@@ -1,0 +1,20 @@
+{
+  "navbar": {
+    "brand": "LMS Platform",
+    "features": "Features",
+    "pricing": "Pricing",
+    "creators": "Creators",
+    "courses": "Courses",
+    "about": "About",
+    "dashboard": "Dashboard",
+    "login": "Log in",
+    "startFree": "Start Free",
+    "join": "Join"
+  },
+  "seo": {
+    "defaultDescription": "Online courses, exams, and verified certificates — learn at your own pace.",
+    "home": {
+      "title": "Online Courses & Certificates"
+    }
+  }
+}

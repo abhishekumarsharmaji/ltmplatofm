@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "LMS Platform"
+description = "A full-featured learning management platform for students, teachers, and administrators, with courses, lessons, assessments, billing, and account management."
+version = "1.0.0"
+id = "artifacts/lms-front"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24567
+
+[services.development]
+run = "pnpm --filter @workspace/lms-front run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/lms-front", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/lms-front/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24567"
+BASE_PATH = "/"
