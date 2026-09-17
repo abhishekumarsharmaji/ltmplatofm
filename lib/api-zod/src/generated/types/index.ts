@@ -7,6 +7,9 @@
  */
 
 export * from './addWishlist201';
+export * from './adminCourse';
+export * from './adminCourseInput';
+export * from './adminCreatedCourse';
 export * from './adminOrders200Item';
 export * from './adminSettings200Item';
 export * from './adminUpdateSetting200';
@@ -17,10 +20,17 @@ export * from './course';
 export * from './courseBasicsInput';
 export * from './courseBuilder';
 export * from './courseBuilderCourse';
+export * from './courseOutline';
+export * from './courseOutlineInput';
+export * from './courseOutlineSectionsItem';
+export * from './courseOutlineSectionsItemLessonsItem';
 export * from './courseReadiness';
 export * from './courseReadinessChecks';
 export * from './healthStatus';
 export * from './lesson';
+export * from './lessonAsset';
+export * from './lessonAssetKind';
+export * from './lessonAssetStatus';
 export * from './lessonInput';
 export * from './lessonReorderInput';
 export * from './listProductsParams';
@@ -47,3 +57,5 @@ export * from './updateCreatorCourseBasics200';
 export * from './upgradeCreator200';
 export * from './user';
 export * from './userRole';
+export * from './videoUploadInput';
+export * from './videoUploadResponse';

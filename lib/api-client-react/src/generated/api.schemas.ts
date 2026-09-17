@@ -59,11 +59,40 @@ export interface ModuleInput {
   title: string;
 }
 
+export type LessonAssetKind = typeof LessonAssetKind[keyof typeof LessonAssetKind];
+
+
+export const LessonAssetKind = {
+  video: 'video',
+} as const;
+
+export type LessonAssetStatus = typeof LessonAssetStatus[keyof typeof LessonAssetStatus];
+
+
+export const LessonAssetStatus = {
+  pending: 'pending',
+  uploaded: 'uploaded',
+  failed: 'failed',
+} as const;
+
+export interface LessonAsset {
+  id: number;
+  lessonId: number;
+  kind: LessonAssetKind;
+  storageKey: string;
+  objectPath: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  status: LessonAssetStatus;
+}
+
 export interface LessonInput {
   /** @minLength 1 */
   title: string;
   description?: string | null;
   isPreview?: boolean;
+  assets?: LessonAsset[];
 }
 
 export interface ModuleReorderInput {
@@ -81,6 +110,7 @@ export interface Lesson {
   description?: string | null;
   position: number;
   isPreview: boolean;
+  assets?: LessonAsset[];
 }
 
 export interface Module {
@@ -170,6 +200,79 @@ export interface ProductInput {
   currency?: string;
   courseId?: number;
   categoryId?: number;
+}
+
+export interface AdminCourseInput {
+  creatorId: number;
+  /** @minLength 2 */
+  title: string;
+  description: string;
+  /** @minimum 0 */
+  priceMinor: number;
+  /** @pattern ^[A-Z]{3}$ */
+  currency: string;
+}
+
+export interface AdminCreatedCourse {
+  courseId: number;
+  productId: number;
+}
+
+export interface AdminCourse {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+  priceMinor: number;
+  currency: string;
+  productId: number | null;
+  creatorId: number;
+  creatorName: string;
+  creatorEmail: string;
+  moduleCount: number;
+  lessonCount: number;
+}
+
+export interface VideoUploadInput {
+  filename: string;
+  /** @pattern ^video/ */
+  mimeType: string;
+  /**
+     * @minimum 1
+     * @maximum 1073741824
+     */
+  sizeBytes: number;
+}
+
+export interface VideoUploadResponse {
+  uploadURL: string;
+  asset: LessonAsset;
+}
+
+export interface CourseOutlineInput {
+  topic: string;
+  audience: string;
+  level: string;
+  /**
+     * @minimum 1
+     * @maximum 20
+     */
+  sectionCount: number;
+}
+
+export type CourseOutlineSectionsItemLessonsItem = {
+  title: string;
+};
+
+export type CourseOutlineSectionsItem = {
+  title: string;
+  lessons: CourseOutlineSectionsItemLessonsItem[];
+};
+
+export interface CourseOutline {
+  title: string;
+  description: string;
+  sections: CourseOutlineSectionsItem[];
 }
 
 export interface CategoryInput {

@@ -308,7 +308,18 @@ export const GetCreatorCourseBuilderResponse = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "position": zod.number().int(),
-  "isPreview": zod.boolean()
+  "isPreview": zod.boolean(),
+  "assets": zod.array(zod.object({
+  "id": zod.number().int(),
+  "lessonId": zod.number().int(),
+  "kind": zod.enum(['video']),
+  "storageKey": zod.string(),
+  "objectPath": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int(),
+  "status": zod.enum(['pending', 'uploaded', 'failed'])
+})).optional()
 })).optional()
 }))
 })
@@ -380,7 +391,18 @@ export const CreateCreatorCourseModuleResponse = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "position": zod.number().int(),
-  "isPreview": zod.boolean()
+  "isPreview": zod.boolean(),
+  "assets": zod.array(zod.object({
+  "id": zod.number().int(),
+  "lessonId": zod.number().int(),
+  "kind": zod.enum(['video']),
+  "storageKey": zod.string(),
+  "objectPath": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int(),
+  "status": zod.enum(['pending', 'uploaded', 'failed'])
+})).optional()
 })).optional()
 })
 
@@ -427,7 +449,18 @@ export const CreateCreatorCourseLessonParams = zod.object({
 export const CreateCreatorCourseLessonBody = zod.object({
   "title": zod.string().min(1),
   "description": zod.string().nullish(),
-  "isPreview": zod.boolean().optional()
+  "isPreview": zod.boolean().optional(),
+  "assets": zod.array(zod.object({
+  "id": zod.number().int(),
+  "lessonId": zod.number().int(),
+  "kind": zod.enum(['video']),
+  "storageKey": zod.string(),
+  "objectPath": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int(),
+  "status": zod.enum(['pending', 'uploaded', 'failed'])
+})).optional()
 })
 
 export const CreateCreatorCourseLessonResponse = zod.object({
@@ -436,7 +469,18 @@ export const CreateCreatorCourseLessonResponse = zod.object({
   "title": zod.string(),
   "description": zod.string().nullish(),
   "position": zod.number().int(),
-  "isPreview": zod.boolean()
+  "isPreview": zod.boolean(),
+  "assets": zod.array(zod.object({
+  "id": zod.number().int(),
+  "lessonId": zod.number().int(),
+  "kind": zod.enum(['video']),
+  "storageKey": zod.string(),
+  "objectPath": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int(),
+  "status": zod.enum(['pending', 'uploaded', 'failed'])
+})).optional()
 })
 
 
@@ -461,7 +505,18 @@ export const UpdateCreatorCourseLessonParams = zod.object({
 export const UpdateCreatorCourseLessonBody = zod.object({
   "title": zod.string().min(1),
   "description": zod.string().nullish(),
-  "isPreview": zod.boolean().optional()
+  "isPreview": zod.boolean().optional(),
+  "assets": zod.array(zod.object({
+  "id": zod.number().int(),
+  "lessonId": zod.number().int(),
+  "kind": zod.enum(['video']),
+  "storageKey": zod.string(),
+  "objectPath": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int(),
+  "status": zod.enum(['pending', 'uploaded', 'failed'])
+})).optional()
 })
 
 export const UpdateCreatorCourseLessonResponse = zod.unknown()
@@ -545,11 +600,141 @@ export const AdminCoursesResponseItem = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
-  "level": zod.string(),
-  "lessons": zod.number().int(),
-  "productId": zod.number().int().nullish()
+  "status": zod.string(),
+  "priceMinor": zod.number().int(),
+  "currency": zod.string(),
+  "productId": zod.number().int().nullable(),
+  "creatorId": zod.number().int(),
+  "creatorName": zod.string(),
+  "creatorEmail": zod.string(),
+  "moduleCount": zod.number().int(),
+  "lessonCount": zod.number().int()
 })
 export const AdminCoursesResponse = zod.array(AdminCoursesResponseItem)
+
+
+export const adminCreateCourseBodyTitleMin = 2;
+
+export const adminCreateCourseBodyPriceMinorMin = 0;
+
+export const adminCreateCourseBodyCurrencyRegExp = new RegExp('^[A-Z]{3}$');
+
+
+export const AdminCreateCourseBody = zod.object({
+  "creatorId": zod.number().int(),
+  "title": zod.string().min(adminCreateCourseBodyTitleMin),
+  "description": zod.string(),
+  "priceMinor": zod.number().int().min(adminCreateCourseBodyPriceMinorMin),
+  "currency": zod.string().regex(adminCreateCourseBodyCurrencyRegExp)
+})
+
+export const AdminCreateCourseResponse = zod.object({
+  "courseId": zod.number().int(),
+  "productId": zod.number().int()
+})
+
+
+export const AdminCourseStudioCoursesResponseItem = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "status": zod.string(),
+  "priceMinor": zod.number().int(),
+  "currency": zod.string(),
+  "productId": zod.number().int().nullable(),
+  "creatorId": zod.number().int(),
+  "creatorName": zod.string(),
+  "creatorEmail": zod.string(),
+  "moduleCount": zod.number().int(),
+  "lessonCount": zod.number().int()
+})
+export const AdminCourseStudioCoursesResponse = zod.array(AdminCourseStudioCoursesResponseItem)
+
+
+export const adminCourseOutlineBodySectionCountMax = 20;
+
+
+
+export const AdminCourseOutlineBody = zod.object({
+  "topic": zod.string(),
+  "audience": zod.string(),
+  "level": zod.string(),
+  "sectionCount": zod.number().int().min(1).max(adminCourseOutlineBodySectionCountMax)
+})
+
+export const AdminCourseOutlineResponse = zod.object({
+  "title": zod.string(),
+  "description": zod.string(),
+  "sections": zod.array(zod.object({
+  "title": zod.string(),
+  "lessons": zod.array(zod.object({
+  "title": zod.string()
+}))
+}))
+})
+
+
+export const RequestLessonVideoUploadParams = zod.object({
+  "lessonId": zod.coerce.number().int()
+})
+
+export const requestLessonVideoUploadBodyMimeTypeRegExp = new RegExp('^video');
+export const requestLessonVideoUploadBodySizeBytesMax = 1073741824;
+
+
+
+export const RequestLessonVideoUploadBody = zod.object({
+  "filename": zod.string(),
+  "mimeType": zod.string().regex(requestLessonVideoUploadBodyMimeTypeRegExp),
+  "sizeBytes": zod.number().int().min(1).max(requestLessonVideoUploadBodySizeBytesMax)
+})
+
+export const RequestLessonVideoUploadResponse = zod.object({
+  "uploadURL": zod.string().url(),
+  "asset": zod.object({
+  "id": zod.number().int(),
+  "lessonId": zod.number().int(),
+  "kind": zod.enum(['video']),
+  "storageKey": zod.string(),
+  "objectPath": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int(),
+  "status": zod.enum(['pending', 'uploaded', 'failed'])
+})
+})
+
+
+export const FinalizeLessonVideoUploadParams = zod.object({
+  "lessonId": zod.coerce.number().int(),
+  "assetId": zod.coerce.number().int()
+})
+
+export const FinalizeLessonVideoUploadResponse = zod.object({
+  "id": zod.number().int(),
+  "lessonId": zod.number().int(),
+  "kind": zod.enum(['video']),
+  "storageKey": zod.string(),
+  "objectPath": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int(),
+  "status": zod.enum(['pending', 'uploaded', 'failed'])
+})
+
+
+export const DownloadLessonAssetParams = zod.object({
+  "assetId": zod.coerce.number().int()
+})
+
+export const DownloadLessonAssetResponse = zod.unknown()
+
+
+export const RemoveLessonAssetParams = zod.object({
+  "assetId": zod.coerce.number().int()
+})
+
+export const RemoveLessonAssetResponse = zod.void()
 
 
 export const adminProductsResponsePriceMinorMin = 0;

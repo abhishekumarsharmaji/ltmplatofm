@@ -3,7 +3,6 @@ import { useParams } from "wouter";
 import { 
   useAdminUsers,
   useAdminCreators,
-  useAdminCourses,
   useAdminProducts,
   useAdminOrders,
   useAdminSettings,
@@ -19,16 +18,29 @@ import { Badge } from "@/components/ui/badge";
 import { CategoryFormDialog } from "@/components/dashboard/CategoryFormDialog";
 import { SettingFormDialog } from "@/components/dashboard/SettingFormDialog";
 
+import { AdminCourseStudioList } from "./admin/AdminCourseStudioList";
+import { AdminCourseStudio } from "./admin/AdminCourseStudio";
+
 export default function AdminDashboard() {
   const params = useParams();
   const section = params.section || "overview";
+  const id = params.id;
+  const action = params.action;
   
+  if (section === "courses" && id && action === "studio") {
+    return (
+      <DashboardLayout role="admin">
+        <AdminCourseStudio productId={Number(id)} />
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout role="admin">
       {section === "overview" && <Overview />}
       {section === "users" && <UsersList />}
       {section === "creators" && <CreatorsList />}
-      {section === "courses" && <CoursesList />}
+      {section === "courses" && <AdminCourseStudioList />}
       {section === "products" && <ProductsList />}
       {section === "orders" && <OrdersList />}
       {section === "categories" && <CategoriesList />}
@@ -159,45 +171,6 @@ function CreatorsList() {
   );
 }
 
-function CoursesList() {
-  const { data: courses, isLoading } = useAdminCourses();
-  
-  return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">All Courses</h2>
-        <p className="text-muted-foreground mt-1">Monitor all published courses on the platform.</p>
-      </div>
-      
-      {isLoading ? (
-        <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
-      ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-          <table className="w-full text-left">
-            <thead className="bg-muted/50 border-b border-border">
-              <tr>
-                <th className="p-4 font-medium text-muted-foreground">ID</th>
-                <th className="p-4 font-medium text-muted-foreground">Title</th>
-                <th className="p-4 font-medium text-muted-foreground">Level</th>
-                <th className="p-4 font-medium text-muted-foreground">Lessons</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {courses?.map((course: any) => (
-                <tr key={course.id} className="hover:bg-muted/30">
-                  <td className="p-4 text-sm text-muted-foreground">{course.id}</td>
-                  <td className="p-4 font-medium">{course.title}</td>
-                  <td className="p-4 text-sm">{course.level}</td>
-                  <td className="p-4 text-sm text-muted-foreground">{course.lessons}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
-}
 
 function ProductsList() {
   const { data: products, isLoading } = useAdminProducts();

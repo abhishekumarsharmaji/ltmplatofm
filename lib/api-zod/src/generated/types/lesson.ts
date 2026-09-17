@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { LessonAsset } from './lessonAsset';
 
 export interface Lesson {
   id: number;
@@ -13,4 +14,5 @@ export interface Lesson {
   description?: string | null;
   position: number;
   isPreview: boolean;
+  assets?: LessonAsset[];
 }

@@ -299,7 +299,53 @@ paths:
     get:
       operationId: adminCourses
       security: [{ cookieAuth: [] }]
-      responses: { "200": { description: Courses, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Course" } } } } } }
+      responses: { "200": { description: Courses, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/AdminCourse" } } } } } }
+    post:
+      operationId: adminCreateCourse
+      security: [{ cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCourseInput" }
+      responses:
+        "201": { description: Created course and product, content: { application/json: { schema: { $ref: "#/components/schemas/AdminCreatedCourse" } } } }
+  /admin/course-studio/courses:
+    get:
+      operationId: adminCourseStudioCourses
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200": { description: Course studio courses, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/AdminCourse" } } } } }
+  /admin/ai/course-outline:
+    post:
+      operationId: adminCourseOutline
+      security: [{ cookieAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CourseOutlineInput" } } } }
+      responses: { "200": { description: Draft outline, content: { application/json: { schema: { $ref: "#/components/schemas/CourseOutline" } } } } }
+  /creator/lessons/{lessonId}/assets/request-upload:
+    post:
+      operationId: requestLessonVideoUpload
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: lessonId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/VideoUploadInput" } } } }
+      responses: { "201": { description: Presigned upload, content: { application/json: { schema: { $ref: "#/components/schemas/VideoUploadResponse" } } } } }
+  /creator/lessons/{lessonId}/assets/{assetId}/finalize:
+    post:
+      operationId: finalizeLessonVideoUpload
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: lessonId, in: path, required: true, schema: { type: integer } }, { name: assetId, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Finalized asset, content: { application/json: { schema: { $ref: "#/components/schemas/LessonAsset" } } } } }
+  /creator/assets/{assetId}/download:
+    get:
+      operationId: downloadLessonAsset
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: assetId, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Private video stream } }
+    delete:
+      operationId: removeLessonAsset
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: assetId, in: path, required: true, schema: { type: integer } }]
+      responses: { "204": { description: Video removed } }
   /admin/products:
     get:
       operationId: adminProducts
@@ -405,6 +451,7 @@ components:
         title: { type: string, minLength: 1 }
         description: { type: string, nullable: true }
         isPreview: { type: boolean }
+        assets: { type: array, items: { $ref: "#/components/schemas/LessonAsset" } }
     ModuleReorderInput:
       type: object
       required: [moduleIds]
@@ -425,6 +472,7 @@ components:
         description: { type: string, nullable: true }
         position: { type: integer }
         isPreview: { type: boolean }
+        assets: { type: array, items: { $ref: "#/components/schemas/LessonAsset" } }
     Module:
       type: object
       required: [id, courseId, title, position]
@@ -509,6 +557,91 @@ components:
         currency: { type: string }
         courseId: { type: integer }
         categoryId: { type: integer }
+    AdminCourseInput:
+      type: object
+      required: [creatorId, title, description, priceMinor, currency]
+      properties:
+        creatorId: { type: integer }
+        title: { type: string, minLength: 2 }
+        description: { type: string }
+        priceMinor: { type: integer, minimum: 0 }
+        currency: { type: string, pattern: "^[A-Z]{3}$" }
+    AdminCreatedCourse:
+      type: object
+      required: [courseId, productId]
+      properties:
+        courseId: { type: integer }
+        productId: { type: integer }
+    AdminCourse:
+      type: object
+      required: [id, title, description, status, priceMinor, currency, productId, creatorId, creatorName, creatorEmail, moduleCount, lessonCount]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        status: { type: string }
+        priceMinor: { type: integer }
+        currency: { type: string }
+        productId: { type: integer, nullable: true }
+        creatorId: { type: integer }
+        creatorName: { type: string }
+        creatorEmail: { type: string }
+        moduleCount: { type: integer }
+        lessonCount: { type: integer }
+    VideoUploadInput:
+      type: object
+      required: [filename, mimeType, sizeBytes]
+      properties:
+        filename: { type: string }
+        mimeType: { type: string, pattern: "^video/" }
+        sizeBytes: { type: integer, minimum: 1, maximum: 1073741824 }
+    LessonAsset:
+      type: object
+      required: [id, lessonId, kind, storageKey, objectPath, filename, mimeType, sizeBytes, status]
+      properties:
+        id: { type: integer }
+        lessonId: { type: integer }
+        kind: { type: string, enum: [video] }
+        storageKey: { type: string }
+        objectPath: { type: string }
+        filename: { type: string }
+        mimeType: { type: string }
+        sizeBytes: { type: integer }
+        status: { type: string, enum: [pending, uploaded, failed] }
+    VideoUploadResponse:
+      type: object
+      required: [uploadURL, asset]
+      properties:
+        uploadURL: { type: string, format: uri }
+        asset: { $ref: "#/components/schemas/LessonAsset" }
+    CourseOutlineInput:
+      type: object
+      required: [topic, audience, level, sectionCount]
+      properties:
+        topic: { type: string }
+        audience: { type: string }
+        level: { type: string }
+        sectionCount: { type: integer, minimum: 1, maximum: 20 }
+    CourseOutline:
+      type: object
+      required: [title, description, sections]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        sections:
+          type: array
+          items:
+            type: object
+            required: [title, lessons]
+            properties:
+              title: { type: string }
+              lessons:
+                type: array
+                items:
+                  type: object
+                  required: [title]
+                  properties:
+                    title: { type: string }
     CategoryInput:
       type: object
       required: [name, slug]

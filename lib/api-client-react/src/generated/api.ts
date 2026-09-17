@@ -21,6 +21,9 @@ import type {
 
 import type {
   AddWishlist201,
+  AdminCourse,
+  AdminCourseInput,
+  AdminCreatedCourse,
   AdminOrders200Item,
   AdminSettings200Item,
   AdminUpdateSetting200,
@@ -30,9 +33,12 @@ import type {
   Course,
   CourseBasicsInput,
   CourseBuilder,
+  CourseOutline,
+  CourseOutlineInput,
   CourseReadiness,
   HealthStatus,
   Lesson,
+  LessonAsset,
   LessonInput,
   LessonReorderInput,
   ListProductsParams,
@@ -53,7 +59,9 @@ import type {
   StudentOrders200Item,
   UpdateCreatorCourseBasics200,
   UpgradeCreator200,
-  User
+  User,
+  VideoUploadInput,
+  VideoUploadResponse
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -2844,9 +2852,9 @@ export const getAdminCoursesUrl = () => {
   return `/api/admin/courses`
 }
 
-export const adminCourses = async ( options?: Parameters<typeof customFetch>[1]): Promise<Course[]> => {
+export const adminCourses = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminCourse[]> => {
 
-  return customFetch<Course[]>(getAdminCoursesUrl(),
+  return customFetch<AdminCourse[]>(getAdminCoursesUrl(),
   {
     ...options,
     method: 'GET'
@@ -2906,6 +2914,533 @@ export function useAdminCourses<TData = Awaited<ReturnType<typeof adminCourses>>
 
 
 
+
+export const getAdminCreateCourseUrl = () => {
+
+
+
+
+  return `/api/admin/courses`
+}
+
+export const adminCreateCourse = async (adminCourseInput: AdminCourseInput, options?: Parameters<typeof customFetch>[1]): Promise<AdminCreatedCourse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<AdminCreatedCourse>(getAdminCreateCourseUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(adminCourseInput)
+  }
+);}
+
+
+
+
+
+export const getAdminCreateCourseMutationKey = () => ['adminCreateCourse'] as const;
+
+export const getAdminCreateCourseMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateCourse>>, TError,AdminCreateCourseMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateCourse>>, TError,AdminCreateCourseMutationVariables, TContext> => {
+
+const mutationKey = getAdminCreateCourseMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateCourse>>, AdminCreateCourseMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminCreateCourse(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCreateCourseMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateCourse>>>
+    export type AdminCreateCourseMutationBody = BodyType<AdminCourseInput>
+    export type AdminCreateCourseMutationError = ErrorType<unknown>
+    export type AdminCreateCourseMutationVariables = {data: BodyType<AdminCourseInput>}
+
+    export const useAdminCreateCourse = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateCourse>>, TError,AdminCreateCourseMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminCreateCourse>>,
+        TError,
+        AdminCreateCourseMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAdminCreateCourseMutationOptions(options));
+    }
+
+export const getAdminCourseStudioCoursesUrl = () => {
+
+
+
+
+  return `/api/admin/course-studio/courses`
+}
+
+export const adminCourseStudioCourses = async ( options?: Parameters<typeof customFetch>[1]): Promise<AdminCourse[]> => {
+
+  return customFetch<AdminCourse[]>(getAdminCourseStudioCoursesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminCourseStudioCoursesQueryKey = () => {
+    return [
+    `/api/admin/course-studio/courses`
+    ] as const;
+    }
+
+
+export const getAdminCourseStudioCoursesQueryOptions = <TData = Awaited<ReturnType<typeof adminCourseStudioCourses>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminCourseStudioCourses>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminCourseStudioCoursesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminCourseStudioCourses>>> = ({ signal }) => adminCourseStudioCourses({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminCourseStudioCourses>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminCourseStudioCoursesQueryResult = NonNullable<Awaited<ReturnType<typeof adminCourseStudioCourses>>>
+export type AdminCourseStudioCoursesQueryError = ErrorType<unknown>
+
+
+
+export function useAdminCourseStudioCourses<TData = Awaited<ReturnType<typeof adminCourseStudioCourses>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminCourseStudioCourses>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminCourseStudioCoursesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAdminCourseOutlineUrl = () => {
+
+
+
+
+  return `/api/admin/ai/course-outline`
+}
+
+export const adminCourseOutline = async (courseOutlineInput: CourseOutlineInput, options?: Parameters<typeof customFetch>[1]): Promise<CourseOutline> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<CourseOutline>(getAdminCourseOutlineUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(courseOutlineInput)
+  }
+);}
+
+
+
+
+
+export const getAdminCourseOutlineMutationKey = () => ['adminCourseOutline'] as const;
+
+export const getAdminCourseOutlineMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCourseOutline>>, TError,AdminCourseOutlineMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminCourseOutline>>, TError,AdminCourseOutlineMutationVariables, TContext> => {
+
+const mutationKey = getAdminCourseOutlineMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCourseOutline>>, AdminCourseOutlineMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminCourseOutline(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCourseOutlineMutationResult = NonNullable<Awaited<ReturnType<typeof adminCourseOutline>>>
+    export type AdminCourseOutlineMutationBody = BodyType<CourseOutlineInput>
+    export type AdminCourseOutlineMutationError = ErrorType<unknown>
+    export type AdminCourseOutlineMutationVariables = {data: BodyType<CourseOutlineInput>}
+
+    export const useAdminCourseOutline = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCourseOutline>>, TError,AdminCourseOutlineMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminCourseOutline>>,
+        TError,
+        AdminCourseOutlineMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAdminCourseOutlineMutationOptions(options));
+    }
+
+export const getRequestLessonVideoUploadUrl = (lessonId: number,) => {
+
+
+
+
+  return `/api/creator/lessons/${lessonId}/assets/request-upload`
+}
+
+export const requestLessonVideoUpload = async (lessonId: number,
+    videoUploadInput: VideoUploadInput, options?: Parameters<typeof customFetch>[1]): Promise<VideoUploadResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<VideoUploadResponse>(getRequestLessonVideoUploadUrl(lessonId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(videoUploadInput)
+  }
+);}
+
+
+
+
+
+export const getRequestLessonVideoUploadMutationKey = () => ['requestLessonVideoUpload'] as const;
+
+export const getRequestLessonVideoUploadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestLessonVideoUpload>>, TError,RequestLessonVideoUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestLessonVideoUpload>>, TError,RequestLessonVideoUploadMutationVariables, TContext> => {
+
+const mutationKey = getRequestLessonVideoUploadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestLessonVideoUpload>>, RequestLessonVideoUploadMutationVariables> = (props) => {
+          const {lessonId,data} = props ?? {};
+
+          return  requestLessonVideoUpload(lessonId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestLessonVideoUploadMutationResult = NonNullable<Awaited<ReturnType<typeof requestLessonVideoUpload>>>
+    export type RequestLessonVideoUploadMutationBody = BodyType<VideoUploadInput>
+    export type RequestLessonVideoUploadMutationError = ErrorType<unknown>
+    export type RequestLessonVideoUploadMutationVariables = {lessonId: number;data: BodyType<VideoUploadInput>}
+
+    export const useRequestLessonVideoUpload = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestLessonVideoUpload>>, TError,RequestLessonVideoUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestLessonVideoUpload>>,
+        TError,
+        RequestLessonVideoUploadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestLessonVideoUploadMutationOptions(options));
+    }
+
+export const getFinalizeLessonVideoUploadUrl = (lessonId: number,
+    assetId: number,) => {
+
+
+
+
+  return `/api/creator/lessons/${lessonId}/assets/${assetId}/finalize`
+}
+
+export const finalizeLessonVideoUpload = async (lessonId: number,
+    assetId: number, options?: Parameters<typeof customFetch>[1]): Promise<LessonAsset> => {
+
+  return customFetch<LessonAsset>(getFinalizeLessonVideoUploadUrl(lessonId,assetId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getFinalizeLessonVideoUploadMutationKey = () => ['finalizeLessonVideoUpload'] as const;
+
+export const getFinalizeLessonVideoUploadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof finalizeLessonVideoUpload>>, TError,FinalizeLessonVideoUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof finalizeLessonVideoUpload>>, TError,FinalizeLessonVideoUploadMutationVariables, TContext> => {
+
+const mutationKey = getFinalizeLessonVideoUploadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof finalizeLessonVideoUpload>>, FinalizeLessonVideoUploadMutationVariables> = (props) => {
+          const {lessonId,assetId} = props ?? {};
+
+          return  finalizeLessonVideoUpload(lessonId,assetId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type FinalizeLessonVideoUploadMutationResult = NonNullable<Awaited<ReturnType<typeof finalizeLessonVideoUpload>>>
+
+    export type FinalizeLessonVideoUploadMutationError = ErrorType<unknown>
+    export type FinalizeLessonVideoUploadMutationVariables = {lessonId: number;assetId: number}
+
+    export const useFinalizeLessonVideoUpload = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof finalizeLessonVideoUpload>>, TError,FinalizeLessonVideoUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof finalizeLessonVideoUpload>>,
+        TError,
+        FinalizeLessonVideoUploadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getFinalizeLessonVideoUploadMutationOptions(options));
+    }
+
+export const getDownloadLessonAssetUrl = (assetId: number,) => {
+
+
+
+
+  return `/api/creator/assets/${assetId}/download`
+}
+
+export const downloadLessonAsset = async (assetId: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDownloadLessonAssetUrl(assetId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getDownloadLessonAssetQueryKey = (assetId: number,) => {
+    return [
+    `/api/creator/assets/${assetId}/download`
+    ] as const;
+    }
+
+
+export const getDownloadLessonAssetQueryOptions = <TData = Awaited<ReturnType<typeof downloadLessonAsset>>, TError = ErrorType<unknown>>(assetId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof downloadLessonAsset>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDownloadLessonAssetQueryKey(assetId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof downloadLessonAsset>>> = ({ signal }) => downloadLessonAsset(assetId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: assetId !== null && assetId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof downloadLessonAsset>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type DownloadLessonAssetQueryResult = NonNullable<Awaited<ReturnType<typeof downloadLessonAsset>>>
+export type DownloadLessonAssetQueryError = ErrorType<unknown>
+
+
+
+export function useDownloadLessonAsset<TData = Awaited<ReturnType<typeof downloadLessonAsset>>, TError = ErrorType<unknown>>(
+ assetId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof downloadLessonAsset>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getDownloadLessonAssetQueryOptions(assetId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRemoveLessonAssetUrl = (assetId: number,) => {
+
+
+
+
+  return `/api/creator/assets/${assetId}/download`
+}
+
+export const removeLessonAsset = async (assetId: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getRemoveLessonAssetUrl(assetId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRemoveLessonAssetMutationKey = () => ['removeLessonAsset'] as const;
+
+export const getRemoveLessonAssetMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeLessonAsset>>, TError,RemoveLessonAssetMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeLessonAsset>>, TError,RemoveLessonAssetMutationVariables, TContext> => {
+
+const mutationKey = getRemoveLessonAssetMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeLessonAsset>>, RemoveLessonAssetMutationVariables> = (props) => {
+          const {assetId} = props ?? {};
+
+          return  removeLessonAsset(assetId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveLessonAssetMutationResult = NonNullable<Awaited<ReturnType<typeof removeLessonAsset>>>
+
+    export type RemoveLessonAssetMutationError = ErrorType<unknown>
+    export type RemoveLessonAssetMutationVariables = {assetId: number}
+
+    export const useRemoveLessonAsset = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeLessonAsset>>, TError,RemoveLessonAssetMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof removeLessonAsset>>,
+        TError,
+        RemoveLessonAssetMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRemoveLessonAssetMutationOptions(options));
+    }
 
 export const getAdminProductsUrl = () => {
 

@@ -37,7 +37,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function CourseBuilder({ productId }: { productId: number }) {
+import { LessonVideoUpload } from "@/components/dashboard/LessonVideoUpload";
+
+export function CourseBuilder({
+  productId,
+  backRoute = "/dashboard/creator/courses",
+  backLabel = "Course Builder",
+  role = "creator"
+}: {
+  productId: number,
+  backRoute?: string,
+  backLabel?: string,
+  role?: 'creator' | 'admin'
+}) {
   const [activeTab, setActiveTab] = useState<"basics" | "curriculum" | "publish">("basics");
   
   const { data: builder, isLoading, error } = useGetCreatorCourseBuilder(productId);
@@ -56,10 +68,8 @@ export function CourseBuilder({ productId }: { productId: number }) {
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20">
       <div className="flex items-center gap-4 border-b border-border pb-4">
-        <Link href="/dashboard/creator/courses">
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+        <Link href={backRoute} className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground transition-colors">
+          <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
           <div className="flex items-center gap-3">
@@ -68,7 +78,7 @@ export function CourseBuilder({ productId }: { productId: number }) {
               {product.status}
             </Badge>
           </div>
-          <p className="text-muted-foreground text-sm">Course Builder</p>
+          <p className="text-muted-foreground text-sm">{backLabel}</p>
         </div>
       </div>
       
@@ -435,6 +445,7 @@ function LessonItem({ lesson, index, total, onMove, productId }: any) {
   const { toast } = useToast();
   
   const [isEditing, setIsEditing] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
   const [title, setTitle] = useState(lesson.title);
   const [description, setDescription] = useState(lesson.description || "");
   const [isPreview, setIsPreview] = useState(lesson.isPreview || false);
@@ -484,48 +495,69 @@ function LessonItem({ lesson, index, total, onMove, productId }: any) {
     );
   }
 
+  const asset = lesson.assets?.find((a: any) => a.kind === "video");
+
   return (
-    <div className="flex items-center justify-between p-3 bg-card border border-border rounded-lg group hover:border-primary/50 transition-colors">
-      <div className="flex items-center gap-3">
-        <div className="flex flex-col">
-          <button aria-label={`Move ${lesson.title} up`} onClick={() => onMove(index, 'up')} disabled={index === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"><ChevronUp className="w-3 h-3" /></button>
-          <button aria-label={`Move ${lesson.title} down`} onClick={() => onMove(index, 'down')} disabled={index === total - 1} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"><ChevronDown className="w-3 h-3" /></button>
+    <div className="flex flex-col p-3 bg-card border border-border rounded-lg group hover:border-primary/50 transition-colors">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col">
+            <button aria-label={`Move ${lesson.title} up`} onClick={() => onMove(index, 'up')} disabled={index === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"><ChevronUp className="w-3 h-3" /></button>
+            <button aria-label={`Move ${lesson.title} down`} onClick={() => onMove(index, 'down')} disabled={index === total - 1} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"><ChevronDown className="w-3 h-3" /></button>
+          </div>
+          <div
+            className="w-8 h-8 rounded flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-colors"
+            onClick={() => setShowVideo(!showVideo)}
+            title="Toggle video settings"
+          >
+            {asset && asset.status === 'uploaded' ? (
+              <Video className="w-4 h-4 text-success" />
+            ) : (
+              <PlayCircle className="w-4 h-4 text-primary" />
+            )}
+          </div>
+          <div>
+            <h4 className="font-medium text-sm leading-none flex items-center gap-2">
+              {lesson.title}
+              {lesson.isPreview && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">Preview</Badge>}
+            </h4>
+            {lesson.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{lesson.description}</p>}
+          </div>
         </div>
-        <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
-          <PlayCircle className="w-4 h-4 text-primary" />
-        </div>
-        <div>
-          <h4 className="font-medium text-sm leading-none flex items-center gap-2">
-            {lesson.title}
-            {lesson.isPreview && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">Preview</Badge>}
-          </h4>
-          {lesson.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{lesson.description}</p>}
+
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button aria-label={`Manage video for ${lesson.title}`} variant="ghost" size="icon" onClick={() => setShowVideo(!showVideo)} className={`h-8 w-8 ${showVideo ? 'text-primary bg-primary/10' : ''}`}>
+            <Video className="w-3.5 h-3.5" />
+          </Button>
+          <Button aria-label={`Edit ${lesson.title}`} variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="h-8 w-8">
+            <Edit2 className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={`Delete ${lesson.title}`}
+            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={() => {
+              if(confirm('Delete this lesson?')) {
+                deleteLesson.mutate({ lessonId: lesson.id }, {
+                  onSuccess: () => {
+                    queryClient.invalidateQueries({ queryKey: getGetCreatorCourseBuilderQueryKey(productId) });
+                    queryClient.invalidateQueries({ queryKey: getGetCreatorCourseReadinessQueryKey(productId) });
+                  }
+                });
+              }
+            }}
+          >
+            <Trash className="w-3.5 h-3.5" />
+          </Button>
         </div>
       </div>
-      
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <Button aria-label={`Edit ${lesson.title}`} variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="h-8 w-8">
-          <Edit2 className="w-3.5 h-3.5" />
-        </Button>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          aria-label={`Delete ${lesson.title}`}
-          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
-          onClick={() => {
-            if(confirm('Delete this lesson?')) {
-              deleteLesson.mutate({ lessonId: lesson.id }, {
-                onSuccess: () => {
-                  queryClient.invalidateQueries({ queryKey: getGetCreatorCourseBuilderQueryKey(productId) });
-                  queryClient.invalidateQueries({ queryKey: getGetCreatorCourseReadinessQueryKey(productId) });
-                }
-              });
-            }
-          }}
-        >
-          <Trash className="w-3.5 h-3.5" />
-        </Button>
-      </div>
+
+      {showVideo && (
+        <div className="mt-4 pt-4 border-t border-border animate-in fade-in slide-in-from-top-2">
+          <LessonVideoUpload lesson={lesson} productId={productId} />
+        </div>
+      )}
     </div>
   );
 }

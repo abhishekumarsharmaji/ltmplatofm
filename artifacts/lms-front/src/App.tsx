@@ -74,6 +74,7 @@ function Router() {
         <Route path="/dashboard/admin" component={Admin} />
         <Route path="/dashboard/admin/:section" component={Admin} />
         <Route path="/dashboard/admin/:section/:id" component={Admin} />
+        <Route path="/dashboard/admin/:section/:id/:action" component={Admin} />
         
         <Route component={NotFound} />
       </Switch>

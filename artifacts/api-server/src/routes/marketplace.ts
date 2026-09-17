@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { and, eq, ilike, desc } from "drizzle-orm";
+import { and, eq, ilike, desc, sql } from "drizzle-orm";
 import {
   db, categoriesTable, coursesTable, productsTable, usersTable, enrollmentsTable,
   ordersTable, orderItemsTable, wishlistTable, platformSettingsTable,
@@ -118,7 +118,13 @@ router.delete("/student/wishlist/:productId", auth, async (req, res) => { const 
 
 router.get("/admin/users", auth, requireRole("admin"), async (_req, res) => res.json(await db.select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role }).from(usersTable)));
 router.get("/admin/creators", auth, requireRole("admin"), async (_req, res) => res.json(await db.select().from(usersTable).where(eq(usersTable.role, "creator"))));
-router.get("/admin/courses", auth, requireRole("admin"), async (_req, res) => res.json(await db.select().from(coursesTable)));
+router.get("/admin/courses", auth, requireRole("admin"), async (_req, res) => res.json(await db.select({
+  id: coursesTable.id, title: coursesTable.title, description: coursesTable.description, status: coursesTable.status,
+  priceMinor: coursesTable.priceMinor, currency: coursesTable.currency, productId: productsTable.id,
+  creatorId: usersTable.id, creatorName: usersTable.name, creatorEmail: usersTable.email,
+  moduleCount: sql<number>`(select count(*)::int from course_modules m where m.course_id = ${coursesTable.id})`,
+  lessonCount: sql<number>`(select count(*)::int from lessons l join course_modules m on m.id=l.module_id where m.course_id = ${coursesTable.id})`,
+}).from(coursesTable).leftJoin(productsTable, eq(productsTable.courseId, coursesTable.id)).innerJoin(usersTable, eq(usersTable.id, coursesTable.creatorId))));
 router.get("/admin/products", auth, requireRole("admin"), async (_req, res) => res.json(await db.select().from(productsTable)));
 router.get("/admin/orders", auth, requireRole("admin"), async (_req, res) => res.json(await db.select().from(ordersTable)));
 router.post("/admin/categories", auth, requireRole("admin"), async (req, res) => { const { name, slug, description } = req.body ?? {}; if (!name || !slug) { res.status(400).json({ error: "name and slug required" }); return; } const [row] = await db.insert(categoriesTable).values({ name, slug, description }).returning(); res.status(201).json(row); });

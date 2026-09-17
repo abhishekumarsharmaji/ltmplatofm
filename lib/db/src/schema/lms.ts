@@ -113,6 +113,20 @@ export const digitalFilesTable = pgTable("digital_files", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const lessonAssetStatusEnum = pgEnum("lesson_asset_status", ["pending", "uploaded", "failed"]);
+export const lessonAssetsTable = pgTable("lesson_assets", {
+  id: serial("id").primaryKey(),
+  lessonId: integer("lesson_id").notNull().references(() => lessonsTable.id, { onDelete: "cascade" }),
+  kind: fileKindEnum("kind").notNull().default("video"),
+  storageKey: text("storage_key").notNull().unique(),
+  objectPath: text("object_path").notNull(),
+  filename: text("filename").notNull(),
+  mimeType: text("mime_type").notNull(),
+  sizeBytes: integer("size_bytes").notNull(),
+  status: lessonAssetStatusEnum("status").notNull().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("lesson_assets_lesson_idx").on(t.lessonId)]);
+
 export const ordersTable = pgTable("orders", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => usersTable.id),

@@ -7,10 +7,7 @@
  */
 import type { LessonAsset } from './lessonAsset';
 
-export interface LessonInput {
-  /** @minLength 1 */
-  title: string;
-  description?: string | null;
-  isPreview?: boolean;
-  assets?: LessonAsset[];
+export interface VideoUploadResponse {
+  uploadURL: string;
+  asset: LessonAsset;
 }

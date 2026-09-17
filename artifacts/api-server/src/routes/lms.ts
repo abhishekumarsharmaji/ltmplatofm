@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { eq, ilike, and, inArray, sql } from "drizzle-orm";
-import { db, coursesTable, courseModulesTable, lessonsTable, productsTable, creatorProfilesTable, lmsCoursesTable, lmsUsersTable, usersTable } from "@workspace/db";
+import { db, coursesTable, courseModulesTable, lessonsTable, lessonAssetsTable, productsTable, creatorProfilesTable, lmsCoursesTable, lmsUsersTable, usersTable } from "@workspace/db";
 import {
   GetSessionResponse,
   ListCoursesResponse,
@@ -190,7 +190,9 @@ router.get("/creator/products/:productId/builder", requireAuth, requireRole("cre
   const modules = await db.select().from(courseModulesTable).where(eq(courseModulesTable.courseId, found.course.id)).orderBy(courseModulesTable.position);
   const moduleIds = modules.map((m) => m.id);
   const lessons = moduleIds.length ? await db.select().from(lessonsTable).where(inArray(lessonsTable.moduleId, moduleIds)).orderBy(lessonsTable.position) : [];
-  res.json({ product: found.product, course: found.course, modules: modules.map((m) => ({ ...m, lessons: lessons.filter((l) => l.moduleId === m.id) })) });
+   const lessonIds = lessons.map((l) => l.id);
+   const assets = lessonIds.length ? await db.select().from(lessonAssetsTable).where(inArray(lessonAssetsTable.lessonId, lessonIds)) : [];
+   res.json({ product: found.product, course: found.course, modules: modules.map((m) => ({ ...m, lessons: lessons.filter((l) => l.moduleId === m.id).map((l) => ({ ...l, assets: assets.filter((a) => a.lessonId === l.id) })) })) });
 });
 
 router.patch("/creator/products/:productId/builder", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {

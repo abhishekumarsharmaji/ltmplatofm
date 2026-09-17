@@ -1,0 +1,1 @@
+- [Replit App Storage signing](app-storage-signing.md) — generate presigned object URLs through the Replit sidecar, not GCS service-account signing.
