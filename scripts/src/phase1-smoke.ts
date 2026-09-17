@@ -27,7 +27,27 @@ try {
     body: JSON.stringify({ title, description: "Transactional test course", type: "course", priceMinor: 4900, currency: "USD" }),
   });
   const created = await createdResponse.json() as { id: number };
-  await request(`/api/creator/products/${created.id}/publish`, { method: "POST", headers: { cookie } });
+
+  const moduleResponse = await request(`/api/creator/products/${created.id}/modules`, {
+    method: "POST",
+    headers: { cookie, "content-type": "application/json" },
+    body: JSON.stringify({ title: "Getting Started" }),
+  });
+  const courseModule = await moduleResponse.json() as { id: number };
+  await request(`/api/creator/modules/${courseModule.id}/lessons`, {
+    method: "POST",
+    headers: { cookie, "content-type": "application/json" },
+    body: JSON.stringify({ title: "Welcome to the course", description: "Course introduction", isPreview: true }),
+  });
+
+  const readiness = await (await request(`/api/creator/products/${created.id}/readiness`, {
+    headers: { cookie },
+  })).json() as { ready: boolean; moduleCount: number; lessonCount: number };
+  if (!readiness.ready || readiness.moduleCount !== 1 || readiness.lessonCount !== 1) {
+    throw new Error("Course builder readiness did not reflect the saved curriculum");
+  }
+
+  await request(`/api/creator/products/${created.id}/publish-course`, { method: "POST", headers: { cookie } });
 
   const products = await (await request(`/api/marketplace/products?q=${encodeURIComponent(title)}`)).json() as Array<{ id: number }>;
   if (!products.some((product) => product.id === created.id)) throw new Error("Published product was not discoverable");

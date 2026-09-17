@@ -46,8 +46,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/create-school" className="hover:text-foreground transition-colors">
-                  Create a School
+                <Link href="/auth/sign-up" className="hover:text-foreground transition-colors">
+                  Start Teaching
                 </Link>
               </li>
             </ul>

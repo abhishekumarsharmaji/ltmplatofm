@@ -6,7 +6,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ListProductsParams = {
-q?: string;
-category?: number;
-};
+export type PublishCreatorCourse200 = { [key: string]: unknown };

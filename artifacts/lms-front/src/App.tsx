@@ -22,7 +22,6 @@ import Pricing from './pages/Pricing';
 import PlatformPricing from './pages/PlatformPricing';
 import About from './pages/About';
 import Creators from './pages/Creators';
-import CreateSchool from './pages/CreateSchool';
 import Login from './pages/auth/Login';
 import SignUp from './pages/auth/SignUp';
 import UnavailablePage from './pages/UnavailablePage';
@@ -53,7 +52,6 @@ function Router() {
         <Route path="/platform-pricing" component={PlatformPricing} />
         <Route path="/about" component={About} />
         <Route path="/creators" component={Creators} />
-        <Route path="/create-school" component={CreateSchool} />
         
         {/* Unavailable features */}
         <Route path="/checkout" component={UnavailablePage} />

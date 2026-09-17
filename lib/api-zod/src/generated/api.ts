@@ -79,7 +79,8 @@ export const ListCoursesResponseItem = zod.object({
   "title": zod.string(),
   "description": zod.string(),
   "level": zod.string(),
-  "lessons": zod.number().int()
+  "lessons": zod.number().int(),
+  "productId": zod.number().int().nullish()
 })
 export const ListCoursesResponse = zod.array(ListCoursesResponseItem)
 
@@ -105,7 +106,8 @@ export const MarketplaceCoursesResponseItem = zod.object({
   "title": zod.string(),
   "description": zod.string(),
   "level": zod.string(),
-  "lessons": zod.number().int()
+  "lessons": zod.number().int(),
+  "productId": zod.number().int().nullish()
 })
 export const MarketplaceCoursesResponse = zod.array(MarketplaceCoursesResponseItem)
 
@@ -120,7 +122,8 @@ export const ListCategoriesResponse = zod.array(ListCategoriesResponseItem)
 
 
 export const ListProductsQueryParams = zod.object({
-  "q": zod.coerce.string().optional()
+  "q": zod.coerce.string().optional(),
+  "category": zod.coerce.number().int().optional()
 })
 
 export const listProductsResponsePriceMinorMin = 0;
@@ -167,7 +170,8 @@ export const GetMarketplaceCourseResponse = zod.object({
   "title": zod.string(),
   "description": zod.string(),
   "level": zod.string(),
-  "lessons": zod.number().int()
+  "lessons": zod.number().int(),
+  "productId": zod.number().int().nullish()
 })
 
 
@@ -272,6 +276,204 @@ export const PublishCreatorProductResponse = zod.object({
 })
 
 
+export const GetCreatorCourseBuilderParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const getCreatorCourseBuilderResponseProductPriceMinorMin = 0;
+
+
+
+export const GetCreatorCourseBuilderResponse = zod.object({
+  "product": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(getCreatorCourseBuilderResponseProductPriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+}),
+  "course": zod.object({
+
+}).passthrough(),
+  "modules": zod.array(zod.object({
+  "id": zod.number().int(),
+  "courseId": zod.number().int(),
+  "title": zod.string(),
+  "position": zod.number().int(),
+  "lessons": zod.array(zod.object({
+  "id": zod.number().int(),
+  "moduleId": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "position": zod.number().int(),
+  "isPreview": zod.boolean()
+})).optional()
+}))
+})
+
+
+export const UpdateCreatorCourseBasicsParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const updateCreatorCourseBasicsBodyTitleMin = 2;
+
+export const updateCreatorCourseBasicsBodyPriceMinorMin = 0;
+
+export const updateCreatorCourseBasicsBodyCurrencyRegExp = new RegExp('^[A-Z]{3}$');
+
+
+export const UpdateCreatorCourseBasicsBody = zod.object({
+  "title": zod.string().min(updateCreatorCourseBasicsBodyTitleMin).optional(),
+  "description": zod.string().optional(),
+  "priceMinor": zod.number().int().min(updateCreatorCourseBasicsBodyPriceMinorMin).optional(),
+  "currency": zod.string().regex(updateCreatorCourseBasicsBodyCurrencyRegExp).optional()
+})
+
+export const UpdateCreatorCourseBasicsResponse = zod.object({
+
+}).passthrough()
+
+
+export const GetCreatorCourseReadinessParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const GetCreatorCourseReadinessResponse = zod.object({
+  "ready": zod.boolean(),
+  "checks": zod.record(zod.string(), zod.boolean()),
+  "moduleCount": zod.number().int(),
+  "lessonCount": zod.number().int()
+})
+
+
+export const PublishCreatorCourseParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const PublishCreatorCourseResponse = zod.object({
+
+}).passthrough()
+
+
+export const CreateCreatorCourseModuleParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+
+
+
+export const CreateCreatorCourseModuleBody = zod.object({
+  "title": zod.string().min(1)
+})
+
+export const CreateCreatorCourseModuleResponse = zod.object({
+  "id": zod.number().int(),
+  "courseId": zod.number().int(),
+  "title": zod.string(),
+  "position": zod.number().int(),
+  "lessons": zod.array(zod.object({
+  "id": zod.number().int(),
+  "moduleId": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "position": zod.number().int(),
+  "isPreview": zod.boolean()
+})).optional()
+})
+
+
+export const ReorderCreatorCourseModulesParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const ReorderCreatorCourseModulesBody = zod.object({
+  "moduleIds": zod.array(zod.number().int())
+})
+
+export const ReorderCreatorCourseModulesResponse = zod.unknown()
+
+
+export const UpdateCreatorCourseModuleParams = zod.object({
+  "moduleId": zod.coerce.number().int()
+})
+
+
+
+
+export const UpdateCreatorCourseModuleBody = zod.object({
+  "title": zod.string().min(1)
+})
+
+export const UpdateCreatorCourseModuleResponse = zod.unknown()
+
+
+export const DeleteCreatorCourseModuleParams = zod.object({
+  "moduleId": zod.coerce.number().int()
+})
+
+export const DeleteCreatorCourseModuleResponse = zod.void()
+
+
+export const CreateCreatorCourseLessonParams = zod.object({
+  "moduleId": zod.coerce.number().int()
+})
+
+
+
+
+export const CreateCreatorCourseLessonBody = zod.object({
+  "title": zod.string().min(1),
+  "description": zod.string().nullish(),
+  "isPreview": zod.boolean().optional()
+})
+
+export const CreateCreatorCourseLessonResponse = zod.object({
+  "id": zod.number().int(),
+  "moduleId": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "position": zod.number().int(),
+  "isPreview": zod.boolean()
+})
+
+
+export const ReorderCreatorCourseLessonsParams = zod.object({
+  "moduleId": zod.coerce.number().int()
+})
+
+export const ReorderCreatorCourseLessonsBody = zod.object({
+  "lessonIds": zod.array(zod.number().int())
+})
+
+export const ReorderCreatorCourseLessonsResponse = zod.unknown()
+
+
+export const UpdateCreatorCourseLessonParams = zod.object({
+  "lessonId": zod.coerce.number().int()
+})
+
+
+
+
+export const UpdateCreatorCourseLessonBody = zod.object({
+  "title": zod.string().min(1),
+  "description": zod.string().nullish(),
+  "isPreview": zod.boolean().optional()
+})
+
+export const UpdateCreatorCourseLessonResponse = zod.unknown()
+
+
+export const DeleteCreatorCourseLessonParams = zod.object({
+  "lessonId": zod.coerce.number().int()
+})
+
+export const DeleteCreatorCourseLessonResponse = zod.void()
+
+
 export const CreatorSalesSummaryResponse = zod.object({
   "orderCount": zod.number().int(),
   "grossMinor": zod.number().int(),
@@ -344,7 +546,8 @@ export const AdminCoursesResponseItem = zod.object({
   "title": zod.string(),
   "description": zod.string(),
   "level": zod.string(),
-  "lessons": zod.number().int()
+  "lessons": zod.number().int(),
+  "productId": zod.number().int().nullish()
 })
 export const AdminCoursesResponse = zod.array(AdminCoursesResponseItem)
 

@@ -57,7 +57,7 @@ export function Navbar() {
               </Button>
             </Link>
           )}
-          <Link href="/create-school">
+          <Link href="/auth/sign-up">
             <Button data-testid="link-start-free" className="font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-xl">
               {t("startFree")} →
             </Button>

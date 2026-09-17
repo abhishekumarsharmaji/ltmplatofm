@@ -62,8 +62,8 @@ export default function Home() {
   ];
 
   const steps = [
-    { key: 'create', step: "01", icon: Rocket, title: "Launch your school", desc: "Deploy your branded platform instantly. No coding required." },
-    { key: 'build', step: "02", icon: BookOpen, title: "Create courses", desc: "Upload videos, write lessons, and structure your curriculum." },
+    { key: 'create', step: "01", icon: Rocket, title: "Launch your course", desc: "Set up your professional creator account instantly." },
+    { key: 'build', step: "02", icon: BookOpen, title: "Create content", desc: "Upload videos, write lessons, and structure your curriculum." },
     { key: 'enroll', step: "03", icon: Users, title: "Enroll students", desc: "Share your link and start accepting payments and enrollments." },
   ];
 
@@ -101,11 +101,11 @@ export default function Home() {
               </h1>
 
               <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed font-medium" style={{ textWrap: "pretty" }}>
-                Launch your own online school, sell courses, and manage students with an all-in-one learning platform built for the modern creator.
+                Launch your own online courses, sell digital products, and manage students with an all-in-one learning platform built for the modern creator.
               </p>
 
               <div className="flex flex-wrap gap-4 justify-center pt-2">
-                <Link href="/create-school">
+                <Link href="/auth/sign-up">
                   <Button
                     size="lg"
                     data-testid="button-start-free"
@@ -157,8 +157,8 @@ export default function Home() {
                   <GraduationCap className="w-6 h-6 text-blue-400" aria-hidden="true" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">For Schools & Creators</h3>
-                  <p className="text-zinc-400 leading-relaxed">Everything you need to run an online academy under your own brand.</p>
+                  <h3 className="text-2xl font-bold text-white mb-2">For Instructors & Creators</h3>
+                  <p className="text-zinc-400 leading-relaxed">Everything you need to run your teaching business under your own brand.</p>
                 </div>
                 <ul className="space-y-2">
                   {['Custom domain & branding', 'Global payment processing', 'AI grading & tutors', 'Detailed analytics'].map((item) => (
@@ -168,9 +168,9 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/create-school">
+                <Link href="/auth/sign-up">
                   <Button className="bg-blue-600 hover:bg-blue-500 text-white rounded-xl">
-                    Create your school
+                    Start Teaching
                     <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
                   </Button>
                 </Link>

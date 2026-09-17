@@ -1,24 +1,32 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { 
   useCreatorSalesSummary,
   useListCreatorProducts,
-  useGetSession
+  useGetSession,
+  useCreateCreatorProduct,
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Package, DollarSign, Users, TrendingUp, BarChart3 } from "lucide-react";
+import { BookOpen, Package, DollarSign, Users, TrendingUp, BarChart3, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProductFormDialog } from "@/components/dashboard/ProductFormDialog";
 import { PublishProductButton } from "@/components/dashboard/PublishProductButton";
+import { CourseBuilder } from "./creator/CourseBuilder";
 
 export default function CreatorDashboard() {
   const params = useParams();
   const section = params.section || "overview";
+  const id = params.id;
+  const action = params.action;
   
+  if (section === "courses" && id && action === "builder") {
+    return <CourseBuilder productId={Number(id)} />;
+  }
+
   return (
     <DashboardLayout role="creator">
       {section === "overview" && <Overview />}
-      {section === "courses" && <Courses />}
+      {section === "courses" && !id && <Courses />}
       {section === "products" && <Products />}
       {section === "sales" && <Sales />}
     </DashboardLayout>
@@ -29,8 +37,25 @@ function Overview() {
   const { data: session } = useGetSession();
   const { data: sales, isLoading: salesLoading } = useCreatorSalesSummary();
   const { data: products, isLoading: productsLoading } = useListCreatorProducts();
+  const createProduct = useCreateCreatorProduct();
+  const [_, setLocation] = useLocation();
   
   const courseCount = products?.filter(p => p.type === 'course').length || 0;
+
+  const handleCreateCourse = () => {
+    createProduct.mutate({
+      data: {
+        title: "Untitled Course",
+        type: "course",
+        priceMinor: 0,
+        currency: "usd"
+      }
+    }, {
+      onSuccess: (prod) => {
+        setLocation(`/dashboard/creator/courses/${prod.id}/builder`);
+      }
+    });
+  };
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -45,11 +70,10 @@ function Overview() {
               New Product
             </Button>
           </ProductFormDialog>
-          <ProductFormDialog type="course">
-            <Button>
-              New Course
-            </Button>
-          </ProductFormDialog>
+          <Button onClick={handleCreateCourse} disabled={createProduct.isPending}>
+            <Plus className="w-4 h-4 mr-2" />
+            New Course
+          </Button>
         </div>
       </div>
 
@@ -135,8 +159,25 @@ function Overview() {
 
 function Courses() {
   const { data: allProducts, isLoading } = useListCreatorProducts();
+  const createProduct = useCreateCreatorProduct();
+  const [_, setLocation] = useLocation();
   const courses = allProducts?.filter(p => p.type === 'course');
   
+  const handleCreateCourse = () => {
+    createProduct.mutate({
+      data: {
+        title: "Untitled Course",
+        type: "course",
+        priceMinor: 0,
+        currency: "usd"
+      }
+    }, {
+      onSuccess: (prod) => {
+        setLocation(`/dashboard/creator/courses/${prod.id}/builder`);
+      }
+    });
+  };
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between">
@@ -144,11 +185,10 @@ function Courses() {
           <h2 className="text-3xl font-bold tracking-tight">Courses</h2>
           <p className="text-muted-foreground mt-1">Manage your educational content.</p>
         </div>
-        <ProductFormDialog type="course">
-          <Button>
-            Create Course
-          </Button>
-        </ProductFormDialog>
+        <Button onClick={handleCreateCourse} disabled={createProduct.isPending}>
+          <Plus className="w-4 h-4 mr-2" />
+          Create Course
+        </Button>
       </div>
       
       {isLoading ? (
@@ -158,16 +198,14 @@ function Courses() {
           <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
           <h3 className="font-bold text-lg mb-2">No courses found</h3>
           <p className="text-muted-foreground mb-4">You haven't created any courses yet.</p>
-          <ProductFormDialog type="course">
-            <Button>Create Your First Course</Button>
-          </ProductFormDialog>
+          <Button onClick={handleCreateCourse} disabled={createProduct.isPending}>Create Your First Course</Button>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course: any) => (
-             <div key={course.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+             <div key={course.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm group">
                 <div className="aspect-video bg-muted rounded-xl mb-4 flex items-center justify-center">
-                  <BookOpen className="w-10 h-10 text-muted-foreground/30" />
+                  <BookOpen className="w-10 h-10 text-muted-foreground/30 group-hover:scale-110 transition-transform" />
                 </div>
                 <h3 className="font-bold line-clamp-1">{course.title}</h3>
                 <p className="text-sm text-muted-foreground mt-1">${(course.priceMinor / 100).toFixed(2)}</p>
@@ -175,12 +213,9 @@ function Courses() {
                   <Badge variant="secondary" className={course.status === 'published' ? 'bg-success/10 text-success border-success/20' : 'bg-muted text-muted-foreground'}>
                     {course.status}
                   </Badge>
-                  <div className="flex gap-2">
-                    <ProductFormDialog type="course" product={course}>
-                      <Button size="sm" variant="outline">Edit</Button>
-                    </ProductFormDialog>
-                    <PublishProductButton id={course.id} status={course.status} />
-                  </div>
+                  <Link href={`/dashboard/creator/courses/${course.id}/builder`}>
+                    <Button size="sm" variant="outline">Edit Course</Button>
+                  </Link>
                 </div>
              </div>
           ))}

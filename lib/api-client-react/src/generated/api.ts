@@ -28,19 +28,30 @@ import type {
   Category,
   CategoryInput,
   Course,
+  CourseBasicsInput,
+  CourseBuilder,
+  CourseReadiness,
   HealthStatus,
+  Lesson,
+  LessonInput,
+  LessonReorderInput,
   ListProductsParams,
   ListWishlist200Item,
   LoginInput,
   MarketplaceCoursesParams,
+  Module,
+  ModuleInput,
+  ModuleReorderInput,
   Product,
   ProductInput,
+  PublishCreatorCourse200,
   PurchasedProducts200Item,
   SalesSummary,
   Session,
   SignUpInput,
   StudentLibrary200Item,
   StudentOrders200Item,
+  UpdateCreatorCourseBasics200,
   UpgradeCreator200,
   User
 } from './api.schemas';
@@ -1263,6 +1274,933 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPublishCreatorProductMutationOptions(options));
+    }
+
+export const getGetCreatorCourseBuilderUrl = (productId: number,) => {
+
+
+
+
+  return `/api/creator/products/${productId}/builder`
+}
+
+export const getCreatorCourseBuilder = async (productId: number, options?: Parameters<typeof customFetch>[1]): Promise<CourseBuilder> => {
+
+  return customFetch<CourseBuilder>(getGetCreatorCourseBuilderUrl(productId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCreatorCourseBuilderQueryKey = (productId: number,) => {
+    return [
+    `/api/creator/products/${productId}/builder`
+    ] as const;
+    }
+
+
+export const getGetCreatorCourseBuilderQueryOptions = <TData = Awaited<ReturnType<typeof getCreatorCourseBuilder>>, TError = ErrorType<unknown>>(productId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCreatorCourseBuilder>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCreatorCourseBuilderQueryKey(productId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCreatorCourseBuilder>>> = ({ signal }) => getCreatorCourseBuilder(productId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: productId !== null && productId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCreatorCourseBuilder>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCreatorCourseBuilderQueryResult = NonNullable<Awaited<ReturnType<typeof getCreatorCourseBuilder>>>
+export type GetCreatorCourseBuilderQueryError = ErrorType<unknown>
+
+
+
+export function useGetCreatorCourseBuilder<TData = Awaited<ReturnType<typeof getCreatorCourseBuilder>>, TError = ErrorType<unknown>>(
+ productId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCreatorCourseBuilder>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCreatorCourseBuilderQueryOptions(productId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateCreatorCourseBasicsUrl = (productId: number,) => {
+
+
+
+
+  return `/api/creator/products/${productId}/builder`
+}
+
+export const updateCreatorCourseBasics = async (productId: number,
+    courseBasicsInput: CourseBasicsInput, options?: Parameters<typeof customFetch>[1]): Promise<UpdateCreatorCourseBasics200> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<UpdateCreatorCourseBasics200>(getUpdateCreatorCourseBasicsUrl(productId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(courseBasicsInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateCreatorCourseBasicsMutationKey = () => ['updateCreatorCourseBasics'] as const;
+
+export const getUpdateCreatorCourseBasicsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCreatorCourseBasics>>, TError,UpdateCreatorCourseBasicsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateCreatorCourseBasics>>, TError,UpdateCreatorCourseBasicsMutationVariables, TContext> => {
+
+const mutationKey = getUpdateCreatorCourseBasicsMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateCreatorCourseBasics>>, UpdateCreatorCourseBasicsMutationVariables> = (props) => {
+          const {productId,data} = props ?? {};
+
+          return  updateCreatorCourseBasics(productId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateCreatorCourseBasicsMutationResult = NonNullable<Awaited<ReturnType<typeof updateCreatorCourseBasics>>>
+    export type UpdateCreatorCourseBasicsMutationBody = BodyType<CourseBasicsInput>
+    export type UpdateCreatorCourseBasicsMutationError = ErrorType<unknown>
+    export type UpdateCreatorCourseBasicsMutationVariables = {productId: number;data: BodyType<CourseBasicsInput>}
+
+    export const useUpdateCreatorCourseBasics = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCreatorCourseBasics>>, TError,UpdateCreatorCourseBasicsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateCreatorCourseBasics>>,
+        TError,
+        UpdateCreatorCourseBasicsMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateCreatorCourseBasicsMutationOptions(options));
+    }
+
+export const getGetCreatorCourseReadinessUrl = (productId: number,) => {
+
+
+
+
+  return `/api/creator/products/${productId}/readiness`
+}
+
+export const getCreatorCourseReadiness = async (productId: number, options?: Parameters<typeof customFetch>[1]): Promise<CourseReadiness> => {
+
+  return customFetch<CourseReadiness>(getGetCreatorCourseReadinessUrl(productId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCreatorCourseReadinessQueryKey = (productId: number,) => {
+    return [
+    `/api/creator/products/${productId}/readiness`
+    ] as const;
+    }
+
+
+export const getGetCreatorCourseReadinessQueryOptions = <TData = Awaited<ReturnType<typeof getCreatorCourseReadiness>>, TError = ErrorType<unknown>>(productId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCreatorCourseReadiness>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCreatorCourseReadinessQueryKey(productId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCreatorCourseReadiness>>> = ({ signal }) => getCreatorCourseReadiness(productId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: productId !== null && productId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCreatorCourseReadiness>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCreatorCourseReadinessQueryResult = NonNullable<Awaited<ReturnType<typeof getCreatorCourseReadiness>>>
+export type GetCreatorCourseReadinessQueryError = ErrorType<unknown>
+
+
+
+export function useGetCreatorCourseReadiness<TData = Awaited<ReturnType<typeof getCreatorCourseReadiness>>, TError = ErrorType<unknown>>(
+ productId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCreatorCourseReadiness>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCreatorCourseReadinessQueryOptions(productId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPublishCreatorCourseUrl = (productId: number,) => {
+
+
+
+
+  return `/api/creator/products/${productId}/publish-course`
+}
+
+export const publishCreatorCourse = async (productId: number, options?: Parameters<typeof customFetch>[1]): Promise<PublishCreatorCourse200> => {
+
+  return customFetch<PublishCreatorCourse200>(getPublishCreatorCourseUrl(productId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPublishCreatorCourseMutationKey = () => ['publishCreatorCourse'] as const;
+
+export const getPublishCreatorCourseMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishCreatorCourse>>, TError,PublishCreatorCourseMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publishCreatorCourse>>, TError,PublishCreatorCourseMutationVariables, TContext> => {
+
+const mutationKey = getPublishCreatorCourseMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publishCreatorCourse>>, PublishCreatorCourseMutationVariables> = (props) => {
+          const {productId} = props ?? {};
+
+          return  publishCreatorCourse(productId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublishCreatorCourseMutationResult = NonNullable<Awaited<ReturnType<typeof publishCreatorCourse>>>
+
+    export type PublishCreatorCourseMutationError = ErrorType<void>
+    export type PublishCreatorCourseMutationVariables = {productId: number}
+
+    export const usePublishCreatorCourse = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publishCreatorCourse>>, TError,PublishCreatorCourseMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publishCreatorCourse>>,
+        TError,
+        PublishCreatorCourseMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPublishCreatorCourseMutationOptions(options));
+    }
+
+export const getCreateCreatorCourseModuleUrl = (productId: number,) => {
+
+
+
+
+  return `/api/creator/products/${productId}/modules`
+}
+
+export const createCreatorCourseModule = async (productId: number,
+    moduleInput: ModuleInput, options?: Parameters<typeof customFetch>[1]): Promise<Module> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Module>(getCreateCreatorCourseModuleUrl(productId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(moduleInput)
+  }
+);}
+
+
+
+
+
+export const getCreateCreatorCourseModuleMutationKey = () => ['createCreatorCourseModule'] as const;
+
+export const getCreateCreatorCourseModuleMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCreatorCourseModule>>, TError,CreateCreatorCourseModuleMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCreatorCourseModule>>, TError,CreateCreatorCourseModuleMutationVariables, TContext> => {
+
+const mutationKey = getCreateCreatorCourseModuleMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCreatorCourseModule>>, CreateCreatorCourseModuleMutationVariables> = (props) => {
+          const {productId,data} = props ?? {};
+
+          return  createCreatorCourseModule(productId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCreatorCourseModuleMutationResult = NonNullable<Awaited<ReturnType<typeof createCreatorCourseModule>>>
+    export type CreateCreatorCourseModuleMutationBody = BodyType<ModuleInput>
+    export type CreateCreatorCourseModuleMutationError = ErrorType<unknown>
+    export type CreateCreatorCourseModuleMutationVariables = {productId: number;data: BodyType<ModuleInput>}
+
+    export const useCreateCreatorCourseModule = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCreatorCourseModule>>, TError,CreateCreatorCourseModuleMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createCreatorCourseModule>>,
+        TError,
+        CreateCreatorCourseModuleMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateCreatorCourseModuleMutationOptions(options));
+    }
+
+export const getReorderCreatorCourseModulesUrl = (productId: number,) => {
+
+
+
+
+  return `/api/creator/products/${productId}/modules/reorder`
+}
+
+export const reorderCreatorCourseModules = async (productId: number,
+    moduleReorderInput: ModuleReorderInput, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<void>(getReorderCreatorCourseModulesUrl(productId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(moduleReorderInput)
+  }
+);}
+
+
+
+
+
+export const getReorderCreatorCourseModulesMutationKey = () => ['reorderCreatorCourseModules'] as const;
+
+export const getReorderCreatorCourseModulesMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reorderCreatorCourseModules>>, TError,ReorderCreatorCourseModulesMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reorderCreatorCourseModules>>, TError,ReorderCreatorCourseModulesMutationVariables, TContext> => {
+
+const mutationKey = getReorderCreatorCourseModulesMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reorderCreatorCourseModules>>, ReorderCreatorCourseModulesMutationVariables> = (props) => {
+          const {productId,data} = props ?? {};
+
+          return  reorderCreatorCourseModules(productId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReorderCreatorCourseModulesMutationResult = NonNullable<Awaited<ReturnType<typeof reorderCreatorCourseModules>>>
+    export type ReorderCreatorCourseModulesMutationBody = BodyType<ModuleReorderInput>
+    export type ReorderCreatorCourseModulesMutationError = ErrorType<unknown>
+    export type ReorderCreatorCourseModulesMutationVariables = {productId: number;data: BodyType<ModuleReorderInput>}
+
+    export const useReorderCreatorCourseModules = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reorderCreatorCourseModules>>, TError,ReorderCreatorCourseModulesMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reorderCreatorCourseModules>>,
+        TError,
+        ReorderCreatorCourseModulesMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReorderCreatorCourseModulesMutationOptions(options));
+    }
+
+export const getUpdateCreatorCourseModuleUrl = (moduleId: number,) => {
+
+
+
+
+  return `/api/creator/modules/${moduleId}`
+}
+
+export const updateCreatorCourseModule = async (moduleId: number,
+    moduleInput: ModuleInput, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<void>(getUpdateCreatorCourseModuleUrl(moduleId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(moduleInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateCreatorCourseModuleMutationKey = () => ['updateCreatorCourseModule'] as const;
+
+export const getUpdateCreatorCourseModuleMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCreatorCourseModule>>, TError,UpdateCreatorCourseModuleMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateCreatorCourseModule>>, TError,UpdateCreatorCourseModuleMutationVariables, TContext> => {
+
+const mutationKey = getUpdateCreatorCourseModuleMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateCreatorCourseModule>>, UpdateCreatorCourseModuleMutationVariables> = (props) => {
+          const {moduleId,data} = props ?? {};
+
+          return  updateCreatorCourseModule(moduleId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateCreatorCourseModuleMutationResult = NonNullable<Awaited<ReturnType<typeof updateCreatorCourseModule>>>
+    export type UpdateCreatorCourseModuleMutationBody = BodyType<ModuleInput>
+    export type UpdateCreatorCourseModuleMutationError = ErrorType<unknown>
+    export type UpdateCreatorCourseModuleMutationVariables = {moduleId: number;data: BodyType<ModuleInput>}
+
+    export const useUpdateCreatorCourseModule = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCreatorCourseModule>>, TError,UpdateCreatorCourseModuleMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateCreatorCourseModule>>,
+        TError,
+        UpdateCreatorCourseModuleMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateCreatorCourseModuleMutationOptions(options));
+    }
+
+export const getDeleteCreatorCourseModuleUrl = (moduleId: number,) => {
+
+
+
+
+  return `/api/creator/modules/${moduleId}`
+}
+
+export const deleteCreatorCourseModule = async (moduleId: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteCreatorCourseModuleUrl(moduleId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteCreatorCourseModuleMutationKey = () => ['deleteCreatorCourseModule'] as const;
+
+export const getDeleteCreatorCourseModuleMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCreatorCourseModule>>, TError,DeleteCreatorCourseModuleMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteCreatorCourseModule>>, TError,DeleteCreatorCourseModuleMutationVariables, TContext> => {
+
+const mutationKey = getDeleteCreatorCourseModuleMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteCreatorCourseModule>>, DeleteCreatorCourseModuleMutationVariables> = (props) => {
+          const {moduleId} = props ?? {};
+
+          return  deleteCreatorCourseModule(moduleId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteCreatorCourseModuleMutationResult = NonNullable<Awaited<ReturnType<typeof deleteCreatorCourseModule>>>
+
+    export type DeleteCreatorCourseModuleMutationError = ErrorType<unknown>
+    export type DeleteCreatorCourseModuleMutationVariables = {moduleId: number}
+
+    export const useDeleteCreatorCourseModule = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCreatorCourseModule>>, TError,DeleteCreatorCourseModuleMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteCreatorCourseModule>>,
+        TError,
+        DeleteCreatorCourseModuleMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteCreatorCourseModuleMutationOptions(options));
+    }
+
+export const getCreateCreatorCourseLessonUrl = (moduleId: number,) => {
+
+
+
+
+  return `/api/creator/modules/${moduleId}/lessons`
+}
+
+export const createCreatorCourseLesson = async (moduleId: number,
+    lessonInput: LessonInput, options?: Parameters<typeof customFetch>[1]): Promise<Lesson> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Lesson>(getCreateCreatorCourseLessonUrl(moduleId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(lessonInput)
+  }
+);}
+
+
+
+
+
+export const getCreateCreatorCourseLessonMutationKey = () => ['createCreatorCourseLesson'] as const;
+
+export const getCreateCreatorCourseLessonMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCreatorCourseLesson>>, TError,CreateCreatorCourseLessonMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCreatorCourseLesson>>, TError,CreateCreatorCourseLessonMutationVariables, TContext> => {
+
+const mutationKey = getCreateCreatorCourseLessonMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCreatorCourseLesson>>, CreateCreatorCourseLessonMutationVariables> = (props) => {
+          const {moduleId,data} = props ?? {};
+
+          return  createCreatorCourseLesson(moduleId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCreatorCourseLessonMutationResult = NonNullable<Awaited<ReturnType<typeof createCreatorCourseLesson>>>
+    export type CreateCreatorCourseLessonMutationBody = BodyType<LessonInput>
+    export type CreateCreatorCourseLessonMutationError = ErrorType<unknown>
+    export type CreateCreatorCourseLessonMutationVariables = {moduleId: number;data: BodyType<LessonInput>}
+
+    export const useCreateCreatorCourseLesson = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCreatorCourseLesson>>, TError,CreateCreatorCourseLessonMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createCreatorCourseLesson>>,
+        TError,
+        CreateCreatorCourseLessonMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateCreatorCourseLessonMutationOptions(options));
+    }
+
+export const getReorderCreatorCourseLessonsUrl = (moduleId: number,) => {
+
+
+
+
+  return `/api/creator/modules/${moduleId}/lessons/reorder`
+}
+
+export const reorderCreatorCourseLessons = async (moduleId: number,
+    lessonReorderInput: LessonReorderInput, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<void>(getReorderCreatorCourseLessonsUrl(moduleId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(lessonReorderInput)
+  }
+);}
+
+
+
+
+
+export const getReorderCreatorCourseLessonsMutationKey = () => ['reorderCreatorCourseLessons'] as const;
+
+export const getReorderCreatorCourseLessonsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reorderCreatorCourseLessons>>, TError,ReorderCreatorCourseLessonsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reorderCreatorCourseLessons>>, TError,ReorderCreatorCourseLessonsMutationVariables, TContext> => {
+
+const mutationKey = getReorderCreatorCourseLessonsMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reorderCreatorCourseLessons>>, ReorderCreatorCourseLessonsMutationVariables> = (props) => {
+          const {moduleId,data} = props ?? {};
+
+          return  reorderCreatorCourseLessons(moduleId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReorderCreatorCourseLessonsMutationResult = NonNullable<Awaited<ReturnType<typeof reorderCreatorCourseLessons>>>
+    export type ReorderCreatorCourseLessonsMutationBody = BodyType<LessonReorderInput>
+    export type ReorderCreatorCourseLessonsMutationError = ErrorType<unknown>
+    export type ReorderCreatorCourseLessonsMutationVariables = {moduleId: number;data: BodyType<LessonReorderInput>}
+
+    export const useReorderCreatorCourseLessons = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reorderCreatorCourseLessons>>, TError,ReorderCreatorCourseLessonsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reorderCreatorCourseLessons>>,
+        TError,
+        ReorderCreatorCourseLessonsMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReorderCreatorCourseLessonsMutationOptions(options));
+    }
+
+export const getUpdateCreatorCourseLessonUrl = (lessonId: number,) => {
+
+
+
+
+  return `/api/creator/lessons/${lessonId}`
+}
+
+export const updateCreatorCourseLesson = async (lessonId: number,
+    lessonInput: LessonInput, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<void>(getUpdateCreatorCourseLessonUrl(lessonId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(lessonInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateCreatorCourseLessonMutationKey = () => ['updateCreatorCourseLesson'] as const;
+
+export const getUpdateCreatorCourseLessonMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCreatorCourseLesson>>, TError,UpdateCreatorCourseLessonMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateCreatorCourseLesson>>, TError,UpdateCreatorCourseLessonMutationVariables, TContext> => {
+
+const mutationKey = getUpdateCreatorCourseLessonMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateCreatorCourseLesson>>, UpdateCreatorCourseLessonMutationVariables> = (props) => {
+          const {lessonId,data} = props ?? {};
+
+          return  updateCreatorCourseLesson(lessonId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateCreatorCourseLessonMutationResult = NonNullable<Awaited<ReturnType<typeof updateCreatorCourseLesson>>>
+    export type UpdateCreatorCourseLessonMutationBody = BodyType<LessonInput>
+    export type UpdateCreatorCourseLessonMutationError = ErrorType<unknown>
+    export type UpdateCreatorCourseLessonMutationVariables = {lessonId: number;data: BodyType<LessonInput>}
+
+    export const useUpdateCreatorCourseLesson = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCreatorCourseLesson>>, TError,UpdateCreatorCourseLessonMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateCreatorCourseLesson>>,
+        TError,
+        UpdateCreatorCourseLessonMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateCreatorCourseLessonMutationOptions(options));
+    }
+
+export const getDeleteCreatorCourseLessonUrl = (lessonId: number,) => {
+
+
+
+
+  return `/api/creator/lessons/${lessonId}`
+}
+
+export const deleteCreatorCourseLesson = async (lessonId: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteCreatorCourseLessonUrl(lessonId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteCreatorCourseLessonMutationKey = () => ['deleteCreatorCourseLesson'] as const;
+
+export const getDeleteCreatorCourseLessonMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCreatorCourseLesson>>, TError,DeleteCreatorCourseLessonMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteCreatorCourseLesson>>, TError,DeleteCreatorCourseLessonMutationVariables, TContext> => {
+
+const mutationKey = getDeleteCreatorCourseLessonMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteCreatorCourseLesson>>, DeleteCreatorCourseLessonMutationVariables> = (props) => {
+          const {lessonId} = props ?? {};
+
+          return  deleteCreatorCourseLesson(lessonId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteCreatorCourseLessonMutationResult = NonNullable<Awaited<ReturnType<typeof deleteCreatorCourseLesson>>>
+
+    export type DeleteCreatorCourseLessonMutationError = ErrorType<unknown>
+    export type DeleteCreatorCourseLessonMutationVariables = {lessonId: number}
+
+    export const useDeleteCreatorCourseLesson = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCreatorCourseLesson>>, TError,DeleteCreatorCourseLessonMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteCreatorCourseLesson>>,
+        TError,
+        DeleteCreatorCourseLessonMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteCreatorCourseLessonMutationOptions(options));
     }
 
 export const getCreatorSalesSummaryUrl = () => {

@@ -40,13 +40,13 @@ export default function About() {
               <div className="grid md:grid-cols-2 gap-8 my-12 not-prose">
                 <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
                   <div className="text-3xl font-black text-blue-400 mb-2">10k+</div>
-                  <div className="font-semibold text-white mb-2">Active Schools</div>
-                  <p className="text-sm text-zinc-400">Creators and institutions using our platform to teach daily.</p>
+                  <div className="font-semibold text-white mb-2">Active Creators</div>
+                  <p className="text-sm text-zinc-400">Instructors using our platform to teach daily.</p>
                 </div>
                 <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
                   <div className="text-3xl font-black text-purple-400 mb-2">2M+</div>
                   <div className="font-semibold text-white mb-2">Students Enrolled</div>
-                  <p className="text-sm text-zinc-400">Learners advancing their careers through our schools.</p>
+                  <p className="text-sm text-zinc-400">Learners advancing their careers through our platform.</p>
                 </div>
               </div>
               

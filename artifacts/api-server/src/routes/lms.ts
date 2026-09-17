@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
-import { eq, ilike, and, sql } from "drizzle-orm";
-import { db, coursesTable, creatorProfilesTable, lmsCoursesTable, lmsUsersTable, usersTable } from "@workspace/db";
+import { eq, ilike, and, inArray, sql } from "drizzle-orm";
+import { db, coursesTable, courseModulesTable, lessonsTable, productsTable, creatorProfilesTable, lmsCoursesTable, lmsUsersTable, usersTable } from "@workspace/db";
 import {
   GetSessionResponse,
   ListCoursesResponse,
@@ -161,6 +161,144 @@ router.get("/creator/courses", requireAuth, requireRole("creator", "admin"), asy
     .where((req as AuthenticatedRequest).canonicalRole === "admin" ? undefined : eq(lmsCoursesTable.creatorId, canonicalId))
     .orderBy(lmsCoursesTable.id);
   res.json(courses);
+});
+
+/* The builder deliberately operates on the canonical course/product graph.  The
+ * older lms_courses endpoints above remain for backwards compatibility. */
+function positiveId(value: string | string[]) {
+  const n = Number(Array.isArray(value) ? value[0] : value);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+function ownerFilter<T>(table: T, id: any, creatorId: number, admin: boolean) {
+  return admin ? eq((table as any).id, id) : and(eq((table as any).id, id), eq((table as any).creatorId, creatorId));
+}
+
+async function builderProduct(productId: number, req: AuthenticatedRequest) {
+  const rows = await db.select({ product: productsTable, course: coursesTable })
+    .from(productsTable).leftJoin(coursesTable, eq(coursesTable.id, productsTable.courseId))
+    .where(ownerFilter(productsTable, productId, req.canonicalUserId!, req.canonicalRole === "admin"));
+  const row = rows[0];
+  if (row?.course && req.canonicalRole !== "admin" && row.course.creatorId !== req.canonicalUserId) return undefined;
+  return row;
+}
+
+router.get("/creator/products/:productId/builder", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const productId = positiveId(req.params.productId);
+  if (!productId) { res.status(400).json({ error: "Invalid product id" }); return; }
+  const found = await builderProduct(productId, req as AuthenticatedRequest);
+  if (!found || !found.course) { res.status(404).json({ error: "Course product not found" }); return; }
+  const modules = await db.select().from(courseModulesTable).where(eq(courseModulesTable.courseId, found.course.id)).orderBy(courseModulesTable.position);
+  const moduleIds = modules.map((m) => m.id);
+  const lessons = moduleIds.length ? await db.select().from(lessonsTable).where(inArray(lessonsTable.moduleId, moduleIds)).orderBy(lessonsTable.position) : [];
+  res.json({ product: found.product, course: found.course, modules: modules.map((m) => ({ ...m, lessons: lessons.filter((l) => l.moduleId === m.id) })) });
+});
+
+router.patch("/creator/products/:productId/builder", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const productId = positiveId(req.params.productId), auth = req as AuthenticatedRequest;
+  if (!productId) { res.status(400).json({ error: "Invalid product id" }); return; }
+  const found = await builderProduct(productId, auth);
+  if (!found?.course) { res.status(404).json({ error: "Course product not found" }); return; }
+  const body = req.body ?? {};
+  const title = body.title === undefined ? found.course.title : body.title;
+  const description = body.description === undefined ? found.course.description : body.description;
+  const priceMinor = body.priceMinor === undefined ? found.course.priceMinor : body.priceMinor;
+  const currency = body.currency === undefined ? found.course.currency : body.currency;
+  if (typeof title !== "string" || title.trim().length < 2 || typeof description !== "string" || typeof priceMinor !== "number" || !Number.isInteger(priceMinor) || priceMinor < 0 || typeof currency !== "string" || !/^[A-Z]{3}$/.test(currency)) {
+    res.status(400).json({ error: "title (2+ chars), description, non-negative integer priceMinor and 3-letter currency are required" }); return;
+  }
+  const updated = await db.transaction(async (tx) => {
+    const [course] = await tx.update(coursesTable).set({ title: title.trim(), description, priceMinor, currency, updatedAt: new Date() }).where(ownerFilter(coursesTable, found.course!.id, auth.canonicalUserId!, auth.canonicalRole === "admin")).returning();
+    await tx.update(productsTable).set({ title: title.trim(), description, priceMinor, currency, updatedAt: new Date() }).where(eq(productsTable.id, productId));
+    return course;
+  });
+  res.json(updated);
+});
+
+router.get("/creator/products/:productId/readiness", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const productId = positiveId(req.params.productId);
+  if (!productId) { res.status(400).json({ error: "Invalid product id" }); return; }
+  const found = await builderProduct(productId, req as AuthenticatedRequest);
+  if (!found?.course) { res.status(404).json({ error: "Course product not found" }); return; }
+  const modules = await db.select().from(courseModulesTable).where(eq(courseModulesTable.courseId, found.course.id));
+  const lessonCount = modules.length ? (await db.select({ count: sql<number>`count(*)::int` }).from(lessonsTable).where(inArray(lessonsTable.moduleId, modules.map((m) => m.id))))[0]?.count ?? 0 : 0;
+  const checks = { title: found.course.title.trim().length >= 2, description: found.course.description.trim().length > 0, module: modules.length > 0, lesson: lessonCount > 0 };
+  res.json({ ready: Object.values(checks).every(Boolean), checks, moduleCount: modules.length, lessonCount });
+});
+
+router.post("/creator/products/:productId/publish-course", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const productId = positiveId(req.params.productId), auth = req as AuthenticatedRequest;
+  if (!productId) { res.status(400).json({ error: "Invalid product id" }); return; }
+  const found = await builderProduct(productId, auth);
+  if (!found?.course) { res.status(404).json({ error: "Course product not found" }); return; }
+  const modules = await db.select({ id: courseModulesTable.id }).from(courseModulesTable).where(eq(courseModulesTable.courseId, found.course.id));
+  const lessonCount = modules.length ? (await db.select({ count: sql<number>`count(*)::int` }).from(lessonsTable).where(inArray(lessonsTable.moduleId, modules.map((m) => m.id))))[0]?.count ?? 0 : 0;
+  if (found.course.title.trim().length < 2 || !found.course.description.trim() || !modules.length || !lessonCount) { res.status(422).json({ error: "Course requires a valid title, description, at least one module and one lesson" }); return; }
+  const publishedAt = new Date();
+  const result = await db.transaction(async (tx) => {
+    const [course] = await tx.update(coursesTable).set({ status: "published", publishedAt, updatedAt: publishedAt }).where(ownerFilter(coursesTable, found.course!.id, auth.canonicalUserId!, auth.canonicalRole === "admin")).returning();
+    const [product] = await tx.update(productsTable).set({ status: "published", updatedAt: publishedAt }).where(eq(productsTable.id, productId)).returning();
+    return { course, product };
+  });
+  res.json(result);
+});
+
+async function ownedModule(moduleId: number, auth: AuthenticatedRequest) {
+  const [row] = await db.select({ module: courseModulesTable, course: coursesTable }).from(courseModulesTable).innerJoin(coursesTable, eq(coursesTable.id, courseModulesTable.courseId))
+    .where(and(eq(courseModulesTable.id, moduleId), auth.canonicalRole === "admin" ? undefined : eq(coursesTable.creatorId, auth.canonicalUserId!)));
+  return row;
+}
+router.post("/creator/products/:productId/modules", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const productId = positiveId(req.params.productId), auth = req as AuthenticatedRequest, body = req.body ?? {};
+  if (!productId || typeof body.title !== "string" || !body.title.trim()) { res.status(400).json({ error: "Valid product id and module title are required" }); return; }
+  const found = await builderProduct(productId, auth); if (!found?.course) { res.status(404).json({ error: "Course product not found" }); return; }
+  const [last] = await db.select({ position: sql<number>`coalesce(max(${courseModulesTable.position}), -1)` }).from(courseModulesTable).where(eq(courseModulesTable.courseId, found.course.id));
+  const [module] = await db.insert(courseModulesTable).values({ courseId: found.course.id, title: body.title.trim(), position: (last?.position ?? -1) + 1 }).returning();
+  res.status(201).json({ ...module, lessons: [] });
+});
+router.patch("/creator/modules/:moduleId", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const id = positiveId(req.params.moduleId), auth = req as AuthenticatedRequest;
+  if (!id || typeof req.body?.title !== "string" || !req.body.title.trim()) { res.status(400).json({ error: "Valid module id and title are required" }); return; }
+  if (!await ownedModule(id, auth)) { res.status(404).json({ error: "Module not found" }); return; }
+  const [module] = await db.update(courseModulesTable).set({ title: req.body.title.trim() }).where(eq(courseModulesTable.id, id)).returning(); res.json(module);
+});
+router.delete("/creator/modules/:moduleId", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => { const id = positiveId(req.params.moduleId); if (!id || !await ownedModule(id, req as AuthenticatedRequest)) { res.status(404).json({ error: "Module not found" }); return; } await db.delete(courseModulesTable).where(eq(courseModulesTable.id, id)); res.sendStatus(204); });
+router.post("/creator/products/:productId/modules/reorder", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const productId = positiveId(req.params.productId), ids = req.body?.moduleIds;
+  if (!productId || !Array.isArray(ids) || !ids.every((n: unknown) => Number.isInteger(n))) { res.status(400).json({ error: "moduleIds array is required" }); return; }
+  const found = await builderProduct(productId, req as AuthenticatedRequest); if (!found?.course) { res.status(404).json({ error: "Course product not found" }); return; }
+  const rows = await db.select().from(courseModulesTable).where(eq(courseModulesTable.courseId, found.course.id)); if (rows.length !== ids.length || new Set(ids).size !== ids.length || !rows.every((r) => ids.includes(r.id))) { res.status(400).json({ error: "moduleIds must contain every course module exactly once" }); return; }
+  await db.transaction(async (tx) => { for (let i = 0; i < ids.length; i++) await tx.update(courseModulesTable).set({ position: 100000 + i }).where(eq(courseModulesTable.id, ids[i])); for (let i = 0; i < ids.length; i++) await tx.update(courseModulesTable).set({ position: i }).where(eq(courseModulesTable.id, ids[i])); }); res.json({ ok: true });
+});
+router.post("/creator/modules/:moduleId/lessons", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const moduleId = positiveId(req.params.moduleId), auth = req as AuthenticatedRequest, body = req.body ?? {};
+  if (!moduleId || typeof body.title !== "string" || !body.title.trim()) { res.status(400).json({ error: "Valid module id and lesson title are required" }); return; }
+  if (!await ownedModule(moduleId, auth)) { res.status(404).json({ error: "Module not found" }); return; }
+  const [last] = await db.select({ position: sql<number>`coalesce(max(${lessonsTable.position}), -1)` }).from(lessonsTable).where(eq(lessonsTable.moduleId, moduleId));
+  const [lesson] = await db.insert(lessonsTable).values({ moduleId, title: body.title.trim(), description: body.description === undefined ? null : String(body.description), isPreview: body.isPreview === true, position: (last?.position ?? -1) + 1 }).returning();
+  res.status(201).json(lesson);
+});
+async function ownedLesson(lessonId: number, auth: AuthenticatedRequest) {
+  const [row] = await db.select({ lesson: lessonsTable, module: courseModulesTable, course: coursesTable }).from(lessonsTable)
+    .innerJoin(courseModulesTable, eq(courseModulesTable.id, lessonsTable.moduleId)).innerJoin(coursesTable, eq(coursesTable.id, courseModulesTable.courseId))
+    .where(and(eq(lessonsTable.id, lessonId), auth.canonicalRole === "admin" ? undefined : eq(coursesTable.creatorId, auth.canonicalUserId!)));
+  return row;
+}
+router.patch("/creator/lessons/:lessonId", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const id = positiveId(req.params.lessonId), body = req.body ?? {};
+  if (!id || (body.title !== undefined && (typeof body.title !== "string" || !body.title.trim()))) { res.status(400).json({ error: "Invalid lesson payload" }); return; }
+  if (!await ownedLesson(id, req as AuthenticatedRequest)) { res.status(404).json({ error: "Lesson not found" }); return; }
+  const updates: { title?: string; description?: string | null; isPreview?: boolean } = {};
+  if (body.title !== undefined) updates.title = body.title.trim();
+  if (body.description !== undefined) updates.description = body.description === null ? null : String(body.description);
+  if (body.isPreview !== undefined) { if (typeof body.isPreview !== "boolean") { res.status(400).json({ error: "isPreview must be boolean" }); return; } updates.isPreview = body.isPreview; }
+  const [lesson] = await db.update(lessonsTable).set(updates).where(eq(lessonsTable.id, id)).returning(); res.json(lesson);
+});
+router.delete("/creator/lessons/:lessonId", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => { const id = positiveId(req.params.lessonId); if (!id || !await ownedLesson(id, req as AuthenticatedRequest)) { res.status(404).json({ error: "Lesson not found" }); return; } await db.delete(lessonsTable).where(eq(lessonsTable.id, id)); res.sendStatus(204); });
+router.post("/creator/modules/:moduleId/lessons/reorder", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const moduleId = positiveId(req.params.moduleId), ids = req.body?.lessonIds;
+  if (!moduleId || !Array.isArray(ids) || !ids.every((n: unknown) => Number.isInteger(n)) || !await ownedModule(moduleId, req as AuthenticatedRequest)) { res.status(400).json({ error: "Valid module and lessonIds array are required" }); return; }
+  const rows = await db.select().from(lessonsTable).where(eq(lessonsTable.moduleId, moduleId)); if (rows.length !== ids.length || new Set(ids).size !== ids.length || !rows.every((r) => ids.includes(r.id))) { res.status(400).json({ error: "lessonIds must contain every module lesson exactly once" }); return; }
+  await db.transaction(async (tx) => { for (let i = 0; i < ids.length; i++) await tx.update(lessonsTable).set({ position: 100000 + i }).where(eq(lessonsTable.id, ids[i])); for (let i = 0; i < ids.length; i++) await tx.update(lessonsTable).set({ position: i }).where(eq(lessonsTable.id, ids[i])); }); res.json({ ok: true });
 });
 
 router.post("/creator/courses", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {

@@ -173,6 +173,82 @@ paths:
       security: [{ cookieAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
       responses: { "200": { description: Published, content: { application/json: { schema: { $ref: "#/components/schemas/Product" } } } } }
+  /creator/products/{productId}/builder:
+    get:
+      operationId: getCreatorCourseBuilder
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Course builder, content: { application/json: { schema: { $ref: "#/components/schemas/CourseBuilder" } } } } }
+    patch:
+      operationId: updateCreatorCourseBasics
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CourseBasicsInput" } } } }
+      responses: { "200": { description: Updated course, content: { application/json: { schema: { type: object } } } } }
+  /creator/products/{productId}/readiness:
+    get:
+      operationId: getCreatorCourseReadiness
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Readiness, content: { application/json: { schema: { $ref: "#/components/schemas/CourseReadiness" } } } } }
+  /creator/products/{productId}/publish-course:
+    post:
+      operationId: publishCreatorCourse
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Published course and product, content: { application/json: { schema: { type: object } } } }, "422": { description: Course is not ready } }
+  /creator/products/{productId}/modules:
+    post:
+      operationId: createCreatorCourseModule
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ModuleInput" } } } }
+      responses: { "201": { description: Created module, content: { application/json: { schema: { $ref: "#/components/schemas/Module" } } } } }
+  /creator/products/{productId}/modules/reorder:
+    post:
+      operationId: reorderCreatorCourseModules
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ModuleReorderInput" } } } }
+      responses: { "200": { description: Reordered } }
+  /creator/modules/{moduleId}:
+    patch:
+      operationId: updateCreatorCourseModule
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: moduleId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ModuleInput" } } } }
+      responses: { "200": { description: Updated module } }
+    delete:
+      operationId: deleteCreatorCourseModule
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: moduleId, in: path, required: true, schema: { type: integer } }]
+      responses: { "204": { description: Deleted } }
+  /creator/modules/{moduleId}/lessons:
+    post:
+      operationId: createCreatorCourseLesson
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: moduleId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/LessonInput" } } } }
+      responses: { "201": { description: Created lesson, content: { application/json: { schema: { $ref: "#/components/schemas/Lesson" } } } } }
+  /creator/modules/{moduleId}/lessons/reorder:
+    post:
+      operationId: reorderCreatorCourseLessons
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: moduleId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/LessonReorderInput" } } } }
+      responses: { "200": { description: Reordered } }
+  /creator/lessons/{lessonId}:
+    patch:
+      operationId: updateCreatorCourseLesson
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: lessonId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/LessonInput" } } } }
+      responses: { "200": { description: Updated lesson } }
+    delete:
+      operationId: deleteCreatorCourseLesson
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: lessonId, in: path, required: true, schema: { type: integer } }]
+      responses: { "204": { description: Deleted } }
   /creator/sales-summary:
     get:
       operationId: creatorSalesSummary
@@ -310,6 +386,69 @@ components:
           anyOf:
             - $ref: "#/components/schemas/User"
             - type: "null"
+    CourseBasicsInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 2 }
+        description: { type: string }
+        priceMinor: { type: integer, minimum: 0 }
+        currency: { type: string, pattern: "^[A-Z]{3}$" }
+    ModuleInput:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string, minLength: 1 }
+    LessonInput:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string, minLength: 1 }
+        description: { type: string, nullable: true }
+        isPreview: { type: boolean }
+    ModuleReorderInput:
+      type: object
+      required: [moduleIds]
+      properties:
+        moduleIds: { type: array, items: { type: integer } }
+    LessonReorderInput:
+      type: object
+      required: [lessonIds]
+      properties:
+        lessonIds: { type: array, items: { type: integer } }
+    Lesson:
+      type: object
+      required: [id, moduleId, title, position, isPreview]
+      properties:
+        id: { type: integer }
+        moduleId: { type: integer }
+        title: { type: string }
+        description: { type: string, nullable: true }
+        position: { type: integer }
+        isPreview: { type: boolean }
+    Module:
+      type: object
+      required: [id, courseId, title, position]
+      properties:
+        id: { type: integer }
+        courseId: { type: integer }
+        title: { type: string }
+        position: { type: integer }
+        lessons: { type: array, items: { $ref: "#/components/schemas/Lesson" } }
+    CourseBuilder:
+      type: object
+      required: [product, course, modules]
+      properties:
+        product: { $ref: "#/components/schemas/Product" }
+        course: { type: object }
+        modules: { type: array, items: { $ref: "#/components/schemas/Module" } }
+    CourseReadiness:
+      type: object
+      required: [ready, checks, moduleCount, lessonCount]
+      properties:
+        ready: { type: boolean }
+        checks: { type: object, additionalProperties: { type: boolean } }
+        moduleCount: { type: integer }
+        lessonCount: { type: integer }
     User:
       type: object
       required: [id, email, name, role]
@@ -337,9 +476,9 @@ components:
           type: string
         lessons:
           type: integer
-         productId:
-           type: integer
-           nullable: true
+        productId:
+          type: integer
+          nullable: true
     Category:
       type: object
       required: [id, name, slug]

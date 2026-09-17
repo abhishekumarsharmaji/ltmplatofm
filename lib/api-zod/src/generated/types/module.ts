@@ -5,12 +5,12 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { Lesson } from './lesson';
 
-export interface Course {
+export interface Module {
   id: number;
+  courseId: number;
   title: string;
-  description: string;
-  level: string;
-  lessons: number;
-  productId?: number | null;
+  position: number;
+  lessons?: Lesson[];
 }

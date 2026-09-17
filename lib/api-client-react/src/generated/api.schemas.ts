@@ -44,21 +44,54 @@ export interface Session {
   user?: User | null;
 }
 
-export interface Course {
-  id: number;
-  title: string;
-  description: string;
-  level: string;
-  lessons: number;
-  productId?: number | null;
+export interface CourseBasicsInput {
+  /** @minLength 2 */
+  title?: string;
+  description?: string;
+  /** @minimum 0 */
+  priceMinor?: number;
+  /** @pattern ^[A-Z]{3}$ */
+  currency?: string;
 }
 
-export interface Category {
-  id: number;
-  name: string;
-  slug: string;
-  description?: string | null;
+export interface ModuleInput {
+  /** @minLength 1 */
+  title: string;
 }
+
+export interface LessonInput {
+  /** @minLength 1 */
+  title: string;
+  description?: string | null;
+  isPreview?: boolean;
+}
+
+export interface ModuleReorderInput {
+  moduleIds: number[];
+}
+
+export interface LessonReorderInput {
+  lessonIds: number[];
+}
+
+export interface Lesson {
+  id: number;
+  moduleId: number;
+  title: string;
+  description?: string | null;
+  position: number;
+  isPreview: boolean;
+}
+
+export interface Module {
+  id: number;
+  courseId: number;
+  title: string;
+  position: number;
+  lessons?: Lesson[];
+}
+
+export type CourseBuilderCourse = { [key: string]: unknown };
 
 export type ProductType = typeof ProductType[keyof typeof ProductType];
 
@@ -86,6 +119,37 @@ export interface Product {
   priceMinor: number;
   currency: string;
   status: ProductStatus;
+}
+
+export interface CourseBuilder {
+  product: Product;
+  course: CourseBuilderCourse;
+  modules: Module[];
+}
+
+export type CourseReadinessChecks = {[key: string]: boolean};
+
+export interface CourseReadiness {
+  ready: boolean;
+  checks: CourseReadinessChecks;
+  moduleCount: number;
+  lessonCount: number;
+}
+
+export interface Course {
+  id: number;
+  title: string;
+  description: string;
+  level: string;
+  lessons: number;
+  productId?: number | null;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
 }
 
 export type ProductInputType = typeof ProductInputType[keyof typeof ProductInputType];
@@ -138,7 +202,12 @@ category?: string;
 
 export type ListProductsParams = {
 q?: string;
+category?: number;
 };
+
+export type UpdateCreatorCourseBasics200 = { [key: string]: unknown };
+
+export type PublishCreatorCourse200 = { [key: string]: unknown };
 
 export type StudentLibrary200Item = { [key: string]: unknown };
 

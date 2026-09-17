@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface Course {
+export interface Lesson {
   id: number;
+  moduleId: number;
   title: string;
-  description: string;
-  level: string;
-  lessons: number;
-  productId?: number | null;
+  description?: string | null;
+  position: number;
+  isPreview: boolean;
 }

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { login } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { getGetSessionQueryKey, login } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function Login() {
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -21,6 +23,7 @@ export default function Login() {
         password: String(form.get("password") ?? ""),
       });
       if (!session.user) throw new Error("No user returned");
+      queryClient.setQueryData(getGetSessionQueryKey(), session);
       setLocation(`/dashboard/${session.user.role}`);
     } catch {
       setError("The email or password is incorrect.");
@@ -74,26 +77,6 @@ export default function Login() {
                   required
                   className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 h-11"
                 />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-zinc-700 bg-zinc-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-zinc-900"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-zinc-400">
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-medium text-blue-400 hover:text-blue-300">
-                  Forgot your password?
-                </a>
               </div>
             </div>
 

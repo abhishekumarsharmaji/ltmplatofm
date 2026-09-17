@@ -26,7 +26,7 @@ export default function PublicRoutePage() {
             </div>
             <h1 className="text-4xl md:text-6xl font-black mt-7">{title}</h1>
             <p className="text-zinc-400 text-lg mt-4 max-w-2xl">
-              Explore this part of the LMS through the same responsive, tenant-aware experience used across courses, schools, and learner accounts.
+              Explore this part of the LMS through the same responsive, tenant-aware experience used across courses, creator storefronts, and learner accounts.
             </p>
             <div className="grid md:grid-cols-3 gap-4 mt-10">
               {["Responsive learning experience", "Tenant-aware platform structure", "Secure account access"].map((item) => (

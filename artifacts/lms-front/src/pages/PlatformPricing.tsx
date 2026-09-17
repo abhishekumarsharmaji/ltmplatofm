@@ -9,16 +9,16 @@ export default function PlatformPricing() {
     {
       name: "Starter",
       price: "$0",
-      description: "Everything you need to launch your first school.",
+      description: "Everything you need to launch your first course.",
       features: [
-        "1 School / Subdomain",
+        "1 Creator account",
         "Up to 100 active students",
         "3 published courses",
         "Stripe & manual payments",
         "Standard support",
         "5% transaction fee"
       ],
-      cta: "Create your school",
+      cta: "Start teaching",
       highlight: false
     },
     {
@@ -27,7 +27,7 @@ export default function PlatformPricing() {
       period: "/month",
       description: "For growing businesses and full-time educators.",
       features: [
-        "1 School / Custom Domain",
+        "Custom Domain",
         "Unlimited active students",
         "Unlimited courses",
         "AI Tutor integration",
@@ -42,9 +42,9 @@ export default function PlatformPricing() {
       name: "Scale",
       price: "$199",
       period: "/month",
-      description: "For academies managing multiple schools and large teams.",
+      description: "For academies managing multiple creators and large teams.",
       features: [
-        "Up to 5 Schools / Domains",
+        "Up to 5 Domains",
         "Advanced role-based access",
         "API access & webhooks",
         "White-labeling options",
@@ -63,7 +63,7 @@ export default function PlatformPricing() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
             <Badge variant="outline" className="border-zinc-800 text-zinc-400 rounded-full px-4 py-1">
-              For Creators & Schools
+              For Creators & Instructors
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
               Start free, scale infinitely
@@ -111,7 +111,7 @@ export default function PlatformPricing() {
                   </ul>
                 </div>
 
-                <Link href={plan.name === "Starter" ? "/create-school" : "/create-school?plan=" + plan.name.toLowerCase()}>
+                <Link href={plan.name === "Starter" ? "/auth/sign-up" : "/auth/sign-up?plan=" + plan.name.toLowerCase()}>
                   <Button 
                     className={`w-full rounded-xl h-12 mt-auto ${
                       plan.highlight 
