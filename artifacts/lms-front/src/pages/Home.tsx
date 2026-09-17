@@ -69,7 +69,7 @@ export default function Home() {
 
   return (
     <PublicLayout>
-      <div className="flex flex-col min-h-screen bg-[#0A0A0A] overflow-hidden selection:bg-blue-500/30 text-white">
+      <div className="flex flex-col min-h-screen bg-background overflow-hidden selection:bg-primary/30 text-foreground">
         {/* Background glows */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
           <div className="absolute top-[-10%] right-[-10%] w-[700px] h-[700px] bg-blue-500/8 rounded-full blur-[140px]" />
@@ -91,7 +91,7 @@ export default function Home() {
 
               <h1
                 id="home-hero-title"
-                className="text-6xl lg:text-8xl font-black tracking-tight text-white leading-[1.05] bg-clip-text text-transparent bg-gradient-to-b from-white via-zinc-200 to-zinc-500"
+                className="text-6xl lg:text-8xl font-black tracking-tight text-foreground leading-[1.05] bg-clip-text text-transparent bg-gradient-to-b from-foreground via-foreground to-muted-foreground"
                 style={{ textWrap: "balance" }}
               >
                 Online Courses &amp;&nbsp;
@@ -100,7 +100,7 @@ export default function Home() {
                 </span>
               </h1>
 
-              <p className="text-xl text-zinc-400 max-w-2xl leading-relaxed font-medium" style={{ textWrap: "pretty" }}>
+              <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed font-medium" style={{ textWrap: "pretty" }}>
                 Launch your own online school, sell courses, and manage students with an all-in-one learning platform built for the modern creator.
               </p>
 

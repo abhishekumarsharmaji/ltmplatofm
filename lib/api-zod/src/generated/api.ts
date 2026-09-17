@@ -23,7 +23,7 @@ export const GetSessionResponse = zod.object({
   "id": zod.number().int(),
   "email": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['student', 'teacher', 'admin'])
+  "role": zod.enum(['student', 'creator', 'admin'])
 }),zod.null()]).optional()
 })
 
@@ -43,7 +43,7 @@ export const LoginResponse = zod.object({
   "id": zod.number().int(),
   "email": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['student', 'teacher', 'admin'])
+  "role": zod.enum(['student', 'creator', 'admin'])
 }),zod.null()]).optional()
 })
 
@@ -66,7 +66,7 @@ export const SignUpResponse = zod.object({
   "id": zod.number().int(),
   "email": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['student', 'teacher', 'admin'])
+  "role": zod.enum(['student', 'creator', 'admin'])
 }),zod.null()]).optional()
 })
 
@@ -82,5 +82,344 @@ export const ListCoursesResponseItem = zod.object({
   "lessons": zod.number().int()
 })
 export const ListCoursesResponse = zod.array(ListCoursesResponseItem)
+
+
+export const UpgradeCreatorResponse = zod.object({
+  "user": zod.object({
+  "id": zod.number().int(),
+  "email": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['student', 'creator', 'admin'])
+})
+})
+
+
+export const MarketplaceCoursesQueryParams = zod.object({
+  "q": zod.coerce.string().optional(),
+  "level": zod.coerce.string().optional(),
+  "category": zod.coerce.string().optional()
+})
+
+export const MarketplaceCoursesResponseItem = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "level": zod.string(),
+  "lessons": zod.number().int()
+})
+export const MarketplaceCoursesResponse = zod.array(MarketplaceCoursesResponseItem)
+
+
+export const ListCategoriesResponseItem = zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "slug": zod.string(),
+  "description": zod.string().nullish()
+})
+export const ListCategoriesResponse = zod.array(ListCategoriesResponseItem)
+
+
+export const ListProductsQueryParams = zod.object({
+  "q": zod.coerce.string().optional()
+})
+
+export const listProductsResponsePriceMinorMin = 0;
+
+
+
+export const ListProductsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(listProductsResponsePriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+})
+export const ListProductsResponse = zod.array(ListProductsResponseItem)
+
+
+export const GetProductParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const getProductResponsePriceMinorMin = 0;
+
+
+
+export const GetProductResponse = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(getProductResponsePriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+})
+
+
+export const GetMarketplaceCourseParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const GetMarketplaceCourseResponse = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "level": zod.string(),
+  "lessons": zod.number().int()
+})
+
+
+export const listCreatorProductsResponsePriceMinorMin = 0;
+
+
+
+export const ListCreatorProductsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(listCreatorProductsResponsePriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+})
+export const ListCreatorProductsResponse = zod.array(ListCreatorProductsResponseItem)
+
+
+export const createCreatorProductBodyTitleMin = 2;
+
+export const createCreatorProductBodyPriceMinorMin = 0;
+
+
+
+export const CreateCreatorProductBody = zod.object({
+  "title": zod.string().min(createCreatorProductBodyTitleMin),
+  "description": zod.string().optional(),
+  "type": zod.enum(['course', 'digital']).optional(),
+  "priceMinor": zod.number().int().min(createCreatorProductBodyPriceMinorMin).optional(),
+  "currency": zod.string().optional(),
+  "courseId": zod.number().int().optional(),
+  "categoryId": zod.number().int().optional()
+})
+
+export const createCreatorProductResponsePriceMinorMin = 0;
+
+
+
+export const CreateCreatorProductResponse = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(createCreatorProductResponsePriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+})
+
+
+export const UpdateCreatorProductParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateCreatorProductBodyTitleMin = 2;
+
+export const updateCreatorProductBodyPriceMinorMin = 0;
+
+
+
+export const UpdateCreatorProductBody = zod.object({
+  "title": zod.string().min(updateCreatorProductBodyTitleMin),
+  "description": zod.string().optional(),
+  "type": zod.enum(['course', 'digital']).optional(),
+  "priceMinor": zod.number().int().min(updateCreatorProductBodyPriceMinorMin).optional(),
+  "currency": zod.string().optional(),
+  "courseId": zod.number().int().optional(),
+  "categoryId": zod.number().int().optional()
+})
+
+export const updateCreatorProductResponsePriceMinorMin = 0;
+
+
+
+export const UpdateCreatorProductResponse = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(updateCreatorProductResponsePriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+})
+
+
+export const PublishCreatorProductParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const publishCreatorProductResponsePriceMinorMin = 0;
+
+
+
+export const PublishCreatorProductResponse = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(publishCreatorProductResponsePriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+})
+
+
+export const CreatorSalesSummaryResponse = zod.object({
+  "orderCount": zod.number().int(),
+  "grossMinor": zod.number().int(),
+  "orders": zod.array(zod.object({
+
+}).passthrough())
+})
+
+
+export const StudentLibraryResponseItem = zod.object({
+
+}).passthrough()
+export const StudentLibraryResponse = zod.array(StudentLibraryResponseItem)
+
+
+export const PurchasedProductsResponseItem = zod.object({
+
+}).passthrough()
+export const PurchasedProductsResponse = zod.array(PurchasedProductsResponseItem)
+
+
+export const StudentOrdersResponseItem = zod.object({
+
+}).passthrough()
+export const StudentOrdersResponse = zod.array(StudentOrdersResponseItem)
+
+
+export const ListWishlistResponseItem = zod.object({
+
+}).passthrough()
+export const ListWishlistResponse = zod.array(ListWishlistResponseItem)
+
+
+export const AddWishlistParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const AddWishlistResponse = zod.object({
+
+}).passthrough()
+
+
+export const RemoveWishlistParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const RemoveWishlistResponse = zod.void()
+
+
+export const AdminUsersResponseItem = zod.object({
+  "id": zod.number().int(),
+  "email": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['student', 'creator', 'admin'])
+})
+export const AdminUsersResponse = zod.array(AdminUsersResponseItem)
+
+
+export const AdminCreatorsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "email": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['student', 'creator', 'admin'])
+})
+export const AdminCreatorsResponse = zod.array(AdminCreatorsResponseItem)
+
+
+export const AdminCoursesResponseItem = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "level": zod.string(),
+  "lessons": zod.number().int()
+})
+export const AdminCoursesResponse = zod.array(AdminCoursesResponseItem)
+
+
+export const adminProductsResponsePriceMinorMin = 0;
+
+
+
+export const AdminProductsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(adminProductsResponsePriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+})
+export const AdminProductsResponse = zod.array(AdminProductsResponseItem)
+
+
+export const AdminOrdersResponseItem = zod.object({
+
+}).passthrough()
+export const AdminOrdersResponse = zod.array(AdminOrdersResponseItem)
+
+
+export const AdminCreateCategoryBody = zod.object({
+  "name": zod.string(),
+  "slug": zod.string(),
+  "description": zod.string().optional()
+})
+
+export const AdminCreateCategoryResponse = zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "slug": zod.string(),
+  "description": zod.string().nullish()
+})
+
+
+export const AdminUpdateCategoryParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const AdminUpdateCategoryResponse = zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "slug": zod.string(),
+  "description": zod.string().nullish()
+})
+
+
+export const AdminDeleteCategoryParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const AdminDeleteCategoryResponse = zod.void()
+
+
+export const AdminSettingsResponseItem = zod.object({
+
+}).passthrough()
+export const AdminSettingsResponse = zod.array(AdminSettingsResponseItem)
+
+
+export const AdminUpdateSettingParams = zod.object({
+  "key": zod.coerce.string()
+})
+
+export const AdminUpdateSettingBody = zod.object({
+  "value": zod.string()
+})
+
+export const AdminUpdateSettingResponse = zod.object({
+
+}).passthrough()
 
 

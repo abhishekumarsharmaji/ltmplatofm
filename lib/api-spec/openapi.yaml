@@ -93,7 +93,182 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Course"
+  /creator/upgrade:
+    post:
+      operationId: upgradeCreator
+      tags: [auth]
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Creator account
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+        "401": { description: Authentication required }
+        "403": { description: Forbidden }
+  /marketplace/courses:
+    get:
+      operationId: marketplaceCourses
+      tags: [courses]
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+        - { name: level, in: query, schema: { type: string } }
+        - { name: category, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Filtered marketplace courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Course" }
+  /categories:
+    get:
+      operationId: listCategories
+      responses:
+        "200": { description: Categories, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Category" } } } } }
+  /marketplace/products:
+    get:
+      operationId: listProducts
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+        - { name: category, in: query, schema: { type: integer } }
+      responses:
+        "200": { description: Products, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Product" } } } } }
+  /marketplace/products/{id}:
+    get:
+      operationId: getProduct
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Product, content: { application/json: { schema: { $ref: "#/components/schemas/Product" } } } }, "404": { description: Not found } }
+  /marketplace/courses/{id}:
+    get:
+      operationId: getMarketplaceCourse
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Course, content: { application/json: { schema: { $ref: "#/components/schemas/Course" } } } }, "404": { description: Not found } }
+  /creator/products:
+    get:
+      operationId: listCreatorProducts
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Products, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Product" } } } } } }
+    post:
+      operationId: createCreatorProduct
+      security: [{ cookieAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ProductInput" } } } }
+      responses: { "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Product" } } } } }
+  /creator/products/{id}:
+    patch:
+      operationId: updateCreatorProduct
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ProductInput" } } } }
+      responses: { "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Product" } } } } }
+  /creator/products/{id}/publish:
+    post:
+      operationId: publishCreatorProduct
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Published, content: { application/json: { schema: { $ref: "#/components/schemas/Product" } } } } }
+  /creator/sales-summary:
+    get:
+      operationId: creatorSalesSummary
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Summary, content: { application/json: { schema: { $ref: "#/components/schemas/SalesSummary" } } } } }
+  /student/library:
+    get:
+      operationId: studentLibrary
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Library, content: { application/json: { schema: { type: array, items: { type: object } } } } } }
+  /student/products/purchased:
+    get:
+      operationId: purchasedProducts
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Purchases, content: { application/json: { schema: { type: array, items: { type: object } } } } } }
+  /student/orders:
+    get:
+      operationId: studentOrders
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Orders, content: { application/json: { schema: { type: array, items: { type: object } } } } } }
+  /student/wishlist:
+    get:
+      operationId: listWishlist
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Wishlist, content: { application/json: { schema: { type: array, items: { type: object } } } } } }
+  /student/wishlist/{productId}:
+    post:
+      operationId: addWishlist
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      responses: { "201": { description: Added, content: { application/json: { schema: { type: object } } } } }
+    delete:
+      operationId: removeWishlist
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      responses: { "204": { description: Removed } }
+  /admin/users:
+    get:
+      operationId: adminUsers
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Users, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/User" } } } } } }
+  /admin/creators:
+    get:
+      operationId: adminCreators
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Creators, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/User" } } } } } }
+  /admin/courses:
+    get:
+      operationId: adminCourses
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Courses, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Course" } } } } } }
+  /admin/products:
+    get:
+      operationId: adminProducts
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Products, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/Product" } } } } } }
+  /admin/orders:
+    get:
+      operationId: adminOrders
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Orders, content: { application/json: { schema: { type: array, items: { type: object } } } } } }
+  /admin/categories:
+    post:
+      operationId: adminCreateCategory
+      security: [{ cookieAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CategoryInput" } } } }
+      responses: { "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Category" } } } } }
+  /admin/categories/{id}:
+    patch:
+      operationId: adminUpdateCategory
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Category" } } } } }
+    delete:
+      operationId: adminDeleteCategory
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "204": { description: Deleted } }
+  /admin/settings:
+    get:
+      operationId: adminSettings
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Settings, content: { application/json: { schema: { type: array, items: { type: object } } } } } }
+  /admin/settings/{key}:
+    patch:
+      operationId: adminUpdateSetting
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: key, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/AdminUpdateSettingInput" } } } }
+      responses: { "200": { description: Updated, content: { application/json: { schema: { type: object } } } } }
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: lms_session
   schemas:
     HealthStatus:
       type: object
@@ -147,7 +322,7 @@ components:
           type: string
         role:
           type: string
-          enum: [student, teacher, admin]
+          enum: [student, creator, admin]
     Course:
       type: object
       required: [id, title, description, level, lessons]
@@ -162,4 +337,56 @@ components:
           type: string
         lessons:
           type: integer
+         productId:
+           type: integer
+           nullable: true
+    Category:
+      type: object
+      required: [id, name, slug]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        description: { type: string, nullable: true }
+    Product:
+      type: object
+      required: [id, title, description, type, priceMinor, currency, status]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        type: { type: string, enum: [course, digital] }
+        priceMinor: { type: integer, minimum: 0 }
+        currency: { type: string }
+        status: { type: string, enum: [draft, published, archived] }
+    ProductInput:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string, minLength: 2 }
+        description: { type: string }
+        type: { type: string, enum: [course, digital] }
+        priceMinor: { type: integer, minimum: 0 }
+        currency: { type: string }
+        courseId: { type: integer }
+        categoryId: { type: integer }
+    CategoryInput:
+      type: object
+      required: [name, slug]
+      properties:
+        name: { type: string }
+        slug: { type: string }
+        description: { type: string }
+    AdminUpdateSettingInput:
+      type: object
+      required: [value]
+      properties:
+        value: { type: string }
+    SalesSummary:
+      type: object
+      required: [orderCount, grossMinor, orders]
+      properties:
+        orderCount: { type: integer }
+        grossMinor: { type: integer }
+        orders: { type: array, items: { type: object } }
 

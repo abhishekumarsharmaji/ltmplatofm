@@ -30,7 +30,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col justify-center py-12 sm:px-6 lg:px-8 dark text-white">
+    <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-foreground">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link href="/">
           <img src="/brand/logo-mark.svg" alt="LMS Platform" className="mx-auto h-12 w-auto invert" />

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { ArrowRight, Video, PenTool, LayoutTemplate, Zap } from "lucide-react";
+import { UpgradeCreatorButton } from "@/components/auth/UpgradeCreatorButton";
 
 export default function Creators() {
   return (
@@ -21,11 +22,9 @@ export default function Creators() {
                 Stop fighting algorithms and algorithmic feeds. Build a premium destination for your biggest fans, own your audience, and keep 100% of your revenue.
               </p>
               <div className="flex gap-4">
-                <Link href="/create-school">
-                  <Button size="lg" className="bg-white text-black hover:bg-zinc-200 font-bold rounded-xl h-14 px-8 text-lg">
-                    Start your academy
-                  </Button>
-                </Link>
+                <UpgradeCreatorButton size="lg" className="bg-white text-black hover:bg-zinc-200 font-bold rounded-xl h-14 px-8 text-lg">
+                  Start your academy
+                </UpgradeCreatorButton>
               </div>
             </div>
             <div className="relative">
@@ -63,12 +62,10 @@ export default function Creators() {
           <div className="mt-32 bg-zinc-900/50 border border-zinc-800 rounded-3xl p-12 text-center max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold mb-6">Ready to stop renting your audience?</h2>
             <p className="text-zinc-400 mb-8 text-lg">Join thousands of creators who have already made the switch.</p>
-            <Link href="/create-school">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl h-14 px-10 text-lg">
+            <UpgradeCreatorButton size="lg" className="bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl h-14 px-10 text-lg">
                 Create your school for free
                 <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
+            </UpgradeCreatorButton>
           </div>
         </div>
       </div>

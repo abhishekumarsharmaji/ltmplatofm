@@ -1,18 +1,214 @@
-import { integer, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { integer, pgTable, serial, text, timestamp, pgEnum, boolean, uniqueIndex, index, check } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const lmsUsersTable = pgTable("lms_users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
-  role: text("role").notNull(),
+  role: text("role").notNull().default("student"),
   passwordHash: text("password_hash").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const lmsCoursesTable = pgTable("lms_courses", {
   id: serial("id").primaryKey(),
+  creatorId: integer("creator_id"),
+  status: text("status").notNull().default("draft"),
   title: text("title").notNull().unique(),
   description: text("description").notNull(),
   level: text("level").notNull(),
   lessons: integer("lessons").notNull(),
+});
+
+export const roleEnum = pgEnum("user_role", ["student", "creator", "admin"]);
+export const courseStatusEnum = pgEnum("course_status", ["draft", "published", "archived"]);
+export const productTypeEnum = pgEnum("product_type", ["course", "digital"]);
+export const orderStatusEnum = pgEnum("order_status", ["pending", "paid", "cancelled", "refunded"]);
+export const paymentStatusEnum = pgEnum("payment_status", ["pending", "succeeded", "failed", "refunded"]);
+export const fileKindEnum = pgEnum("file_kind", ["video", "document", "audio", "image", "other"]);
+
+/** Normalized application identity. lms_users remains for backwards-compatible auth data. */
+export const usersTable = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull(),
+  name: text("name").notNull(),
+  role: roleEnum("role").notNull().default("student"),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [uniqueIndex("users_email_unique").on(t.email), index("users_role_idx").on(t.role)]);
+
+export const creatorProfilesTable = pgTable("creator_profiles", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  displayName: text("display_name").notNull(),
+  bio: text("bio"),
+  avatarUrl: text("avatar_url"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [uniqueIndex("creator_profiles_user_unique").on(t.userId)]);
+
+export const categoriesTable = pgTable("categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [uniqueIndex("categories_slug_unique").on(t.slug)]);
+
+export const coursesTable = pgTable("courses", {
+  id: serial("id").primaryKey(),
+  creatorId: integer("creator_id").notNull().references(() => usersTable.id),
+  categoryId: integer("category_id").references(() => categoriesTable.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  slug: text("slug").notNull(),
+  description: text("description").notNull().default(""),
+  level: text("level").notNull().default("all"),
+  status: courseStatusEnum("status").notNull().default("draft"),
+  priceMinor: integer("price_minor").notNull().default(0),
+  currency: text("currency").notNull().default("USD"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+}, (t) => [uniqueIndex("courses_slug_unique").on(t.slug), index("courses_creator_idx").on(t.creatorId), check("courses_price_nonnegative", sql`${t.priceMinor} >= 0`)]);
+
+export const courseModulesTable = pgTable("course_modules", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").notNull().references(() => coursesTable.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  position: integer("position").notNull().default(0),
+}, (t) => [uniqueIndex("course_modules_position_unique").on(t.courseId, t.position)]);
+
+export const lessonsTable = pgTable("lessons", {
+  id: serial("id").primaryKey(),
+  moduleId: integer("module_id").notNull().references(() => courseModulesTable.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  position: integer("position").notNull().default(0),
+  isPreview: boolean("is_preview").notNull().default(false),
+}, (t) => [uniqueIndex("lessons_position_unique").on(t.moduleId, t.position)]);
+
+export const productsTable = pgTable("products", {
+  id: serial("id").primaryKey(),
+  creatorId: integer("creator_id").notNull().references(() => usersTable.id),
+  courseId: integer("course_id").references(() => coursesTable.id, { onDelete: "set null" }),
+  categoryId: integer("category_id").references(() => categoriesTable.id, { onDelete: "set null" }),
+  type: productTypeEnum("type").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  priceMinor: integer("price_minor").notNull().default(0),
+  currency: text("currency").notNull().default("USD"),
+  status: courseStatusEnum("status").notNull().default("draft"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("products_creator_idx").on(t.creatorId), check("products_price_nonnegative", sql`${t.priceMinor} >= 0`)]);
+
+export const digitalFilesTable = pgTable("digital_files", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().references(() => productsTable.id, { onDelete: "cascade" }),
+  kind: fileKindEnum("kind").notNull(),
+  storageKey: text("storage_key").notNull(),
+  filename: text("filename").notNull(),
+  sizeBytes: integer("size_bytes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const ordersTable = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id),
+  status: orderStatusEnum("status").notNull().default("pending"),
+  totalMinor: integer("total_minor").notNull().default(0),
+  currency: text("currency").notNull().default("USD"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("orders_user_idx").on(t.userId), check("orders_total_nonnegative", sql`${t.totalMinor} >= 0`)]);
+
+export const orderItemsTable = pgTable("order_items", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull().references(() => ordersTable.id, { onDelete: "cascade" }),
+  productId: integer("product_id").notNull().references(() => productsTable.id),
+  quantity: integer("quantity").notNull().default(1),
+  unitPriceMinor: integer("unit_price_minor").notNull(),
+}, (t) => [check("order_items_quantity_positive", sql`${t.quantity} > 0`), check("order_items_price_nonnegative", sql`${t.unitPriceMinor} >= 0`)]);
+
+export const enrollmentsTable = pgTable("enrollments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  courseId: integer("course_id").notNull().references(() => coursesTable.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [uniqueIndex("enrollments_user_course_unique").on(t.userId, t.courseId)]);
+
+export const paymentsTable = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull().references(() => ordersTable.id),
+  status: paymentStatusEnum("status").notNull().default("pending"),
+  amountMinor: integer("amount_minor").notNull(),
+  provider: text("provider"),
+  providerReference: text("provider_reference"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [check("payments_amount_nonnegative", sql`${t.amountMinor} >= 0`)]);
+
+export const reviewsTable = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id),
+  courseId: integer("course_id").notNull().references(() => coursesTable.id, { onDelete: "cascade" }),
+  rating: integer("rating").notNull(),
+  body: text("body"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [uniqueIndex("reviews_user_course_unique").on(t.userId, t.courseId), check("reviews_rating_range", sql`${t.rating} BETWEEN 1 AND 5`)]);
+
+export const wishlistTable = pgTable("wishlist", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  productId: integer("product_id").notNull().references(() => productsTable.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [uniqueIndex("wishlist_user_product_unique").on(t.userId, t.productId)]);
+
+export const couponsTable = pgTable("coupons", {
+  id: serial("id").primaryKey(),
+  creatorId: integer("creator_id").references(() => usersTable.id),
+  code: text("code").notNull(),
+  discountPercent: integer("discount_percent"),
+  discountMinor: integer("discount_minor"),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+}, (t) => [uniqueIndex("coupons_code_unique").on(t.code), check("coupons_percent_range", sql`${t.discountPercent} IS NULL OR ${t.discountPercent} BETWEEN 1 AND 100`)]);
+
+export const liveClassesTable = pgTable("live_classes", {
+  id: serial("id").primaryKey(),
+  creatorId: integer("creator_id").notNull().references(() => usersTable.id),
+  courseId: integer("course_id").references(() => coursesTable.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+  endsAt: timestamp("ends_at", { withTimezone: true }),
+  meetingUrl: text("meeting_url"),
+});
+
+export const certificatesTable = pgTable("certificates", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id),
+  courseId: integer("course_id").notNull().references(() => coursesTable.id),
+  certificateNumber: text("certificate_number").notNull(),
+  issuedAt: timestamp("issued_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [uniqueIndex("certificates_number_unique").on(t.certificateNumber), uniqueIndex("certificates_user_course_unique").on(t.userId, t.courseId)]);
+
+export const creatorEarningsTable = pgTable("creator_earnings", {
+  id: serial("id").primaryKey(),
+  creatorId: integer("creator_id").notNull().references(() => usersTable.id),
+  orderItemId: integer("order_item_id").notNull().references(() => orderItemsTable.id),
+  amountMinor: integer("amount_minor").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const payoutsTable = pgTable("payouts", {
+  id: serial("id").primaryKey(),
+  creatorId: integer("creator_id").notNull().references(() => usersTable.id),
+  amountMinor: integer("amount_minor").notNull(),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const platformSettingsTable = pgTable("platform_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

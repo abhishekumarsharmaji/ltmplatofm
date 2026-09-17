@@ -28,7 +28,7 @@ export type UserRole = typeof UserRole[keyof typeof UserRole];
 
 export const UserRole = {
   student: 'student',
-  teacher: 'teacher',
+  creator: 'creator',
   admin: 'admin',
 } as const;
 
@@ -50,5 +50,109 @@ export interface Course {
   description: string;
   level: string;
   lessons: number;
+  productId?: number | null;
 }
+
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+}
+
+export type ProductType = typeof ProductType[keyof typeof ProductType];
+
+
+export const ProductType = {
+  course: 'course',
+  digital: 'digital',
+} as const;
+
+export type ProductStatus = typeof ProductStatus[keyof typeof ProductStatus];
+
+
+export const ProductStatus = {
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export interface Product {
+  id: number;
+  title: string;
+  description: string;
+  type: ProductType;
+  /** @minimum 0 */
+  priceMinor: number;
+  currency: string;
+  status: ProductStatus;
+}
+
+export type ProductInputType = typeof ProductInputType[keyof typeof ProductInputType];
+
+
+export const ProductInputType = {
+  course: 'course',
+  digital: 'digital',
+} as const;
+
+export interface ProductInput {
+  /** @minLength 2 */
+  title: string;
+  description?: string;
+  type?: ProductInputType;
+  /** @minimum 0 */
+  priceMinor?: number;
+  currency?: string;
+  courseId?: number;
+  categoryId?: number;
+}
+
+export interface CategoryInput {
+  name: string;
+  slug: string;
+  description?: string;
+}
+
+export interface AdminUpdateSettingInput {
+  value: string;
+}
+
+export type SalesSummaryOrdersItem = { [key: string]: unknown };
+
+export interface SalesSummary {
+  orderCount: number;
+  grossMinor: number;
+  orders: SalesSummaryOrdersItem[];
+}
+
+export type UpgradeCreator200 = {
+  user: User;
+};
+
+export type MarketplaceCoursesParams = {
+q?: string;
+level?: string;
+category?: string;
+};
+
+export type ListProductsParams = {
+q?: string;
+};
+
+export type StudentLibrary200Item = { [key: string]: unknown };
+
+export type PurchasedProducts200Item = { [key: string]: unknown };
+
+export type StudentOrders200Item = { [key: string]: unknown };
+
+export type ListWishlist200Item = { [key: string]: unknown };
+
+export type AddWishlist201 = { [key: string]: unknown };
+
+export type AdminOrders200Item = { [key: string]: unknown };
+
+export type AdminSettings200Item = { [key: string]: unknown };
+
+export type AdminUpdateSetting200 = { [key: string]: unknown };
 

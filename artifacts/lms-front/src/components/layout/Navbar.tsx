@@ -2,9 +2,11 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "@/lib/i18n";
 import { Globe2 } from "lucide-react";
+import { useGetSession } from "@workspace/api-client-react";
 
 export function Navbar() {
   const t = useTranslations("navbar");
+  const { data: session } = useGetSession();
 
   return (
     <nav className="fixed top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
@@ -42,11 +44,19 @@ export function Navbar() {
             <Globe2 className="w-4 h-4" />
           </Button>
 
-          <Link href="/auth/login">
-            <Button variant="ghost" className="hidden text-muted-foreground hover:text-foreground sm:inline-flex">
-              {t("login")}
-            </Button>
-          </Link>
+          {session?.authenticated ? (
+            <Link href={`/dashboard/${session.user?.role || 'student'}`}>
+              <Button variant="ghost" className="hidden text-muted-foreground hover:text-foreground sm:inline-flex">
+                Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/auth/login">
+              <Button variant="ghost" className="hidden text-muted-foreground hover:text-foreground sm:inline-flex">
+                {t("login")}
+              </Button>
+            </Link>
+          )}
           <Link href="/create-school">
             <Button data-testid="link-start-free" className="font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-xl">
               {t("startFree")} →

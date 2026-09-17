@@ -6,7 +6,7 @@ export function ProtectedRoute({
   role,
   children,
 }: {
-  role: "student" | "teacher" | "admin";
+  role: "student" | "creator" | "admin";
   children: ReactNode;
 }) {
   const session = useGetSession();

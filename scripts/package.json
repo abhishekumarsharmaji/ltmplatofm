@@ -5,9 +5,13 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
+    "seed:dev": "tsx ./src/seed-dev.ts",
+    "test:phase1": "tsx ./src/phase1-smoke.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
+    "@workspace/db": "workspace:*",
+    "drizzle-orm": "catalog:",
     "@types/node": "catalog:",
     "tsx": "catalog:"
   }

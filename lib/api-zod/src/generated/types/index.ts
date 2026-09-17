@@ -6,10 +6,31 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './addWishlist201';
+export * from './adminOrders200Item';
+export * from './adminSettings200Item';
+export * from './adminUpdateSetting200';
+export * from './adminUpdateSettingInput';
+export * from './category';
+export * from './categoryInput';
 export * from './course';
 export * from './healthStatus';
+export * from './listProductsParams';
+export * from './listWishlist200Item';
 export * from './loginInput';
+export * from './marketplaceCoursesParams';
+export * from './product';
+export * from './productInput';
+export * from './productInputType';
+export * from './productStatus';
+export * from './productType';
+export * from './purchasedProducts200Item';
+export * from './salesSummary';
+export * from './salesSummaryOrdersItem';
 export * from './session';
 export * from './signUpInput';
+export * from './studentLibrary200Item';
+export * from './studentOrders200Item';
+export * from './upgradeCreator200';
 export * from './user';
 export * from './userRole';
