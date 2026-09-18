@@ -322,14 +322,15 @@ function CreatorsList() {
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : (
         <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-          <table className="w-full text-left">
-            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
-              <tr>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Name</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Email</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Joined</th>
-              </tr>
-            </thead>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px] text-left">
+              <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
+                <tr>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Name</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Email</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Joined</th>
+                </tr>
+              </thead>
             <tbody className="divide-y divide-[#E5E5E5]">
               {creators?.map((creator) => (
                 <tr key={creator.id} className="hover:bg-gray-50 transition-colors">
@@ -341,7 +342,8 @@ function CreatorsList() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -363,30 +365,32 @@ function ProductsList() {
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : (
         <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-          <table className="w-full text-left">
-            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
-              <tr>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Title</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Type</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Price</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E5E5E5]">
-              {products?.map((item: any) => (
-                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="p-4 font-bold text-[14px] text-black">{item.title}</td>
-                  <td className="p-4"><Badge className="bg-gray-100 text-[#394649] hover:bg-gray-100 border-none shadow-none uppercase text-[10px] font-bold">{item.type}</Badge></td>
-                  <td className="p-4 font-bold text-[14px]">${(item.priceMinor / 100).toFixed(2)} {item.currency}</td>
-                  <td className="p-4">
-                    <Badge className={item.status === 'published' ? 'bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
-                      {item.status}
-                    </Badge>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px] text-left">
+              <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
+                <tr>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Title</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Type</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Price</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#E5E5E5]">
+                {products?.map((item: any) => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="p-4 font-bold text-[14px] text-black">{item.title}</td>
+                    <td className="p-4"><Badge className="bg-gray-100 text-[#394649] hover:bg-gray-100 border-none shadow-none uppercase text-[10px] font-bold">{item.type}</Badge></td>
+                    <td className="p-4 font-bold text-[14px]">${(item.priceMinor / 100).toFixed(2)} {item.currency}</td>
+                    <td className="p-4">
+                      <Badge className={item.status === 'published' ? 'bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
+                        {item.status}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

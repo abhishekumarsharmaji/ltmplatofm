@@ -49,21 +49,21 @@ export function Navbar() {
     }
   };
 
-  const NavLinks = () => (
+  const NavLinks = ({ onClick }: { onClick?: () => void }) => (
     <>
-      <Link href="/" className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors">
+      <Link href="/" onClick={onClick} className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors block py-2 lg:py-0">
         {t("home")}
       </Link>
-      <Link href="/courses" className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors">
+      <Link href="/courses" onClick={onClick} className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors block py-2 lg:py-0">
         {t("courses")}
       </Link>
-      <Link href="/platform-pricing" className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors">
+      <Link href="/platform-pricing" onClick={onClick} className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors block py-2 lg:py-0">
         {t("pricing")}
       </Link>
-      <Link href="/creators" className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors">
+      <Link href="/creators" onClick={onClick} className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors block py-2 lg:py-0">
         {t("creators")}
       </Link>
-      <Link href="/about" className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors">
+      <Link href="/about" onClick={onClick} className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors block py-2 lg:py-0">
         {t("about")}
       </Link>
     </>
@@ -190,8 +190,8 @@ export function Navbar() {
             </button>
           </form>
           
-          <div className="flex flex-col space-y-4 pt-2 pb-4">
-            <NavLinks />
+          <div className="flex flex-col pt-2 pb-4">
+            <NavLinks onClick={() => setIsMobileMenuOpen(false)} />
             {!user && (
               <>
                 <div className="h-px bg-gray-100 w-full my-2"></div>
