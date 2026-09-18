@@ -28,7 +28,7 @@ export function PublishProductButton({
 
   if (status === 'published') {
     return (
-      <Button size="sm" variant="outline" disabled>
+      <Button variant="outline" disabled className="h-9 px-4 rounded-md font-medium text-[13px] border-[#DADADA] text-[#9794AA] bg-gray-50">
         Published
       </Button>
     );
@@ -36,9 +36,9 @@ export function PublishProductButton({
 
   return (
     <Button 
-      size="sm" 
       onClick={handlePublish}
       disabled={publishProduct.isPending}
+      className="h-9 px-4 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[13px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]"
     >
       {publishProduct.isPending ? "Publishing..." : "Publish"}
     </Button>

@@ -107,35 +107,37 @@ export function ProductFormDialog({
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{product ? 'Edit' : 'Create'} {type === 'course' ? 'Course' : 'Digital Product'}</DialogTitle>
+      <DialogContent className="border-[#E5E5E5] rounded-xl p-0 gap-0 overflow-hidden sm:max-w-[450px]">
+        <DialogHeader className="p-6 pb-4 border-b border-[#E5E5E5] bg-[#FAFAFA]">
+          <DialogTitle className="text-[20px] font-bold text-black">{product ? 'Edit' : 'Create'} {type === 'course' ? 'Course' : 'Digital Product'}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="p-6 space-y-5 bg-white">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input id="title" {...form.register("title")} />
+            <Label htmlFor="title" className="text-[14px] font-bold text-[#394649]">Title</Label>
+            <Input id="title" {...form.register("title")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
             {form.formState.errors.title && (
-              <p className="text-sm text-red-500">{form.formState.errors.title?.message as string}</p>
+              <p className="text-[13px] text-[#E53E3E] font-medium">{form.formState.errors.title?.message as string}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description (optional)</Label>
-            <Input id="description" {...form.register("description")} />
+            <Label htmlFor="description" className="text-[14px] font-bold text-[#394649]">Description (optional)</Label>
+            <Input id="description" {...form.register("description")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
           </div>
           {type === "digital" ? (
             <div className="space-y-2">
-              <Label htmlFor="priceMinor">Price (in cents)</Label>
-              <Input id="priceMinor" type="number" {...form.register("priceMinor")} />
+              <Label htmlFor="priceMinor" className="text-[14px] font-bold text-[#394649]">Price (in cents)</Label>
+              <Input id="priceMinor" type="number" {...form.register("priceMinor")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
             </div>
           ) : (
-            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+            <div className="rounded-lg border border-[#E5E5E5] bg-[#FAFAFA] p-4 text-[13px] text-[#4D4D4D]">
               All courses are free. Students can enroll instantly without payment.
             </div>
           )}
-          <Button type="submit" disabled={isPending} className="w-full">
-            {isPending ? "Saving..." : "Save"}
-          </Button>
+          <div className="pt-2">
+            <Button type="submit" disabled={isPending} className="w-full h-11 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
+              {isPending ? "Saving..." : "Save"}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

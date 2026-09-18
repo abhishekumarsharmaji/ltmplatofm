@@ -157,21 +157,21 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
   };
 
   return (
-    <div className="mt-4 p-4 border border-dashed border-border rounded-lg bg-muted/10">
+    <div className="mt-4 p-4 border-2 border-dashed border-[#E5E5E5] rounded-lg bg-[#FAFAFA]">
       <div className="flex items-center justify-between mb-3">
-        <h5 className="text-sm font-semibold flex items-center gap-2">
+        <h5 className="text-[14px] font-bold text-black flex items-center gap-2">
           <PlayCircle className="w-4 h-4 text-primary" />
           Lesson Video
         </h5>
         {asset && (
-          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+          <span className="text-[12px] text-[#4D4D4D] bg-white border border-[#E5E5E5] px-2 py-1 rounded">
             {asset.status === "uploaded" ? "Ready" : asset.status}
           </span>
         )}
       </div>
 
       {error && (
-        <div className="mb-3 p-2 bg-destructive/10 text-destructive text-sm rounded flex items-center gap-2">
+        <div className="mb-3 p-3 bg-red-50 text-[#E53E3E] text-[13px] font-medium rounded-md flex items-center gap-2 border border-red-100">
           <AlertCircle className="w-4 h-4" />
           {error}
         </div>
@@ -179,17 +179,19 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
 
       {uploading ? (
         <div className="space-y-2">
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="flex justify-between text-[13px] text-[#4D4D4D] font-bold">
             <span>Uploading...</span>
             <span>{progress}%</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
+          </div>
         </div>
       ) : asset && asset.status === "uploaded" ? (
-        <div className="flex items-center justify-between bg-card border border-border p-3 rounded-md">
+        <div className="flex items-center justify-between bg-white border border-[#E5E5E5] p-3 rounded-md shadow-sm">
           <div className="flex flex-col truncate pr-4">
-            <span className="text-sm font-medium truncate">{asset.filename}</span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-[14px] font-bold text-black truncate">{asset.filename}</span>
+            <span className="text-[12px] text-[#9794AA] mt-0.5">
               {(asset.sizeBytes / (1024 * 1024)).toFixed(2)} MB
             </span>
           </div>
@@ -198,7 +200,7 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
               href={`/api/creator/assets/${asset.id}/download`}
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-sm text-primary hover:underline font-medium"
+              className="text-[13px] text-primary hover:text-[#10A364] hover:underline font-medium px-2"
             >
               Play / Download
             </a>
@@ -206,6 +208,7 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
               variant="outline" 
               size="sm"
               onClick={() => fileInputRef.current?.click()}
+              className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-8 px-3 rounded-md font-medium text-[13px]"
             >
               Replace
             </Button>
@@ -213,7 +216,7 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
               aria-label={`Remove ${asset.filename}`}
               variant="ghost"
               size="icon"
-              className="text-destructive hover:text-destructive"
+              className="h-8 w-8 text-[#E53E3E] hover:bg-red-50 hover:text-[#E53E3E] rounded-md"
               onClick={handleRemove}
               disabled={removeAsset.isPending}
             >
@@ -223,11 +226,11 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
         </div>
       ) : (
         <div className="text-center py-6">
-          <Upload className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground mb-4">
+          <Upload className="w-8 h-8 text-[#9794AA] mx-auto mb-3" />
+          <p className="text-[14px] text-[#4D4D4D] mb-4">
             Upload a video for this lesson (Max 10GB)
           </p>
-          <Button onClick={() => fileInputRef.current?.click()}>
+          <Button onClick={() => fileInputRef.current?.click()} className="h-9 px-4 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[13px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
             Select Video File
           </Button>
         </div>

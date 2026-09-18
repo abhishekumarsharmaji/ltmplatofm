@@ -1,8 +1,39 @@
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { useMarketplaceCourses, useListCategories } from "@workspace/api-client-react";
+
+const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
 
 export default function About() {
+  const coursesQuery = useMarketplaceCourses({});
+  const categoriesQuery = useListCategories();
+  const courses = coursesQuery.data ?? [];
+  const statsLoading = coursesQuery.isLoading || categoriesQuery.isLoading;
+
+  const stats = [
+    {
+      value: new Set(courses.map((c) => c.creatorName).filter(Boolean)).size,
+      label: "Mentors",
+      caption: "Creators teaching on the platform today.",
+    },
+    {
+      value: courses.length,
+      label: "Courses",
+      caption: "Published courses you can start right now.",
+    },
+    {
+      value: courses.reduce((sum, c) => sum + (c.lessons || 0), 0),
+      label: "Lessons",
+      caption: "Video lessons across every course.",
+    },
+    {
+      value: (categoriesQuery.data ?? []).length,
+      label: "Categories",
+      caption: "Topics to explore, from business to design.",
+    },
+  ];
+
   return (
     <PublicLayout>
       <div className="bg-white min-h-screen pt-32 pb-0 lg:pt-40 flex flex-col">
