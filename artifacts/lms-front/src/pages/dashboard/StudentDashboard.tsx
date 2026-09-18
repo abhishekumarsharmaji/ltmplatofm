@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, BookOpen, Package, ShoppingCart, Heart, Play, Trophy, CheckCircle2, Clock, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UpgradeCreatorButton } from "@/components/auth/UpgradeCreatorButton";
+import { CourseThumbnail } from "@/components/courses/CourseThumbnail";
 
 const StudentLiveClasses = lazy(() => import("@/components/dashboard/StudentLiveClasses").then((module) => ({ default: module.StudentLiveClasses })));
 const LiveClassroom = lazy(() => import("@/components/dashboard/LiveClassroom").then((module) => ({ default: module.LiveClassroom })));
@@ -151,13 +152,7 @@ function Overview({ name }: { name: string }) {
               <Link key={course.id} href={`/courses/${course.id}`}>
                 <div className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-lg transition-shadow duration-300 flex flex-col h-full cursor-pointer overflow-hidden">
                   <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
-                    {course.thumbnailUrl ? (
-                      <img src={course.thumbnailUrl} alt={course.title} loading="lazy" decoding="async" width="640" height="400" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
-                        <span className="text-4xl text-primary/30 font-bold">{course.title[0]}</span>
-                      </div>
-                    )}
+                    <CourseThumbnail src={course.thumbnailUrl} title={course.title} className="transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute top-3 left-3">
                       <Badge className="bg-primary text-white hover:bg-primary font-bold shadow-sm rounded-full px-3 py-1 text-[12px]">
                         Free
@@ -214,13 +209,7 @@ function Library() {
              return (
                <div key={i} className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-lg transition-shadow duration-300 flex flex-col h-full overflow-hidden">
                   <div className="relative aspect-[16/10] bg-gray-100 flex items-center justify-center overflow-hidden">
-                    {course.thumbnailUrl ? (
-                       <img src={course.thumbnailUrl} alt={course.title} loading="lazy" decoding="async" width="640" height="400" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
-                        <span className="text-4xl text-primary/30 font-bold">{course.title[0]}</span>
-                      </div>
-                    )}
+                     <CourseThumbnail src={course.thumbnailUrl} title={course.title} className="transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                        <Play className="w-12 h-12 text-white fill-white drop-shadow-md" />
                     </div>

@@ -123,6 +123,7 @@ router.get("/marketplace/courses", async (req, res): Promise<void> => {
     outcomes: coursesTable.outcomes,
     faqs: coursesTable.faqs,
     level: coursesTable.level,
+    creatorName: usersTable.name,
     lessons: sql<number>`(
       select count(*)::int
       from lessons
@@ -130,6 +131,7 @@ router.get("/marketplace/courses", async (req, res): Promise<void> => {
       where course_modules.course_id = courses.id
     )`,
   }).from(coursesTable)
+    .innerJoin(usersTable, eq(usersTable.id, coursesTable.creatorId))
     .where(and(...filters))
     .orderBy(coursesTable.id);
   res.json(ListCoursesResponse.parse(courses));

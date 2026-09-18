@@ -5,6 +5,7 @@ import { useMarketplaceCourses, useListCategories, getMarketplaceCoursesQueryKey
 import { Star, Clock, BookOpen, Share2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useTranslations } from "@/lib/i18n";
+import { CourseThumbnail } from "@/components/courses/CourseThumbnail";
 
 export default function Home() {
   const t = useTranslations("home");
@@ -183,13 +184,7 @@ export default function Home() {
                   <Link key={course.id} href={`/courses/${course.id}`}>
                     <div className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-lg transition-shadow duration-300 flex flex-col h-full cursor-pointer overflow-hidden">
                       <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
-                        {course.thumbnailUrl ? (
-                          <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
-                            <span className="text-4xl text-primary/30 font-bold">{course.title[0]}</span>
-                          </div>
-                        )}
+                        <CourseThumbnail src={course.thumbnailUrl} title={course.title} className="transition-transform duration-500 group-hover:scale-105" />
                       </div>
                       <div className="p-5 flex flex-col flex-1">
                         <div className="flex justify-between items-center text-[13px] text-[#394649] mb-3">

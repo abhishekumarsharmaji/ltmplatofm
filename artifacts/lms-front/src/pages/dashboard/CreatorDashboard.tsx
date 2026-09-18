@@ -14,6 +14,7 @@ import { PublishProductButton } from "@/components/dashboard/PublishProductButto
 import { CourseBuilder } from "./creator/CourseBuilder";
 import { CreatorLiveClassesStandalone } from "@/components/dashboard/LiveClassesStandalone";
 import { LiveClassroom } from "@/components/dashboard/LiveClassroom";
+import { CourseThumbnail } from "@/components/courses/CourseThumbnail";
 
 export default function CreatorDashboard() {
   const params = useParams();
@@ -75,13 +76,13 @@ function Overview() {
           <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Creator Dashboard</h2>
           <p className="text-[16px] text-[#4D4D4D] mt-1">Welcome back, {session?.user?.name || "Creator"}. Here's what's happening.</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:gap-4">
           <ProductFormDialog type="digital">
-            <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-11 px-6 rounded-md font-medium text-[14px]">
+            <Button className="w-full border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-11 px-6 rounded-md font-medium text-[14px] sm:w-auto">
               New Product
             </Button>
           </ProductFormDialog>
-          <Button onClick={handleCreateCourse} disabled={createProduct.isPending} className="h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
+          <Button onClick={handleCreateCourse} disabled={createProduct.isPending} className="h-11 w-full px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)] sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             New Course
           </Button>
@@ -212,17 +213,11 @@ function Courses() {
           <Button onClick={handleCreateCourse} disabled={createProduct.isPending} className="h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px]">Create Your First Course</Button>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {courses.map((course: any) => (
              <div key={course.id} className="bg-white border border-[#E5E5E5] rounded-lg p-5 shadow-sm group hover:shadow-md transition-shadow">
-                <div className="aspect-[16/10] bg-gradient-to-br from-green-50 to-blue-50 rounded-md mb-4 flex items-center justify-center relative overflow-hidden">
-                  {course.thumbnailUrl ? (
-                    <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
-                      <span className="text-4xl text-primary/30 font-bold">{course.title[0]}</span>
-                    </div>
-                  )}
+                 <div className="aspect-[16/10] bg-gradient-to-br from-green-50 to-blue-50 rounded-md mb-4 flex items-center justify-center relative overflow-hidden">
+                   <CourseThumbnail src={course.thumbnailUrl} title={course.title} className="transition-transform duration-500 group-hover:scale-105" />
                 </div>
                 <h3 className="font-bold text-[16px] text-black line-clamp-1">{course.title}</h3>
                 <p className="text-[14px] text-primary font-bold mt-1">${(course.priceMinor / 100).toFixed(2)}</p>

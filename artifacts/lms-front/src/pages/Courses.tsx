@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Link, useSearchParams } from "wouter";
 import { Search, BookOpen, AlertCircle } from "lucide-react";
 import { getMarketplaceCoursesQueryKey, useMarketplaceCourses, useListCategories } from "@workspace/api-client-react";
+import { CourseThumbnail } from "@/components/courses/CourseThumbnail";
 
 export default function Courses() {
   // Filters live in the URL (?q=&category=) so the navbar search and shared links work.
@@ -63,19 +64,19 @@ export default function Courses() {
 
   return (
     <PublicLayout>
-      <div className="bg-white min-h-screen text-black pt-32 pb-24">
-        <div className="container mx-auto px-4 md:px-8">
+      <div className="bg-white min-h-screen text-black pt-24 sm:pt-28 md:pt-32 pb-16 md:pb-24">
+        <div className="container mx-auto px-4 sm:px-6 md:px-8">
           
-          <div className="max-w-3xl mb-12 text-center mx-auto">
-            <h1 className="text-[40px] md:text-[46px] font-bold mb-4 text-black">
+          <div className="max-w-3xl mb-9 md:mb-12 text-center mx-auto">
+            <h1 className="text-[32px] sm:text-[40px] md:text-[46px] leading-tight font-bold mb-4 text-black">
               Explore Inspiring Online Courses
             </h1>
-            <p className="text-[#394649] text-[18px]">
+            <p className="text-[#394649] text-[15px] sm:text-[17px] md:text-[18px]">
               Join thousands of learners and take your career to the next level with our expert-led courses.
             </p>
           </div>
 
-          <div className="flex flex-col items-center gap-8 mb-16">
+          <div className="flex flex-col items-center gap-6 md:gap-8 mb-10 md:mb-16">
             <div className="relative w-full max-w-2xl">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9794AA] w-5 h-5" />
               <Input 
@@ -115,7 +116,7 @@ export default function Courses() {
           </div>
 
           {courseQuery.isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                 <div key={i} className="rounded-lg border border-[#E5E5E5] bg-white h-[320px] animate-pulse">
                   <div className="h-[180px] bg-gray-200 rounded-t-lg" />
@@ -157,21 +158,15 @@ export default function Courses() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {courses.map(course => (
                 <Link key={course.id} href={`/courses/${course.id}`}>
                   <div className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-shadow duration-300 flex flex-col h-full cursor-pointer overflow-hidden">
                     <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
-                      {course.thumbnailUrl ? (
-                        <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
-                          <span className="text-4xl text-primary/30 font-bold">{course.title[0]}</span>
-                        </div>
-                      )}
+                      <CourseThumbnail src={course.thumbnailUrl} title={course.title} className="transition-transform duration-500 group-hover:scale-105" />
                     </div>
                     
-                    <div className="p-5 flex flex-col flex-1">
+                    <div className="p-4 sm:p-5 flex flex-col flex-1">
                       <div className="flex justify-between items-center text-[13px] text-[#394649] mb-3">
                         <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" />{course.lessons || 0} Lessons</span>
                         <span className="capitalize">{course.level || "Beginner"}</span>

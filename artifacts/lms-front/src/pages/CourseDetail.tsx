@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BookOpen, CheckCircle2, Clock, Play, AlertCircle, MonitorPlay, Infinity, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CourseThumbnail } from "@/components/courses/CourseThumbnail";
 import {
   Accordion,
   AccordionContent,
@@ -149,13 +150,7 @@ export default function CourseDetail() {
 
               <div className="lg:col-span-5">
                 <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-100 border border-[#E5E5E5] flex items-center justify-center group shadow-sm">
-                  {course.thumbnailUrl ? (
-                    <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-50 flex flex-col items-center justify-center">
-                      <BookOpen className="w-24 h-24 text-primary/20 mb-4 transition-transform duration-700 group-hover:scale-110" />
-                    </div>
-                  )}
+                  <CourseThumbnail src={course.thumbnailUrl} title={course.title} className="transition-transform duration-700 group-hover:scale-105" />
                 </div>
               </div>
             </div>
@@ -263,13 +258,7 @@ export default function CourseDetail() {
                 <div className="sticky top-32 border border-[#E5E5E5] bg-white rounded-lg p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
                   <div className="flex gap-4 mb-6">
                     <div className="w-20 h-20 rounded bg-gray-100 border border-[#E5E5E5] flex-shrink-0 overflow-hidden">
-                      {course.thumbnailUrl ? (
-                         <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover" />
-                      ) : (
-                         <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center text-primary/30 font-bold text-2xl">
-                           {course.title[0]}
-                         </div>
-                      )}
+                      <CourseThumbnail src={course.thumbnailUrl} title={course.title} />
                     </div>
                     <div className="flex flex-col justify-center">
                       <h4 className="text-[14px] font-bold text-black line-clamp-2 leading-snug">{course.title}</h4>
