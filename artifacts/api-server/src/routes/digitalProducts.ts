@@ -43,6 +43,10 @@ const safeFile = (file: typeof digitalFilesTable.$inferSelect) => {
   const { storageKey: _storageKey, objectPath: _objectPath, ...rest } = file;
   return rest;
 };
+const safeProduct = (product: typeof productsTable.$inferSelect) => {
+  const { coverImageObjectPath: _coverImageObjectPath, ...rest } = product;
+  return rest;
+};
 async function ownedProduct(productId: number, req: AuthenticatedRequest) {
   return (await db.select().from(productsTable).where(and(
     eq(productsTable.id, productId), eq(productsTable.type, "digital"),
@@ -56,7 +60,7 @@ router.get("/marketplace/digital-products", async (req, res): Promise<void> => {
     eq(productsTable.type, "digital"), eq(productsTable.status, "published"),
     q ? or(ilike(productsTable.title, `%${q}%`), ilike(productsTable.description, `%${q}%`)) : undefined,
   )).orderBy(desc(productsTable.createdAt));
-  res.json(rows.map((row) => ({ ...row, priceMinor: 0, isFree: true })));
+  res.json(rows.map((row) => ({ ...safeProduct(row), priceMinor: 0, isFree: true })));
 });
 router.get("/marketplace/digital-products/:id", async (req, res): Promise<void> => {
   const productId = numericId(req.params.id);
@@ -67,7 +71,7 @@ router.get("/marketplace/digital-products/:id", async (req, res): Promise<void> 
   if (!product) { res.status(404).json({ error: "Digital product not found" }); return; }
   const files = await db.select({ id: digitalFilesTable.id, filename: digitalFilesTable.filename, mimeType: digitalFilesTable.mimeType, sizeBytes: digitalFilesTable.sizeBytes, kind: digitalFilesTable.kind, position: digitalFilesTable.position })
     .from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, productId), eq(digitalFilesTable.status, "uploaded"))).orderBy(asc(digitalFilesTable.position));
-  res.json({ ...product.product, creatorName: product.creatorName, priceMinor: 0, isFree: true, files });
+  res.json({ ...safeProduct(product.product), creatorName: product.creatorName, priceMinor: 0, isFree: true, files });
 });
 
 router.get("/creator/digital-products/:productId/files", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
@@ -159,7 +163,7 @@ router.get("/student/digital-products", requireAuth, requireRole("student", "cre
   if (!userId) { res.json([]); return; }
   const rows = await db.select({ product: productsTable, acquiredAt: digitalProductEntitlementsTable.acquiredAt }).from(digitalProductEntitlementsTable)
     .innerJoin(productsTable, eq(productsTable.id, digitalProductEntitlementsTable.productId)).where(eq(digitalProductEntitlementsTable.userId, userId)).orderBy(desc(digitalProductEntitlementsTable.acquiredAt));
-  res.json(rows.map((row) => ({ ...row.product, acquiredAt: row.acquiredAt, isFree: true, priceMinor: 0 })));
+  res.json(rows.map((row) => ({ ...safeProduct(row.product), acquiredAt: row.acquiredAt, isFree: true, priceMinor: 0 })));
 });
 router.get("/student/digital-products/:productId", requireAuth, requireRole("student", "creator", "admin"), async (req, res): Promise<void> => {
   const productId = numericId(req.params.productId), user = req as AuthenticatedRequest;
@@ -171,7 +175,7 @@ router.get("/student/digital-products/:productId", requireAuth, requireRole("stu
   if (!published) { res.status(404).json({ error: "Digital product not found" }); return; }
   const files = await db.select({ id: digitalFilesTable.id, filename: digitalFilesTable.filename, mimeType: digitalFilesTable.mimeType, sizeBytes: digitalFilesTable.sizeBytes, kind: digitalFilesTable.kind, position: digitalFilesTable.position })
     .from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, productId), eq(digitalFilesTable.status, "uploaded"))).orderBy(asc(digitalFilesTable.position));
-  res.json({ ...published, isFree: true, priceMinor: 0, files });
+  res.json({ ...safeProduct(published), isFree: true, priceMinor: 0, files });
 });
 router.get("/student/digital-products/:productId/files/:fileId/download", requireAuth, requireRole("student", "creator", "admin"), async (req, res): Promise<void> => {
   const productId = numericId(req.params.productId), fileId = numericId(req.params.fileId), user = req as AuthenticatedRequest;

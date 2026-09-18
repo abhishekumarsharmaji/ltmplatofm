@@ -914,7 +914,6 @@ components:
         shortSummary: { type: string }
         subtype: { type: string, enum: [ebook, template, toolkit, document, bundle, other] }
         coverImageUrl: { type: string }
-        coverImageObjectPath: { type: string }
         type: { type: string, enum: [course, digital] }
         priceMinor: { type: integer, minimum: 0 }
         currency: { type: string }

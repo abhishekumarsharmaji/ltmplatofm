@@ -11,6 +11,10 @@ const router: IRouter = Router();
 const auth = requireAuth;
 const userOf = async (req: AuthenticatedRequest) => req.canonicalUserId;
 const id = (value: unknown) => Number.isInteger(Number(value)) ? Number(value) : null;
+const safeProduct = (product: typeof productsTable.$inferSelect) => {
+  const { coverImageObjectPath: _coverImageObjectPath, ...publicProduct } = product;
+  return publicProduct;
+};
 
 router.get("/categories", async (_req, res) => res.json(await db.select().from(categoriesTable).orderBy(categoriesTable.name)));
 router.get("/marketplace/products", async (req, res) => {
@@ -19,13 +23,13 @@ router.get("/marketplace/products", async (req, res) => {
   const rows = await db.select().from(productsTable)
     .where(and(eq(productsTable.status, "published"), q ? ilike(productsTable.title, `%${q}%`) : undefined, category ? eq(productsTable.categoryId, category) : undefined))
     .orderBy(desc(productsTable.createdAt));
-  res.json(rows.map((row) => row.type === "digital" ? { ...row, priceMinor: 0, isFree: true } : row));
+  res.json(rows.map((row) => row.type === "digital" ? { ...safeProduct(row), priceMinor: 0, isFree: true } : safeProduct(row)));
 });
 router.get("/marketplace/products/:id", async (req, res) => {
   const productId = id(req.params.id); if (!productId) { res.status(400).json({ error: "Invalid id" }); return; }
   const [row] = await db.select().from(productsTable).where(and(eq(productsTable.id, productId), eq(productsTable.status, "published")));
   if (!row) { res.status(404).json({ error: "Product not found" }); return; }
-  res.json(row.type === "digital" ? { ...row, priceMinor: 0, isFree: true } : row);
+  res.json(row.type === "digital" ? { ...safeProduct(row), priceMinor: 0, isFree: true } : safeProduct(row));
 });
 router.get("/marketplace/courses/:id", async (req, res) => {
   const courseId = id(req.params.id); if (!courseId) { res.status(400).json({ error: "Invalid id" }); return; }
@@ -143,11 +147,12 @@ router.post("/creator/products", auth, requireRole("creator", "admin"), async (r
     }).returning();
     return created;
   });
-  res.status(201).json(row);
+  res.status(201).json(safeProduct(row));
 });
 router.get("/creator/products", auth, requireRole("creator", "admin"), async (req, res) => {
   const creatorId = await userOf(req as AuthenticatedRequest); if (!creatorId) { res.json([]); return; }
-  res.json(await db.select().from(productsTable).where((req as AuthenticatedRequest).user!.role === "admin" ? undefined : eq(productsTable.creatorId, creatorId)));
+  const rows = await db.select().from(productsTable).where((req as AuthenticatedRequest).user!.role === "admin" ? undefined : eq(productsTable.creatorId, creatorId));
+  res.json(rows.map(safeProduct));
 });
 router.patch("/creator/products/:id", auth, requireRole("creator", "admin"), async (req, res) => {
   const productId = id(req.params.id), creatorId = await userOf(req as AuthenticatedRequest); if (!productId || !creatorId) { res.status(400).json({ error: "Invalid id" }); return; }
@@ -157,7 +162,7 @@ router.patch("/creator/products/:id", auth, requireRole("creator", "admin"), asy
    if (existing.type === "digital" && req.body?.priceMinor !== undefined && req.body.priceMinor !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
    if (existing.type === "digital" && req.body?.subtype !== undefined && !["ebook", "template", "toolkit", "document", "bundle", "other"].includes(req.body.subtype)) { res.status(400).json({ error: "Invalid digital product type" }); return; }
   const patch = Object.fromEntries(allowed.filter((key) => req.body?.[key] !== undefined).map((key) => [key, key === "categoryId" ? id(req.body[key]) : req.body[key]]));
-  const [row] = await db.update(productsTable).set({ ...patch, updatedAt: new Date() }).where(eq(productsTable.id, productId)).returning(); res.json(row);
+  const [row] = await db.update(productsTable).set({ ...patch, updatedAt: new Date() }).where(eq(productsTable.id, productId)).returning(); res.json(safeProduct(row));
 });
 router.post("/creator/products/:id/publish", auth, requireRole("creator", "admin"), async (req, res) => {
   const productId = id(req.params.id), creatorId = await userOf(req as AuthenticatedRequest); if (!productId || !creatorId) { res.status(400).json({ error: "Invalid id" }); return; }
@@ -177,7 +182,7 @@ router.post("/creator/products/:id/publish", auth, requireRole("creator", "admin
       : and(eq(coursesTable.id, row.courseId), eq(coursesTable.creatorId, creatorId));
     await db.update(coursesTable).set({ status: "published", publishedAt: new Date(), updatedAt: new Date() }).where(courseWhere);
   }
-  res.json(row);
+  res.json(safeProduct(row));
 });
 router.get("/creator/sales-summary", auth, requireRole("creator", "admin"), async (req, res) => {
   const creatorId = await userOf(req as AuthenticatedRequest);

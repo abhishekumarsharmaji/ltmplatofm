@@ -15,7 +15,6 @@ export interface ProductInput {
   shortSummary?: string;
   subtype?: ProductInputSubtype;
   coverImageUrl?: string;
-  coverImageObjectPath?: string;
   type?: ProductInputType;
   /** @minimum 0 */
   priceMinor?: number;
