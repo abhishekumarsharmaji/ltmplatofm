@@ -6,13 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface VideoUploadInput {
-  filename: string;
-  /** @pattern ^video/ */
-  mimeType: string;
+export interface MultipartPartInput {
+  uploadId: string;
   /**
      * @minimum 1
-     * @maximum 10737418240
+     * @maximum 10000
      */
-  sizeBytes: number;
+  partNumber: number;
 }

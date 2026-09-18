@@ -886,7 +886,7 @@ export const RequestLessonVideoUploadParams = zod.object({
 })
 
 export const requestLessonVideoUploadBodyMimeTypeRegExp = new RegExp('^video');
-export const requestLessonVideoUploadBodySizeBytesMax = 1073741824;
+export const requestLessonVideoUploadBodySizeBytesMax = 10737418240;
 
 
 
@@ -917,6 +917,19 @@ export const FinalizeLessonVideoUploadParams = zod.object({
   "assetId": zod.coerce.number().int()
 })
 
+export const finalizeLessonVideoUploadBodyPartsItemPartNumberMax = 10000;
+
+
+
+
+export const FinalizeLessonVideoUploadBody = zod.object({
+  "uploadId": zod.string(),
+  "parts": zod.array(zod.object({
+  "partNumber": zod.number().int().min(1).max(finalizeLessonVideoUploadBodyPartsItemPartNumberMax),
+  "eTag": zod.string()
+})).min(1)
+})
+
 export const FinalizeLessonVideoUploadResponse = zod.object({
   "id": zod.number().int(),
   "lessonId": zod.number().int(),
@@ -928,6 +941,37 @@ export const FinalizeLessonVideoUploadResponse = zod.object({
   "sizeBytes": zod.number().int(),
   "status": zod.enum(['pending', 'uploaded', 'failed'])
 })
+
+
+export const RequestLessonVideoPartUrlParams = zod.object({
+  "lessonId": zod.coerce.number().int(),
+  "assetId": zod.coerce.number().int()
+})
+
+export const requestLessonVideoPartUrlBodyPartNumberMax = 10000;
+
+
+
+export const RequestLessonVideoPartUrlBody = zod.object({
+  "uploadId": zod.string(),
+  "partNumber": zod.number().int().min(1).max(requestLessonVideoPartUrlBodyPartNumberMax)
+})
+
+export const RequestLessonVideoPartUrlResponse = zod.object({
+  "uploadURL": zod.string()
+})
+
+
+export const AbortLessonVideoUploadParams = zod.object({
+  "lessonId": zod.coerce.number().int(),
+  "assetId": zod.coerce.number().int()
+})
+
+export const AbortLessonVideoUploadBody = zod.object({
+  "uploadId": zod.string()
+})
+
+export const AbortLessonVideoUploadResponse = zod.void()
 
 
 export const DownloadLessonAssetParams = zod.object({

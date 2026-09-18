@@ -277,9 +277,37 @@ export interface VideoUploadInput {
   mimeType: string;
   /**
      * @minimum 1
-     * @maximum 1073741824
+     * @maximum 10737418240
      */
   sizeBytes: number;
+}
+
+export interface MultipartPartInput {
+  uploadId: string;
+  /**
+     * @minimum 1
+     * @maximum 10000
+     */
+  partNumber: number;
+}
+
+export type MultipartCompleteInputPartsItem = {
+  /**
+     * @minimum 1
+     * @maximum 10000
+     */
+  partNumber: number;
+  eTag: string;
+};
+
+export interface MultipartCompleteInput {
+  uploadId: string;
+  /** @minItems 1 */
+  parts: MultipartCompleteInputPartsItem[];
+}
+
+export interface MultipartAbortInput {
+  uploadId: string;
 }
 
 export type StudentLessonAssetKind = typeof StudentLessonAssetKind[keyof typeof StudentLessonAssetKind];
@@ -505,6 +533,10 @@ export type StudentOrders200Item = { [key: string]: unknown };
 export type ListWishlist200Item = { [key: string]: unknown };
 
 export type AddWishlist201 = { [key: string]: unknown };
+
+export type RequestLessonVideoPartUrl200 = {
+  uploadURL: string;
+};
 
 export type AdminOrders200Item = { [key: string]: unknown };
 

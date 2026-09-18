@@ -1,8 +1,6 @@
 import { useState, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
-  useRequestLessonVideoUpload, 
-  useFinalizeLessonVideoUpload,
   useRemoveLessonAsset,
   getGetCreatorCourseBuilderQueryKey,
   getGetCreatorCourseReadinessQueryKey
@@ -17,8 +15,6 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const requestUpload = useRequestLessonVideoUpload();
-  const finalizeUpload = useFinalizeLessonVideoUpload();
   const removeAsset = useRemoveLessonAsset();
   
   const [uploading, setUploading] = useState(false);
@@ -34,10 +30,10 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
       return;
     }
     
-    // Max 1GB
-    const MAX_SIZE = 1024 * 1024 * 1024;
+    // R2 multipart uploads support course videos up to 10GB.
+    const MAX_SIZE = 10 * 1024 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      setError("File exceeds 1GB limit.");
+      setError("File exceeds 10GB limit.");
       return;
     }
 
@@ -46,51 +42,87 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
     setProgress(0);
 
     try {
-      const res = await requestUpload.mutateAsync({
-        lessonId: lesson.id,
-        data: {
+      const apiJson = async <T,>(url: string, init: RequestInit): Promise<T> => {
+        const response = await fetch(url, {
+          ...init,
+          credentials: "include",
+          headers: { "Content-Type": "application/json", ...init.headers },
+        });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || `Request failed with status ${response.status}`);
+        }
+        return response.json() as Promise<T>;
+      };
+      const res = await apiJson<{ asset: any; uploadId: string; partSize: number }>(
+        `/api/creator/lessons/${lesson.id}/assets/request-upload`,
+        {
+          method: "POST",
+          body: JSON.stringify({
           filename: file.name,
           mimeType: file.type,
-          sizeBytes: file.size
-        }
-      });
-
-      const { uploadURL, asset } = res;
-
-      // Reserve the first part of the indicator for URL preparation.
-      setProgress(10);
-
-      // Perform PUT upload using XMLHttpRequest to track progress
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", uploadURL, true);
-        xhr.setRequestHeader("Content-Type", file.type);
-        
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percent = Math.round((event.loaded / event.total) * 90) + 10; // Reserve 10% for init/finalize
-            setProgress(percent);
+            sizeBytes: file.size,
+          }),
+        },
+      );
+      const { asset, uploadId, partSize } = res;
+      const partCount = Math.ceil(file.size / partSize);
+      const loadedByPart = new Map<number, number>();
+      const parts: Array<{ partNumber: number; eTag: string }> = [];
+      let nextPart = 1;
+      const uploadPart = async (partNumber: number) => {
+        const { uploadURL } = await apiJson<{ uploadURL: string }>(
+          `/api/creator/lessons/${lesson.id}/assets/${asset.id}/part-url`,
+          { method: "POST", body: JSON.stringify({ uploadId, partNumber }) },
+        );
+        const start = (partNumber - 1) * partSize;
+        const chunk = file.slice(start, Math.min(start + partSize, file.size));
+        const eTag = await new Promise<string>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("PUT", uploadURL, true);
+          xhr.upload.onprogress = (event) => {
+            loadedByPart.set(partNumber, event.loaded);
+            const uploaded = Array.from(loadedByPart.values()).reduce((sum, value) => sum + value, 0);
+            setProgress(Math.min(94, Math.round((uploaded / file.size) * 94)));
+          };
+          xhr.onload = () => {
+            const tag = xhr.getResponseHeader("ETag");
+            if (xhr.status >= 200 && xhr.status < 300 && tag) resolve(tag);
+            else reject(new Error(`Part ${partNumber} upload failed with status ${xhr.status}`));
+          };
+          xhr.onerror = () => reject(new Error(`Network error uploading part ${partNumber}`));
+          xhr.send(chunk);
+        });
+        parts.push({ partNumber, eTag });
+      };
+      try {
+        const workers = Array.from({ length: Math.min(3, partCount) }, async () => {
+          while (nextPart <= partCount) {
+            const partNumber = nextPart++;
+            await uploadPart(partNumber);
           }
-        };
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve();
-          } else {
-            reject(new Error(`Upload failed with status ${xhr.status}`));
-          }
-        };
-
-        xhr.onerror = () => reject(new Error("Network error during upload"));
-        xhr.send(file);
-      });
-
-      setProgress(95);
-
-      await finalizeUpload.mutateAsync({
-        lessonId: lesson.id,
-        assetId: asset.id
-      });
+        });
+        await Promise.all(workers);
+        setProgress(95);
+        await apiJson(
+          `/api/creator/lessons/${lesson.id}/assets/${asset.id}/finalize`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              uploadId,
+              parts: parts.sort((a, b) => a.partNumber - b.partNumber),
+            }),
+          },
+        );
+      } catch (uploadError) {
+        await fetch(`/api/creator/lessons/${lesson.id}/assets/${asset.id}/abort`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uploadId }),
+        }).catch(() => undefined);
+        throw uploadError;
+      }
 
       setProgress(100);
       toast({ title: "Video uploaded successfully" });
@@ -193,7 +225,7 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
         <div className="text-center py-6">
           <Upload className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
           <p className="text-sm text-muted-foreground mb-4">
-            Upload a video for this lesson (Max 1GB)
+            Upload a video for this lesson (Max 10GB)
           </p>
           <Button onClick={() => fileInputRef.current?.click()}>
             Select Video File

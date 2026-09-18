@@ -3,11 +3,19 @@ import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import OpenAI from "openai";
 import { db, coursesTable, courseModulesTable, enrollmentsTable, lessonAssetsTable, lessonsTable, productsTable, usersTable } from "@workspace/db";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewares/auth";
-import { createCourseThumbnailUploadUrl, createLessonUploadUrl, objectFile } from "../lib/objectStorage";
+import {
+  abortLessonMultipartUpload,
+  completeLessonMultipartUpload,
+  createCourseThumbnailUploadUrl,
+  createLessonMultipartUpload,
+  createLessonPartUploadUrl,
+  objectFile,
+} from "../lib/objectStorage";
 
 const router: IRouter = Router();
 const id = (v: string | string[]) => { const value = Array.isArray(v) ? v[0] : v; return /^\d+$/.test(value) && Number(value) > 0 ? Number(value) : null; };
-const MAX_VIDEO_BYTES = 1024 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 10 * 1024 * 1024 * 1024;
+const VIDEO_PART_BYTES = 100 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 async function ownedProduct(productId: number, req: AuthenticatedRequest) {
   const [row] = await db.select({ product: productsTable, course: coursesTable }).from(productsTable)
@@ -110,17 +118,35 @@ router.post("/creator/products/:productId/thumbnail/finalize", requireAuth, requ
 router.post("/creator/lessons/:lessonId/assets/request-upload", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const lessonId = id(req.params.lessonId), auth = req as AuthenticatedRequest;
   const { filename, mimeType, sizeBytes } = req.body ?? {};
-  if (!lessonId || typeof filename !== "string" || !/^video\/[^;]+$/i.test(mimeType ?? "") || !Number.isInteger(sizeBytes) || sizeBytes < 1 || sizeBytes > MAX_VIDEO_BYTES) { res.status(400).json({ error: "filename, video MIME type and sizeBytes up to 1GB are required" }); return; }
+  if (!lessonId || typeof filename !== "string" || !/^video\/[^;]+$/i.test(mimeType ?? "") || !Number.isInteger(sizeBytes) || sizeBytes < 1 || sizeBytes > MAX_VIDEO_BYTES) { res.status(400).json({ error: "filename, video MIME type and sizeBytes up to 10GB are required" }); return; }
   if (!await ownedLesson(lessonId, auth)) { res.status(404).json({ error: "Lesson not found" }); return; }
-  const upload = await createLessonUploadUrl();
+  const upload = await createLessonMultipartUpload(mimeType);
   const [asset] = await db.insert(lessonAssetsTable).values({ lessonId, kind: "video", storageKey: upload.objectPath, objectPath: upload.objectPath, filename, mimeType, sizeBytes }).returning();
-  res.status(201).json({ asset, uploadURL: upload.url });
+  res.status(201).json({ asset, uploadId: upload.uploadId, partSize: VIDEO_PART_BYTES });
+});
+router.post("/creator/lessons/:lessonId/assets/:assetId/part-url", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const lessonId = id(req.params.lessonId), assetId = id(req.params.assetId), auth = req as AuthenticatedRequest;
+  if (!lessonId || !assetId || !await ownedLesson(lessonId, auth)) { res.status(404).json({ error: "Asset not found" }); return; }
+  const [asset] = await db.select().from(lessonAssetsTable).where(and(eq(lessonAssetsTable.id, assetId), eq(lessonAssetsTable.lessonId, lessonId)));
+  if (!asset) { res.status(404).json({ error: "Asset not found" }); return; }
+  const { uploadId, partNumber } = req.body ?? {};
+  if (typeof uploadId !== "string" || uploadId.length < 1 || !Number.isInteger(partNumber) || partNumber < 1 || partNumber > 10_000) {
+    res.status(400).json({ error: "Valid uploadId and partNumber are required" }); return;
+  }
+  const uploadURL = await createLessonPartUploadUrl(asset.objectPath, uploadId, partNumber);
+  res.json({ uploadURL });
 });
 router.post("/creator/lessons/:lessonId/assets/:assetId/finalize", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const lessonId = id(req.params.lessonId), assetId = id(req.params.assetId), auth = req as AuthenticatedRequest;
   if (!lessonId || !assetId || !await ownedLesson(lessonId, auth)) { res.status(404).json({ error: "Asset not found" }); return; }
   const [asset] = await db.select().from(lessonAssetsTable).where(and(eq(lessonAssetsTable.id, assetId), eq(lessonAssetsTable.lessonId, lessonId)));
   if (!asset) { res.status(404).json({ error: "Asset not found" }); return; }
+  const { uploadId, parts } = req.body ?? {};
+  if (typeof uploadId !== "string" || !Array.isArray(parts) || parts.length < 1 ||
+      !parts.every((part) => Number.isInteger(part?.partNumber) && part.partNumber > 0 && typeof part?.eTag === "string" && part.eTag.length > 0)) {
+    res.status(400).json({ error: "Valid multipart completion data is required" }); return;
+  }
+  await completeLessonMultipartUpload(asset.objectPath, uploadId, parts);
   const [metadata] = await objectFile(asset.objectPath).getMetadata();
   const actualSize = Number(metadata.size ?? 0);
   if (actualSize < 1 || actualSize > MAX_VIDEO_BYTES || metadata.contentType && !metadata.contentType.startsWith("video/")) { res.status(422).json({ error: "Uploaded object is not a valid video" }); return; }
@@ -137,6 +163,15 @@ router.post("/creator/lessons/:lessonId/assets/:assetId/finalize", requireAuth, 
   });
   await Promise.all(previousAssets.map((item) => objectFile(item.objectPath).delete({ ignoreNotFound: true }).catch(() => undefined)));
   res.json(updated);
+});
+router.post("/creator/lessons/:lessonId/assets/:assetId/abort", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const lessonId = id(req.params.lessonId), assetId = id(req.params.assetId), auth = req as AuthenticatedRequest;
+  if (!lessonId || !assetId || !await ownedLesson(lessonId, auth)) { res.status(404).json({ error: "Asset not found" }); return; }
+  const [asset] = await db.select().from(lessonAssetsTable).where(and(eq(lessonAssetsTable.id, assetId), eq(lessonAssetsTable.lessonId, lessonId)));
+  if (!asset || typeof req.body?.uploadId !== "string") { res.status(404).json({ error: "Upload not found" }); return; }
+  await abortLessonMultipartUpload(asset.objectPath, req.body.uploadId).catch(() => undefined);
+  await db.delete(lessonAssetsTable).where(eq(lessonAssetsTable.id, assetId));
+  res.sendStatus(204);
 });
 router.get("/creator/lessons/:lessonId/assets", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const lessonId = id(req.params.lessonId); if (!lessonId || !await ownedLesson(lessonId, req as AuthenticatedRequest)) { res.status(404).json({ error: "Lesson not found" }); return; }

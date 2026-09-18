@@ -2,11 +2,15 @@ import { Storage } from "@google-cloud/storage";
 import { randomUUID } from "node:crypto";
 import { PassThrough } from "node:stream";
 import {
+  AbortMultipartUploadCommand,
+  CompleteMultipartUploadCommand,
+  CreateMultipartUploadCommand,
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
   PutObjectCommand,
   S3Client,
+  UploadPartCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -50,6 +54,52 @@ async function createUploadUrl(folder: string): Promise<{ url: string; objectPat
 }
 export const createLessonUploadUrl = () => createUploadUrl("lesson-videos");
 export const createCourseThumbnailUploadUrl = () => createUploadUrl("course-thumbnails");
+export async function createLessonMultipartUpload(contentType: string) {
+  const { client, bucket } = r2Config();
+  const name = `lesson-videos/${randomUUID()}`;
+  const result = await client.send(new CreateMultipartUploadCommand({
+    Bucket: bucket,
+    Key: name,
+    ContentType: contentType,
+  }));
+  if (!result.UploadId) throw new Error("R2 did not create a multipart upload");
+  return { uploadId: result.UploadId, objectPath: `r2://${bucket}/${name}` };
+}
+export async function createLessonPartUploadUrl(objectPath: string, uploadId: string, partNumber: number) {
+  const { client } = r2Config();
+  const { bucket, name } = parseR2(objectPath);
+  return getSignedUrl(client, new UploadPartCommand({
+    Bucket: bucket,
+    Key: name,
+    UploadId: uploadId,
+    PartNumber: partNumber,
+  }), { expiresIn: 15 * 60 });
+}
+export async function completeLessonMultipartUpload(
+  objectPath: string,
+  uploadId: string,
+  parts: Array<{ partNumber: number; eTag: string }>,
+) {
+  const { client } = r2Config();
+  const { bucket, name } = parseR2(objectPath);
+  await client.send(new CompleteMultipartUploadCommand({
+    Bucket: bucket,
+    Key: name,
+    UploadId: uploadId,
+    MultipartUpload: {
+      Parts: parts.map((part) => ({ PartNumber: part.partNumber, ETag: part.eTag })),
+    },
+  }));
+}
+export async function abortLessonMultipartUpload(objectPath: string, uploadId: string) {
+  const { client } = r2Config();
+  const { bucket, name } = parseR2(objectPath);
+  await client.send(new AbortMultipartUploadCommand({
+    Bucket: bucket,
+    Key: name,
+    UploadId: uploadId,
+  }));
+}
 export function objectFile(objectPath: string) {
   if (objectPath.startsWith("r2://")) {
     const { client } = r2Config();
