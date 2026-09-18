@@ -34,6 +34,7 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
       case 'student':
         return [
           { href: `/dashboard/student`, label: "Dashboard", icon: LayoutDashboard },
+          { href: `/courses`, label: "Browse Courses", icon: Globe },
           { href: `/dashboard/student/library`, label: "My Learning", icon: BookOpen },
           { href: `/dashboard/student/live-classes`, label: "Live Classes", icon: Video },
           { href: `/dashboard/student/products`, label: "Purchased Products", icon: Package },

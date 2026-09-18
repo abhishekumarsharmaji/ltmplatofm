@@ -5,7 +5,8 @@ import {
   usePurchasedProducts, 
   useStudentOrders, 
   useListWishlist,
-  useGetSession
+  useGetSession,
+  useMarketplaceCourses
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Package, ShoppingCart, Heart, Play, Trophy, CheckCircle2, Clock, Star } from "lucide-react";
@@ -44,6 +45,7 @@ export default function StudentDashboard() {
 function Overview({ name }: { name: string }) {
   const { data: library } = useStudentLibrary();
   const { data: products } = usePurchasedProducts();
+  const { data: availableCourses, isLoading: coursesLoading } = useMarketplaceCourses({});
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -95,6 +97,53 @@ function Overview({ name }: { name: string }) {
           </div>
         </div>
       </div>
+
+      <section className="space-y-4">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h3 className="text-2xl font-bold tracking-tight">Available Courses</h3>
+            <p className="text-sm text-muted-foreground">New courses published by our creators.</p>
+          </div>
+          <Link href="/courses">
+            <Button variant="outline">View All</Button>
+          </Link>
+        </div>
+
+        {coursesLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[0, 1, 2].map((item) => <div key={item} className="h-56 animate-pulse rounded-2xl border border-border bg-card" />)}
+          </div>
+        ) : !availableCourses?.length ? (
+          <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
+            <BookOpen className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" />
+            <p className="font-medium">No published courses yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">Creator courses will appear here after publishing.</p>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {availableCourses.slice(0, 6).map((course) => (
+              <Link key={course.id} href={`/courses/${course.id}`}>
+                <article className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-colors hover:border-primary/50">
+                  <div className="flex aspect-video items-center justify-center bg-muted">
+                    <BookOpen className="h-12 w-12 text-muted-foreground/30 transition-transform group-hover:scale-110" />
+                  </div>
+                  <div className="flex flex-1 flex-col p-5">
+                    <div className="mb-2 flex items-start justify-between gap-2">
+                      <h4 className="line-clamp-2 font-bold">{course.title}</h4>
+                      <Badge variant="secondary" className="shrink-0 capitalize">{course.level}</Badge>
+                    </div>
+                    <p className="line-clamp-2 text-sm text-muted-foreground">{course.description}</p>
+                    <div className="mt-auto flex items-center gap-1 border-t border-border pt-4 text-xs text-muted-foreground">
+                      <BookOpen className="h-3.5 w-3.5" />
+                      {course.lessons} lesson{course.lessons === 1 ? "" : "s"}
+                    </div>
+                  </div>
+                </article>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
