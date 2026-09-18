@@ -3,7 +3,7 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Input } from "@/components/ui/input";
 import { Link, useSearchParams } from "wouter";
 import { Search, BookOpen, AlertCircle } from "lucide-react";
-import { useMarketplaceCourses, useListCategories } from "@workspace/api-client-react";
+import { getMarketplaceCoursesQueryKey, useMarketplaceCourses, useListCategories } from "@workspace/api-client-react";
 
 export default function Courses() {
   // Filters live in the URL (?q=&category=) so the navbar search and shared links work.
@@ -45,7 +45,17 @@ export default function Courses() {
     ...(category ? { category } : {})
   };
   
-  const courseQuery = useMarketplaceCourses(queryParams);
+  const courseQuery = useMarketplaceCourses(queryParams, {
+    query: {
+      queryKey: getMarketplaceCoursesQueryKey(queryParams),
+      // Keep the current catalog visible while filters refetch and allow enough
+      // time for an autoscale API process to become ready.
+      placeholderData: (previous) => previous,
+      retry: 4,
+      retryDelay: (attempt) => Math.min(750 * 2 ** attempt, 3000),
+      refetchInterval: (query) => query.state.status === "error" ? 3000 : false,
+    },
+  });
   const categoriesQuery = useListCategories();
   
   const categories = categoriesQuery.data || [];
@@ -117,16 +127,17 @@ export default function Courses() {
               ))}
             </div>
           ) : courseQuery.isError ? (
-            <div className="text-center py-20 bg-red-50 rounded-lg border border-red-100 text-red-600">
-              <AlertCircle className="w-8 h-8 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2">Error loading courses</h3>
-              <p className="mb-5">The server may still be starting. Please try again.</p>
+            <div className="text-center py-16 bg-[#FAFAFA] rounded-lg border border-[#E5E5E5] text-[#394649]">
+              <AlertCircle className="w-8 h-8 mx-auto mb-4 text-[#9794AA]" />
+              <h3 className="text-xl font-bold mb-2 text-black">Reconnecting to courses</h3>
+              <p className="mb-5">The catalog will refresh automatically in a moment.</p>
               <button
                 type="button"
                 onClick={() => courseQuery.refetch()}
-                className="px-5 py-2 rounded-md bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors"
+                disabled={courseQuery.isFetching}
+                className="px-5 py-2 rounded-md bg-primary text-white text-sm font-semibold hover:bg-[#10A364] transition-colors disabled:opacity-60"
               >
-                Retry loading courses
+                {courseQuery.isFetching ? "Reconnecting..." : "Retry now"}
               </button>
             </div>
           ) : courses.length === 0 ? (
