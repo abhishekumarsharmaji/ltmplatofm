@@ -4,8 +4,10 @@ import { PublicLayout } from "@/components/layout/PublicLayout";
 import { useMarketplaceCourses, useListCategories } from "@workspace/api-client-react";
 import { Star, Clock, BookOpen, Share2 } from "lucide-react";
 import { useState, useMemo } from "react";
+import { useTranslations } from "@/lib/i18n";
 
 export default function Home() {
+  const t = useTranslations("home");
   const [activeCategory, setActiveCategory] = useState<string>("featured");
   
   const { data: courses = [], isLoading: isLoadingCourses } = useMarketplaceCourses();
@@ -18,9 +20,6 @@ export default function Home() {
     }
     const cat = categories.find(c => c.slug === activeCategory);
     if (!cat) return courses.slice(0, 8);
-    // Ideally we fetch with ?category=id, but since we already have all courses here we can filter if we had category info on Course.
-    // However, Course type doesn't have categoryId directly. The hook useMarketplaceCourses accepts { category: categoryId } but returns Course[].
-    // Let's just pass the sliced list for now since it's a demo frontend phase.
     return courses.slice(0, 8);
   }, [courses, categories, activeCategory]);
 
@@ -41,18 +40,42 @@ export default function Home() {
     .map(([name, count]) => ({ name, count }))
     .slice(0, 6);
 
-  // Fallback if no mentors exist yet
-  if (mentorsList.length === 0) {
-    mentorsList.push(
-      { name: "Sarah Connor", count: 4 },
-      { name: "James Gosling", count: 2 },
-      { name: "Ada Lovelace", count: 7 }
-    );
-  }
-
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
+
+  const compactFormatter = new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1
+  });
+
+  const isLoading = isLoadingCourses || isLoadingCategories;
+
+  // Pill 1: Mentors / Categories
+  let pill1Label = "";
+  let pill1Value = "";
+  let pill1Avatars: string[] = [];
+
+  if (uniqueMentors > 0) {
+    pill1Value = compactFormatter.format(uniqueMentors);
+    pill1Label = uniqueMentors === 1 ? t("hero.pills.mentor") as string : t("hero.pills.mentors") as string;
+    pill1Avatars = mentorsList.slice(0, 3).map(m => getInitials(m.name));
+  } else {
+    pill1Value = compactFormatter.format(totalCategories);
+    pill1Label = totalCategories === 1 ? t("hero.pills.category") as string : t("hero.pills.categories") as string;
+  }
+
+  // Pill 2: Lessons / Courses
+  let pill2Label = "";
+  let pill2Value = "";
+
+  if (totalLessons > 0) {
+    pill2Value = compactFormatter.format(totalLessons);
+    pill2Label = totalLessons === 1 ? t("hero.pills.lesson") as string : t("hero.pills.lessons") as string;
+  } else {
+    pill2Value = compactFormatter.format(totalCourses);
+    pill2Label = totalCourses === 1 ? t("hero.pills.course") as string : t("hero.pills.courses") as string;
+  }
 
   return (
     <PublicLayout>
@@ -66,18 +89,18 @@ export default function Home() {
               {/* Hero Left Content */}
               <div className="max-w-2xl relative z-10">
                 <h1 className="text-[52px] sm:text-[68px] leading-[1.1] text-black mb-8">
-                  <span className="font-light block">Master your Self,</span>
-                  <span className="font-light block">Anywhere</span>
-                  <span className="font-normal block">Anytime,</span>
+                  <span className="font-light block">{t("hero.title1")}</span>
+                  <span className="font-light block">{t("hero.title2")}</span>
+                  <span className="font-normal block">{t("hero.title3")}</span>
                 </h1>
                 <p className="text-[18px] text-[#4D4D4D] mb-10 max-w-[420px] leading-relaxed">
-                  Join thousands of learners and take your career to the next level with our expert-led courses.
+                  {t("hero.subtitle")}
                 </p>
                 <Link href="/courses">
                   <Button 
                     className="h-[54px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)]"
                   >
-                    Start Learning Now
+                    {t("hero.startLearning")}
                   </Button>
                 </Link>
               </div>
@@ -102,23 +125,49 @@ export default function Home() {
                 </div>
 
                 {/* Stat Pill 1 */}
-                <div className="absolute top-[15%] left-[25%] z-20 bg-white rounded-full py-3 px-6 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex items-center gap-3">
-                  <div className="flex flex-col">
-                    <span className="text-primary font-bold text-lg leading-tight">2k+</span>
-                    <span className="text-[#394649] text-sm">Student</span>
-                  </div>
-                  <div className="flex -space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center text-xs font-bold text-blue-800">A</div>
-                    <div className="w-8 h-8 rounded-full bg-purple-100 border-2 border-white flex items-center justify-center text-xs font-bold text-purple-800">B</div>
-                    <div className="w-8 h-8 rounded-full bg-yellow-100 border-2 border-white flex items-center justify-center text-xs font-bold text-yellow-800">C</div>
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center border-2 border-white text-white text-xs font-bold">+</div>
-                  </div>
+                <div className="absolute top-[5%] left-[5%] z-20 bg-white rounded-full py-3 px-6 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex items-center gap-3">
+                  {isLoading ? (
+                    <div className="flex items-center gap-3 w-[140px]">
+                      <div className="flex flex-col gap-1 w-12">
+                        <div className="h-5 bg-gray-100 animate-pulse rounded"></div>
+                        <div className="h-3 bg-gray-100 animate-pulse rounded"></div>
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-gray-100 animate-pulse ml-auto"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex flex-col">
+                        <span className="text-primary font-bold text-lg leading-tight">{pill1Value}</span>
+                        <span className="text-[#394649] text-sm">{pill1Label}</span>
+                      </div>
+                      {pill1Avatars.length > 0 && (
+                        <div className="flex -space-x-3">
+                          {pill1Avatars.map((initials, idx) => (
+                            <div key={idx} className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white
+                              ${idx === 0 ? 'bg-blue-500' : idx === 1 ? 'bg-purple-500' : 'bg-orange-500'}
+                            `}>
+                              {initials}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 {/* Stat Pill 2 */}
                 <div className="absolute bottom-[25%] right-[0%] z-20 bg-white rounded-[20px] py-4 px-6 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex flex-col min-w-[160px]">
-                  <span className="text-primary font-bold text-[28px] leading-tight">5.8k</span>
-                  <span className="text-[#9794AA] text-sm">Success Courses</span>
+                  {isLoading ? (
+                    <>
+                      <div className="h-8 bg-gray-100 animate-pulse rounded w-16 mb-2"></div>
+                      <div className="h-4 bg-gray-100 animate-pulse rounded w-24"></div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-primary font-bold text-[28px] leading-tight">{pill2Value}</span>
+                      <span className="text-[#9794AA] text-sm">{pill2Label}</span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -130,13 +179,13 @@ export default function Home() {
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
-                { label: "COURSES", value: totalCourses || 0 },
-                { label: "LESSONS", value: totalLessons || 0 },
-                { label: "MENTORS", value: uniqueMentors || 0 },
-                { label: "CATEGORIES", value: totalCategories || 0 }
+                { label: t("stats.courses"), value: totalCourses || 0 },
+                { label: t("stats.lessons"), value: totalLessons || 0 },
+                { label: t("stats.mentors"), value: uniqueMentors || 0 },
+                { label: t("stats.categories"), value: totalCategories || 0 }
               ].map((stat, i) => (
                 <div key={i} className="bg-[#515151] rounded-lg py-8 flex flex-col items-center justify-center shadow-sm">
-                  {isLoadingCourses || isLoadingCategories ? (
+                  {isLoading ? (
                     <div className="w-16 h-10 bg-white/20 animate-pulse rounded mb-2" />
                   ) : (
                     <span className="text-primary font-bold text-[36px] leading-none mb-1">{stat.value}+</span>
@@ -152,7 +201,7 @@ export default function Home() {
         <section className="py-24">
           <div className="container mx-auto px-4 lg:px-8">
             <h2 className="text-center text-[46px] font-bold text-black mb-12">
-              Explore Inspiring Online Courses
+              {t("courses.title")}
             </h2>
             
             {/* Category Chips */}
@@ -165,7 +214,7 @@ export default function Home() {
                     : "bg-white border-[#DADADA] text-[#394649] hover:border-primary"
                 }`}
               >
-                Featured
+                {t("courses.featured")}
               </button>
               {categories.map((cat) => (
                 <button
