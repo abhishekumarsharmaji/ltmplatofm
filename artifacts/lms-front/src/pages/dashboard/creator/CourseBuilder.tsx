@@ -70,19 +70,19 @@ export function CourseBuilder({
   const { product, course, modules } = builder;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-20">
-      <div className="flex items-center gap-4 border-b border-border pb-4">
-        <Link href={backRoute} className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-accent hover:text-accent-foreground text-muted-foreground transition-colors">
+    <div className="max-w-6xl mx-auto space-y-8 pb-20 pt-4">
+      <div className="flex items-center gap-4 border-b border-[#E5E5E5] pb-6">
+        <Link href={backRoute} className="inline-flex items-center justify-center h-10 w-10 rounded-md border border-[#E5E5E5] bg-white hover:bg-gray-50 text-[#394649] transition-colors shadow-sm">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight">{product.title}</h1>
-            <Badge variant="secondary" className={product.status === 'published' ? 'bg-success/10 text-success border-success/20' : 'bg-muted text-muted-foreground'}>
+          <div className="flex items-center gap-4">
+            <h1 className="text-[28px] md:text-[32px] font-bold text-black tracking-tight leading-tight">{product.title}</h1>
+            <Badge className={product.status === 'published' ? 'bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
               {product.status}
             </Badge>
           </div>
-          <p className="text-muted-foreground text-sm">{backLabel}</p>
+          <p className="text-[14px] text-[#4D4D4D]">{backLabel}</p>
         </div>
       </div>
 
@@ -111,11 +111,11 @@ export function CourseBuilder({
             onClick={() => setActiveTab("publish")}
             icon={CheckCircle2}
             label="Publish"
-            badge={readiness?.ready ? undefined : <AlertCircle className="w-4 h-4 text-warning" />}
+            badge={readiness?.ready ? undefined : <AlertCircle className="w-4 h-4 text-amber-500" />}
           />
         </div>
 
-        <div className="flex-1 bg-card border border-border rounded-xl p-6 shadow-sm min-h-[500px]">
+        <div className="flex-1 bg-white border border-[#E5E5E5] rounded-xl p-6 md:p-8 shadow-sm min-h-[500px]">
           {activeTab === "basics" && <BasicsTab productId={productId} product={product} course={course} />}
           {activeTab === "curriculum" && <CurriculumTab productId={productId} modules={modules || []} />}
           {activeTab === "live" && <LiveClassesTab productId={productId} role={role} />}
@@ -130,14 +130,14 @@ function TabButton({ active, onClick, icon: Icon, label, badge }: any) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+      className={`w-full flex items-center justify-between px-4 py-3 rounded-md text-[14px] font-medium transition-all ${
         active
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          ? "bg-[#E3F9EF] text-primary shadow-sm"
+          : "text-[#394649] hover:bg-gray-50 hover:text-primary"
       }`}
     >
       <div className="flex items-center gap-3">
-        <Icon className="w-4 h-4" />
+        <Icon className="w-[18px] h-[18px]" />
         {label}
       </div>
       {badge}
@@ -280,58 +280,58 @@ function BasicsTab({ productId, product, course }: { productId: number, product:
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300 pb-20">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold">Course Details</h2>
-          <p className="text-muted-foreground text-sm mt-1">Define your course identity and what students will learn.</p>
+          <h2 className="text-[24px] font-bold text-black">Course Details</h2>
+          <p className="text-[#4D4D4D] text-[14px] mt-1">Define your course identity and what students will learn.</p>
         </div>
-        <Button onClick={handleSave} disabled={updateBasics.isPending}>
+        <Button onClick={handleSave} disabled={updateBasics.isPending} className="h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
           {updateBasics.isPending ? "Saving..." : "Save Changes"}
         </Button>
       </div>
 
-      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-        <p className="font-medium text-foreground">Free enrollment</p>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <div className="rounded-lg border border-[#E5E5E5] bg-[#FAFAFA] p-5">
+        <p className="font-bold text-[14px] text-black">Free enrollment</p>
+        <p className="mt-1 text-[13px] text-[#4D4D4D]">
           Students can enroll in this course instantly. No price or payment is required.
         </p>
       </div>
 
       <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="title">Course Title</Label>
+          <Label htmlFor="title" className="text-[14px] font-bold text-[#394649]">Course Title</Label>
           <Input
             id="title"
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder="e.g. Advanced TypeScript Patterns"
-            className="text-lg font-medium h-12"
+            className="text-[16px] font-bold text-black h-12 border-[#E5E5E5] rounded-md"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="desc">Description</Label>
+          <Label htmlFor="desc" className="text-[14px] font-bold text-[#394649]">Description</Label>
           <Textarea
             id="desc"
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="What is this course about?"
-            className="min-h-[120px] resize-none"
+            className="min-h-[120px] resize-none text-[15px] border-[#E5E5E5] rounded-md text-black"
           />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <Label>Course Thumbnail</Label>
+            <Label className="text-[14px] font-bold text-[#394649]">Course Thumbnail</Label>
 
-            <div className="border-2 border-dashed border-border rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 bg-muted/20 relative overflow-hidden h-[180px]">
+            <div className="border-2 border-dashed border-[#E5E5E5] rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 bg-[#FAFAFA] relative overflow-hidden h-[200px]">
               {thumbnailUrl && !uploadProgress ? (
                 <>
-                  <img src={thumbnailUrl} alt="Thumbnail preview" className="absolute inset-0 w-full h-full object-cover opacity-50" />
-                  <div className="relative z-10 bg-background/90 backdrop-blur-sm p-3 rounded-lg border border-border shadow-sm">
-                    <p className="text-sm font-medium mb-2">Thumbnail is set</p>
-                    <div className="flex gap-2">
-                      <Label htmlFor="file-upload" className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors">
+                  <img src={thumbnailUrl} alt="Thumbnail preview" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+                  <div className="relative z-10 bg-white/90 backdrop-blur-sm p-4 rounded-lg border border-[#E5E5E5] shadow-sm">
+                    <p className="text-[13px] font-bold text-black mb-3">Thumbnail is set</p>
+                    <div className="flex justify-center">
+                      <Label htmlFor="file-upload" className="cursor-pointer bg-primary text-white hover:bg-[#10A364] h-9 px-5 inline-flex items-center justify-center rounded-md text-[13px] font-medium transition-colors shadow-sm">
                         Replace Image
                       </Label>
                     </div>
@@ -339,24 +339,24 @@ function BasicsTab({ productId, product, course }: { productId: number, product:
                 </>
               ) : uploadProgress !== null ? (
                 <div className="w-full max-w-[200px] space-y-2">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-[13px] text-[#4D4D4D] font-bold">
                     <span>Uploading...</span>
                     <span>{uploadProgress}%</span>
                   </div>
-                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                     <div className="h-full bg-primary transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
                   </div>
                 </div>
               ) : (
                 <>
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                  <div className="w-12 h-12 rounded-full bg-[#E3F9EF] flex items-center justify-center text-primary">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Upload thumbnail</p>
-                    <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WebP up to 10MB</p>
+                    <p className="text-[14px] font-bold text-black">Upload thumbnail</p>
+                    <p className="text-[12px] text-[#9794AA] mt-1">JPG, PNG, WebP up to 10MB</p>
                   </div>
-                  <Label htmlFor="file-upload" className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors mt-2">
+                  <Label htmlFor="file-upload" className="cursor-pointer bg-primary text-white hover:bg-[#10A364] h-9 px-5 inline-flex items-center justify-center rounded-md text-[13px] font-medium transition-colors mt-2 shadow-sm">
                     Select File
                   </Label>
                 </>
@@ -372,23 +372,24 @@ function BasicsTab({ productId, product, course }: { productId: number, product:
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="thumbnail" className="text-xs text-muted-foreground">Or provide an image URL</Label>
+              <Label htmlFor="thumbnail" className="text-[12px] text-[#9794AA]">Or provide an image URL</Label>
               <Input
                 id="thumbnail"
                 value={thumbnailUrl}
                 onChange={e => setThumbnailUrl(e.target.value)}
                 placeholder="https://example.com/image.jpg"
+                className="h-10 text-[14px] border-[#E5E5E5] rounded-md"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="level">Difficulty Level</Label>
+            <Label htmlFor="level" className="text-[14px] font-bold text-[#394649]">Difficulty Level</Label>
             <select
               id="level"
               value={level}
               onChange={e => setLevel(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex h-11 w-full rounded-md border border-[#E5E5E5] bg-white px-3 py-2 text-[15px] font-medium text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
             >
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
@@ -399,27 +400,27 @@ function BasicsTab({ productId, product, course }: { productId: number, product:
         </div>
 
         {/* Outcomes */}
-        <div className="space-y-4 pt-4 border-t border-border">
+        <div className="space-y-5 pt-6 border-t border-[#E5E5E5]">
           <div className="flex items-center justify-between">
-            <Label className="text-base font-semibold">What you'll learn (Outcomes)</Label>
-            <Button variant="outline" size="sm" onClick={addOutcome}><Plus className="w-4 h-4 mr-2" /> Add Outcome</Button>
+            <Label className="text-[16px] font-bold text-black">What you'll learn (Outcomes)</Label>
+            <Button variant="outline" size="sm" onClick={addOutcome} className="border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]"><Plus className="w-4 h-4 mr-2" /> Add Outcome</Button>
           </div>
           {outcomes.length === 0 ? (
-            <div className="text-sm text-muted-foreground p-4 bg-muted/30 rounded-lg border border-border text-center">
+            <div className="text-[14px] text-[#4D4D4D] p-5 bg-[#FAFAFA] rounded-lg border border-[#E5E5E5] text-center">
               No outcomes added yet. Add some to show students what they will achieve.
             </div>
           ) : (
             <div className="space-y-3">
               {outcomes.map((outcome, index) => (
-                <div key={index} className="flex gap-2 items-start">
-                  <div className="mt-2 text-muted-foreground"><CheckCircle2 className="w-4 h-4" /></div>
+                <div key={index} className="flex gap-3 items-center">
+                  <div className="text-primary"><CheckCircle2 className="w-5 h-5" /></div>
                   <Input
                     value={outcome}
                     onChange={(e) => updateOutcome(index, e.target.value)}
                     placeholder="e.g. Master React fundamentals"
-                    className="flex-1"
+                    className="flex-1 h-10 border-[#E5E5E5] text-[14px]"
                   />
-                  <Button variant="ghost" size="icon" onClick={() => removeOutcome(index)} className="text-destructive hover:text-destructive hover:bg-destructive/10"><Trash className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => removeOutcome(index)} className="text-[#E53E3E] hover:text-[#E53E3E] hover:bg-red-50 h-10 w-10"><Trash className="w-4 h-4" /></Button>
                 </div>
               ))}
             </div>
@@ -427,42 +428,46 @@ function BasicsTab({ productId, product, course }: { productId: number, product:
         </div>
 
         {/* FAQs */}
-        <div className="space-y-4 pt-4 border-t border-border">
+        <div className="space-y-5 pt-6 border-t border-[#E5E5E5]">
           <div className="flex items-center justify-between">
-            <Label className="text-base font-semibold">Frequently Asked Questions</Label>
-            <Button variant="outline" size="sm" onClick={addFaq}><Plus className="w-4 h-4 mr-2" /> Add FAQ</Button>
+            <Label className="text-[16px] font-bold text-black">Frequently Asked Questions</Label>
+            <Button variant="outline" size="sm" onClick={addFaq} className="border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]"><Plus className="w-4 h-4 mr-2" /> Add FAQ</Button>
           </div>
           {faqs.length === 0 ? (
-            <div className="text-sm text-muted-foreground p-4 bg-muted/30 rounded-lg border border-border text-center">
+            <div className="text-[14px] text-[#4D4D4D] p-5 bg-[#FAFAFA] rounded-lg border border-[#E5E5E5] text-center">
               No FAQs added yet.
             </div>
           ) : (
             <div className="space-y-4">
               {faqs.map((faq, index) => (
-                <div key={index} className="p-4 bg-muted/20 border border-border rounded-lg space-y-3 relative group">
+                <div key={index} className="p-5 bg-white border border-[#E5E5E5] rounded-lg shadow-sm space-y-4 relative group hover:shadow-md transition-shadow">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => removeFaq(index)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-[#E53E3E] hover:text-[#E53E3E] hover:bg-red-50 h-8 w-8"
                   >
                     <Trash className="w-4 h-4" />
                   </Button>
-                  <div className="pr-8">
-                    <Label className="text-xs text-muted-foreground">Question</Label>
-                    <Input
-                      value={faq.question}
-                      onChange={(e) => updateFaq(index, "question", e.target.value)}
-                      placeholder="e.g. Do I need prior experience?"
-                      className="mb-2"
-                    />
-                    <Label className="text-xs text-muted-foreground">Answer</Label>
-                    <Textarea
-                      value={faq.answer}
-                      onChange={(e) => updateFaq(index, "answer", e.target.value)}
-                      placeholder="e.g. No, this course starts from the absolute basics."
-                      className="resize-none h-20"
-                    />
+                  <div className="pr-8 space-y-4">
+                    <div>
+                      <Label className="text-[12px] font-bold text-[#9794AA] uppercase tracking-wider mb-2 block">Question</Label>
+                      <Input
+                        value={faq.question}
+                        onChange={(e) => updateFaq(index, "question", e.target.value)}
+                        placeholder="e.g. Do I need prior experience?"
+                        className="h-10 border-[#E5E5E5] font-bold text-[14px]"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[12px] font-bold text-[#9794AA] uppercase tracking-wider mb-2 block">Answer</Label>
+                      <Textarea
+                        value={faq.answer}
+                        onChange={(e) => updateFaq(index, "answer", e.target.value)}
+                        placeholder="e.g. No, this course starts from the absolute basics."
+                        className="resize-none min-h-[80px] border-[#E5E5E5] text-[14px]"
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -518,10 +523,10 @@ function CurriculumTab({ productId, modules }: { productId: number, modules: any
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold">Curriculum</h2>
-          <p className="text-muted-foreground text-sm mt-1">Organize your lessons into modules.</p>
+          <h2 className="text-[24px] font-bold text-black">Curriculum</h2>
+          <p className="text-[#4D4D4D] text-[14px] mt-1">Organize your lessons into modules.</p>
         </div>
-        <Button onClick={handleAddModule} disabled={createModule.isPending}>
+        <Button onClick={handleAddModule} disabled={createModule.isPending} className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]">
           <Plus className="w-4 h-4 mr-2" />
           Add Module
         </Button>
@@ -529,11 +534,11 @@ function CurriculumTab({ productId, modules }: { productId: number, modules: any
 
       <div className="space-y-4">
         {modules.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">
-            <ListVideo className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-            <h3 className="font-medium">No modules yet</h3>
-            <p className="text-sm text-muted-foreground mb-4">Start by adding a module to organize your lessons.</p>
-            <Button variant="outline" onClick={handleAddModule} disabled={createModule.isPending}>Add Module</Button>
+          <div className="text-center py-12 border-2 border-dashed border-[#E5E5E5] rounded-xl bg-[#FAFAFA]">
+            <ListVideo className="w-10 h-10 text-[#9794AA] mx-auto mb-3" />
+            <h3 className="font-bold text-[16px] text-black">No modules yet</h3>
+            <p className="text-[14px] text-[#4D4D4D] mb-6">Start by adding a module to organize your lessons.</p>
+            <Button variant="outline" onClick={handleAddModule} disabled={createModule.isPending} className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-10 px-6 rounded-md font-medium text-[14px]">Add Module</Button>
           </div>
         ) : (
           modules.map((mod: any, index: number) => (
@@ -610,14 +615,14 @@ function ModuleItem({ module, index, total, onMove, productId }: any) {
   };
 
   return (
-    <div className="border border-border rounded-xl bg-muted/20 overflow-hidden">
-      <div className="flex items-center justify-between p-3 bg-card border-b border-border group">
+    <div className="border border-[#E5E5E5] rounded-xl bg-[#FAFAFA] overflow-hidden">
+      <div className="flex items-center justify-between p-3 bg-white border-b border-[#E5E5E5] group">
         <div className="flex items-center gap-3 flex-1">
           <div className="flex flex-col">
-            <button aria-label={`Move ${module.title} up`} onClick={() => onMove(index, 'up')} disabled={index === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"><ChevronUp className="w-3 h-3" /></button>
-            <button aria-label={`Move ${module.title} down`} onClick={() => onMove(index, 'down')} disabled={index === total - 1} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"><ChevronDown className="w-3 h-3" /></button>
+            <button aria-label={`Move ${module.title} up`} onClick={() => onMove(index, 'up')} disabled={index === 0} className="p-0.5 text-[#9794AA] hover:text-black disabled:opacity-30"><ChevronUp className="w-4 h-4" /></button>
+            <button aria-label={`Move ${module.title} down`} onClick={() => onMove(index, 'down')} disabled={index === total - 1} className="p-0.5 text-[#9794AA] hover:text-black disabled:opacity-30"><ChevronDown className="w-4 h-4" /></button>
           </div>
-          <span className="text-sm font-semibold text-muted-foreground uppercase w-24">Module {index + 1}</span>
+          <span className="text-[12px] font-bold text-[#9794AA] uppercase tracking-wider w-24">Module {index + 1}</span>
           {isEditing ? (
             <Input
               value={title}
@@ -625,26 +630,26 @@ function ModuleItem({ module, index, total, onMove, productId }: any) {
               onBlur={saveTitle}
               onKeyDown={e => e.key === 'Enter' && saveTitle()}
               autoFocus
-              className="h-8 max-w-sm"
+              className="h-9 max-w-sm border-[#E5E5E5] text-[14px] font-bold text-black"
             />
           ) : (
-            <h3 className="font-bold flex-1 cursor-pointer hover:text-primary" onClick={() => setIsEditing(true)}>
+            <h3 className="font-bold text-[16px] text-black flex-1 cursor-pointer hover:text-primary transition-colors" onClick={() => setIsEditing(true)}>
               {module.title}
             </h3>
           )}
         </div>
         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button aria-label={`Edit ${module.title}`} variant="ghost" size="icon" onClick={() => setIsEditing(!isEditing)} className="h-8 w-8">
+          <Button aria-label={`Edit ${module.title}`} variant="ghost" size="icon" onClick={() => setIsEditing(!isEditing)} className="h-8 w-8 text-[#9794AA] hover:text-black">
             <Edit2 className="w-4 h-4" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button aria-label={`More actions for ${module.title}`} variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="w-4 h-4" /></Button>
+              <Button aria-label={`More actions for ${module.title}`} variant="ghost" size="icon" className="h-8 w-8 text-[#9794AA] hover:text-black"><MoreVertical className="w-4 h-4" /></Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleAddLesson}><Plus className="w-4 h-4 mr-2" /> Add Lesson</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleAddLesson} className="cursor-pointer font-medium text-[13px]"><Plus className="w-4 h-4 mr-2" /> Add Lesson</DropdownMenuItem>
               <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
+                className="text-[#E53E3E] focus:text-[#E53E3E] focus:bg-red-50 cursor-pointer font-medium text-[13px]"
                 onClick={() => {
                   if(confirm('Delete this module and all its lessons?')) {
                     deleteModule.mutate({ moduleId: module.id }, {
@@ -666,8 +671,8 @@ function ModuleItem({ module, index, total, onMove, productId }: any) {
       <div className="p-3 space-y-2">
         {(!module.lessons || module.lessons.length === 0) ? (
           <div className="text-center py-6">
-            <p className="text-sm text-muted-foreground mb-3">No lessons in this module.</p>
-            <Button variant="outline" size="sm" onClick={handleAddLesson} disabled={createLesson.isPending}>Add First Lesson</Button>
+            <p className="text-[14px] text-[#4D4D4D] mb-3">No lessons in this module.</p>
+            <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]" onClick={handleAddLesson} disabled={createLesson.isPending}>Add First Lesson</Button>
           </div>
         ) : (
           module.lessons.map((lesson: any, lIndex: number) => (

@@ -324,42 +324,42 @@ function AICourseForm({ creatorId, onSuccess }: { creatorId: number, onSuccess: 
   if (draft) {
     return (
       <div className="space-y-6 animate-in fade-in">
-        <div className="bg-brand/5 border border-brand/20 p-4 rounded-lg">
-          <div className="flex items-center gap-2 text-brand font-semibold mb-2">
-            <Sparkles className="w-4 h-4" />
+        <div className="bg-[#F1EEFC] border border-[#704FE6]/20 p-5 rounded-lg">
+          <div className="flex items-center gap-2 text-[#704FE6] font-bold mb-4">
+            <Sparkles className="w-5 h-5" />
             Review Generated Draft
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Title</Label>
-              <Input value={draft.title} onChange={e => setDraft({...draft, title: e.target.value})} className="font-bold border-brand/20 bg-card" />
+              <Label className="text-[12px] text-[#4D4D4D] font-bold uppercase tracking-wider mb-2 block">Title</Label>
+              <Input value={draft.title} onChange={e => setDraft({...draft, title: e.target.value})} className="font-bold border-[#704FE6]/20 bg-white h-11 text-[15px]" />
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Description</Label>
-              <Textarea value={draft.description} onChange={e => setDraft({...draft, description: e.target.value})} rows={3} className="border-brand/20 bg-card" />
+              <Label className="text-[12px] text-[#4D4D4D] font-bold uppercase tracking-wider mb-2 block">Description</Label>
+              <Textarea value={draft.description} onChange={e => setDraft({...draft, description: e.target.value})} rows={3} className="border-[#704FE6]/20 bg-white text-[14px] resize-none" />
             </div>
             
             <div>
-              <Label className="text-xs text-muted-foreground uppercase tracking-wider mb-2 block">Curriculum ({draft.sections?.length || 0} Modules)</Label>
-              <div className="space-y-3">
+              <Label className="text-[12px] text-[#4D4D4D] font-bold uppercase tracking-wider mb-3 block">Curriculum ({draft.sections?.length || 0} Modules)</Label>
+              <div className="space-y-4">
                 {draft.sections?.map((sec: any, i: number) => (
-                  <div key={i} className="border border-border bg-card rounded p-3">
+                  <div key={i} className="border border-[#704FE6]/20 bg-white rounded-lg p-4 shadow-sm">
                     <Input value={sec.title} onChange={e => {
                       const newSecs = [...draft.sections];
                       newSecs[i].title = e.target.value;
                       setDraft({...draft, sections: newSecs});
-                    }} className="font-semibold h-8 mb-2" />
+                    }} className="font-bold h-10 mb-3 text-[14px]" />
                     
-                    <div className="pl-4 border-l-2 border-muted space-y-2">
+                    <div className="pl-4 border-l-2 border-[#E5E5E5] space-y-2">
                       {sec.lessons?.map((les: any, j: number) => (
-                        <div key={j} className="flex items-center gap-2">
-                          <PlayCircle className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <div key={j} className="flex items-center gap-3">
+                          <PlayCircle className="w-4 h-4 text-[#9794AA] shrink-0" />
                           <Input value={les.title} onChange={e => {
                             const newSecs = [...draft.sections];
                             newSecs[i].lessons[j].title = e.target.value;
                             setDraft({...draft, sections: newSecs});
-                          }} className="h-7 text-sm" />
+                          }} className="h-9 text-[13px]" />
                         </div>
                       ))}
                     </div>
@@ -370,9 +370,9 @@ function AICourseForm({ creatorId, onSuccess }: { creatorId: number, onSuccess: 
           </div>
         </div>
         
-        <div className="flex gap-3 justify-end pt-2">
-          <Button variant="outline" onClick={() => setDraft(null)} disabled={isApplying}>Discard & Restart</Button>
-          <Button onClick={handleApply} disabled={isApplying} className="bg-brand hover:bg-brand/90 text-brand-foreground">
+        <div className="flex gap-4 justify-end pt-4">
+          <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-11 px-6 rounded-md font-medium text-[14px]" onClick={() => setDraft(null)} disabled={isApplying}>Discard & Restart</Button>
+          <Button onClick={handleApply} disabled={isApplying} className="h-11 px-6 bg-[#704FE6] hover:bg-[#5b3dcf] text-white font-medium rounded-md text-[14px] shadow-sm">
             {isApplying && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             Confirm & Build Course
           </Button>
@@ -382,21 +382,23 @@ function AICourseForm({ creatorId, onSuccess }: { creatorId: number, onSuccess: 
   }
 
   return (
-    <form onSubmit={handleGenerate} className="space-y-5">
+    <form onSubmit={handleGenerate} className="space-y-6">
       <div className="space-y-2">
-        <Label>Topic</Label>
-        <Input required value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Advanced System Design in Node.js" />
+        <Label className="text-[14px] font-bold text-[#394649]">Topic</Label>
+        <Input required value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Advanced System Design in Node.js" className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
       </div>
       
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label>Target Audience</Label>
-          <Input required value={audience} onChange={e => setAudience(e.target.value)} placeholder="e.g. Frontend Developers" />
+          <Label className="text-[14px] font-bold text-[#394649]">Target Audience</Label>
+          <Input required value={audience} onChange={e => setAudience(e.target.value)} placeholder="e.g. Frontend Developers" className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
         </div>
         <div className="space-y-2">
-          <Label>Level</Label>
+          <Label className="text-[14px] font-bold text-[#394649]">Level</Label>
           <Select value={level} onValueChange={setLevel}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-11 border-[#E5E5E5] rounded-md text-[14px]">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="beginner">Beginner</SelectItem>
               <SelectItem value="intermediate">Intermediate</SelectItem>
@@ -407,10 +409,10 @@ function AICourseForm({ creatorId, onSuccess }: { creatorId: number, onSuccess: 
         </div>
       </div>
 
-      <div className="space-y-4 pt-2">
+      <div className="space-y-5 pt-2">
         <div className="flex justify-between items-center">
-          <Label>Number of Modules</Label>
-          <span className="font-bold text-sm bg-muted px-2 py-1 rounded">{sectionCount[0]}</span>
+          <Label className="text-[14px] font-bold text-[#394649]">Number of Modules</Label>
+          <span className="font-bold text-[14px] bg-[#FAFAFA] border border-[#E5E5E5] px-3 py-1 rounded text-primary">{sectionCount[0]}</span>
         </div>
         <Slider 
           min={1} max={10} step={1} 
@@ -419,12 +421,12 @@ function AICourseForm({ creatorId, onSuccess }: { creatorId: number, onSuccess: 
         />
       </div>
 
-      <div className="pt-6">
-        <Button type="submit" disabled={generateOutline.isPending} className="w-full bg-brand hover:bg-brand/90 text-brand-foreground">
+      <div className="pt-8">
+        <Button type="submit" disabled={generateOutline.isPending} className="w-full h-12 bg-[#704FE6] hover:bg-[#5b3dcf] text-white font-medium rounded-md text-[15px] shadow-[0_4px_14px_rgba(112,79,230,0.25)]">
           {generateOutline.isPending ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Analyzing Topic...</>
+            <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Analyzing Topic...</>
           ) : (
-            <><Sparkles className="w-4 h-4 mr-2" /> Generate Curriculum Draft</>
+            <><Sparkles className="w-5 h-5 mr-2" /> Generate Curriculum Draft</>
           )}
         </Button>
       </div>
