@@ -279,12 +279,12 @@ export default function CourseDetail() {
                   
                   <div className="space-y-4 mb-6 pt-4 border-t border-[#E5E5E5]">
                     <div className="flex items-center justify-between text-[16px]">
-                      <span className="text-[#394649]">Subtotal</span>
+                      <span className="text-[#394649]">Course price</span>
                       <span className="text-black font-medium">Free</span>
                     </div>
                     <div className="flex items-center justify-between text-[16px]">
-                      <span className="text-[#394649]">Shipping</span>
-                      <span className="text-black font-medium">—</span>
+                      <span className="text-[#394649]">Access</span>
+                      <span className="text-black font-medium">Lifetime</span>
                     </div>
                     <div className="flex items-center justify-between pt-4 border-t border-[#E5E5E5]">
                       <span className="text-black font-bold text-[18px]">Total</span>

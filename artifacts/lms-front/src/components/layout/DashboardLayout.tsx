@@ -15,21 +15,16 @@ import {
   Heart,
   BarChart,
   Globe,
-  Sun,
-  Moon,
-  Laptop,
   Video,
   Menu,
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getGetSessionQueryKey, logout, useGetSession } from "@workspace/api-client-react";
-import { useTheme } from "@/components/theme-provider";
 
 export function DashboardLayout({ children, role }: { children: ReactNode, role: 'student' | 'creator' | 'admin' }) {
   const [location, setLocation] = useLocation();
   const queryClient = useQueryClient();
-  const { theme, setTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const getLinks = () => {
@@ -114,14 +109,6 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
         </div>
 
         <div className="p-4 border-t border-[#E5E5E5] space-y-2 bg-white">
-          <div className="flex items-center justify-between px-3 py-2">
-            <span className="text-[13px] text-[#9794AA] font-medium">Theme</span>
-            <div className="flex items-center gap-1 border border-[#E5E5E5] rounded-md p-1 bg-gray-50">
-              <button onClick={() => setTheme("light")} className={`p-1.5 rounded ${theme === 'light' ? 'bg-white shadow-sm text-primary' : 'text-[#9794AA]'}`}><Sun className="w-4 h-4" /></button>
-              <button onClick={() => setTheme("dark")} className={`p-1.5 rounded ${theme === 'dark' ? 'bg-white shadow-sm text-primary' : 'text-[#9794AA]'}`}><Moon className="w-4 h-4" /></button>
-              <button onClick={() => setTheme("system")} className={`p-1.5 rounded ${theme === 'system' ? 'bg-white shadow-sm text-primary' : 'text-[#9794AA]'}`}><Laptop className="w-4 h-4" /></button>
-            </div>
-          </div>
           <button
             type="button"
             onClick={async () => {
