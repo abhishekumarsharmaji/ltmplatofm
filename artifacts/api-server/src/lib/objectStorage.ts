@@ -1,15 +1,40 @@
 import { Storage } from "@google-cloud/storage";
 import { randomUUID } from "node:crypto";
+import { PassThrough } from "node:stream";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const REPLIT_SIDECAR_ENDPOINT = "http://127.0.0.1:1106";
 const storage = new Storage({
   credentials: { audience: "replit", subject_token_type: "access_token", token_url: `${REPLIT_SIDECAR_ENDPOINT}/token`, type: "external_account", credential_source: { url: `${REPLIT_SIDECAR_ENDPOINT}/credential`, format: { type: "json", subject_token_field_name: "access_token" } }, universe_domain: "googleapis.com" },
   projectId: "",
 });
-function privatePath() {
-  const value = process.env.PRIVATE_OBJECT_DIR;
-  if (!value) throw new Error("PRIVATE_OBJECT_DIR is not configured");
-  return value.replace(/\/$/, "");
+let r2Client: S3Client | undefined;
+function r2Config() {
+  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+  const endpoint = process.env.R2_ENDPOINT;
+  const bucket = process.env.R2_BUCKET_NAME;
+  if (!accessKeyId || !secretAccessKey || !endpoint || !bucket) {
+    throw new Error("Cloudflare R2 is not configured");
+  }
+  r2Client ??= new S3Client({
+    region: "auto",
+    endpoint: endpoint.replace(/\/$/, ""),
+    credentials: { accessKeyId, secretAccessKey },
+  });
+  return { client: r2Client, bucket };
+}
+function parseR2(path: string) {
+  const match = /^r2:\/\/([^/]+)\/(.+)$/.exec(path);
+  if (!match) throw new Error("Invalid R2 object path");
+  return { bucket: match[1], name: match[2] };
 }
 function parse(path: string) {
   const clean = path.replace(/^\/+/, "");
@@ -18,29 +43,47 @@ function parse(path: string) {
   return { bucket: clean.slice(0, slash), name: clean.slice(slash + 1) };
 }
 async function createUploadUrl(folder: string): Promise<{ url: string; objectPath: string }> {
-  const objectPath = `${privatePath()}/${folder}/${randomUUID()}`;
-  const { bucket, name } = parse(objectPath);
-  const response = await fetch(`${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      bucket_name: bucket,
-      object_name: name,
-      method: "PUT",
-      expires_at: new Date(Date.now() + 15 * 60_000).toISOString(),
-    }),
-    signal: AbortSignal.timeout(30_000),
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to prepare upload URL (${response.status})`);
-  }
-  const { signed_url: url } = await response.json() as { signed_url?: string };
-  if (!url) throw new Error("Storage service did not return an upload URL");
-  return { url, objectPath: `/${objectPath}` };
+  const { client, bucket } = r2Config();
+  const name = `${folder}/${randomUUID()}`;
+  const url = await getSignedUrl(client, new PutObjectCommand({ Bucket: bucket, Key: name }), { expiresIn: 15 * 60 });
+  return { url, objectPath: `r2://${bucket}/${name}` };
 }
 export const createLessonUploadUrl = () => createUploadUrl("lesson-videos");
 export const createCourseThumbnailUploadUrl = () => createUploadUrl("course-thumbnails");
 export function objectFile(objectPath: string) {
+  if (objectPath.startsWith("r2://")) {
+    const { client } = r2Config();
+    const { bucket, name } = parseR2(objectPath);
+    return {
+      async getMetadata() {
+        const result = await client.send(new HeadObjectCommand({ Bucket: bucket, Key: name }));
+        return [{
+          size: result.ContentLength,
+          contentType: result.ContentType,
+        }];
+      },
+      createReadStream(options?: { start?: number; end?: number }) {
+        const output = new PassThrough();
+        const range = options?.start !== undefined
+          ? `bytes=${options.start}-${options.end ?? ""}`
+          : undefined;
+        void client.send(new GetObjectCommand({ Bucket: bucket, Key: name, Range: range }))
+          .then(({ Body }) => {
+            if (!Body || typeof (Body as NodeJS.ReadableStream).pipe !== "function") {
+              output.destroy(new Error("R2 did not return a readable object stream"));
+              return;
+            }
+            (Body as NodeJS.ReadableStream).pipe(output);
+          })
+          .catch((error: unknown) => output.destroy(error instanceof Error ? error : new Error("R2 download failed")));
+        return output;
+      },
+      async delete(_options?: { ignoreNotFound?: boolean }) {
+        await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: name }));
+        return [{}];
+      },
+    };
+  }
   const { bucket, name } = parse(objectPath);
   return storage.bucket(bucket).file(name);
 }
