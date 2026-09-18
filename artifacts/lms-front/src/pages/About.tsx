@@ -11,12 +11,8 @@ export default function About() {
   const courses = coursesQuery.data ?? [];
   const statsLoading = coursesQuery.isLoading || categoriesQuery.isLoading;
 
+  // Only stats with a real, non-zero value are shown.
   const stats = [
-    {
-      value: new Set(courses.map((c) => c.creatorName).filter(Boolean)).size,
-      label: "Mentors",
-      caption: "Creators teaching on the platform today.",
-    },
     {
       value: courses.length,
       label: "Courses",
@@ -32,7 +28,7 @@ export default function About() {
       label: "Categories",
       caption: "Topics to explore, from business to design.",
     },
-  ];
+  ].filter((stat) => stat.value > 0);
 
   return (
     <PublicLayout>
@@ -78,9 +74,9 @@ export default function About() {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 my-20" data-testid="about-stats">
+            <div className="flex flex-wrap justify-center gap-6 my-20" data-testid="about-stats">
               {stats.map((stat) => (
-                <div key={stat.label} className="bg-[#515151] rounded-lg py-10 px-4 flex flex-col items-center justify-center shadow-sm text-center">
+                <div key={stat.label} className="w-[calc(50%-12px)] lg:w-[220px] bg-[#515151] rounded-lg py-10 px-4 flex flex-col items-center justify-center shadow-sm text-center">
                   {statsLoading ? (
                     <div className="h-[46px] w-16 rounded bg-white/10 animate-pulse mb-2" aria-hidden="true" />
                   ) : (

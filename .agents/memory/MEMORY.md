@@ -1,4 +1,6 @@
 - [Replit App Storage signing](app-storage-signing.md) — generate presigned object URLs through the Replit sidecar, not GCS service-account signing.
 - [White-label live classrooms](white-label-live-classrooms.md) — keep scheduling and classroom UX inside the LMS; use LiveKit only as the real-time media engine.
-- [GitHub mirror](github-mirror.md) — workspace was a shallow clone (GitHub rejects shallow pushes; unshallow from the template repo); sync via GITHUB_TOKEN + GIT_ASKPASS, push branch by name.
+- [GitHub mirror](github-mirror.md) — auto-sync workflow pushes master→main with GITHUB_TOKEN via GIT_ASKPASS; never unshallow-skip or put the token in files.
 - [Lesson video protection](lesson-video-protection.md) — keep 307→presigned R2; Fetch-Metadata gate + short TTL + SecureVideoPlayer are deterrents, not auth; dev test video is HEVC (undecodable in headless Chromium).
+- [Design system](design-system.md) — app is pinned light-only (hex-heavy pages); real data only; pricing pages and /checkout are known static/unavailable.
+- [Visual verification](visual-verification.md) — screenshot logged-in pages with scripts/dev-screenshot.mjs + curl cookie jar (strip #HttpOnly_); dev accounts live in dev DB only.
