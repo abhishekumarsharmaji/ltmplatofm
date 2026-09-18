@@ -61,13 +61,15 @@ commit_pending_changes() {
 }
 
 push_if_behind() {
-  local head remote_head
+  local head remote_head source
   head="$(git rev-parse HEAD)"
   remote_head="$(git rev-parse -q --verify "refs/remotes/$REMOTE/$BRANCH" 2>/dev/null || true)"
   if [ "$head" = "$remote_head" ]; then
     return 0
   fi
-  if output="$(git push -q --force-with-lease "$REMOTE" "HEAD:refs/heads/$BRANCH" 2>&1)"; then
+  # Push the branch by name so git updates refs/remotes/<remote>/<branch>, which the lease check relies on.
+  source="$(git symbolic-ref -q --short HEAD || echo HEAD)"
+  if output="$(git push -q --force-with-lease "$REMOTE" "$source:refs/heads/$BRANCH" 2>&1)"; then
     log "pushed ${head:0:7} to $REMOTE/$BRANCH"
   else
     log "push failed: $output"
