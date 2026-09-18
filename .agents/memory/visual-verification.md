@@ -11,4 +11,5 @@ description: How to screenshot dashboard/authenticated pages in this workspace (
 
 **How to apply:**
 - Create the jar with `curl -c jar -X POST .../api/auth/sign-up` (or `/login`). Dev-only accounts `dev-student@example.com`, `dev-creator@example.com`, `dev-admin@example.com` (password `DevPass123!`) exist in the **development** DB only; roles were promoted with a direct SQL update because sign-up always creates students.
+- Pass router paths such as `/dashboard/student/products` to the screenshot script without the artifact prefix. The local port-80 proxy already maps the web artifact to `/`; adding `/lms-front` captures the app's 404 route.
 - Widths 1440 and 390 cover desktop and mobile; page height is capped at 2600px per capture.
