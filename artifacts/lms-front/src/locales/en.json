@@ -1,6 +1,6 @@
 {
   "navbar": {
-    "brand": "LMS Platform",
+    "brand": "CoreSkils",
     "features": "Features",
     "pricing": "Pricing",
     "creators": "Creators",
@@ -83,7 +83,7 @@
   },
   "auth": {
     "login": {
-      "title": "Welcome to LMS Platform",
+      "title": "Welcome to CoreSkils",
       "subtitle": "Kindly fill in your details below to continue",
       "emailLabel": "Email Address",
       "emailPlaceholder": "Enter your email",

@@ -76,9 +76,9 @@ export function Navbar() {
         {/* Left: Logo & Search */}
         <div className="flex items-center gap-8 flex-1">
           <Link href="/" className="flex items-center space-x-2 shrink-0">
-            <img src="/brand/logo-mark.svg" alt="LMS Platform" className="w-8 h-8" />
+            <img src={`${import.meta.env.BASE_URL}brand/logo-mark.svg`} alt="CoreSkils" className="w-8 h-8" />
             <span className="font-bold text-xl text-black tracking-tight hidden sm:block">
-              LMS Platform
+              CoreSkils
             </span>
           </Link>
           

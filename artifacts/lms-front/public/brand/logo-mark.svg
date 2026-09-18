@@ -1,7 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" role="img" aria-label="LMS platform mark">
-  <circle cx="128" cy="128" r="82" stroke="#0F172A" stroke-width="18"/>
-  <path d="M79 166C97 119 129 94 177 80" stroke="#0F172A" stroke-width="18" stroke-linecap="round"/>
-  <circle cx="180" cy="76" r="14" fill="#0F172A"/>
-  <circle cx="76" cy="180" r="14" fill="#0F172A"/>
-  <circle cx="128" cy="128" r="16" fill="#0F172A"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" role="img" aria-label="CoreSkils mark">
+  <rect x="40" y="40" width="80" height="80" rx="20" fill="#10A364" />
+  <rect x="40" y="136" width="80" height="80" rx="20" fill="#10A364" />
+  <rect x="136" y="136" width="80" height="80" rx="20" fill="#10A364" />
+  <path d="M 136 120 L 216 40 M 160 40 L 216 40 L 216 96" stroke="#10A364" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" />
 </svg>

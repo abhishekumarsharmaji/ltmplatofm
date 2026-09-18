@@ -80,8 +80,8 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
       <aside className={`w-64 border-r border-[#E5E5E5] bg-white flex flex-col fixed inset-y-0 z-40 md:z-10 transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="h-20 flex items-center justify-between px-6 border-b border-[#E5E5E5]">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/brand/logo-mark.svg" alt="LMS Platform" className="w-8 h-8" />
-            <span className="font-bold text-[18px] text-black tracking-tight">LMS {role === 'creator' ? 'Creator' : role === 'admin' ? 'Admin' : 'Student'}</span>
+            <img src={`${import.meta.env.BASE_URL}brand/logo-mark.svg`} alt="CoreSkils" className="w-8 h-8" />
+            <span className="font-bold text-[18px] text-black tracking-tight">CoreSkils {role === 'creator' ? 'Creator' : role === 'admin' ? 'Admin' : 'Student'}</span>
           </Link>
           <button className="md:hidden text-[#394649]" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
             <X className="w-5 h-5" />

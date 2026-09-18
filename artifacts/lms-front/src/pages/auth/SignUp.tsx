@@ -44,9 +44,9 @@ export default function SignUp() {
         {/* Top Logo */}
         <div className="absolute top-10 left-8 sm:left-16 lg:left-24 xl:left-32">
           <Link href="/" className="flex items-center space-x-2 shrink-0">
-            <img src="/brand/logo-mark.svg" alt="LMS Platform" className="w-8 h-8" />
+            <img src={`${import.meta.env.BASE_URL}brand/logo-mark.svg`} alt="CoreSkils" className="w-8 h-8" />
             <span className="font-bold text-xl text-black tracking-tight">
-              LMS Platform
+              CoreSkils
             </span>
           </Link>
         </div>

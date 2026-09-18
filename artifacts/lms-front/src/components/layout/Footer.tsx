@@ -5,7 +5,7 @@ const linkClass = "text-[#9794AA] hover:text-white text-[14px] transition-colors
 
 export function Footer() {
   const t = useTranslations("footer");
-  const platformName = "LMS Platform";
+  const platformName = "CoreSkils";
   const currentYear = new Date().getFullYear();
 
   // Only real destinations: every link below resolves to an existing route.
@@ -44,7 +44,7 @@ export function Footer() {
           {/* Brand & Description */}
           <div className="md:col-span-4 lg:col-span-5 flex flex-col">
             <Link href="/" className="flex items-center gap-3 mb-6 w-fit">
-              <img src={`${import.meta.env.BASE_URL}brand/logo-mark.svg`} alt="" className="w-9 h-9 invert" />
+              <img src={`${import.meta.env.BASE_URL}brand/logo-mark.svg`} alt="" className="w-9 h-9 brightness-0 invert" />
               <span className="text-[32px] font-bold tracking-tight">{platformName}</span>
             </Link>
             <p className="text-[#9794AA] text-[15px] leading-relaxed max-w-sm">
