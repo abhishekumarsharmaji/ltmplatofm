@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -20,11 +21,12 @@ import {
   Video
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { logout, useGetSession } from "@workspace/api-client-react";
+import { getGetSessionQueryKey, logout, useGetSession } from "@workspace/api-client-react";
 import { useTheme } from "@/components/theme-provider";
 
 export function DashboardLayout({ children, role }: { children: ReactNode, role: 'student' | 'creator' | 'admin' }) {
   const [location, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
 
   const getLinks = () => {
@@ -110,6 +112,7 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
             type="button"
             onClick={async () => {
               await logout();
+              queryClient.setQueryData(getGetSessionQueryKey(), { authenticated: false, user: null });
               setLocation("/auth/login");
             }}
             className="w-full text-left"

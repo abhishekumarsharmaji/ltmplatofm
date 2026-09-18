@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signUp } from "@workspace/api-client-react";
+import { getGetSessionQueryKey, signUp } from "@workspace/api-client-react";
 
 export default function SignUp() {
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -16,11 +18,12 @@ export default function SignUp() {
     setError("");
     const form = new FormData(e.currentTarget);
     try {
-      await signUp({
+      const session = await signUp({
         name: String(form.get("name") ?? ""),
         email: String(form.get("email") ?? ""),
         password: String(form.get("password") ?? ""),
       });
+      queryClient.setQueryData(getGetSessionQueryKey(), session);
       setLocation("/dashboard/student");
     } catch {
       setError("We could not create this account. Try another email.");
