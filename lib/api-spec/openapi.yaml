@@ -577,7 +577,7 @@ paths:
       operationId: getDigitalProductReadiness
       security: [{ cookieAuth: [] }]
       parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
-      responses: { "200": { description: Readiness, content: { application/json: { schema: { type: object } } } } }
+      responses: { "200": { description: Readiness, content: { application/json: { schema: { $ref: "#/components/schemas/DigitalProductReadiness" } } } } }
   /creator/digital-products/{productId}/unpublish:
     post:
       operationId: unpublishDigitalProduct
@@ -970,6 +970,20 @@ components:
         productId: { type: integer }
         acquired: { type: boolean }
         alreadyOwned: { type: boolean }
+    DigitalProductReadiness:
+      type: object
+      required: [ready, checks]
+      properties:
+        ready: { type: boolean }
+        checks:
+          type: object
+          required: [title, description, subtype, files, free]
+          properties:
+            title: { type: boolean }
+            description: { type: boolean }
+            subtype: { type: boolean }
+            files: { type: boolean }
+            free: { type: boolean }
     AdminCourseInput:
       type: object
       required: [creatorId, title, description, priceMinor, currency]

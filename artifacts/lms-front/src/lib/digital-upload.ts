@@ -19,7 +19,7 @@ export async function uploadDigitalFile({
 
   try {
     const totalParts = Math.ceil(file.size / partSize);
-    const uploadedParts = [];
+    const uploadedParts: Array<{ partNumber: number; eTag: string }> = [];
     let uploadedBytes = 0;
 
     for (let partNumber = 1; partNumber <= totalParts; partNumber++) {
@@ -33,11 +33,15 @@ export async function uploadDigitalFile({
 
       await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.open('PUT', partUrlRes.url);
+        xhr.open('PUT', partUrlRes.uploadURL);
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
-             const eTag = xhr.getResponseHeader('ETag') || '';
-             uploadedParts.push({ partNumber, eTag: eTag.replace(/"/g, '') });
+             const eTag = xhr.getResponseHeader('ETag');
+             if (!eTag) {
+               reject(new Error(`Upload part ${partNumber} completed without an ETag`));
+               return;
+             }
+             uploadedParts.push({ partNumber, eTag });
              uploadedBytes += chunk.size;
              if (onProgress) onProgress(Math.round((uploadedBytes / file.size) * 100));
              resolve(null);

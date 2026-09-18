@@ -1755,8 +1755,15 @@ export const GetDigitalProductReadinessParams = zod.object({
 })
 
 export const GetDigitalProductReadinessResponse = zod.object({
-
-}).passthrough()
+  "ready": zod.boolean(),
+  "checks": zod.object({
+  "title": zod.boolean(),
+  "description": zod.boolean(),
+  "subtype": zod.boolean(),
+  "files": zod.boolean(),
+  "free": zod.boolean()
+})
+})
 
 
 export const UnpublishDigitalProductParams = zod.object({

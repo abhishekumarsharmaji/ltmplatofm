@@ -50,9 +50,9 @@ import type {
   DigitalFileUploadResponse,
   DigitalProduct,
   DigitalProductDetail,
+  DigitalProductReadiness,
   EnrollmentResult,
   FinalizeCourseThumbnailUpload200,
-  GetDigitalProductReadiness200,
   HealthStatus,
   ImageFinalizeInput,
   ImageUploadInput,
@@ -6257,9 +6257,9 @@ export const getGetDigitalProductReadinessUrl = (productId: number,) => {
   return `/api/creator/digital-products/${productId}/readiness`
 }
 
-export const getDigitalProductReadiness = async (productId: number, options?: Parameters<typeof customFetch>[1]): Promise<GetDigitalProductReadiness200> => {
+export const getDigitalProductReadiness = async (productId: number, options?: Parameters<typeof customFetch>[1]): Promise<DigitalProductReadiness> => {
 
-  return customFetch<GetDigitalProductReadiness200>(getGetDigitalProductReadinessUrl(productId),
+  return customFetch<DigitalProductReadiness>(getGetDigitalProductReadinessUrl(productId),
   {
     ...options,
     method: 'GET'

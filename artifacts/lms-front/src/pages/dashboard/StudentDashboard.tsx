@@ -3,7 +3,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useParams, Link } from "wouter";
 import { 
   useStudentLibrary, 
-  usePurchasedProducts, 
+  useListStudentDigitalProducts, 
   useStudentOrders, 
   useListWishlist,
   useGetSession,
@@ -14,6 +14,7 @@ import { AlertCircle, BookOpen, Package, ShoppingCart, Heart, Play, Trophy, Chec
 import { Badge } from "@/components/ui/badge";
 import { UpgradeCreatorButton } from "@/components/auth/UpgradeCreatorButton";
 import { CourseThumbnail } from "@/components/courses/CourseThumbnail";
+import { StudentProductView } from "@/components/dashboard/digital-products/StudentProductView";
 
 const StudentLiveClasses = lazy(() => import("@/components/dashboard/StudentLiveClasses").then((module) => ({ default: module.StudentLiveClasses })));
 const LiveClassroom = lazy(() => import("@/components/dashboard/LiveClassroom").then((module) => ({ default: module.LiveClassroom })));
@@ -49,11 +50,21 @@ export default function StudentDashboard() {
     );
   }
   
+  if (section === "products" && id) {
+    return (
+      <DashboardLayout role="student">
+        <Suspense fallback={<SectionLoading />}>
+          <StudentProductView productId={Number(id)} />
+        </Suspense>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout role="student">
       {section === "overview" && <Overview name={session?.user?.name || "Student"} />}
       {section === "library" && <Library />}
-      {section === "products" && <Products />}
+      {section === "products" && !id && <Products />}
       {section === "live-classes" && !id && <Suspense fallback={<SectionLoading />}><StudentLiveClasses /></Suspense>}
       {section === "orders" && <Orders />}
       {section === "wishlist" && <Wishlist />}
@@ -63,7 +74,7 @@ export default function StudentDashboard() {
 
 function Overview({ name }: { name: string }) {
   const { data: library } = useStudentLibrary();
-  const { data: products } = usePurchasedProducts();
+  const { data: products } = useListStudentDigitalProducts();
   const { data: availableCourses, isLoading: coursesLoading } = useMarketplaceCourses({});
 
   return (
@@ -97,7 +108,7 @@ function Overview({ name }: { name: string }) {
                   <Package className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-white font-medium">Products Purchased</p>
+                  <p className="text-white font-medium">Products Acquired</p>
                   <p className="text-[#A3A3A3] text-[13px]">All time</p>
                 </div>
               </div>
@@ -231,13 +242,13 @@ function Library() {
 }
 
 function Products() {
-  const { data: products, isLoading, isError, isFetching, refetch } = usePurchasedProducts();
+  const { data: products, isLoading, isError, isFetching, refetch } = useListStudentDigitalProducts();
   
   return (
     <div className="space-y-8 max-w-6xl mx-auto pt-4">
       <div>
-        <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Purchased Products</h2>
-        <p className="text-[16px] text-[#4D4D4D] mt-1">Digital products you have access to.</p>
+        <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Digital Products</h2>
+        <p className="text-[16px] text-[#4D4D4D] mt-1">Digital products you have acquired.</p>
       </div>
       
       {isLoading ? (
@@ -255,19 +266,22 @@ function Products() {
         <div className="text-center py-20 bg-white border border-[#E5E5E5] rounded-xl">
           <Package className="w-12 h-12 text-[#9794AA] mx-auto mb-4" />
           <h3 className="font-bold text-[18px] text-black mb-2">No products yet</h3>
-          <p className="text-[14px] text-[#4D4D4D] mb-6">You haven't purchased any digital products.</p>
+          <p className="text-[14px] text-[#4D4D4D] mb-6">You haven't acquired any digital products.</p>
           <Link href="/products" className="h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)] inline-flex items-center justify-center">Explore Products</Link>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((item: any, i) => (
              <div key={i} className="bg-white border border-[#E5E5E5] rounded-lg p-5 shadow-sm flex flex-col group hover:shadow-md transition-shadow">
-                <div className="aspect-[4/3] bg-gradient-to-br from-green-50 to-blue-50 rounded-md mb-4 flex items-center justify-center">
+                <div className="aspect-[4/3] bg-[#FAFAFA] border border-[#E5E5E5] rounded-md mb-4 flex items-center justify-center relative overflow-hidden">
                   <Package className="w-10 h-10 text-primary/40 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="absolute top-2 left-2 bg-white/80 backdrop-blur-md border border-[#E5E5E5] text-black font-bold uppercase text-[9px] tracking-wider px-2 py-0.5 rounded">
+                    {item.subtype || item.type || "Product"}
+                  </span>
                 </div>
-                 <h3 className="font-bold text-[16px] text-black leading-snug line-clamp-2">{item.product?.title ?? item.title}</h3>
+                 <h3 className="font-bold text-[16px] text-black leading-snug line-clamp-2">{item.title}</h3>
                 <div className="mt-4 pt-4 border-t border-[#E5E5E5]">
-                   <Link href={`/products/${item.product?.id ?? item.productId ?? item.id}`} className="w-full border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-10 rounded-md font-medium text-[14px] inline-flex items-center justify-center">Download Access</Link>
+                   <Link href={`/dashboard/student/products/${item.id}`} className="w-full border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-10 rounded-md font-medium text-[14px] inline-flex items-center justify-center">View Content</Link>
                 </div>
              </div>
           ))}

@@ -232,12 +232,12 @@ export function CreatorProductManage({ productId }: { productId: number }) {
             {readiness ? (
               <ul className="space-y-3">
                 <li className="flex gap-3 text-[14px]">
-                  {readiness.hasTitle ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0" /> : <AlertCircle className="w-5 h-5 text-warning shrink-0" />}
-                  <span className={readiness.hasTitle ? "text-[#394649]" : "text-black font-medium"}>Title and description</span>
+                  {readiness.checks.title && readiness.checks.description ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0" /> : <AlertCircle className="w-5 h-5 text-warning shrink-0" />}
+                  <span className={readiness.checks.title && readiness.checks.description ? "text-[#394649]" : "text-black font-medium"}>Title and description</span>
                 </li>
                 <li className="flex gap-3 text-[14px]">
-                  {readiness.hasFiles ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0" /> : <AlertCircle className="w-5 h-5 text-warning shrink-0" />}
-                  <span className={readiness.hasFiles ? "text-[#394649]" : "text-black font-medium"}>At least 1 file uploaded</span>
+                  {readiness.checks.files ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0" /> : <AlertCircle className="w-5 h-5 text-warning shrink-0" />}
+                  <span className={readiness.checks.files ? "text-[#394649]" : "text-black font-medium"}>At least 1 file uploaded</span>
                 </li>
               </ul>
             ) : (
@@ -247,7 +247,7 @@ export function CreatorProductManage({ productId }: { productId: number }) {
               </div>
             )}
             
-            {readiness?.isReady && product.status !== "published" && (
+            {readiness?.ready && product.status !== "published" && (
               <div className="mt-6 p-4 bg-[#E3F9EF] rounded-lg text-primary text-[13px] font-medium flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                 This product is ready to be published to the marketplace!

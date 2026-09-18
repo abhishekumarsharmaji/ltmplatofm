@@ -10,11 +10,11 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Package, DollarSign, Users, TrendingUp, BarChart3, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProductFormDialog } from "@/components/dashboard/ProductFormDialog";
-import { PublishProductButton } from "@/components/dashboard/PublishProductButton";
 import { CourseBuilder } from "./creator/CourseBuilder";
 import { CreatorLiveClassesStandalone } from "@/components/dashboard/LiveClassesStandalone";
 import { LiveClassroom } from "@/components/dashboard/LiveClassroom";
 import { CourseThumbnail } from "@/components/courses/CourseThumbnail";
+import { CreatorProductManage } from "@/components/dashboard/digital-products/CreatorProductManage";
 
 export default function CreatorDashboard() {
   const params = useParams();
@@ -24,6 +24,14 @@ export default function CreatorDashboard() {
   
   if (section === "courses" && id && action === "builder") {
     return <CourseBuilder productId={Number(id)} />;
+  }
+
+  if (section === "products" && id && action === "manage") {
+    return (
+      <DashboardLayout role="creator">
+        <CreatorProductManage productId={Number(id)} />
+      </DashboardLayout>
+    );
   }
 
   if (section === "live-classes" && id && action === "classroom") {
@@ -38,7 +46,7 @@ export default function CreatorDashboard() {
     <DashboardLayout role="creator">
       {section === "overview" && <Overview />}
       {section === "courses" && !id && <Courses />}
-      {section === "products" && <Products />}
+      {section === "products" && !id && <Products />}
       {section === "live-classes" && !id && <CreatorLiveClassesStandalone />}
       {section === "sales" && <Sales />}
     </DashboardLayout>
@@ -62,7 +70,7 @@ function Overview() {
         priceMinor: 0,
         currency: "usd"
       }
-    }, {
+    } as any, {
       onSuccess: (prod) => {
         setLocation(`/dashboard/creator/courses/${prod.id}/builder`);
       }
@@ -175,7 +183,7 @@ function Courses() {
         priceMinor: 0,
         currency: "usd"
       }
-    }, {
+    } as any, {
       onSuccess: (prod) => {
         setLocation(`/dashboard/creator/courses/${prod.id}/builder`);
       }
@@ -212,7 +220,7 @@ function Courses() {
                    <CourseThumbnail src={course.thumbnailUrl} title={course.title} className="transition-transform duration-500 group-hover:scale-105" />
                 </div>
                 <h3 className="font-bold text-[16px] text-black line-clamp-1">{course.title}</h3>
-                <p className="text-[14px] text-primary font-bold mt-1">${(course.priceMinor / 100).toFixed(2)}</p>
+                <p className="text-[14px] text-primary font-bold mt-1">Free</p>
                 <div className="mt-4 pt-4 border-t border-[#E5E5E5] flex justify-between items-center">
                   <Badge className={course.status === 'published' ? 'bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
                     {course.status}
@@ -236,7 +244,7 @@ function Products() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Digital Products</h2>
-          <p className="text-[16px] text-[#4D4D4D] mt-1">Manage your downloadable content.</p>
+          <p className="text-[16px] text-[#4D4D4D] mt-1">Manage your downloadable free content.</p>
         </div>
         <ProductFormDialog type="digital">
           <Button className="h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
@@ -264,8 +272,7 @@ function Products() {
               <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
                 <tr>
                   <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Title</th>
-                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Type</th>
-                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Price</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Subtype</th>
                   <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Status</th>
                   <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Actions</th>
                 </tr>
@@ -274,20 +281,14 @@ function Products() {
                 {products.map((item: any) => (
                   <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                     <td className="p-4 font-bold text-[14px] text-black">{item.title}</td>
-                    <td className="p-4"><Badge className="bg-gray-100 text-[#4D4D4D] hover:bg-gray-100 border-none shadow-none uppercase text-[10px] font-bold">{item.type}</Badge></td>
-                    <td className="p-4 font-medium text-[14px]">${(item.priceMinor / 100).toFixed(2)} {item.currency}</td>
+                    <td className="p-4"><Badge className="bg-gray-100 text-[#4D4D4D] hover:bg-gray-100 border-none shadow-none uppercase text-[10px] font-bold">{item.subtype || item.type}</Badge></td>
                     <td className="p-4">
                       <Badge className={item.status === 'published' ? 'bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
                         {item.status}
                       </Badge>
                     </td>
                     <td className="p-4 text-right">
-                    <div className="flex gap-2 justify-end">
-                      <ProductFormDialog type="digital" product={item}>
-                        <Button className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium">Edit</Button>
-                      </ProductFormDialog>
-                      <PublishProductButton id={item.id} status={item.status} />
-                    </div>
+                      <Link href={`/dashboard/creator/products/${item.id}/manage`} className="h-[36px] px-4 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[13px] inline-flex items-center justify-center">Manage</Link>
                     </td>
                   </tr>
                 ))}

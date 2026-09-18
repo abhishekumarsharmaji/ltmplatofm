@@ -398,6 +398,19 @@ export interface DigitalAcquisition {
   alreadyOwned: boolean;
 }
 
+export type DigitalProductReadinessChecks = {
+  title: boolean;
+  description: boolean;
+  subtype: boolean;
+  files: boolean;
+  free: boolean;
+};
+
+export interface DigitalProductReadiness {
+  ready: boolean;
+  checks: DigitalProductReadinessChecks;
+}
+
 export interface AdminCourseInput {
   creatorId: number;
   /** @minLength 2 */
@@ -746,8 +759,6 @@ courseId: number;
 export type ListDigitalProductsParams = {
 q?: string;
 };
-
-export type GetDigitalProductReadiness200 = { [key: string]: unknown };
 
 export type RequestDigitalFilePartUrl200 = {
   uploadURL: string;
