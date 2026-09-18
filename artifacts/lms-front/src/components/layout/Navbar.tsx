@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTranslations } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
-import { Globe2, LayoutDashboard, LogOut, Search, Menu, X } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, X } from "lucide-react";
 import { getGetSessionQueryKey, logout, useGetSession } from "@workspace/api-client-react";
 
 export function Navbar() {
@@ -22,7 +20,6 @@ export function Navbar() {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const user = session?.authenticated ? session.user : null;
@@ -41,29 +38,21 @@ export function Navbar() {
     setLocation("/");
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      setLocation(`/courses?q=${encodeURIComponent(searchQuery.trim())}`);
-      setIsMobileMenuOpen(false);
-    }
-  };
-
   const NavLinks = ({ onClick }: { onClick?: () => void }) => (
     <>
-      <Link href="/" onClick={onClick} className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors block py-2 lg:py-0">
+      <Link href="/" onClick={onClick} className="block py-3 text-[16px] font-semibold text-[#394649] transition-colors hover:text-primary lg:py-0">
         {t("home")}
       </Link>
-      <Link href="/courses" onClick={onClick} className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors block py-2 lg:py-0">
+      <Link href="/courses" onClick={onClick} className="block py-3 text-[16px] font-semibold text-[#394649] transition-colors hover:text-primary lg:py-0">
         {t("courses")}
       </Link>
-      <Link href="/platform-pricing" onClick={onClick} className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors block py-2 lg:py-0">
+      <Link href="/platform-pricing" onClick={onClick} className="block py-3 text-[16px] font-semibold text-[#394649] transition-colors hover:text-primary lg:py-0">
         {t("pricing")}
       </Link>
-      <Link href="/creators" onClick={onClick} className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors block py-2 lg:py-0">
+      <Link href="/creators" onClick={onClick} className="block py-3 text-[16px] font-semibold text-[#394649] transition-colors hover:text-primary lg:py-0">
         {t("creators")}
       </Link>
-      <Link href="/about" onClick={onClick} className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors block py-2 lg:py-0">
+      <Link href="/about" onClick={onClick} className="block py-3 text-[16px] font-semibold text-[#394649] transition-colors hover:text-primary lg:py-0">
         {t("about")}
       </Link>
     </>
@@ -73,40 +62,23 @@ export function Navbar() {
     <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-100">
       <div className="container mx-auto flex h-20 items-center justify-between px-4 lg:px-8">
         
-        {/* Left: Logo & Search */}
-        <div className="flex items-center gap-8 flex-1">
+        {/* Brand */}
+        <div className="flex items-center">
           <Link href="/" className="flex items-center space-x-2 shrink-0">
             <img src={`${import.meta.env.BASE_URL}brand/logo-mark.svg`} alt="CoreSkils" className="w-8 h-8" />
             <span className="font-bold text-xl text-black tracking-tight hidden sm:block">
               CoreSkils
             </span>
           </Link>
-          
-          <form onSubmit={handleSearch} className="hidden md:flex items-center relative w-full max-w-sm">
-            <Input 
-              aria-label={t("searchPlaceholder")}
-              placeholder={t("searchPlaceholder")}
-              className="h-11 pl-5 pr-12 rounded-full border-[#E5E5E5] bg-white text-sm focus-visible:ring-1 focus-visible:ring-primary/50 placeholder:text-[#9794AA]"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button 
-              type="submit" 
-              aria-label="Search"
-              className="absolute right-1.5 w-8 h-8 sm:w-9 sm:h-9 bg-primary rounded-full flex items-center justify-center text-white hover:bg-[#10A364] transition-colors"
-            >
-              <Search className="w-4 h-4" />
-            </button>
-          </form>
         </div>
 
         {/* Center/Right Links - Desktop */}
-        <div className="hidden lg:flex items-center space-x-8">
+        <div className="hidden items-center space-x-9 lg:flex">
           <NavLinks />
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center space-x-4 ml-8 shrink-0">
+        <div className="ml-6 flex shrink-0 items-center space-x-4 lg:ml-8">
           {isPending ? (
             <div className="h-9 w-24 rounded-full bg-muted animate-pulse" aria-hidden="true" />
           ) : user ? (
@@ -147,10 +119,10 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/auth/login" className="hidden lg:block text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors">
+              <Link href="/auth/login" className="hidden text-[16px] font-semibold text-[#394649] transition-colors hover:text-primary lg:block">
                 {t("login")}
               </Link>
-              <Link href="/auth/sign-up" data-testid="link-start-free" className="hidden sm:inline-flex h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md shadow-[0_10px_24px_rgba(21,207,116,0.35)] transition-all items-center justify-center">
+              <Link href="/auth/sign-up" data-testid="link-start-free" className="hidden h-12 items-center justify-center rounded-md bg-primary px-8 text-[16px] font-semibold text-white shadow-[0_10px_24px_rgba(21,207,116,0.35)] transition-all hover:bg-[#10A364] sm:inline-flex">
                   {t("join")}
               </Link>
             </>
@@ -171,32 +143,15 @@ export function Navbar() {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-gray-100 bg-white p-4 space-y-4 shadow-lg absolute w-full left-0">
-          <form onSubmit={handleSearch} className="flex items-center relative w-full md:hidden">
-            <Input 
-              aria-label={t("searchPlaceholder")}
-              placeholder={t("searchPlaceholder")}
-              className="h-12 pl-5 pr-12 rounded-full border-[#E5E5E5] bg-white text-sm"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button 
-              type="submit" 
-              aria-label="Search"
-              className="absolute right-2 w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-          </form>
-          
-          <div className="flex flex-col pt-2 pb-4">
+          <div className="flex flex-col pb-4">
             <NavLinks onClick={() => setIsMobileMenuOpen(false)} />
             {!user && (
               <>
                 <div className="h-px bg-gray-100 w-full my-2"></div>
-                <Link href="/auth/login" className="text-[14px] font-medium text-[#4D4D4D]" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link href="/auth/login" className="py-3 text-[16px] font-semibold text-[#394649]" onClick={() => setIsMobileMenuOpen(false)}>
                   {t("login")}
                 </Link>
-                <Link href="/auth/sign-up" onClick={() => setIsMobileMenuOpen(false)} className="w-full h-11 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md shadow-[0_10px_24px_rgba(21,207,116,0.35)] inline-flex items-center justify-center">
+                <Link href="/auth/sign-up" onClick={() => setIsMobileMenuOpen(false)} className="inline-flex h-12 w-full items-center justify-center rounded-md bg-primary text-[16px] font-semibold text-white shadow-[0_10px_24px_rgba(21,207,116,0.35)] hover:bg-[#10A364]">
                     {t("join")}
                 </Link>
               </>
