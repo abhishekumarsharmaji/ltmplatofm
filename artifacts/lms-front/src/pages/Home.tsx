@@ -46,38 +46,7 @@ export default function Home() {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
-  const compactFormatter = new Intl.NumberFormat("en-US", {
-    notation: "compact",
-    maximumFractionDigits: 1
-  });
-
   const isLoading = isLoadingCourses || isLoadingCategories;
-
-  // Pill 1: Mentors / Categories
-  let pill1Label = "";
-  let pill1Value = "";
-  let pill1Avatars: string[] = [];
-
-  if (uniqueMentors > 0) {
-    pill1Value = compactFormatter.format(uniqueMentors);
-    pill1Label = uniqueMentors === 1 ? t("hero.pills.mentor") as string : t("hero.pills.mentors") as string;
-    pill1Avatars = mentorsList.slice(0, 3).map(m => getInitials(m.name));
-  } else {
-    pill1Value = compactFormatter.format(totalCategories);
-    pill1Label = totalCategories === 1 ? t("hero.pills.category") as string : t("hero.pills.categories") as string;
-  }
-
-  // Pill 2: Lessons / Courses
-  let pill2Label = "";
-  let pill2Value = "";
-
-  if (totalLessons > 0) {
-    pill2Value = compactFormatter.format(totalLessons);
-    pill2Label = totalLessons === 1 ? t("hero.pills.lesson") as string : t("hero.pills.lessons") as string;
-  } else {
-    pill2Value = compactFormatter.format(totalCourses);
-    pill2Label = totalCourses === 1 ? t("hero.pills.course") as string : t("hero.pills.courses") as string;
-  }
 
   return (
     <PublicLayout>
@@ -129,51 +98,6 @@ export default function Home() {
                   />
                 </div>
 
-                {/* Stat Pill 1 */}
-                <div className="absolute top-[12%] left-[-6%] z-20 bg-white rounded-full py-3 px-6 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex items-center gap-3">
-                  {isLoading ? (
-                    <div className="flex items-center gap-3 w-[140px]">
-                      <div className="flex flex-col gap-1 w-12">
-                        <div className="h-5 bg-gray-100 animate-pulse rounded"></div>
-                        <div className="h-3 bg-gray-100 animate-pulse rounded"></div>
-                      </div>
-                      <div className="w-8 h-8 rounded-full bg-gray-100 animate-pulse ml-auto"></div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex flex-col">
-                        <span className="text-primary font-bold text-lg leading-tight">{pill1Value}</span>
-                        <span className="text-[#394649] text-sm">{pill1Label}</span>
-                      </div>
-                      {pill1Avatars.length > 0 && (
-                        <div className="flex -space-x-3">
-                          {pill1Avatars.map((initials, idx) => (
-                            <div key={idx} className={`w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white
-                              ${idx === 0 ? 'bg-blue-500' : idx === 1 ? 'bg-purple-500' : 'bg-orange-500'}
-                            `}>
-                              {initials}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* Stat Pill 2 */}
-                <div className="absolute bottom-[14%] right-[-2%] z-20 bg-white rounded-[20px] py-4 px-6 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex flex-col min-w-[160px]">
-                  {isLoading ? (
-                    <>
-                      <div className="h-8 bg-gray-100 animate-pulse rounded w-16 mb-2"></div>
-                      <div className="h-4 bg-gray-100 animate-pulse rounded w-24"></div>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-primary font-bold text-[28px] leading-tight">{pill2Value}</span>
-                      <span className="text-[#9794AA] text-sm">{pill2Label}</span>
-                    </>
-                  )}
-                </div>
               </div>
             </div>
           </div>
