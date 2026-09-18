@@ -64,38 +64,37 @@ function Overview() {
   const { data: session } = useGetSession();
   
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Platform Administration</h2>
-        <p className="text-muted-foreground mt-1">Manage global settings, users, and infrastructure.</p>
+        <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Platform Administration</h2>
+        <p className="text-[16px] text-[#4D4D4D] mt-1">Manage global settings, users, and infrastructure.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-card border border-border p-6 rounded-2xl shadow-sm hover:border-primary/50 transition-colors group cursor-pointer">
-          <div className="w-12 h-12 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+        <div className="bg-white border border-[#E5E5E5] p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow group cursor-pointer">
+          <div className="w-12 h-12 bg-[#EAEFF8] text-[#224EA1] rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
             <Users className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-bold mb-2">User Management</h3>
-          <p className="text-sm text-muted-foreground mb-4">View and manage all students and creators on the platform.</p>
+          <h3 className="text-[18px] font-bold text-black mb-2">User Management</h3>
+          <p className="text-[14px] text-[#4D4D4D] mb-4">View and manage all students and creators on the platform.</p>
         </div>
 
-        <div className="bg-card border border-border p-6 rounded-2xl shadow-sm hover:border-primary/50 transition-colors group cursor-pointer">
-          <div className="w-12 h-12 bg-purple-500/10 text-purple-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+        <div className="bg-white border border-[#E5E5E5] p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow group cursor-pointer">
+          <div className="w-12 h-12 bg-[#F1EEFC] text-[#704FE6] rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
             <BookOpen className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-bold mb-2">Content Moderation</h3>
-          <p className="text-sm text-muted-foreground mb-4">Review published courses and digital products.</p>
+          <h3 className="text-[18px] font-bold text-black mb-2">Content Moderation</h3>
+          <p className="text-[14px] text-[#4D4D4D] mb-4">Review published courses and digital products.</p>
         </div>
 
-        <div className="bg-card border border-border p-6 rounded-2xl shadow-sm hover:border-primary/50 transition-colors group cursor-pointer">
-          <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+        <div className="bg-white border border-[#E5E5E5] p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow group cursor-pointer">
+          <div className="w-12 h-12 bg-[#E3F9EF] text-primary rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
             <Settings className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-bold mb-2">Platform Settings</h3>
-          <p className="text-sm text-muted-foreground mb-4">Configure global settings, payments, and integrations.</p>
+          <h3 className="text-[18px] font-bold text-black mb-2">Platform Settings</h3>
+          <p className="text-[14px] text-[#4D4D4D] mb-4">Configure global settings, payments, and integrations.</p>
         </div>
       </div>
-
     </div>
   );
 }
@@ -104,33 +103,33 @@ function UsersList() {
   const { data: users, isLoading } = useAdminUsers();
   
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">All Users</h2>
-        <p className="text-muted-foreground mt-1">Manage all accounts across the platform.</p>
+        <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">All Users</h2>
+        <p className="text-[16px] text-[#4D4D4D] mt-1">Manage all accounts across the platform.</p>
       </div>
       
       {isLoading ? (
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
           <table className="w-full text-left">
-            <thead className="bg-muted/50 border-b border-border">
+            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
               <tr>
-                <th className="p-4 font-medium text-muted-foreground">ID</th>
-                <th className="p-4 font-medium text-muted-foreground">Name</th>
-                <th className="p-4 font-medium text-muted-foreground">Email</th>
-                <th className="p-4 font-medium text-muted-foreground">Role</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">ID</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Name</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Email</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Role</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[#E5E5E5]">
               {users?.map((user: any) => (
-                <tr key={user.id} className="hover:bg-muted/30">
-                  <td className="p-4 text-sm text-muted-foreground">{user.id}</td>
-                  <td className="p-4 font-medium">{user.name}</td>
-                  <td className="p-4 text-sm">{user.email}</td>
+                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="p-4 text-[14px] text-[#4D4D4D]">{user.id}</td>
+                  <td className="p-4 font-bold text-[14px] text-black">{user.name}</td>
+                  <td className="p-4 text-[14px] text-[#4D4D4D]">{user.email}</td>
                   <td className="p-4">
-                    <Badge variant="outline" className="capitalize">{user.role}</Badge>
+                    <Badge className="bg-gray-100 text-[#394649] hover:bg-gray-100 border-none shadow-none uppercase text-[10px] font-bold">{user.role}</Badge>
                   </td>
                 </tr>
               ))}
@@ -146,31 +145,31 @@ function CreatorsList() {
   const { data: creators, isLoading } = useAdminCreators();
   
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Creators</h2>
-        <p className="text-muted-foreground mt-1">Manage educators and content creators.</p>
+        <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Creators</h2>
+        <p className="text-[16px] text-[#4D4D4D] mt-1">Manage educators and content creators.</p>
       </div>
       
       {isLoading ? (
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
           <table className="w-full text-left">
-            <thead className="bg-muted/50 border-b border-border">
+            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
               <tr>
-                <th className="p-4 font-medium text-muted-foreground">Name</th>
-                <th className="p-4 font-medium text-muted-foreground">Email</th>
-                <th className="p-4 font-medium text-muted-foreground">Status</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Name</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Email</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[#E5E5E5]">
               {creators?.map((creator: any) => (
-                <tr key={creator.id} className="hover:bg-muted/30">
-                  <td className="p-4 font-medium">{creator.name}</td>
-                  <td className="p-4 text-sm text-muted-foreground">{creator.email}</td>
+                <tr key={creator.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="p-4 font-bold text-[14px] text-black">{creator.name}</td>
+                  <td className="p-4 text-[14px] text-[#4D4D4D]">{creator.email}</td>
                   <td className="p-4">
-                    <Badge variant="secondary" className="bg-success/10 text-success">Active</Badge>
+                    <Badge className="bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium">Active</Badge>
                   </td>
                 </tr>
               ))}
@@ -187,33 +186,33 @@ function ProductsList() {
   const { data: products, isLoading } = useAdminProducts();
   
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">All Products</h2>
-        <p className="text-muted-foreground mt-1">Monitor all digital products.</p>
+        <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">All Products</h2>
+        <p className="text-[16px] text-[#4D4D4D] mt-1">Monitor all digital products.</p>
       </div>
       
       {isLoading ? (
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
           <table className="w-full text-left">
-            <thead className="bg-muted/50 border-b border-border">
+            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
               <tr>
-                <th className="p-4 font-medium text-muted-foreground">Title</th>
-                <th className="p-4 font-medium text-muted-foreground">Type</th>
-                <th className="p-4 font-medium text-muted-foreground">Price</th>
-                <th className="p-4 font-medium text-muted-foreground">Status</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Title</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Type</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Price</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[#E5E5E5]">
               {products?.map((item: any) => (
-                <tr key={item.id} className="hover:bg-muted/30">
-                  <td className="p-4 font-medium">{item.title}</td>
-                  <td className="p-4"><Badge variant="outline" className="uppercase text-[10px]">{item.type}</Badge></td>
-                  <td className="p-4 font-medium">${(item.priceMinor / 100).toFixed(2)} {item.currency}</td>
+                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="p-4 font-bold text-[14px] text-black">{item.title}</td>
+                  <td className="p-4"><Badge className="bg-gray-100 text-[#394649] hover:bg-gray-100 border-none shadow-none uppercase text-[10px] font-bold">{item.type}</Badge></td>
+                  <td className="p-4 font-bold text-[14px]">${(item.priceMinor / 100).toFixed(2)} {item.currency}</td>
                   <td className="p-4">
-                    <Badge variant="secondary" className={item.status === 'published' ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}>
+                    <Badge className={item.status === 'published' ? 'bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
                       {item.status}
                     </Badge>
                   </td>
@@ -231,30 +230,30 @@ function OrdersList() {
   const { data: orders, isLoading } = useAdminOrders();
   
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Global Orders</h2>
-        <p className="text-muted-foreground mt-1">View all transactions across the platform.</p>
+        <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Global Orders</h2>
+        <p className="text-[16px] text-[#4D4D4D] mt-1">View all transactions across the platform.</p>
       </div>
       
       {isLoading ? (
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
           <table className="w-full text-left">
-            <thead className="bg-muted/50 border-b border-border">
+            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
               <tr>
-                <th className="p-4 font-medium text-muted-foreground">ID</th>
-                <th className="p-4 font-medium text-muted-foreground">Item</th>
-                <th className="p-4 font-medium text-muted-foreground">Amount</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">ID</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Item</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Amount</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[#E5E5E5]">
               {orders?.map((order: any, i) => (
-                <tr key={i} className="hover:bg-muted/30">
-                  <td className="p-4 text-sm text-muted-foreground">{order.id}</td>
-                  <td className="p-4 font-medium">{order.title}</td>
-                  <td className="p-4 font-bold text-emerald-500">${((order.priceMinor ?? 0) / 100).toFixed(2)}</td>
+                <tr key={i} className="hover:bg-gray-50 transition-colors">
+                  <td className="p-4 text-[14px] text-[#4D4D4D]">{order.id}</td>
+                  <td className="p-4 font-bold text-[14px] text-black">{order.title}</td>
+                  <td className="p-4 font-bold text-[14px] text-primary">${((order.priceMinor ?? 0) / 100).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -269,39 +268,42 @@ function CategoriesList() {
   const { data: categories, isLoading } = useListCategories();
   
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Categories</h2>
-          <p className="text-muted-foreground mt-1">Manage global product categories.</p>
+          <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Categories</h2>
+          <p className="text-[16px] text-[#4D4D4D] mt-1">Manage global product categories.</p>
         </div>
         <CategoryFormDialog>
-          <Button><Plus className="w-4 h-4 mr-2" /> Add Category</Button>
+          <Button className="h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
+            <Plus className="w-4 h-4 mr-2" /> 
+            Add Category
+          </Button>
         </CategoryFormDialog>
       </div>
       
       {isLoading ? (
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
           <table className="w-full text-left">
-            <thead className="bg-muted/50 border-b border-border">
+            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
               <tr>
-                <th className="p-4 font-medium text-muted-foreground">Name</th>
-                <th className="p-4 font-medium text-muted-foreground">Slug</th>
-                <th className="p-4 font-medium text-muted-foreground">Description</th>
-                <th className="p-4 font-medium text-muted-foreground text-right">Actions</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Name</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Slug</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Description</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[#E5E5E5]">
               {categories?.map((cat: any) => (
-                <tr key={cat.id} className="hover:bg-muted/30">
-                  <td className="p-4 font-bold">{cat.name}</td>
-                  <td className="p-4 text-sm font-mono text-muted-foreground">{cat.slug}</td>
-                  <td className="p-4 text-sm text-muted-foreground">{cat.description || "-"}</td>
+                <tr key={cat.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="p-4 font-bold text-[14px] text-black">{cat.name}</td>
+                  <td className="p-4 text-[14px] font-mono text-[#9794AA]">{cat.slug}</td>
+                  <td className="p-4 text-[14px] text-[#4D4D4D]">{cat.description || "-"}</td>
                   <td className="p-4 text-right">
                     <CategoryFormDialog category={cat}>
-                      <Button size="sm" variant="ghost">Edit</Button>
+                      <Button className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium">Edit</Button>
                     </CategoryFormDialog>
                   </td>
                 </tr>
@@ -318,40 +320,43 @@ function SettingsView() {
   const { data: settings, isLoading } = useAdminSettings();
   
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Platform Settings</h2>
-          <p className="text-muted-foreground mt-1">Configure global variables.</p>
+          <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Platform Settings</h2>
+          <p className="text-[16px] text-[#4D4D4D] mt-1">Configure global variables.</p>
         </div>
         <SettingFormDialog>
-          <Button><Plus className="w-4 h-4 mr-2" /> Add/Update Setting</Button>
+          <Button className="h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
+            <Plus className="w-4 h-4 mr-2" /> 
+            Add/Update Setting
+          </Button>
         </SettingFormDialog>
       </div>
       
       {isLoading ? (
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm overflow-hidden">
+        <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
           <table className="w-full text-left">
-            <thead className="bg-muted/50 border-b border-border">
+            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
               <tr>
-                <th className="p-4 font-medium text-muted-foreground">Key</th>
-                <th className="p-4 font-medium text-muted-foreground">Value</th>
-                <th className="p-4 font-medium text-muted-foreground text-right">Actions</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Key</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Value</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[#E5E5E5]">
               {(Array.isArray(settings) ? settings : Object.entries(settings || {}).map(([key, value]) => ({ key, value }))).map((setting: any) => {
                 const key = setting.key;
                 const value = setting.value;
                 return (
-                <tr key={key} className="hover:bg-muted/30">
-                  <td className="p-4 font-mono text-sm">{key}</td>
-                  <td className="p-4 text-sm max-w-[200px] truncate">{String(value)}</td>
+                <tr key={key} className="hover:bg-gray-50 transition-colors">
+                  <td className="p-4 font-mono text-[14px] font-bold text-black">{key}</td>
+                  <td className="p-4 text-[14px] text-[#4D4D4D] max-w-[200px] truncate">{String(value)}</td>
                   <td className="p-4 text-right">
                     <SettingFormDialog settingKey={key} settingValue={String(value)}>
-                      <Button size="sm" variant="ghost">Edit</Button>
+                      <Button className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium">Edit</Button>
                     </SettingFormDialog>
                   </td>
                 </tr>

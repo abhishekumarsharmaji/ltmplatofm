@@ -69,95 +69,95 @@ function Overview() {
   };
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
+    <div className="space-y-12 max-w-6xl mx-auto pt-4">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Creator Dashboard</h2>
-          <p className="text-muted-foreground mt-1">Welcome back, {session?.user?.name || "Creator"}. Here's what's happening.</p>
+          <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Creator Dashboard</h2>
+          <p className="text-[16px] text-[#4D4D4D] mt-1">Welcome back, {session?.user?.name || "Creator"}. Here's what's happening.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-4">
           <ProductFormDialog type="digital">
-            <Button variant="outline">
+            <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-11 px-6 rounded-md font-medium text-[14px]">
               New Product
             </Button>
           </ProductFormDialog>
-          <Button onClick={handleCreateCourse} disabled={createProduct.isPending}>
+          <Button onClick={handleCreateCourse} disabled={createProduct.isPending} className="h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
             <Plus className="w-4 h-4 mr-2" />
             New Course
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Total Revenue", value: salesLoading ? "..." : `$${((sales?.grossMinor || 0) / 100).toFixed(2)}`, icon: DollarSign, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-          { label: "Total Orders", value: salesLoading ? "..." : (sales?.orderCount || 0).toString(), icon: Package, color: "text-blue-500", bg: "bg-blue-500/10" },
-          { label: "Active Courses", value: productsLoading ? "..." : courseCount.toString(), icon: BookOpen, color: "text-purple-500", bg: "bg-purple-500/10" },
-          { label: "Products", value: productsLoading ? "..." : (products?.length || 0).toString(), icon: Package, color: "text-amber-500", bg: "bg-amber-500/10" },
+          { label: "Total Revenue", value: salesLoading ? "..." : `$${((sales?.grossMinor || 0) / 100).toFixed(2)}`, icon: DollarSign, color: "text-[#15CF74]", bg: "bg-[#E3F9EF]" },
+          { label: "Total Orders", value: salesLoading ? "..." : (sales?.orderCount || 0).toString(), icon: Package, color: "text-[#224EA1]", bg: "bg-[#EAEFF8]" },
+          { label: "Active Courses", value: productsLoading ? "..." : courseCount.toString(), icon: BookOpen, color: "text-[#704FE6]", bg: "bg-[#F1EEFC]" },
+          { label: "Products", value: productsLoading ? "..." : (products?.length || 0).toString(), icon: Package, color: "text-[#FE543D]", bg: "bg-[#FFEFEB]" },
         ].map((stat, i) => (
-          <div key={i} className="bg-card border border-border p-6 rounded-2xl shadow-sm">
+          <div key={i} className="bg-white border border-[#E5E5E5] p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.bg}`}>
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg}`}>
+                <stat.icon className={`w-6 h-6 ${stat.color}`} />
               </div>
             </div>
-            <p className="text-sm text-muted-foreground font-medium mb-1">{stat.label}</p>
-            <h4 className="text-2xl font-bold">{stat.value}</h4>
+            <p className="text-[14px] text-[#4D4D4D] font-medium mb-1">{stat.label}</p>
+            <h4 className="text-[28px] font-bold text-black">{stat.value}</h4>
           </div>
         ))}
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm min-h-[400px]">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold">Recent Orders</h3>
+        <div className="bg-white border border-[#E5E5E5] rounded-xl p-8 shadow-sm min-h-[400px]">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-[20px] font-bold text-black">Recent Orders</h3>
             <Link href="/dashboard/creator/sales">
-              <Button variant="ghost" size="sm">View All</Button>
+              <Button variant="ghost" className="text-primary hover:bg-[#E3F9EF] hover:text-primary">View All</Button>
             </Link>
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-2">
             {salesLoading ? (
               <div className="py-10 flex justify-center"><div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" /></div>
             ) : !sales?.orders || sales.orders.length === 0 ? (
-              <p className="text-muted-foreground text-center py-10">No orders yet.</p>
+              <p className="text-[#9794AA] text-center py-10">No orders yet.</p>
             ) : (
               sales.orders.slice(0, 5).map((order: any, i) => (
-                <div key={i} className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-xl transition-colors border border-transparent hover:border-border">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center font-bold text-muted-foreground">
+                <div key={i} className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-[#E5E5E5]">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-[#FAFAFA] border border-[#E5E5E5] rounded-full flex items-center justify-center font-bold text-[#394649]">
                       {order.userName?.charAt(0) || "U"}
                     </div>
                     <div>
-                      <p className="font-medium text-sm">{order.userName}</p>
-                      <p className="text-xs text-muted-foreground">{order.productName}</p>
+                      <p className="font-bold text-[14px] text-black">{order.userName}</p>
+                      <p className="text-[13px] text-[#4D4D4D]">{order.productName}</p>
                     </div>
                   </div>
-                  <span className="text-sm font-bold text-emerald-500">+${((order.amountMinor || 0) / 100).toFixed(2)}</span>
+                  <span className="text-[14px] font-bold text-primary">+${((order.amountMinor || 0) / 100).toFixed(2)}</span>
                 </div>
               ))
             )}
           </div>
         </div>
         
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm min-h-[400px]">
-          <h3 className="text-lg font-bold mb-6">Quick Actions</h3>
-          <div className="space-y-3">
+        <div className="bg-[#515151] rounded-xl p-8 shadow-sm min-h-[400px] flex flex-col">
+          <h3 className="text-[20px] font-bold text-white mb-8">Quick Actions</h3>
+          <div className="space-y-4 flex-1 flex flex-col justify-center">
             <Link href="/dashboard/creator/courses">
-              <Button variant="outline" className="w-full justify-start h-12 mb-3">
-                <BookOpen className="w-4 h-4 mr-3 text-muted-foreground" />
+              <Button className="w-full justify-start h-14 bg-white/10 hover:bg-white/20 text-white border-none rounded-lg text-[15px] transition-colors">
+                <BookOpen className="w-5 h-5 mr-4" />
                 Manage Courses
               </Button>
             </Link>
             <Link href="/dashboard/creator/products">
-              <Button variant="outline" className="w-full justify-start h-12 mb-3">
-                <Package className="w-4 h-4 mr-3 text-muted-foreground" />
+              <Button className="w-full justify-start h-14 bg-white/10 hover:bg-white/20 text-white border-none rounded-lg text-[15px] transition-colors">
+                <Package className="w-5 h-5 mr-4" />
                 Manage Products
               </Button>
             </Link>
             <Link href="/dashboard/creator/sales">
-              <Button variant="outline" className="w-full justify-start h-12">
-                <DollarSign className="w-4 h-4 mr-3 text-muted-foreground" />
+              <Button className="w-full justify-start h-14 bg-white/10 hover:bg-white/20 text-white border-none rounded-lg text-[15px] transition-colors">
+                <DollarSign className="w-5 h-5 mr-4" />
                 View Payouts
               </Button>
             </Link>
@@ -190,13 +190,13 @@ function Courses() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Courses</h2>
-          <p className="text-muted-foreground mt-1">Manage your educational content.</p>
+          <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Courses</h2>
+          <p className="text-[16px] text-[#4D4D4D] mt-1">Manage your educational content.</p>
         </div>
-        <Button onClick={handleCreateCourse} disabled={createProduct.isPending}>
+        <Button onClick={handleCreateCourse} disabled={createProduct.isPending} className="h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
           <Plus className="w-4 h-4 mr-2" />
           Create Course
         </Button>
@@ -205,27 +205,33 @@ function Courses() {
       {isLoading ? (
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : !courses || courses.length === 0 ? (
-        <div className="text-center py-20 bg-card border border-border rounded-2xl shadow-sm">
-          <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="font-bold text-lg mb-2">No courses found</h3>
-          <p className="text-muted-foreground mb-4">You haven't created any courses yet.</p>
-          <Button onClick={handleCreateCourse} disabled={createProduct.isPending}>Create Your First Course</Button>
+        <div className="text-center py-20 bg-white border border-[#E5E5E5] rounded-xl shadow-sm">
+          <BookOpen className="w-12 h-12 text-[#9794AA] mx-auto mb-4" />
+          <h3 className="font-bold text-[18px] text-black mb-2">No courses found</h3>
+          <p className="text-[14px] text-[#4D4D4D] mb-6">You haven't created any courses yet.</p>
+          <Button onClick={handleCreateCourse} disabled={createProduct.isPending} className="h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px]">Create Your First Course</Button>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course: any) => (
-             <div key={course.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm group">
-                <div className="aspect-video bg-muted rounded-xl mb-4 flex items-center justify-center">
-                  <BookOpen className="w-10 h-10 text-muted-foreground/30 group-hover:scale-110 transition-transform" />
+             <div key={course.id} className="bg-white border border-[#E5E5E5] rounded-lg p-5 shadow-sm group hover:shadow-md transition-shadow">
+                <div className="aspect-[16/10] bg-gradient-to-br from-green-50 to-blue-50 rounded-md mb-4 flex items-center justify-center relative overflow-hidden">
+                  {course.thumbnailUrl ? (
+                    <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                      <span className="text-4xl text-primary/30 font-bold">{course.title[0]}</span>
+                    </div>
+                  )}
                 </div>
-                <h3 className="font-bold line-clamp-1">{course.title}</h3>
-                <p className="text-sm text-muted-foreground mt-1">${(course.priceMinor / 100).toFixed(2)}</p>
-                <div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
-                  <Badge variant="secondary" className={course.status === 'published' ? 'bg-success/10 text-success border-success/20' : 'bg-muted text-muted-foreground'}>
+                <h3 className="font-bold text-[16px] text-black line-clamp-1">{course.title}</h3>
+                <p className="text-[14px] text-primary font-bold mt-1">${(course.priceMinor / 100).toFixed(2)}</p>
+                <div className="mt-4 pt-4 border-t border-[#E5E5E5] flex justify-between items-center">
+                  <Badge className={course.status === 'published' ? 'bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
                     {course.status}
                   </Badge>
                   <Link href={`/dashboard/creator/courses/${course.id}/builder`}>
-                    <Button size="sm" variant="outline">Edit Course</Button>
+                    <Button className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium">Edit Course</Button>
                   </Link>
                 </div>
              </div>
@@ -241,14 +247,15 @@ function Products() {
   const products = allProducts?.filter(p => p.type === 'digital');
   
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Digital Products</h2>
-          <p className="text-muted-foreground mt-1">Manage your downloadable content.</p>
+          <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Digital Products</h2>
+          <p className="text-[16px] text-[#4D4D4D] mt-1">Manage your downloadable content.</p>
         </div>
         <ProductFormDialog type="digital">
-          <Button>
+          <Button className="h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
+            <Plus className="w-4 h-4 mr-2" />
             Add Product
           </Button>
         </ProductFormDialog>
@@ -257,41 +264,41 @@ function Products() {
       {isLoading ? (
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : !products || products.length === 0 ? (
-        <div className="text-center py-20 bg-card border border-border rounded-2xl shadow-sm">
-          <Package className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="font-bold text-lg mb-2">No products found</h3>
-          <p className="text-muted-foreground mb-4">You haven't added any digital products yet.</p>
+        <div className="text-center py-20 bg-white border border-[#E5E5E5] rounded-xl shadow-sm">
+          <Package className="w-12 h-12 text-[#9794AA] mx-auto mb-4" />
+          <h3 className="font-bold text-[18px] text-black mb-2">No products found</h3>
+          <p className="text-[14px] text-[#4D4D4D] mb-6">You haven't added any digital products yet.</p>
           <ProductFormDialog type="digital">
-            <Button>Add Your First Product</Button>
+            <Button className="h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px]">Add Your First Product</Button>
           </ProductFormDialog>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
           <table className="w-full text-left">
-            <thead className="bg-muted/50 border-b border-border">
+            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
               <tr>
-                <th className="p-4 font-medium text-muted-foreground">Title</th>
-                <th className="p-4 font-medium text-muted-foreground">Type</th>
-                <th className="p-4 font-medium text-muted-foreground">Price</th>
-                <th className="p-4 font-medium text-muted-foreground">Status</th>
-                <th className="p-4 font-medium text-muted-foreground text-right">Actions</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Title</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Type</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Price</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Status</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[#E5E5E5]">
               {products.map((item: any) => (
-                <tr key={item.id} className="hover:bg-muted/30">
-                  <td className="p-4 font-medium">{item.title}</td>
-                  <td className="p-4"><Badge variant="outline" className="uppercase text-[10px]">{item.type}</Badge></td>
-                  <td className="p-4 font-medium">${(item.priceMinor / 100).toFixed(2)} {item.currency}</td>
+                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="p-4 font-bold text-[14px] text-black">{item.title}</td>
+                  <td className="p-4"><Badge className="bg-gray-100 text-[#4D4D4D] hover:bg-gray-100 border-none shadow-none uppercase text-[10px] font-bold">{item.type}</Badge></td>
+                  <td className="p-4 font-medium text-[14px]">${(item.priceMinor / 100).toFixed(2)} {item.currency}</td>
                   <td className="p-4">
-                    <Badge variant="secondary" className={item.status === 'published' ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}>
+                    <Badge className={item.status === 'published' ? 'bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
                       {item.status}
                     </Badge>
                   </td>
                   <td className="p-4 text-right">
                   <div className="flex gap-2 justify-end">
                     <ProductFormDialog type="digital" product={item}>
-                      <Button size="sm" variant="ghost">Edit</Button>
+                      <Button className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium">Edit</Button>
                     </ProductFormDialog>
                     <PublishProductButton id={item.id} status={item.status} />
                   </div>
@@ -310,69 +317,71 @@ function Sales() {
   const { data: sales, isLoading } = useCreatorSalesSummary();
   
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Sales & Analytics</h2>
-        <p className="text-muted-foreground mt-1">Track your revenue and performance.</p>
+        <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Sales & Analytics</h2>
+        <p className="text-[16px] text-[#4D4D4D] mt-1">Track your revenue and performance.</p>
       </div>
       
       {isLoading ? (
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : !sales ? (
-        <div className="text-center py-20 bg-card border border-border rounded-2xl shadow-sm">
-          <BarChart3 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="font-bold text-lg mb-2">No data available</h3>
-          <p className="text-muted-foreground">Sales data will appear here once you start generating revenue.</p>
+        <div className="text-center py-20 bg-white border border-[#E5E5E5] rounded-xl shadow-sm">
+          <BarChart3 className="w-12 h-12 text-[#9794AA] mx-auto mb-4" />
+          <h3 className="font-bold text-[18px] text-black mb-2">No data available</h3>
+          <p className="text-[14px] text-[#4D4D4D]">Sales data will appear here once you start generating revenue.</p>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-card border border-border p-6 rounded-2xl shadow-sm text-center">
-              <p className="text-muted-foreground font-medium mb-2">Total Revenue</p>
-              <h3 className="text-4xl font-bold text-emerald-500">${((sales.grossMinor || 0) / 100).toFixed(2)}</h3>
+            <div className="bg-[#515151] border-none p-8 rounded-xl shadow-sm flex flex-col justify-center">
+              <p className="text-white text-[16px] font-bold mb-2">Total Revenue</p>
+              <h3 className="text-[40px] font-bold text-primary leading-none">${((sales.grossMinor || 0) / 100).toFixed(2)}</h3>
             </div>
-            <div className="bg-card border border-border p-6 rounded-2xl shadow-sm text-center">
-              <p className="text-muted-foreground font-medium mb-2">Total Orders</p>
-              <h3 className="text-4xl font-bold text-blue-500">{sales.orderCount || 0}</h3>
+            <div className="bg-white border border-[#E5E5E5] p-8 rounded-xl shadow-sm flex flex-col justify-center">
+              <p className="text-[#394649] text-[16px] font-bold mb-2">Total Orders</p>
+              <h3 className="text-[40px] font-bold text-black leading-none">{sales.orderCount || 0}</h3>
             </div>
-            <div className="bg-card border border-border p-6 rounded-2xl shadow-sm text-center">
-              <p className="text-muted-foreground font-medium mb-2">Avg. Order Value</p>
-              <h3 className="text-4xl font-bold text-purple-500">
+            <div className="bg-white border border-[#E5E5E5] p-8 rounded-xl shadow-sm flex flex-col justify-center">
+              <p className="text-[#394649] text-[16px] font-bold mb-2">Avg. Order Value</p>
+              <h3 className="text-[40px] font-bold text-black leading-none">
                 ${sales.orderCount ? ((sales.grossMinor || 0) / 100 / sales.orderCount).toFixed(2) : "0.00"}
               </h3>
             </div>
           </div>
           
-          <h3 className="text-xl font-bold mt-8 mb-4">Transaction History</h3>
-          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-            <table className="w-full text-left">
-              <thead className="bg-muted/50 border-b border-border">
-                <tr>
-                  <th className="p-4 font-medium text-muted-foreground">Date</th>
-                  <th className="p-4 font-medium text-muted-foreground">Customer</th>
-                  <th className="p-4 font-medium text-muted-foreground">Product</th>
-                  <th className="p-4 font-medium text-muted-foreground text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {sales.orders && sales.orders.length > 0 ? (
-                  sales.orders.map((order: any, i) => (
-                    <tr key={i} className="hover:bg-muted/30">
-                      <td className="p-4 text-sm text-muted-foreground">{order.createdAt ? new Date(String(order.createdAt)).toLocaleDateString() : '-'}</td>
-                      <td className="p-4 font-medium">{order.userName}</td>
-                      <td className="p-4 text-sm text-muted-foreground">{order.productName}</td>
-                      <td className="p-4 font-bold text-right text-emerald-500">+${((order.amountMinor || 0) / 100).toFixed(2)}</td>
-                    </tr>
-                  ))
-                ) : (
+          <div className="pt-4">
+            <h3 className="text-[24px] font-bold text-black mb-6">Transaction History</h3>
+            <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
+              <table className="w-full text-left">
+                <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-muted-foreground">
-                      No transactions found.
-                    </td>
+                    <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Date</th>
+                    <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Customer</th>
+                    <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Product</th>
+                    <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Amount</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-[#E5E5E5]">
+                  {sales.orders && sales.orders.length > 0 ? (
+                    sales.orders.map((order: any, i) => (
+                      <tr key={i} className="hover:bg-gray-50 transition-colors">
+                        <td className="p-4 text-[14px] text-[#4D4D4D]">{order.createdAt ? new Date(String(order.createdAt)).toLocaleDateString() : '-'}</td>
+                        <td className="p-4 font-bold text-[14px]">{order.userName}</td>
+                        <td className="p-4 text-[14px] text-[#4D4D4D]">{order.productName}</td>
+                        <td className="p-4 font-bold text-[14px] text-right text-primary">+${((order.amountMinor || 0) / 100).toFixed(2)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="p-8 text-center text-[#9794AA]">
+                        No transactions found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}
