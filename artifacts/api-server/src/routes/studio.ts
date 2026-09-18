@@ -9,6 +9,7 @@ import {
   createCourseThumbnailUploadUrl,
   createLessonMultipartUpload,
   createLessonPartUploadUrl,
+  createObjectDownloadUrl,
   objectFile,
 } from "../lib/objectStorage";
 
@@ -32,6 +33,12 @@ async function ownedLesson(lessonId: number, req: AuthenticatedRequest) {
 }
 
 async function streamAsset(asset: typeof lessonAssetsTable.$inferSelect, req: Request, res: Response) {
+  const directUrl = await createObjectDownloadUrl(asset.objectPath, asset.filename, asset.mimeType);
+  if (directUrl) {
+    res.setHeader("Cache-Control", "private, no-store");
+    res.redirect(307, directUrl);
+    return;
+  }
   const file = objectFile(asset.objectPath); const [meta] = await file.getMetadata();
   const size = Number(meta.size ?? asset.sizeBytes);
   const range = req.headers.range;
