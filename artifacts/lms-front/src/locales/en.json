@@ -7,12 +7,124 @@
     "courses": "Courses",
     "about": "About",
     "dashboard": "Dashboard",
-    "login": "Log in",
+    "login": "Sign in",
     "startFree": "Start Free",
-    "join": "Join",
+    "join": "Join For Free",
     "logout": "Log out",
     "accountMenu": "Account menu",
-    "logoutFailed": "Could not log out. Please try again."
+    "logoutFailed": "Could not log out. Please try again.",
+    "searchPlaceholder": "What do you want to learn today?",
+    "home": "Home"
+  },
+  "footer": {
+    "description": "The modern platform for creating and exploring online courses. Learn at your own pace from anywhere.",
+    "explore": "Explore",
+    "company": "Company",
+    "support": "Support",
+    "careers": "Careers",
+    "blog": "Blog",
+    "press": "Press",
+    "partners": "Partners",
+    "newsletter": "Newsletter",
+    "helpCenter": "Help Center",
+    "houseRules": "House Rules",
+    "contentGuidelines": "Content Guidelines",
+    "copyright": "Copyright © {year} {platform}. All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfUse": "Terms of Use",
+    "cookiesPolicy": "Cookies Policy",
+    "preferences": "Preferences",
+    "ethicsLine": "Ethics Line",
+    "accessibility": "Accessibility"
+  },
+  "home": {
+    "hero": {
+      "title1": "Master your Self,",
+      "title2": "Anywhere",
+      "title3": "Anytime,",
+      "subtitle": "Join thousands of learners and take your career to the next level with our expert-led courses.",
+      "startLearning": "Start Learning Now",
+      "pills": {
+        "mentors": "Mentors",
+        "mentor": "Mentor",
+        "categories": "Categories",
+        "category": "Category",
+        "lessons": "Lessons",
+        "lesson": "Lesson",
+        "courses": "Courses",
+        "course": "Course"
+      }
+    },
+    "stats": {
+      "courses": "COURSES",
+      "lessons": "LESSONS",
+      "mentors": "MENTORS",
+      "categories": "CATEGORIES"
+    },
+    "courses": {
+      "title": "Explore Inspiring Online Courses",
+      "featured": "Featured",
+      "viewAll": "View all courses",
+      "empty": "No courses found for this category.",
+      "unknownAuthor": "Unknown Author",
+      "beginner": "Beginner",
+      "lessons": "Lessons"
+    },
+    "cta": {
+      "title1": "Start your learning",
+      "title2": "journey today",
+      "subtitle": "Join our community of students and expert mentors to expand your skills.",
+      "button": "Start for free"
+    },
+    "mentors": {
+      "title": "Our Expert Mentors",
+      "subtitleSingle": "{count} Course",
+      "subtitlePlural": "{count} Courses"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome to LMS Platform",
+      "subtitle": "Kindly fill in your details below to continue",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "Enter your email",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••••••",
+      "button": "Login",
+      "buttonLoading": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "createOne": "Create one",
+      "error": "The email or password is incorrect."
+    },
+    "signup": {
+      "title": "Create an account",
+      "subtitle": "Kindly fill in your details below to continue",
+      "nameLabel": "Full Name",
+      "namePlaceholder": "Enter your full name",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "Enter your email",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••••••",
+      "button": "Sign up",
+      "buttonLoading": "Creating...",
+      "haveAccount": "Already have an account?",
+      "logIn": "Log in",
+      "error": "We could not create this account. Try another email."
+    },
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
+  },
+  "errors": {
+    "unavailable": {
+      "title": "Currently Unavailable",
+      "desc": "This feature (including payments and checkout) is disabled during the current phase.",
+      "return": "Return Home"
+    },
+    "notFound": {
+      "title": "404 Page Not Found",
+      "desc": "The page you are looking for doesn't exist or has been moved.",
+      "return": "Return to Home"
+    }
   },
   "seo": {
     "defaultDescription": "Online courses, exams, and verified certificates — learn at your own pace.",

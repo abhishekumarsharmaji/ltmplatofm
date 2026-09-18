@@ -3,8 +3,9 @@ import { useTranslations } from "@/lib/i18n";
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 
 export function Footer() {
-  const t = useTranslations("seo");
+  const t = useTranslations("footer");
   const platformName = "LMS Platform";
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-[#222222] pt-20 pb-8 text-white">
@@ -17,7 +18,7 @@ export function Footer() {
               {platformName}
             </h2>
             <p className="text-[#9794AA] text-[15px] leading-relaxed max-w-sm mb-8">
-              Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.
+              {t("description")}
             </p>
             <div className="flex items-center gap-3">
               {[

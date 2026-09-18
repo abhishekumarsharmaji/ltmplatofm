@@ -52,7 +52,7 @@ export function Navbar() {
   const NavLinks = () => (
     <>
       <Link href="/" className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors">
-        Home
+        {t("home")}
       </Link>
       <Link href="/courses" className="text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors">
         {t("courses")}
@@ -84,7 +84,7 @@ export function Navbar() {
           
           <form onSubmit={handleSearch} className="hidden md:flex items-center relative w-full max-w-sm">
             <Input 
-              placeholder="What do you want to learn today?" 
+              placeholder={t("searchPlaceholder")}
               className="h-11 pl-5 pr-12 rounded-full border-[#E5E5E5] bg-white text-sm focus-visible:ring-1 focus-visible:ring-primary/50 placeholder:text-[#9794AA]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -146,11 +146,11 @@ export function Navbar() {
           ) : (
             <>
               <Link href="/auth/login" className="hidden lg:block text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors">
-                Sign in
+                {t("login")}
               </Link>
               <Link href="/auth/sign-up">
                 <Button data-testid="link-start-free" className="hidden sm:inline-flex h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md shadow-[0_10px_24px_rgba(21,207,116,0.35)] transition-all">
-                  Join For Free
+                  {t("join")}
                 </Button>
               </Link>
             </>
@@ -171,7 +171,7 @@ export function Navbar() {
         <div className="lg:hidden border-t border-gray-100 bg-white p-4 space-y-4 shadow-lg absolute w-full left-0">
           <form onSubmit={handleSearch} className="flex items-center relative w-full md:hidden">
             <Input 
-              placeholder="What do you want to learn today?" 
+              placeholder={t("searchPlaceholder")}
               className="h-12 pl-5 pr-12 rounded-full border-[#E5E5E5] bg-white text-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -190,11 +190,11 @@ export function Navbar() {
               <>
                 <div className="h-px bg-gray-100 w-full my-2"></div>
                 <Link href="/auth/login" className="text-[14px] font-medium text-[#4D4D4D]" onClick={() => setIsMobileMenuOpen(false)}>
-                  Sign in
+                  {t("login")}
                 </Link>
                 <Link href="/auth/sign-up" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button className="w-full h-11 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md shadow-[0_10px_24px_rgba(21,207,116,0.35)]">
-                    Join For Free
+                    {t("join")}
                   </Button>
                 </Link>
               </>
