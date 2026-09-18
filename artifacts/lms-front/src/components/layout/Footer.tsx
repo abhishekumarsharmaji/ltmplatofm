@@ -45,7 +45,7 @@ export function Footer() {
             
             {/* Explore */}
             <div className="flex flex-col">
-              <h4 className="text-[16px] font-bold mb-6">Explore</h4>
+              <h4 className="text-[16px] font-bold mb-6">{t("explore")}</h4>
               <ul className="space-y-4">
                 <li><Link href="/courses" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">Courses</Link></li>
                 <li><Link href="/platform-pricing" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">Pricing</Link></li>
@@ -56,23 +56,23 @@ export function Footer() {
 
             {/* Company */}
             <div className="flex flex-col">
-              <h4 className="text-[16px] font-bold mb-6">Company</h4>
+              <h4 className="text-[16px] font-bold mb-6">{t("company")}</h4>
               <ul className="space-y-4">
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">Careers</a></li>
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">Blog</a></li>
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">Press</a></li>
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">Partners</a></li>
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">Newsletter</a></li>
+                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("careers")}</a></li>
+                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("blog")}</a></li>
+                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("press")}</a></li>
+                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("partners")}</a></li>
+                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("newsletter")}</a></li>
               </ul>
             </div>
 
             {/* Support */}
             <div className="flex flex-col">
-              <h4 className="text-[16px] font-bold mb-6">Support</h4>
+              <h4 className="text-[16px] font-bold mb-6">{t("support")}</h4>
               <ul className="space-y-4">
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">Help Center</a></li>
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">House Rules</a></li>
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">Content Guidelines</a></li>
+                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("helpCenter")}</a></li>
+                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("houseRules")}</a></li>
+                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("contentGuidelines")}</a></li>
               </ul>
             </div>
 
@@ -81,14 +81,14 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-[#515151] flex flex-col sm:flex-row justify-between items-center gap-4 text-[13px] text-[#9794AA]">
-          <p>Copyright © {new Date().getFullYear()} {platformName}, Inc. All rights reserved.</p>
+          <p>{t("copyright", { year: currentYear.toString(), platform: platformName })}</p>
           <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Use</a>
-            <a href="#" className="hover:text-white transition-colors">Cookies Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Preferences</a>
-            <a href="#" className="hover:text-white transition-colors">Ethics Line</a>
-            <a href="#" className="hover:text-white transition-colors">Accessibility</a>
+            <a href="#" className="hover:text-white transition-colors">{t("privacyPolicy")}</a>
+            <a href="#" className="hover:text-white transition-colors">{t("termsOfUse")}</a>
+            <a href="#" className="hover:text-white transition-colors">{t("cookiesPolicy")}</a>
+            <a href="#" className="hover:text-white transition-colors">{t("preferences")}</a>
+            <a href="#" className="hover:text-white transition-colors">{t("ethicsLine")}</a>
+            <a href="#" className="hover:text-white transition-colors">{t("accessibility")}</a>
           </div>
         </div>
       </div>

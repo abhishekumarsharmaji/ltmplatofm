@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
+import { useTranslations } from "@/lib/i18n";
 
 export default function SignUp() {
+  const t = useTranslations("auth.signup");
+  const tAuth = useTranslations("auth");
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +31,7 @@ export default function SignUp() {
       queryClient.setQueryData(getGetSessionQueryKey(), session);
       setLocation("/dashboard/student");
     } catch {
-      setError("We could not create this account. Try another email.");
+      setError(t("error") as string);
     } finally {
       setIsLoading(false);
     }
@@ -50,27 +53,27 @@ export default function SignUp() {
 
         <div className="w-full max-w-md mt-16 pb-10">
           <h1 className="text-[32px] sm:text-[40px] font-bold text-black tracking-tight mb-3">
-            Create an account
+            {t("title")}
           </h1>
           <p className="text-[15px] text-[#9794AA] mb-10">
-            Kindly fill in your details below to continue
+            {t("subtitle")}
           </p>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-[14px] font-medium text-[#4D4D4D]">Full Name</Label>
+              <Label htmlFor="name" className="text-[14px] font-medium text-[#4D4D4D]">{t("nameLabel")}</Label>
               <Input
                 id="name"
                 name="name"
                 type="text"
                 required
                 className="h-12 border-[#E5E5E5] rounded-[8px] focus-visible:ring-1 focus-visible:ring-primary/50 text-[#394649]"
-                placeholder="Enter your full name"
+                placeholder={t("namePlaceholder") as string}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-[14px] font-medium text-[#4D4D4D]">Email Address</Label>
+              <Label htmlFor="email" className="text-[14px] font-medium text-[#4D4D4D]">{t("emailLabel")}</Label>
               <Input
                 id="email"
                 name="email"
@@ -78,12 +81,12 @@ export default function SignUp() {
                 autoComplete="email"
                 required
                 className="h-12 border-[#E5E5E5] rounded-[8px] focus-visible:ring-1 focus-visible:ring-primary/50 text-[#394649]"
-                placeholder="Enter your email"
+                placeholder={t("emailPlaceholder") as string}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-[14px] font-medium text-[#4D4D4D]">Password</Label>
+              <Label htmlFor="password" className="text-[14px] font-medium text-[#4D4D4D]">{t("passwordLabel")}</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -93,13 +96,13 @@ export default function SignUp() {
                   required
                   minLength={8}
                   className="h-12 border-[#E5E5E5] rounded-[8px] focus-visible:ring-1 focus-visible:ring-primary/50 text-[#394649] pr-10"
-                  placeholder="••••••••••••"
+                  placeholder={t("passwordPlaceholder") as string}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9794AA] hover:text-[#4D4D4D] focus:outline-none"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? tAuth("hidePassword") as string : tAuth("showPassword") as string}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -113,14 +116,14 @@ export default function SignUp() {
               className="w-full h-12 bg-primary hover:bg-[#10A364] text-white font-medium rounded-[8px] text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)] transition-all mt-4"
               disabled={isLoading}
             >
-              {isLoading ? "Creating..." : "Sign up"}
+              {isLoading ? t("buttonLoading") : t("button")}
             </Button>
           </form>
 
           <p className="mt-8 text-center text-sm text-[#9794AA]">
-            Already have an account?{' '}
+            {t("haveAccount")}{' '}
             <Link href="/auth/login" className="font-medium text-primary hover:text-[#10A364] transition-colors">
-              Log in
+              {t("logIn")}
             </Link>
           </p>
         </div>
