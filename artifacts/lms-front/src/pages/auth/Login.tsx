@@ -121,7 +121,7 @@ export default function Login() {
       <div className="hidden lg:block lg:flex-1 p-4 pl-0">
         <div className="w-full h-full relative rounded-l-[40px] rounded-r-[20px] overflow-hidden">
           <img 
-            src="/images/login-classroom.webp" 
+            src={`${import.meta.env.BASE_URL}images/auth-us-ai-lab.webp`}
             alt="Classroom" 
             className="absolute inset-0 w-full h-full object-cover"
           />
