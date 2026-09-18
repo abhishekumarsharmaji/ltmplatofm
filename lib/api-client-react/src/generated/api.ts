@@ -36,7 +36,12 @@ import type {
   CourseOutline,
   CourseOutlineInput,
   CourseReadiness,
+  EnrollmentResult,
+  FinalizeCourseThumbnailUpload200,
   HealthStatus,
+  ImageFinalizeInput,
+  ImageUploadInput,
+  ImageUploadResponse,
   Lesson,
   LessonAsset,
   LessonInput,
@@ -985,6 +990,74 @@ export function useGetMarketplaceCourse<TData = Awaited<ReturnType<typeof getMar
 
 
 
+export const getEnrollInCourseUrl = (courseId: number,) => {
+
+
+
+
+  return `/api/student/courses/${courseId}/enroll`
+}
+
+export const enrollInCourse = async (courseId: number, options?: Parameters<typeof customFetch>[1]): Promise<EnrollmentResult> => {
+
+  return customFetch<EnrollmentResult>(getEnrollInCourseUrl(courseId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getEnrollInCourseMutationKey = () => ['enrollInCourse'] as const;
+
+export const getEnrollInCourseMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enrollInCourse>>, TError,EnrollInCourseMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof enrollInCourse>>, TError,EnrollInCourseMutationVariables, TContext> => {
+
+const mutationKey = getEnrollInCourseMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof enrollInCourse>>, EnrollInCourseMutationVariables> = (props) => {
+          const {courseId} = props ?? {};
+
+          return  enrollInCourse(courseId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EnrollInCourseMutationResult = NonNullable<Awaited<ReturnType<typeof enrollInCourse>>>
+
+    export type EnrollInCourseMutationError = ErrorType<void>
+    export type EnrollInCourseMutationVariables = {courseId: number}
+
+    export const useEnrollInCourse = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enrollInCourse>>, TError,EnrollInCourseMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof enrollInCourse>>,
+        TError,
+        EnrollInCourseMutationVariables,
+        TContext
+      > => {
+      return useMutation(getEnrollInCourseMutationOptions(options));
+    }
+
 export const getListCreatorProductsUrl = () => {
 
 
@@ -1441,6 +1514,172 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getUpdateCreatorCourseBasicsMutationOptions(options));
+    }
+
+export const getRequestCourseThumbnailUploadUrl = (productId: number,) => {
+
+
+
+
+  return `/api/creator/products/${productId}/thumbnail/request-upload`
+}
+
+export const requestCourseThumbnailUpload = async (productId: number,
+    imageUploadInput: ImageUploadInput, options?: Parameters<typeof customFetch>[1]): Promise<ImageUploadResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ImageUploadResponse>(getRequestCourseThumbnailUploadUrl(productId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(imageUploadInput)
+  }
+);}
+
+
+
+
+
+export const getRequestCourseThumbnailUploadMutationKey = () => ['requestCourseThumbnailUpload'] as const;
+
+export const getRequestCourseThumbnailUploadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestCourseThumbnailUpload>>, TError,RequestCourseThumbnailUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestCourseThumbnailUpload>>, TError,RequestCourseThumbnailUploadMutationVariables, TContext> => {
+
+const mutationKey = getRequestCourseThumbnailUploadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestCourseThumbnailUpload>>, RequestCourseThumbnailUploadMutationVariables> = (props) => {
+          const {productId,data} = props ?? {};
+
+          return  requestCourseThumbnailUpload(productId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestCourseThumbnailUploadMutationResult = NonNullable<Awaited<ReturnType<typeof requestCourseThumbnailUpload>>>
+    export type RequestCourseThumbnailUploadMutationBody = BodyType<ImageUploadInput>
+    export type RequestCourseThumbnailUploadMutationError = ErrorType<unknown>
+    export type RequestCourseThumbnailUploadMutationVariables = {productId: number;data: BodyType<ImageUploadInput>}
+
+    export const useRequestCourseThumbnailUpload = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestCourseThumbnailUpload>>, TError,RequestCourseThumbnailUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestCourseThumbnailUpload>>,
+        TError,
+        RequestCourseThumbnailUploadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestCourseThumbnailUploadMutationOptions(options));
+    }
+
+export const getFinalizeCourseThumbnailUploadUrl = (productId: number,) => {
+
+
+
+
+  return `/api/creator/products/${productId}/thumbnail/finalize`
+}
+
+export const finalizeCourseThumbnailUpload = async (productId: number,
+    imageFinalizeInput: ImageFinalizeInput, options?: Parameters<typeof customFetch>[1]): Promise<FinalizeCourseThumbnailUpload200> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<FinalizeCourseThumbnailUpload200>(getFinalizeCourseThumbnailUploadUrl(productId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(imageFinalizeInput)
+  }
+);}
+
+
+
+
+
+export const getFinalizeCourseThumbnailUploadMutationKey = () => ['finalizeCourseThumbnailUpload'] as const;
+
+export const getFinalizeCourseThumbnailUploadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof finalizeCourseThumbnailUpload>>, TError,FinalizeCourseThumbnailUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof finalizeCourseThumbnailUpload>>, TError,FinalizeCourseThumbnailUploadMutationVariables, TContext> => {
+
+const mutationKey = getFinalizeCourseThumbnailUploadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof finalizeCourseThumbnailUpload>>, FinalizeCourseThumbnailUploadMutationVariables> = (props) => {
+          const {productId,data} = props ?? {};
+
+          return  finalizeCourseThumbnailUpload(productId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type FinalizeCourseThumbnailUploadMutationResult = NonNullable<Awaited<ReturnType<typeof finalizeCourseThumbnailUpload>>>
+    export type FinalizeCourseThumbnailUploadMutationBody = BodyType<ImageFinalizeInput>
+    export type FinalizeCourseThumbnailUploadMutationError = ErrorType<unknown>
+    export type FinalizeCourseThumbnailUploadMutationVariables = {productId: number;data: BodyType<ImageFinalizeInput>}
+
+    export const useFinalizeCourseThumbnailUpload = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof finalizeCourseThumbnailUpload>>, TError,FinalizeCourseThumbnailUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof finalizeCourseThumbnailUpload>>,
+        TError,
+        FinalizeCourseThumbnailUploadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getFinalizeCourseThumbnailUploadMutationOptions(options));
     }
 
 export const getGetCreatorCourseReadinessUrl = (productId: number,) => {

@@ -123,19 +123,36 @@ function Overview({ name }: { name: string }) {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {availableCourses.slice(0, 6).map((course) => (
               <Link key={course.id} href={`/courses/${course.id}`}>
-                <article className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-colors hover:border-primary/50">
-                  <div className="flex aspect-video items-center justify-center bg-muted">
-                    <BookOpen className="h-12 w-12 text-muted-foreground/30 transition-transform group-hover:scale-110" />
+                <article className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:border-primary/50 hover:shadow-md">
+                  <div className="relative flex aspect-video items-center justify-center bg-muted overflow-hidden">
+                    {course.thumbnailUrl ? (
+                      <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                      <BookOpen className="h-12 w-12 text-muted-foreground/30 transition-transform duration-500 group-hover:scale-110" />
+                    )}
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      <Badge className="bg-success text-success-foreground font-bold shadow-sm">
+                        Free
+                      </Badge>
+                    </div>
                   </div>
                   <div className="flex flex-1 flex-col p-5">
                     <div className="mb-2 flex items-start justify-between gap-2">
-                      <h4 className="line-clamp-2 font-bold">{course.title}</h4>
-                      <Badge variant="secondary" className="shrink-0 capitalize">{course.level}</Badge>
+                      <h4 className="line-clamp-2 font-bold group-hover:text-primary transition-colors">{course.title}</h4>
+                      <Badge variant="secondary" className="shrink-0 capitalize">{course.level || "Beginner"}</Badge>
                     </div>
+                    {course.creatorName && (
+                      <p className="text-xs font-medium text-muted-foreground mb-2">
+                        by {course.creatorName}
+                      </p>
+                    )}
                     <p className="line-clamp-2 text-sm text-muted-foreground">{course.description}</p>
-                    <div className="mt-auto flex items-center gap-1 border-t border-border pt-4 text-xs text-muted-foreground">
-                      <BookOpen className="h-3.5 w-3.5" />
-                      {course.lessons} lesson{course.lessons === 1 ? "" : "s"}
+                    <div className="mt-auto flex items-center justify-between border-t border-border pt-4 text-xs font-medium text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <BookOpen className="h-3.5 w-3.5" />
+                        {course.lessons} lesson{course.lessons === 1 ? "" : "s"}
+                      </span>
+                      <span className="text-primary font-bold">Start</span>
                     </div>
                   </div>
                 </article>
@@ -169,18 +186,31 @@ function Library() {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {library.map((item: any, i) => (
-             <div key={i} className="bg-card border border-border rounded-2xl p-5 shadow-sm">
-                <div className="aspect-video bg-muted rounded-xl mb-4 flex items-center justify-center">
-                  <Play className="w-10 h-10 text-muted-foreground/30" />
-                </div>
-                   <h3 className="font-bold line-clamp-1">{item.course?.title ?? item.title}</h3>
-                <div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
-                  <Badge variant="secondary">In Progress</Badge>
-                   <Link href={`/courses/${item.course?.id ?? item.courseId ?? item.id}`}><Button size="sm">Resume</Button></Link>
-                </div>
-             </div>
-          ))}
+          {library.map((item: any, i) => {
+             const course = item.course || item;
+             return (
+               <div key={i} className="bg-card border border-border rounded-2xl p-5 shadow-sm group hover:border-primary/50 transition-colors flex flex-col">
+                  <div className="relative aspect-video bg-muted rounded-xl mb-4 flex items-center justify-center overflow-hidden">
+                    {course.thumbnailUrl ? (
+                      <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                      <Play className="w-10 h-10 text-muted-foreground/30 transition-transform duration-500 group-hover:scale-110" />
+                    )}
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                       <Play className="w-12 h-12 text-white fill-white drop-shadow-md" />
+                    </div>
+                  </div>
+                  <h3 className="font-bold line-clamp-1 mb-1 group-hover:text-primary transition-colors">{course.title}</h3>
+                  {course.creatorName && (
+                    <p className="text-xs text-muted-foreground mb-4">by {course.creatorName}</p>
+                  )}
+                  <div className="mt-auto pt-4 border-t border-border flex justify-between items-center">
+                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Enrolled</Badge>
+                    <Link href={`/courses/${course.id}`}><Button size="sm">Continue Learning</Button></Link>
+                  </div>
+               </div>
+             );
+          })}
         </div>
       )}
     </div>

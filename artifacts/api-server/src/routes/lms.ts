@@ -118,6 +118,9 @@ router.get("/marketplace/courses", async (req, res): Promise<void> => {
     id: coursesTable.id,
     title: coursesTable.title,
     description: coursesTable.description,
+    thumbnailUrl: coursesTable.thumbnailUrl,
+    outcomes: coursesTable.outcomes,
+    faqs: coursesTable.faqs,
     level: coursesTable.level,
     lessons: sql<number>`(
       select count(*)::int
@@ -203,14 +206,17 @@ router.patch("/creator/products/:productId/builder", requireAuth, requireRole("c
   const body = req.body ?? {};
   const title = body.title === undefined ? found.course.title : body.title;
   const description = body.description === undefined ? found.course.description : body.description;
-  const priceMinor = body.priceMinor === undefined ? found.course.priceMinor : body.priceMinor;
-  const currency = body.currency === undefined ? found.course.currency : body.currency;
-  if (typeof title !== "string" || title.trim().length < 2 || typeof description !== "string" || typeof priceMinor !== "number" || !Number.isInteger(priceMinor) || priceMinor < 0 || typeof currency !== "string" || !/^[A-Z]{3}$/.test(currency)) {
-    res.status(400).json({ error: "title (2+ chars), description, non-negative integer priceMinor and 3-letter currency are required" }); return;
+  const thumbnailUrl = body.thumbnailUrl === undefined ? found.course.thumbnailUrl : body.thumbnailUrl;
+  const level = body.level === undefined ? found.course.level : body.level;
+  const outcomes = body.outcomes === undefined ? found.course.outcomes : body.outcomes;
+  const faqs = body.faqs === undefined ? found.course.faqs : body.faqs;
+  const validFaqs = Array.isArray(faqs) && faqs.every((faq: unknown) => typeof faq === "object" && faq !== null && typeof (faq as any).question === "string" && typeof (faq as any).answer === "string");
+  if (typeof title !== "string" || title.trim().length < 2 || typeof description !== "string" || (thumbnailUrl !== null && typeof thumbnailUrl !== "string") || typeof level !== "string" || !Array.isArray(outcomes) || !outcomes.every((item: unknown) => typeof item === "string") || !validFaqs) {
+    res.status(400).json({ error: "Valid course title, description, thumbnail, level, outcomes and FAQs are required" }); return;
   }
   const updated = await db.transaction(async (tx) => {
-    const [course] = await tx.update(coursesTable).set({ title: title.trim(), description, priceMinor, currency, updatedAt: new Date() }).where(ownerFilter(coursesTable, found.course!.id, auth.canonicalUserId!, auth.canonicalRole === "admin")).returning();
-    await tx.update(productsTable).set({ title: title.trim(), description, priceMinor, currency, updatedAt: new Date() }).where(eq(productsTable.id, productId));
+    const [course] = await tx.update(coursesTable).set({ title: title.trim(), description, thumbnailUrl: thumbnailUrl?.trim() || null, level, outcomes: outcomes.map((item: string) => item.trim()).filter(Boolean), faqs: faqs.map((faq: any) => ({ question: faq.question.trim(), answer: faq.answer.trim() })).filter((faq: any) => faq.question && faq.answer), priceMinor: 0, currency: "USD", updatedAt: new Date() }).where(ownerFilter(coursesTable, found.course!.id, auth.canonicalUserId!, auth.canonicalRole === "admin")).returning();
+    await tx.update(productsTable).set({ title: title.trim(), description, priceMinor: 0, currency: "USD", updatedAt: new Date() }).where(eq(productsTable.id, productId));
     return course;
   });
   res.json(updated);

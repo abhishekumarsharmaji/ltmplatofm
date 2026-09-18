@@ -1,10 +1,11 @@
 import { Router, type IRouter } from "express";
-import { and, eq, ilike, desc, sql } from "drizzle-orm";
+import { and, eq, ilike, desc, inArray, sql } from "drizzle-orm";
 import {
-  db, categoriesTable, coursesTable, productsTable, usersTable, enrollmentsTable,
+  db, categoriesTable, coursesTable, courseModulesTable, lessonsTable, productsTable, usersTable, enrollmentsTable,
   ordersTable, orderItemsTable, wishlistTable, platformSettingsTable,
 } from "@workspace/db";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewares/auth";
+import { objectFile } from "../lib/objectStorage";
 
 const router: IRouter = Router();
 const auth = requireAuth;
@@ -27,16 +28,41 @@ router.get("/marketplace/products/:id", async (req, res) => {
 });
 router.get("/marketplace/courses/:id", async (req, res) => {
   const courseId = id(req.params.id); if (!courseId) { res.status(400).json({ error: "Invalid id" }); return; }
-  const [row] = await db.select({ course: coursesTable, productId: productsTable.id }).from(coursesTable)
+  const [row] = await db.select({ course: coursesTable, productId: productsTable.id, creatorName: usersTable.name }).from(coursesTable)
     .leftJoin(productsTable, and(eq(productsTable.courseId, coursesTable.id), eq(productsTable.type, "course")))
+    .innerJoin(usersTable, eq(usersTable.id, coursesTable.creatorId))
     .where(and(eq(coursesTable.id, courseId), eq(coursesTable.status, "published")));
-  if (!row) { res.status(404).json({ error: "Course not found" }); return; } res.json({ ...row.course, productId: row.productId });
+  if (!row) { res.status(404).json({ error: "Course not found" }); return; }
+  const modules = await db.select().from(courseModulesTable).where(eq(courseModulesTable.courseId, courseId)).orderBy(courseModulesTable.position);
+  const moduleIds = modules.map((module) => module.id);
+  const lessons = moduleIds.length ? await db.select().from(lessonsTable).where(inArray(lessonsTable.moduleId, moduleIds)).orderBy(lessonsTable.position) : [];
+  res.json({ ...row.course, productId: row.productId, creatorName: row.creatorName, lessons: lessons.length, modules: modules.map((module) => ({ ...module, lessons: lessons.filter((lesson) => lesson.moduleId === module.id) })) });
+});
+router.get("/marketplace/courses/:id/thumbnail", async (req, res) => {
+  const courseId = id(req.params.id);
+  if (!courseId) { res.status(400).end(); return; }
+  const [course] = await db.select({ objectPath: coursesTable.thumbnailObjectPath }).from(coursesTable).where(eq(coursesTable.id, courseId));
+  if (!course?.objectPath) { res.status(404).end(); return; }
+  const file = objectFile(course.objectPath);
+  const [metadata] = await file.getMetadata();
+  res.setHeader("Content-Type", metadata.contentType ?? "image/jpeg");
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  file.createReadStream().on("error", () => { if (!res.headersSent) res.status(404); res.end(); }).pipe(res);
+});
+router.post("/student/courses/:courseId/enroll", auth, async (req, res) => {
+  const courseId = id(req.params.courseId), userId = await userOf(req as AuthenticatedRequest);
+  if (!courseId || !userId) { res.status(400).json({ error: "Invalid course" }); return; }
+  const [course] = await db.select({ id: coursesTable.id }).from(coursesTable).where(and(eq(coursesTable.id, courseId), eq(coursesTable.status, "published")));
+  if (!course) { res.status(404).json({ error: "Published course not found" }); return; }
+  const inserted = await db.insert(enrollmentsTable).values({ userId, courseId }).onConflictDoNothing().returning({ id: enrollmentsTable.id });
+  res.json({ enrolled: true, alreadyEnrolled: inserted.length === 0, courseId });
 });
 
 router.post("/creator/products", auth, requireRole("creator", "admin"), async (req, res) => {
   const requestUser = req as AuthenticatedRequest;
   const creatorId = await userOf(requestUser); if (!creatorId) { res.status(409).json({ error: "Creator profile unavailable" }); return; }
-  const { title, description = "", type = "digital", priceMinor = 0, currency = "USD", courseId, categoryId } = req.body ?? {};
+  const { title, description = "", type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId } = req.body ?? {};
+  const priceMinor = type === "course" ? 0 : requestedPrice;
   if (typeof title !== "string" || title.length < 2 || !["course", "digital"].includes(type) || !Number.isInteger(priceMinor) || priceMinor < 0) {
     res.status(400).json({ error: "Invalid product payload" }); return;
   }

@@ -150,6 +150,15 @@ paths:
       operationId: getMarketplaceCourse
       parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
       responses: { "200": { description: Course, content: { application/json: { schema: { $ref: "#/components/schemas/Course" } } } }, "404": { description: Not found } }
+  /student/courses/{courseId}/enroll:
+    post:
+      operationId: enrollInCourse
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: courseId, in: path, required: true, schema: { type: integer } }]
+      responses:
+        "200": { description: Enrolled, content: { application/json: { schema: { $ref: "#/components/schemas/EnrollmentResult" } } } }
+        "401": { description: Authentication required }
+        "404": { description: Published course not found }
   /creator/products:
     get:
       operationId: listCreatorProducts
@@ -185,6 +194,20 @@ paths:
       parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CourseBasicsInput" } } } }
       responses: { "200": { description: Updated course, content: { application/json: { schema: { type: object } } } } }
+  /creator/products/{productId}/thumbnail/request-upload:
+    post:
+      operationId: requestCourseThumbnailUpload
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ImageUploadInput" } } } }
+      responses: { "201": { description: Presigned thumbnail upload, content: { application/json: { schema: { $ref: "#/components/schemas/ImageUploadResponse" } } } } }
+  /creator/products/{productId}/thumbnail/finalize:
+    post:
+      operationId: finalizeCourseThumbnailUpload
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ImageFinalizeInput" } } } }
+      responses: { "200": { description: Thumbnail saved, content: { application/json: { schema: { type: object } } } } }
   /creator/products/{productId}/readiness:
     get:
       operationId: getCreatorCourseReadiness
@@ -522,8 +545,28 @@ components:
       properties:
         title: { type: string, minLength: 2 }
         description: { type: string }
-        priceMinor: { type: integer, minimum: 0 }
-        currency: { type: string, pattern: "^[A-Z]{3}$" }
+        thumbnailUrl: { type: ["string", "null"] }
+        level: { type: string }
+        outcomes: { type: array, items: { type: string } }
+        faqs: { type: array, items: { $ref: "#/components/schemas/CourseFaq" } }
+    ImageUploadInput:
+      type: object
+      required: [filename, mimeType, sizeBytes]
+      properties:
+        filename: { type: string }
+        mimeType: { type: string }
+        sizeBytes: { type: integer, minimum: 1 }
+    ImageUploadResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL: { type: string }
+        objectPath: { type: string }
+    ImageFinalizeInput:
+      type: object
+      required: [objectPath]
+      properties:
+        objectPath: { type: string }
     ModuleInput:
       type: object
       required: [title]
@@ -605,6 +648,21 @@ components:
           type: string
         description:
           type: string
+        thumbnailUrl:
+          type: ["string", "null"]
+        outcomes:
+          type: array
+          items: { type: string }
+        faqs:
+          type: array
+          items: { $ref: "#/components/schemas/CourseFaq" }
+        modules:
+          type: array
+          items: { $ref: "#/components/schemas/Module" }
+        creatorName:
+          type: ["string", "null"]
+        enrolled:
+          type: boolean
         level:
           type: string
         lessons:
@@ -612,6 +670,19 @@ components:
         productId:
           type: integer
           nullable: true
+    CourseFaq:
+      type: object
+      required: [question, answer]
+      properties:
+        question: { type: string, minLength: 1 }
+        answer: { type: string, minLength: 1 }
+    EnrollmentResult:
+      type: object
+      required: [enrolled, alreadyEnrolled, courseId]
+      properties:
+        enrolled: { type: boolean }
+        alreadyEnrolled: { type: boolean }
+        courseId: { type: integer }
     Category:
       type: object
       required: [id, name, slug]

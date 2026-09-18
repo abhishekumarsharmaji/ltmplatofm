@@ -1,4 +1,4 @@
-import { integer, pgTable, serial, text, timestamp, pgEnum, boolean, uniqueIndex, index, check } from "drizzle-orm/pg-core";
+import { integer, pgTable, serial, text, timestamp, pgEnum, boolean, uniqueIndex, index, check, jsonb } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 export const lmsUsersTable = pgTable("lms_users", {
@@ -63,6 +63,10 @@ export const coursesTable = pgTable("courses", {
   title: text("title").notNull(),
   slug: text("slug").notNull(),
   description: text("description").notNull().default(""),
+  thumbnailUrl: text("thumbnail_url"),
+  thumbnailObjectPath: text("thumbnail_object_path"),
+  outcomes: text("outcomes").array().notNull().default(sql`ARRAY[]::text[]`),
+  faqs: jsonb("faqs").$type<Array<{ question: string; answer: string }>>().notNull().default(sql`'[]'::jsonb`),
   level: text("level").notNull().default("all"),
   status: courseStatusEnum("status").notNull().default("draft"),
   priceMinor: integer("price_minor").notNull().default(0),

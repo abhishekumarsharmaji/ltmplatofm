@@ -5,13 +5,15 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { CourseFaq } from './courseFaq';
 
 export interface CourseBasicsInput {
   /** @minLength 2 */
   title?: string;
   description?: string;
-  /** @minimum 0 */
-  priceMinor?: number;
-  /** @pattern ^[A-Z]{3}$ */
-  currency?: string;
+  /** @nullable */
+  thumbnailUrl?: string | null;
+  level?: string;
+  outcomes?: string[];
+  faqs?: CourseFaq[];
 }

@@ -3,11 +3,18 @@ import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import OpenAI from "openai";
 import { db, coursesTable, courseModulesTable, lessonAssetsTable, lessonsTable, productsTable, usersTable } from "@workspace/db";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewares/auth";
-import { createLessonUploadUrl, objectFile } from "../lib/objectStorage";
+import { createCourseThumbnailUploadUrl, createLessonUploadUrl, objectFile } from "../lib/objectStorage";
 
 const router: IRouter = Router();
 const id = (v: string | string[]) => { const value = Array.isArray(v) ? v[0] : v; return /^\d+$/.test(value) && Number(value) > 0 ? Number(value) : null; };
 const MAX_VIDEO_BYTES = 1024 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+async function ownedProduct(productId: number, req: AuthenticatedRequest) {
+  const [row] = await db.select({ product: productsTable, course: coursesTable }).from(productsTable)
+    .innerJoin(coursesTable, eq(coursesTable.id, productsTable.courseId))
+    .where(and(eq(productsTable.id, productId), req.canonicalRole === "admin" ? undefined : eq(productsTable.creatorId, req.canonicalUserId!)));
+  return row;
+}
 async function ownedLesson(lessonId: number, req: AuthenticatedRequest) {
   const [row] = await db.select({ lesson: lessonsTable, course: coursesTable }).from(lessonsTable)
     .innerJoin(courseModulesTable, eq(courseModulesTable.id, lessonsTable.moduleId))
@@ -43,6 +50,30 @@ router.get("/admin/course-studio/courses", requireAuth, requireRole("admin"), as
     lessonCount: sql<number>`(select count(*)::int from lessons l join course_modules m on m.id=l.module_id where m.course_id = ${coursesTable.id})`,
   }).from(coursesTable).leftJoin(productsTable, eq(productsTable.courseId, coursesTable.id)).innerJoin(usersTable, eq(usersTable.id, coursesTable.creatorId)).orderBy(desc(coursesTable.createdAt));
   res.json(rows);
+});
+router.post("/creator/products/:productId/thumbnail/request-upload", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const productId = id(req.params.productId), auth = req as AuthenticatedRequest;
+  const { mimeType, sizeBytes } = req.body ?? {};
+  if (!productId || !/^image\/(jpeg|png|webp)$/i.test(mimeType ?? "") || !Number.isInteger(sizeBytes) || sizeBytes < 1 || sizeBytes > MAX_IMAGE_BYTES) {
+    res.status(400).json({ error: "A JPG, PNG or WebP image up to 10MB is required" }); return;
+  }
+  if (!await ownedProduct(productId, auth)) { res.status(404).json({ error: "Course product not found" }); return; }
+  const upload = await createCourseThumbnailUploadUrl();
+  res.status(201).json({ uploadURL: upload.url, objectPath: upload.objectPath });
+});
+router.post("/creator/products/:productId/thumbnail/finalize", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const productId = id(req.params.productId), auth = req as AuthenticatedRequest, objectPath = req.body?.objectPath;
+  const found = productId ? await ownedProduct(productId, auth) : undefined;
+  if (!productId || !found || typeof objectPath !== "string" || !objectPath.includes("/course-thumbnails/")) { res.status(404).json({ error: "Thumbnail upload not found" }); return; }
+  const [metadata] = await objectFile(objectPath).getMetadata();
+  const actualSize = Number(metadata.size ?? 0), contentType = String(metadata.contentType ?? "");
+  if (actualSize < 1 || actualSize > MAX_IMAGE_BYTES || !/^image\/(jpeg|png|webp)$/i.test(contentType)) { res.status(422).json({ error: "Uploaded object is not a valid course image" }); return; }
+  if (found.course.thumbnailObjectPath && found.course.thumbnailObjectPath !== objectPath) {
+    await objectFile(found.course.thumbnailObjectPath).delete({ ignoreNotFound: true }).catch(() => undefined);
+  }
+  const thumbnailUrl = `/api/marketplace/courses/${found.course.id}/thumbnail`;
+  const [course] = await db.update(coursesTable).set({ thumbnailObjectPath: objectPath, thumbnailUrl, updatedAt: new Date() }).where(eq(coursesTable.id, found.course.id)).returning();
+  res.json(course);
 });
 
 router.post("/creator/lessons/:lessonId/assets/request-upload", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {

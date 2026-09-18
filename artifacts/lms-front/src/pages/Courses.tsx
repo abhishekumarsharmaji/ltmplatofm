@@ -101,25 +101,40 @@ export default function Courses() {
                 <Link key={course.id} href={`/courses/${course.id}`}>
                   <div className="bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 transition-all duration-300 group cursor-pointer flex flex-col h-full shadow-sm">
                     <div className="relative aspect-video overflow-hidden bg-muted flex items-center justify-center">
-                      <BookOpen className="w-12 h-12 text-muted-foreground/30" />
-                      <Badge className="absolute top-3 left-3 bg-background/80 backdrop-blur-md border-border text-foreground font-medium">
-                        {course.level}
-                      </Badge>
+                      {course.thumbnailUrl ? (
+                        <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      ) : (
+                        <BookOpen className="w-12 h-12 text-muted-foreground/30 transition-transform duration-500 group-hover:scale-110" />
+                      )}
+                      <div className="absolute top-3 left-3 flex gap-2">
+                        <Badge className="bg-background/80 backdrop-blur-md border-border text-foreground font-medium capitalize">
+                          {course.level || "Beginner"}
+                        </Badge>
+                        <Badge className="bg-success text-success-foreground font-bold">
+                          Free
+                        </Badge>
+                      </div>
                     </div>
                     
                     <div className="p-5 flex flex-col flex-1">
                       <h3 className="text-lg font-bold leading-tight mb-2 group-hover:text-primary transition-colors line-clamp-2">
                         {course.title}
                       </h3>
+                      {course.creatorName && (
+                        <p className="text-sm font-medium text-muted-foreground mb-2">
+                          by {course.creatorName}
+                        </p>
+                      )}
                       <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{course.description}</p>
                       
                       <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1 font-medium">
                             <Clock className="w-3.5 h-3.5" />
                             {course.lessons} lessons
                           </span>
                         </div>
+                        <span className="text-sm font-bold text-primary">Learn Now</span>
                       </div>
                     </div>
                   </div>

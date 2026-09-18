@@ -123,10 +123,16 @@ export function ProductFormDialog({
             <Label htmlFor="description">Description (optional)</Label>
             <Input id="description" {...form.register("description")} />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="priceMinor">Price (in cents)</Label>
-            <Input id="priceMinor" type="number" {...form.register("priceMinor")} />
-          </div>
+          {type === "digital" ? (
+            <div className="space-y-2">
+              <Label htmlFor="priceMinor">Price (in cents)</Label>
+              <Input id="priceMinor" type="number" {...form.register("priceMinor")} />
+            </div>
+          ) : (
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+              All courses are free. Students can enroll instantly without payment.
+            </div>
+          )}
           <Button type="submit" disabled={isPending} className="w-full">
             {isPending ? "Saving..." : "Save"}
           </Button>

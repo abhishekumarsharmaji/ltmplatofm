@@ -44,14 +44,38 @@ export interface Session {
   user?: User | null;
 }
 
+export interface CourseFaq {
+  /** @minLength 1 */
+  question: string;
+  /** @minLength 1 */
+  answer: string;
+}
+
 export interface CourseBasicsInput {
   /** @minLength 2 */
   title?: string;
   description?: string;
-  /** @minimum 0 */
-  priceMinor?: number;
-  /** @pattern ^[A-Z]{3}$ */
-  currency?: string;
+  /** @nullable */
+  thumbnailUrl?: string | null;
+  level?: string;
+  outcomes?: string[];
+  faqs?: CourseFaq[];
+}
+
+export interface ImageUploadInput {
+  filename: string;
+  mimeType: string;
+  /** @minimum 1 */
+  sizeBytes: number;
+}
+
+export interface ImageUploadResponse {
+  uploadURL: string;
+  objectPath: string;
+}
+
+export interface ImageFinalizeInput {
+  objectPath: string;
 }
 
 export interface ModuleInput {
@@ -170,9 +194,23 @@ export interface Course {
   id: number;
   title: string;
   description: string;
+  /** @nullable */
+  thumbnailUrl?: string | null;
+  outcomes?: string[];
+  faqs?: CourseFaq[];
+  modules?: Module[];
+  /** @nullable */
+  creatorName?: string | null;
+  enrolled?: boolean;
   level: string;
   lessons: number;
   productId?: number | null;
+}
+
+export interface EnrollmentResult {
+  enrolled: boolean;
+  alreadyEnrolled: boolean;
+  courseId: number;
 }
 
 export interface Category {
@@ -394,6 +432,8 @@ category?: number;
 };
 
 export type UpdateCreatorCourseBasics200 = { [key: string]: unknown };
+
+export type FinalizeCourseThumbnailUpload200 = { [key: string]: unknown };
 
 export type PublishCreatorCourse200 = { [key: string]: unknown };
 

@@ -2,8 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { 
   LiveKitRoom, 
   VideoConference, 
-  RoomAudioRenderer
+  RoomAudioRenderer,
+  ParticipantTile,
+  useLocalParticipant,
+  useTracks
 } from "@livekit/components-react";
+import { Track } from "livekit-client";
 import "@livekit/components-styles";
 import { 
   useJoinLiveClass, 
@@ -13,7 +17,7 @@ import {
   useStopLiveClassRecording
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Video, Circle, Square, AlertCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, Video, Circle, Square, AlertCircle, Loader2, MonitorUp, MonitorX } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -134,9 +138,99 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
           onDisconnected={handleDisconnected}
           style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
         >
-          <VideoConference />
+          <BroadcastRoomContent isHost={tokenInfo.isHost} />
           <RoomAudioRenderer />
         </LiveKitRoom>
+      </div>
+    </div>
+  );
+}
+
+function BroadcastRoomContent({ isHost }: { isHost: boolean }) {
+  if (isHost) {
+    return (
+      <div className="relative h-full">
+        <VideoConference />
+        <ScreenShareControl />
+      </div>
+    );
+  }
+
+  return <StudentBroadcastView />;
+}
+
+function ScreenShareControl() {
+  const { localParticipant } = useLocalParticipant();
+  const [sharing, setSharing] = useState(localParticipant.isScreenShareEnabled);
+  const [pending, setPending] = useState(false);
+  const { toast } = useToast();
+
+  const toggleScreenShare = async () => {
+    setPending(true);
+    try {
+      const next = !localParticipant.isScreenShareEnabled;
+      await Promise.race([
+        localParticipant.setScreenShareEnabled(next),
+        new Promise<never>((_, reject) => {
+          window.setTimeout(() => reject(new Error("Screen sharing did not start. Check browser permission and try again.")), 12_000);
+        }),
+      ]);
+      setSharing(next);
+      toast({
+        title: next ? "Screen sharing started" : "Screen sharing stopped",
+        description: next ? "Students can now see your shared screen live." : "Your camera remains visible to students.",
+      });
+    } catch (error) {
+      toast({
+        title: "Could not share screen",
+        description: error instanceof Error ? error.message : "Please allow screen-sharing permission and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <Button
+      type="button"
+      onClick={toggleScreenShare}
+      disabled={pending}
+      className="absolute right-4 top-4 z-20 shadow-lg"
+      variant={sharing ? "destructive" : "default"}
+    >
+      {sharing ? <MonitorX className="mr-2 h-4 w-4" /> : <MonitorUp className="mr-2 h-4 w-4" />}
+      {pending ? "Please wait..." : sharing ? "Stop sharing" : "Share screen live"}
+    </Button>
+  );
+}
+
+function StudentBroadcastView() {
+  const screenTracks = useTracks([Track.Source.ScreenShare]);
+  const cameraTracks = useTracks([Track.Source.Camera]);
+  const featuredTrack = screenTracks[0] ?? cameraTracks[0];
+
+  return (
+    <div className="flex h-full flex-col bg-slate-950 text-white">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+        <div>
+          <p className="font-semibold">Live course broadcast</p>
+          <p className="text-xs text-white/60">
+            {screenTracks.length ? "The instructor is sharing their screen." : "Waiting for the instructor to share their screen."}
+          </p>
+        </div>
+        <Badge className="border-red-400/30 bg-red-500/15 text-red-200">LIVE</Badge>
+      </div>
+      <div className="flex min-h-0 flex-1 items-center justify-center p-3 md:p-6">
+        {featuredTrack ? (
+          <ParticipantTile trackRef={featuredTrack} className="h-full w-full overflow-hidden rounded-xl bg-black [&_video]:object-contain" />
+        ) : (
+          <div className="max-w-md text-center">
+            <MonitorUp className="mx-auto mb-4 h-12 w-12 text-white/30" />
+            <h2 className="text-xl font-semibold">The live class will appear here</h2>
+            <p className="mt-2 text-sm text-white/60">You are connected. The instructor has not started camera or screen sharing yet.</p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -5,11 +5,21 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { CourseFaq } from './courseFaq';
+import type { Module } from './module';
 
 export interface Course {
   id: number;
   title: string;
   description: string;
+  /** @nullable */
+  thumbnailUrl?: string | null;
+  outcomes?: string[];
+  faqs?: CourseFaq[];
+  modules?: Module[];
+  /** @nullable */
+  creatorName?: string | null;
+  enrolled?: boolean;
   level: string;
   lessons: number;
   productId?: number | null;

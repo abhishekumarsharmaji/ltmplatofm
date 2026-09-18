@@ -74,10 +74,47 @@ export const SignUpResponse = zod.object({
 export const LogoutResponse = zod.void()
 
 
+
+
+
+
 export const ListCoursesResponseItem = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "thumbnailUrl": zod.string().nullish(),
+  "outcomes": zod.array(zod.string()).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string().min(1),
+  "answer": zod.string().min(1)
+})).optional(),
+  "modules": zod.array(zod.object({
+  "id": zod.number().int(),
+  "courseId": zod.number().int(),
+  "title": zod.string(),
+  "position": zod.number().int(),
+  "lessons": zod.array(zod.object({
+  "id": zod.number().int(),
+  "moduleId": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "position": zod.number().int(),
+  "isPreview": zod.boolean(),
+  "assets": zod.array(zod.object({
+  "id": zod.number().int(),
+  "lessonId": zod.number().int(),
+  "kind": zod.enum(['video']),
+  "storageKey": zod.string(),
+  "objectPath": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int(),
+  "status": zod.enum(['pending', 'uploaded', 'failed'])
+})).optional()
+})).optional()
+})).optional(),
+  "creatorName": zod.string().nullish(),
+  "enrolled": zod.boolean().optional(),
   "level": zod.string(),
   "lessons": zod.number().int(),
   "productId": zod.number().int().nullish()
@@ -101,10 +138,47 @@ export const MarketplaceCoursesQueryParams = zod.object({
   "category": zod.coerce.string().optional()
 })
 
+
+
+
+
 export const MarketplaceCoursesResponseItem = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "thumbnailUrl": zod.string().nullish(),
+  "outcomes": zod.array(zod.string()).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string().min(1),
+  "answer": zod.string().min(1)
+})).optional(),
+  "modules": zod.array(zod.object({
+  "id": zod.number().int(),
+  "courseId": zod.number().int(),
+  "title": zod.string(),
+  "position": zod.number().int(),
+  "lessons": zod.array(zod.object({
+  "id": zod.number().int(),
+  "moduleId": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "position": zod.number().int(),
+  "isPreview": zod.boolean(),
+  "assets": zod.array(zod.object({
+  "id": zod.number().int(),
+  "lessonId": zod.number().int(),
+  "kind": zod.enum(['video']),
+  "storageKey": zod.string(),
+  "objectPath": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int(),
+  "status": zod.enum(['pending', 'uploaded', 'failed'])
+})).optional()
+})).optional()
+})).optional(),
+  "creatorName": zod.string().nullish(),
+  "enrolled": zod.boolean().optional(),
   "level": zod.string(),
   "lessons": zod.number().int(),
   "productId": zod.number().int().nullish()
@@ -165,13 +239,61 @@ export const GetMarketplaceCourseParams = zod.object({
   "id": zod.coerce.number().int()
 })
 
+
+
+
+
 export const GetMarketplaceCourseResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "thumbnailUrl": zod.string().nullish(),
+  "outcomes": zod.array(zod.string()).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string().min(1),
+  "answer": zod.string().min(1)
+})).optional(),
+  "modules": zod.array(zod.object({
+  "id": zod.number().int(),
+  "courseId": zod.number().int(),
+  "title": zod.string(),
+  "position": zod.number().int(),
+  "lessons": zod.array(zod.object({
+  "id": zod.number().int(),
+  "moduleId": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "position": zod.number().int(),
+  "isPreview": zod.boolean(),
+  "assets": zod.array(zod.object({
+  "id": zod.number().int(),
+  "lessonId": zod.number().int(),
+  "kind": zod.enum(['video']),
+  "storageKey": zod.string(),
+  "objectPath": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int(),
+  "status": zod.enum(['pending', 'uploaded', 'failed'])
+})).optional()
+})).optional()
+})).optional(),
+  "creatorName": zod.string().nullish(),
+  "enrolled": zod.boolean().optional(),
   "level": zod.string(),
   "lessons": zod.number().int(),
   "productId": zod.number().int().nullish()
+})
+
+
+export const EnrollInCourseParams = zod.object({
+  "courseId": zod.coerce.number().int()
+})
+
+export const EnrollInCourseResponse = zod.object({
+  "enrolled": zod.boolean(),
+  "alreadyEnrolled": zod.boolean(),
+  "courseId": zod.number().int()
 })
 
 
@@ -331,19 +453,55 @@ export const UpdateCreatorCourseBasicsParams = zod.object({
 
 export const updateCreatorCourseBasicsBodyTitleMin = 2;
 
-export const updateCreatorCourseBasicsBodyPriceMinorMin = 0;
 
-export const updateCreatorCourseBasicsBodyCurrencyRegExp = new RegExp('^[A-Z]{3}$');
+
 
 
 export const UpdateCreatorCourseBasicsBody = zod.object({
   "title": zod.string().min(updateCreatorCourseBasicsBodyTitleMin).optional(),
   "description": zod.string().optional(),
-  "priceMinor": zod.number().int().min(updateCreatorCourseBasicsBodyPriceMinorMin).optional(),
-  "currency": zod.string().regex(updateCreatorCourseBasicsBodyCurrencyRegExp).optional()
+  "thumbnailUrl": zod.string().nullish(),
+  "level": zod.string().optional(),
+  "outcomes": zod.array(zod.string()).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string().min(1),
+  "answer": zod.string().min(1)
+})).optional()
 })
 
 export const UpdateCreatorCourseBasicsResponse = zod.object({
+
+}).passthrough()
+
+
+export const RequestCourseThumbnailUploadParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+
+
+
+export const RequestCourseThumbnailUploadBody = zod.object({
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int().min(1)
+})
+
+export const RequestCourseThumbnailUploadResponse = zod.object({
+  "uploadURL": zod.string(),
+  "objectPath": zod.string()
+})
+
+
+export const FinalizeCourseThumbnailUploadParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const FinalizeCourseThumbnailUploadBody = zod.object({
+  "objectPath": zod.string()
+})
+
+export const FinalizeCourseThumbnailUploadResponse = zod.object({
 
 }).passthrough()
 

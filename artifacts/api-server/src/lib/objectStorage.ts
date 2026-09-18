@@ -17,8 +17,8 @@ function parse(path: string) {
   if (slash < 1) throw new Error("Invalid object path");
   return { bucket: clean.slice(0, slash), name: clean.slice(slash + 1) };
 }
-export async function createLessonUploadUrl(): Promise<{ url: string; objectPath: string }> {
-  const objectPath = `${privatePath()}/lesson-videos/${randomUUID()}`;
+async function createUploadUrl(folder: string): Promise<{ url: string; objectPath: string }> {
+  const objectPath = `${privatePath()}/${folder}/${randomUUID()}`;
   const { bucket, name } = parse(objectPath);
   const response = await fetch(`${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`, {
     method: "POST",
@@ -38,6 +38,8 @@ export async function createLessonUploadUrl(): Promise<{ url: string; objectPath
   if (!url) throw new Error("Storage service did not return an upload URL");
   return { url, objectPath: `/${objectPath}` };
 }
+export const createLessonUploadUrl = () => createUploadUrl("lesson-videos");
+export const createCourseThumbnailUploadUrl = () => createUploadUrl("course-thumbnails");
 export function objectFile(objectPath: string) {
   const { bucket, name } = parse(objectPath);
   return storage.bucket(bucket).file(name);

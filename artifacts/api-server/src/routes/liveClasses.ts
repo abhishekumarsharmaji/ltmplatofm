@@ -103,7 +103,7 @@ router.post("/live-classes/:id/join", requireAuth, async (req, res): Promise<voi
   }
   if (!process.env.LIVEKIT_API_KEY || !process.env.LIVEKIT_API_SECRET || !process.env.LIVEKIT_URL) { res.status(503).json({ error: "LiveKit is not configured" }); return; }
   const token = new AccessToken(process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET, { identity: String(user.canonicalUserId), name: user.user?.name, ttl: "2h" });
-  token.addGrant({ roomJoin: true, room: item.roomName, canPublish: true, canSubscribe: true, canPublishData: true, roomAdmin: host });
+  token.addGrant({ roomJoin: true, room: item.roomName, canPublish: host, canSubscribe: true, canPublishData: host, roomAdmin: host });
   if (host && item.status === "scheduled") {
     item.status = "live";
     await db.update(liveClassesTable).set({ status: "live", updatedAt: new Date() }).where(eq(liveClassesTable.id, item.id));
