@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "wouter";
 import { 
   useAdminUsers,
@@ -24,7 +24,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { 
   Settings, Users, ShieldAlert, Activity, Globe, Paintbrush, 
-  BookOpen, Package, ShoppingCart, Award, Plus
+  BookOpen, Package, ShoppingCart, Award, Plus, Search, X
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CategoryFormDialog } from "@/components/dashboard/CategoryFormDialog";
@@ -147,19 +147,82 @@ function Overview() {
 
 function UsersList() {
   const { data: users, isLoading } = useAdminUsers();
+  const [search, setSearch] = useState("");
+  const [role, setRole] = useState<"all" | "student" | "creator" | "admin">("all");
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredUsers = useMemo(() => (users ?? []).filter((user: any) => {
+    const matchesSearch = !normalizedSearch
+      || user.name?.toLowerCase().includes(normalizedSearch)
+      || user.email?.toLowerCase().includes(normalizedSearch)
+      || String(user.id).includes(normalizedSearch);
+    return matchesSearch && (role === "all" || user.role === role);
+  }), [users, normalizedSearch, role]);
+  const counts = useMemo(() => ({
+    total: users?.length ?? 0,
+    students: users?.filter((user: any) => user.role === "student").length ?? 0,
+    creators: users?.filter((user: any) => user.role === "creator").length ?? 0,
+  }), [users]);
+  const hasFilters = Boolean(search) || role !== "all";
   
   return (
-    <div className="space-y-8 max-w-6xl mx-auto pt-4">
+    <div className="space-y-6 max-w-6xl mx-auto pt-4">
       <div>
         <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">All Users</h2>
         <p className="text-[16px] text-[#4D4D4D] mt-1">Manage all accounts across the platform.</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {[
+          { label: "Total users", value: counts.total },
+          { label: "Students", value: counts.students },
+          { label: "Creators", value: counts.creators },
+        ].map((item) => (
+          <div key={item.label} className="rounded-xl border border-[#E5E5E5] bg-white px-5 py-4 shadow-sm">
+            <p className="text-sm text-[#69737D]">{item.label}</p>
+            <p className="mt-1 text-2xl font-bold text-black">{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-xl border border-[#E5E5E5] bg-white p-4 shadow-sm sm:flex-row sm:items-center">
+        <label className="relative flex-1">
+          <span className="sr-only">Search users</span>
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A8490]" />
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search by name, email or ID…"
+            className="h-11 w-full rounded-lg border border-[#D9DEE5] bg-white pl-10 pr-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+          />
+        </label>
+        <select
+          value={role}
+          onChange={(event) => setRole(event.target.value as typeof role)}
+          className="h-11 rounded-lg border border-[#D9DEE5] bg-white px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 sm:w-44"
+          aria-label="Filter users by role"
+        >
+          <option value="all">All roles</option>
+          <option value="student">Students</option>
+          <option value="creator">Creators</option>
+          <option value="admin">Admin</option>
+        </select>
+        {hasFilters && (
+          <Button variant="ghost" className="h-11 gap-2 sm:px-3" onClick={() => { setSearch(""); setRole("all"); }}>
+            <X className="h-4 w-4" /> Clear
+          </Button>
+        )}
       </div>
       
       {isLoading ? (
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : (
         <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-          <table className="w-full text-left">
+          <div className="flex items-center justify-between border-b border-[#E5E5E5] px-4 py-3 text-sm text-[#69737D]">
+            <span>{filteredUsers.length} {filteredUsers.length === 1 ? "user" : "users"} found</span>
+            {hasFilters && <span>Filtered from {counts.total}</span>}
+          </div>
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[820px] text-left">
             <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
               <tr>
                 <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">ID</th>
@@ -170,7 +233,7 @@ function UsersList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5E5E5]">
-              {users?.map((user: any) => (
+              {filteredUsers.map((user: any) => (
                 <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                   <td className="p-4 text-[14px] text-[#4D4D4D]">{user.id}</td>
                   <td className="p-4 font-bold text-[14px] text-black">{user.name}</td>
@@ -186,8 +249,17 @@ function UsersList() {
                   </td>
                 </tr>
               ))}
+              {!filteredUsers.length && (
+                <tr>
+                  <td colSpan={5} className="px-6 py-14 text-center">
+                    <p className="font-semibold text-black">No matching users</p>
+                    <p className="mt-1 text-sm text-[#69737D]">Try another name, email, ID, or role.</p>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>
