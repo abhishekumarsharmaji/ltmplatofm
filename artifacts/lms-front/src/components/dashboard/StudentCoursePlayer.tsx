@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { format, parseISO } from "date-fns";
-import { useGetStudentCourse, useListUpcomingLiveClasses, type StudentLesson } from "@workspace/api-client-react";
+import { useGetSession, useGetStudentCourse, useListUpcomingLiveClasses, type StudentLesson } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, Clock, MonitorPlay, PlayCircle, Radio, Video } from "lucide-react";
+import { SecureVideoPlayer } from "@/components/dashboard/SecureVideoPlayer";
 
 export function StudentCoursePlayer({ courseId }: { courseId: number }) {
   const { data: course, isLoading, error } = useGetStudentCourse(courseId);
   const { data: liveClasses } = useListUpcomingLiveClasses({ courseId });
+  const { data: session } = useGetSession();
+  const watermark = session?.user?.email ?? session?.user?.name ?? undefined;
   const lessons = useMemo(() => course?.modules.flatMap((module) => module.lessons) ?? [], [course]);
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
 
@@ -89,10 +92,7 @@ export function StudentCoursePlayer({ courseId }: { courseId: number }) {
           <div className="overflow-hidden rounded-2xl border border-border bg-black shadow-sm">
             <div className="aspect-video">
               {videoAsset ? (
-                <video key={videoAsset.id} className="h-full w-full bg-black object-contain" controls preload="metadata" playsInline>
-                  <source src={videoAsset.streamUrl} type={videoAsset.mimeType} />
-                  Your browser does not support video playback.
-                </video>
+                <SecureVideoPlayer key={videoAsset.id} streamUrl={videoAsset.streamUrl} watermark={watermark} />
               ) : (
                 <div className="flex h-full flex-col items-center justify-center px-6 text-center text-white">
                   <MonitorPlay className="mb-3 h-12 w-12 text-white/30" />

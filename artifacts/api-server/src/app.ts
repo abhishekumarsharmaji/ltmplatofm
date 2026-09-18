@@ -1,5 +1,4 @@
 import express, { type Express } from "express";
-import cors from "cors";
 import pinoHttp from "pino-http";
 import cookieParser from "cookie-parser";
 import router from "./routes";
@@ -26,7 +25,8 @@ app.use(
     },
   }),
 );
-app.use(cors());
+// No CORS middleware on purpose: every browser client is served from the same origin through the
+// shared path-based proxy, so no third-party origin is ever granted access to the API or lesson videos.
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

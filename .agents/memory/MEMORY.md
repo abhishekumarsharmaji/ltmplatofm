@@ -1,2 +1,3 @@
 - [Replit App Storage signing](app-storage-signing.md) — generate presigned object URLs through the Replit sidecar, not GCS service-account signing.
 - [White-label live classrooms](white-label-live-classrooms.md) — keep scheduling and classroom UX inside the LMS; use LiveKit only as the real-time media engine.
+- [Lesson video protection](lesson-video-protection.md) — keep 307→presigned R2; Fetch-Metadata gate + short TTL + SecureVideoPlayer are deterrents, not auth; dev test video is HEVC (undecodable in headless Chromium).

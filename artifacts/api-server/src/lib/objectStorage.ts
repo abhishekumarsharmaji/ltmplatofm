@@ -100,7 +100,7 @@ export async function abortLessonMultipartUpload(objectPath: string, uploadId: s
     UploadId: uploadId,
   }));
 }
-export async function createObjectDownloadUrl(objectPath: string, filename: string, contentType: string) {
+export async function createObjectDownloadUrl(objectPath: string, filename: string, contentType: string, expiresInSeconds: number) {
   if (!objectPath.startsWith("r2://")) return null;
   const { client } = r2Config();
   const { bucket, name } = parseR2(objectPath);
@@ -109,7 +109,7 @@ export async function createObjectDownloadUrl(objectPath: string, filename: stri
     Key: name,
     ResponseContentType: contentType,
     ResponseContentDisposition: `inline; filename="${filename.replace(/["\\\r\n]/g, "_")}"`,
-  }), { expiresIn: 10 * 60 });
+  }), { expiresIn: expiresInSeconds });
 }
 export function objectFile(objectPath: string) {
   if (objectPath.startsWith("r2://")) {

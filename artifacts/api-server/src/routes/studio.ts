@@ -12,12 +12,20 @@ import {
   createObjectDownloadUrl,
   objectFile,
 } from "../lib/objectStorage";
+import { isCoursePlayerMediaRequest } from "../lib/mediaRequestGuard";
 
 const router: IRouter = Router();
 const id = (v: string | string[]) => { const value = Array.isArray(v) ? v[0] : v; return /^\d+$/.test(value) && Number(value) > 0 ? Number(value) : null; };
 const MAX_VIDEO_BYTES = 10 * 1024 * 1024 * 1024;
 const VIDEO_PART_BYTES = 100 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+// Signed R2 URLs are bearer links, so they are short-lived and a copied link dies quickly. Browsers keep
+// requesting the API URL for later byte ranges (a fresh redirect each time) and the student player also
+// recovers from an expired link, so a few minutes is enough for playback without leaving a long-lived link.
+const STUDENT_STREAM_URL_TTL_SECONDS = 5 * 60;
+// The creator's "Play / Download" link opens the storage URL directly in a tab, where every later range
+// request reuses that same URL; give it longer so a preview or a large download does not break midway.
+const CREATOR_DOWNLOAD_URL_TTL_SECONDS = 10 * 60;
 async function ownedProduct(productId: number, req: AuthenticatedRequest) {
   const [row] = await db.select({ product: productsTable, course: coursesTable }).from(productsTable)
     .innerJoin(coursesTable, eq(coursesTable.id, productsTable.courseId))
@@ -32,10 +40,11 @@ async function ownedLesson(lessonId: number, req: AuthenticatedRequest) {
   return row;
 }
 
-async function streamAsset(asset: typeof lessonAssetsTable.$inferSelect, req: Request, res: Response) {
-  const directUrl = await createObjectDownloadUrl(asset.objectPath, asset.filename, asset.mimeType);
+async function streamAsset(asset: typeof lessonAssetsTable.$inferSelect, req: Request, res: Response, signedUrlTtlSeconds: number) {
+  res.setHeader("Cache-Control", "private, no-store");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  const directUrl = await createObjectDownloadUrl(asset.objectPath, asset.filename, asset.mimeType, signedUrlTtlSeconds);
   if (directUrl) {
-    res.setHeader("Cache-Control", "private, no-store");
     res.redirect(307, directUrl);
     return;
   }
@@ -188,18 +197,24 @@ router.get("/creator/assets/:assetId/download", requireAuth, requireRole("creato
   const assetId = id(req.params.assetId); if (!assetId) { res.status(400).json({ error: "Invalid asset id" }); return; }
   const [asset] = await db.select().from(lessonAssetsTable).where(eq(lessonAssetsTable.id, assetId));
   if (!asset || asset.status !== "uploaded" || !await ownedLesson(asset.lessonId, req as AuthenticatedRequest)) { res.status(404).json({ error: "Asset not found" }); return; }
-  await streamAsset(asset, req, res);
+  await streamAsset(asset, req, res, CREATOR_DOWNLOAD_URL_TTL_SECONDS);
 });
 router.get("/student/courses/:courseId/assets/:assetId/stream", requireAuth, requireRole("student", "creator", "admin"), async (req, res): Promise<void> => {
   const courseId = id(req.params.courseId), assetId = id(req.params.assetId), user = req as AuthenticatedRequest;
   if (!courseId || !assetId || !user.canonicalUserId) { res.status(400).json({ error: "Invalid course or asset" }); return; }
+  if (!isCoursePlayerMediaRequest(req)) {
+    req.log.warn({ courseId, assetId, userId: user.canonicalUserId, dest: req.headers["sec-fetch-dest"], site: req.headers["sec-fetch-site"] }, "Blocked lesson video request from outside the course player");
+    res.status(403).setHeader("Cache-Control", "private, no-store");
+    res.json({ error: "Lesson videos can only be played inside the course player" });
+    return;
+  }
   const [row] = await db.select({ asset: lessonAssetsTable }).from(lessonAssetsTable)
     .innerJoin(lessonsTable, eq(lessonsTable.id, lessonAssetsTable.lessonId))
     .innerJoin(courseModulesTable, eq(courseModulesTable.id, lessonsTable.moduleId))
     .innerJoin(enrollmentsTable, and(eq(enrollmentsTable.courseId, courseModulesTable.courseId), eq(enrollmentsTable.userId, user.canonicalUserId)))
     .where(and(eq(courseModulesTable.courseId, courseId), eq(lessonAssetsTable.id, assetId), eq(lessonAssetsTable.status, "uploaded")));
   if (!row) { res.status(404).json({ error: "Video not found or enrollment required" }); return; }
-  await streamAsset(row.asset, req, res);
+  await streamAsset(row.asset, req, res, STUDENT_STREAM_URL_TTL_SECONDS);
 });
 router.delete("/creator/assets/:assetId/download", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const assetId = id(req.params.assetId);
