@@ -158,7 +158,7 @@ export function LessonResourceUpload({ lesson, productId }: { lesson: any, produ
 
   return (
     <div className="mt-4 p-4 border-2 border-dashed border-[#E5E5E5] rounded-lg bg-[#FAFAFA]">
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h5 className="text-[14px] font-bold text-black flex items-center gap-2">
           <FileText className="w-4 h-4 text-primary" />
           Lesson Resources
@@ -167,7 +167,7 @@ export function LessonResourceUpload({ lesson, productId }: { lesson: any, produ
           variant="outline" 
           size="sm"
           onClick={() => fileInputRef.current?.click()}
-          className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-8 px-3 rounded-md font-medium text-[13px]"
+          className="h-10 w-full border border-[#DADADA] bg-white px-3 text-[13px] font-medium text-[#394649] hover:bg-gray-50 sm:w-auto"
           disabled={uploading}
         >
           <Upload className="w-3 h-3 mr-2" />
@@ -197,20 +197,20 @@ export function LessonResourceUpload({ lesson, productId }: { lesson: any, produ
       {assets.length > 0 ? (
         <div className="space-y-2">
           {assets.map((asset: any) => (
-            <div key={asset.id} className="flex items-center justify-between bg-white border border-[#E5E5E5] p-3 rounded-md shadow-sm">
-              <div className="flex flex-col truncate pr-4">
+            <div key={asset.id} className="flex flex-col gap-3 rounded-md border border-[#E5E5E5] bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 flex-col sm:pr-4">
                 <span className="text-[14px] font-bold text-black truncate">{asset.filename}</span>
                 <span className="text-[12px] text-[#9794AA] mt-0.5">
                   {(asset.sizeBytes / (1024 * 1024)).toFixed(2)} MB • {asset.status === 'uploaded' ? 'Ready' : asset.status}
                 </span>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex shrink-0 items-center justify-end gap-2">
                 {asset.status === 'uploaded' && (
                   <a 
                     href={asset.downloadUrl || `/api/creator/assets/${asset.id}/download`}
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-[13px] text-primary hover:text-[#10A364] hover:underline font-medium px-2"
+                    className="inline-flex h-10 items-center px-3 text-[13px] font-medium text-primary hover:text-[#10A364] hover:underline"
                   >
                     Download
                   </a>
@@ -219,7 +219,7 @@ export function LessonResourceUpload({ lesson, productId }: { lesson: any, produ
                   aria-label={`Remove ${asset.filename}`}
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-[#E53E3E] hover:bg-red-50 hover:text-[#E53E3E] rounded-md"
+                  className="h-10 w-10 rounded-md text-[#E53E3E] hover:bg-red-50 hover:text-[#E53E3E]"
                   onClick={() => handleRemove(asset.id)}
                   disabled={removeAsset.isPending}
                 >

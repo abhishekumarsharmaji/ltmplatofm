@@ -678,11 +678,11 @@ function ModuleItem({ module, index, total, onMove, productId }: any) {
         {(!module.lessons || module.lessons.length === 0) ? (
           <div className="text-center py-6">
             <p className="text-[14px] text-[#4D4D4D] mb-4">No lessons in this module.</p>
-            <div className="flex justify-center gap-3">
-              <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]" onClick={handleAddLesson} disabled={createLesson.isPending}>
+            <div className="flex flex-col justify-center gap-2 sm:flex-row sm:gap-3">
+              <Button className="h-10 w-full border border-[#DADADA] bg-white px-4 text-[13px] font-medium text-[#394649] hover:bg-gray-50 sm:w-auto" onClick={handleAddLesson} disabled={createLesson.isPending}>
                 <Plus className="w-4 h-4 mr-2" /> Add First Lesson
               </Button>
-              <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]" onClick={() => setIsLiveClassFormOpen(true)}>
+              <Button className="h-10 w-full border border-[#DADADA] bg-white px-4 text-[13px] font-medium text-[#394649] hover:bg-gray-50 sm:w-auto" onClick={() => setIsLiveClassFormOpen(true)}>
                 <Video className="w-4 h-4 mr-2" /> Schedule Live Class
               </Button>
             </div>
@@ -787,8 +787,8 @@ function LessonItem({ lesson, index, total, onMove, productId }: any) {
 
   return (
     <div className="flex flex-col p-3 bg-white border border-[#E5E5E5] rounded-lg group hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="flex flex-col">
             <button aria-label={`Move ${lesson.title} up`} onClick={() => onMove(index, 'up')} disabled={index === 0} className="p-0.5 text-[#9794AA] hover:text-black disabled:opacity-30"><ChevronUp className="w-3 h-3" /></button>
             <button aria-label={`Move ${lesson.title} down`} onClick={() => onMove(index, 'down')} disabled={index === total - 1} className="p-0.5 text-[#9794AA] hover:text-black disabled:opacity-30"><ChevronDown className="w-3 h-3" /></button>
@@ -804,16 +804,16 @@ function LessonItem({ lesson, index, total, onMove, productId }: any) {
               <PlayCircle className="w-4 h-4 text-[#9794AA]" />
             )}
           </div>
-          <div>
-            <h4 className="font-bold text-[14px] text-black leading-none flex items-center gap-2">
-              {lesson.title}
+          <div className="min-w-0">
+            <h4 className="flex items-center gap-2 text-[14px] font-bold leading-tight text-black">
+              <span className="truncate">{lesson.title}</span>
               {lesson.isPreview && <Badge className="bg-[#E3F9EF] text-primary text-[10px] px-1.5 py-0 h-4 border-none shadow-none font-bold uppercase tracking-wider hover:bg-[#E3F9EF]">Preview</Badge>}
             </h4>
             {lesson.description && <p className="text-[12px] text-[#4D4D4D] mt-1.5 line-clamp-1">{lesson.description}</p>}
           </div>
         </div>
 
-        <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center justify-end gap-1 border-t border-[#F0F0F0] pt-2 opacity-100 transition-opacity sm:border-0 sm:pt-0 sm:opacity-0 sm:group-hover:opacity-100">
           <Button aria-label={`Manage resources for ${lesson.title}`} variant="ghost" size="icon" onClick={() => setShowResources(!showResources)} className={`h-10 w-10 ${showResources ? 'text-primary bg-[#E3F9EF]' : 'text-[#9794AA] hover:text-black'}`}>
             <FileText className="w-4 h-4" />
           </Button>
