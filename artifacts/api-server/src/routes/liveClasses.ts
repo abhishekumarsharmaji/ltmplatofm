@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { randomUUID } from "node:crypto";
-import { and, desc, eq, gte } from "drizzle-orm";
-import { AccessToken, EgressClient, EncodedFileOutput } from "livekit-server-sdk";
+import { and, desc, eq, ne } from "drizzle-orm";
+import { AccessToken, EgressClient, EncodedFileOutput, RoomServiceClient } from "livekit-server-sdk";
 import { db, coursesTable, enrollmentsTable, liveClassAttendanceTable, liveClassesTable, productsTable, usersTable } from "@workspace/db";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewares/auth";
 
@@ -45,7 +45,7 @@ router.get("/live-classes", requireAuth, async (req, res): Promise<void> => {
   if (!courseId) { res.status(400).json({ error: "courseId is required" }); return; }
   const [enrolled] = await db.select({ id: enrollmentsTable.id }).from(enrollmentsTable).where(and(eq(enrollmentsTable.courseId, courseId), eq(enrollmentsTable.userId, user.canonicalUserId!)));
   if (user.canonicalRole === "student" && !enrolled) { res.status(403).json({ error: "Enrollment required" }); return; }
-  res.json(await db.select().from(liveClassesTable).where(and(eq(liveClassesTable.courseId, courseId), gte(liveClassesTable.endsAt, new Date()))).orderBy(liveClassesTable.startsAt));
+  res.json(await db.select().from(liveClassesTable).where(and(eq(liveClassesTable.courseId, courseId), ne(liveClassesTable.status, "cancelled"))).orderBy(desc(liveClassesTable.startsAt)));
 });
 
 router.patch("/creator/live-classes/:id", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
@@ -63,8 +63,14 @@ router.delete("/creator/live-classes/:id", requireAuth, requireRole("creator", "
 
 for (const [path, status] of [["cancel", "cancelled"], ["complete", "completed"]] as const) {
   router.post(`/creator/live-classes/:id/${path}`, requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
-    const classId = id(req.params.id); if (!classId || !await ownedClass(classId, auth(req))) { res.status(404).json({ error: "Live class not found" }); return; }
-    const [item] = await db.update(liveClassesTable).set({ status, updatedAt: new Date() }).where(eq(liveClassesTable.id, classId)).returning(); res.json(item);
+    const classId = id(req.params.id), found = classId ? await ownedClass(classId, auth(req)) : undefined;
+    if (!classId || !found) { res.status(404).json({ error: "Live class not found" }); return; }
+    const [item] = await db.update(liveClassesTable).set({ status, updatedAt: new Date() }).where(eq(liveClassesTable.id, classId)).returning();
+    if (status === "completed" && process.env.LIVEKIT_URL && process.env.LIVEKIT_API_KEY && process.env.LIVEKIT_API_SECRET) {
+      const rooms = new RoomServiceClient(process.env.LIVEKIT_URL, process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET);
+      await rooms.deleteRoom(found.liveClass.roomName).catch(() => undefined);
+    }
+    res.json(item);
   });
 }
 
@@ -99,7 +105,7 @@ router.post("/live-classes/:id/join", requireAuth, async (req, res): Promise<voi
     if (!enrolled) { res.status(403).json({ error: "Enrollment required" }); return; }
     const now = Date.now();
     if (now < item.startsAt.getTime() - 15 * 60_000) { res.status(403).json({ error: "The classroom opens 15 minutes before the scheduled start time" }); return; }
-    if (now > item.endsAt.getTime() + 30 * 60_000 || item.status === "completed") { res.status(403).json({ error: "This live class has ended" }); return; }
+    if (item.status === "completed") { res.status(403).json({ error: "This live class has ended" }); return; }
   }
   if (!process.env.LIVEKIT_API_KEY || !process.env.LIVEKIT_API_SECRET || !process.env.LIVEKIT_URL) { res.status(503).json({ error: "LiveKit is not configured" }); return; }
   const token = new AccessToken(process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET, { identity: String(user.canonicalUserId), name: user.user?.name, ttl: "2h" });

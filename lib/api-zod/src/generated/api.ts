@@ -297,6 +297,55 @@ export const EnrollInCourseResponse = zod.object({
 })
 
 
+export const GetStudentCourseParams = zod.object({
+  "courseId": zod.coerce.number().int()
+})
+
+
+
+
+
+export const GetStudentCourseResponse = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "thumbnailUrl": zod.string().nullish(),
+  "outcomes": zod.array(zod.string()).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string().min(1),
+  "answer": zod.string().min(1)
+})).optional(),
+  "creatorName": zod.string().nullish(),
+  "level": zod.string(),
+  "lessons": zod.number().int(),
+  "productId": zod.number().int().nullish(),
+  "modules": zod.array(zod.object({
+  "id": zod.number().int(),
+  "courseId": zod.number().int(),
+  "title": zod.string(),
+  "position": zod.number().int(),
+  "lessons": zod.array(zod.object({
+  "id": zod.number().int(),
+  "moduleId": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "position": zod.number().int(),
+  "isPreview": zod.boolean(),
+  "assets": zod.array(zod.object({
+  "id": zod.number().int(),
+  "lessonId": zod.number().int(),
+  "kind": zod.enum(['video']),
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int(),
+  "status": zod.enum(['uploaded']),
+  "streamUrl": zod.string()
+}))
+}))
+}))
+})
+
+
 export const listCreatorProductsResponsePriceMinorMin = 0;
 
 

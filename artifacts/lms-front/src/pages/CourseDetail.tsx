@@ -131,7 +131,7 @@ export default function CourseDetail() {
 
                 <div className="pt-6 flex gap-4">
                   {isEnrolled ? (
-                    <Link href="/dashboard/student/library">
+                    <Link href={`/dashboard/student/courses/${courseId}`}>
                       <Button size="lg" className="h-14 px-8 text-base">
                         Resume Learning
                       </Button>
@@ -275,7 +275,7 @@ export default function CourseDetail() {
                 <div className="sticky top-32 border border-border bg-card rounded-3xl p-8 shadow-sm">
                   <h3 className="text-xl font-bold mb-6">Ready to start?</h3>
                   {isEnrolled ? (
-                    <Link href="/dashboard/student/library">
+                    <Link href={`/dashboard/student/courses/${courseId}`}>
                       <Button className="w-full h-12 text-base mb-4">Resume Learning</Button>
                     </Link>
                   ) : (

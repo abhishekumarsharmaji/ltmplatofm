@@ -115,10 +115,10 @@ function LiveClassItem({ liveClass, productId, role }: { liveClass: LiveClass, p
   };
 
   const handleComplete = () => {
-    if (confirm("Mark this class as completed?")) {
+    if (confirm("End this live class now? All connected students will be disconnected.")) {
       completeClass.mutate({ id: liveClass.id }, {
         onSuccess: () => {
-          toast({ title: "Class marked as completed" });
+          toast({ title: "Live class ended" });
           invalidate();
         },
         onError: (err) => toast({ title: "Could not complete", description: err.message, variant: "destructive" })
@@ -162,6 +162,12 @@ function LiveClassItem({ liveClass, productId, role }: { liveClass: LiveClass, p
         {(liveClass.status === "completed" || liveClass.status === "live") && (
           <RecordingUploadDialog liveClass={liveClass} productId={productId} />
         )}
+        {liveClass.status === "live" && (
+          <Button variant="destructive" size="sm" onClick={handleComplete} disabled={completeClass.isPending}>
+            <CheckCircle className="mr-2 h-4 w-4" />
+            {completeClass.isPending ? "Ending..." : "End Live Class"}
+          </Button>
+        )}
         {liveClass.status === 'scheduled' || liveClass.status === 'live' ? (
           <Link href={`/dashboard/${role}/live-classes/${liveClass.id}/classroom`}>
             <Button variant={liveClass.status === 'live' ? "destructive" : "default"} size="sm">
@@ -188,11 +194,6 @@ function LiveClassItem({ liveClass, productId, role }: { liveClass: LiveClass, p
             {liveClass.status === 'scheduled' && (
               <DropdownMenuItem onClick={handleCancel}>
                 <XCircle className="w-4 h-4 mr-2" /> Cancel Class
-              </DropdownMenuItem>
-            )}
-            {(liveClass.status === 'scheduled' || liveClass.status === 'live') && (
-              <DropdownMenuItem onClick={handleComplete}>
-                <CheckCircle className="w-4 h-4 mr-2" /> Mark Completed
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />

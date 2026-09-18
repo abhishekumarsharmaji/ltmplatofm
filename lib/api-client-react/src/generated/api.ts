@@ -65,6 +65,7 @@ import type {
   SalesSummary,
   Session,
   SignUpInput,
+  StudentCourse,
   StudentLibrary200Item,
   StudentOrders200Item,
   UpdateCreatorCourseBasics200,
@@ -1057,6 +1058,77 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getEnrollInCourseMutationOptions(options));
     }
+
+export const getGetStudentCourseUrl = (courseId: number,) => {
+
+
+
+
+  return `/api/student/courses/${courseId}`
+}
+
+export const getStudentCourse = async (courseId: number, options?: Parameters<typeof customFetch>[1]): Promise<StudentCourse> => {
+
+  return customFetch<StudentCourse>(getGetStudentCourseUrl(courseId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentCourseQueryKey = (courseId: number,) => {
+    return [
+    `/api/student/courses/${courseId}`
+    ] as const;
+    }
+
+
+export const getGetStudentCourseQueryOptions = <TData = Awaited<ReturnType<typeof getStudentCourse>>, TError = ErrorType<void>>(courseId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentCourse>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentCourseQueryKey(courseId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentCourse>>> = ({ signal }) => getStudentCourse(courseId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: courseId !== null && courseId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentCourse>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentCourseQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentCourse>>>
+export type GetStudentCourseQueryError = ErrorType<void>
+
+
+
+export function useGetStudentCourse<TData = Awaited<ReturnType<typeof getStudentCourse>>, TError = ErrorType<void>>(
+ courseId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentCourse>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentCourseQueryOptions(courseId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getListCreatorProductsUrl = () => {
 

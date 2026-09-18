@@ -1,7 +1,7 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request, type Response } from "express";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import OpenAI from "openai";
-import { db, coursesTable, courseModulesTable, lessonAssetsTable, lessonsTable, productsTable, usersTable } from "@workspace/db";
+import { db, coursesTable, courseModulesTable, enrollmentsTable, lessonAssetsTable, lessonsTable, productsTable, usersTable } from "@workspace/db";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewares/auth";
 import { createCourseThumbnailUploadUrl, createLessonUploadUrl, objectFile } from "../lib/objectStorage";
 
@@ -21,6 +21,37 @@ async function ownedLesson(lessonId: number, req: AuthenticatedRequest) {
     .innerJoin(coursesTable, eq(coursesTable.id, courseModulesTable.courseId))
     .where(and(eq(lessonsTable.id, lessonId), req.canonicalRole === "admin" ? undefined : eq(coursesTable.creatorId, req.canonicalUserId!)));
   return row;
+}
+
+async function streamAsset(asset: typeof lessonAssetsTable.$inferSelect, req: Request, res: Response) {
+  const file = objectFile(asset.objectPath); const [meta] = await file.getMetadata();
+  const size = Number(meta.size ?? asset.sizeBytes);
+  const range = req.headers.range;
+  res.setHeader("Content-Type", meta.contentType ?? asset.mimeType);
+  res.setHeader("Content-Disposition", `inline; filename="${asset.filename.replace(/["\\\r\n]/g, "_")}"`);
+  res.setHeader("Accept-Ranges", "bytes");
+  if (!range) {
+    res.setHeader("Content-Length", size);
+    file.createReadStream().pipe(res);
+    return;
+  }
+  const match = /^bytes=(\d+)-(\d*)$/.exec(range);
+  if (!match) {
+    res.status(416).setHeader("Content-Range", `bytes */${size}`);
+    res.end();
+    return;
+  }
+  const start = Number(match[1]);
+  const end = match[2] ? Math.min(Number(match[2]), size - 1) : size - 1;
+  if (start > end || start >= size) {
+    res.status(416).setHeader("Content-Range", `bytes */${size}`);
+    res.end();
+    return;
+  }
+  res.status(206);
+  res.setHeader("Content-Range", `bytes ${start}-${end}/${size}`);
+  res.setHeader("Content-Length", end - start + 1);
+  file.createReadStream({ start, end }).pipe(res);
 }
 
 router.post("/admin/courses", requireAuth, requireRole("admin"), async (req, res): Promise<void> => {
@@ -115,34 +146,18 @@ router.get("/creator/assets/:assetId/download", requireAuth, requireRole("creato
   const assetId = id(req.params.assetId); if (!assetId) { res.status(400).json({ error: "Invalid asset id" }); return; }
   const [asset] = await db.select().from(lessonAssetsTable).where(eq(lessonAssetsTable.id, assetId));
   if (!asset || asset.status !== "uploaded" || !await ownedLesson(asset.lessonId, req as AuthenticatedRequest)) { res.status(404).json({ error: "Asset not found" }); return; }
-  const file = objectFile(asset.objectPath); const [meta] = await file.getMetadata();
-  const size = Number(meta.size ?? asset.sizeBytes);
-  const range = req.headers.range;
-  res.setHeader("Content-Type", meta.contentType ?? asset.mimeType);
-  res.setHeader("Content-Disposition", `inline; filename="${asset.filename.replace(/["\\\r\n]/g, "_")}"`);
-  res.setHeader("Accept-Ranges", "bytes");
-  if (!range) {
-    res.setHeader("Content-Length", size);
-    file.createReadStream().pipe(res);
-    return;
-  }
-  const match = /^bytes=(\d+)-(\d*)$/.exec(range);
-  if (!match) {
-    res.status(416).setHeader("Content-Range", `bytes */${size}`);
-    res.end();
-    return;
-  }
-  const start = Number(match[1]);
-  const end = match[2] ? Math.min(Number(match[2]), size - 1) : size - 1;
-  if (start > end || start >= size) {
-    res.status(416).setHeader("Content-Range", `bytes */${size}`);
-    res.end();
-    return;
-  }
-  res.status(206);
-  res.setHeader("Content-Range", `bytes ${start}-${end}/${size}`);
-  res.setHeader("Content-Length", end - start + 1);
-  file.createReadStream({ start, end }).pipe(res);
+  await streamAsset(asset, req, res);
+});
+router.get("/student/courses/:courseId/assets/:assetId/stream", requireAuth, requireRole("student", "creator", "admin"), async (req, res): Promise<void> => {
+  const courseId = id(req.params.courseId), assetId = id(req.params.assetId), user = req as AuthenticatedRequest;
+  if (!courseId || !assetId || !user.canonicalUserId) { res.status(400).json({ error: "Invalid course or asset" }); return; }
+  const [row] = await db.select({ asset: lessonAssetsTable }).from(lessonAssetsTable)
+    .innerJoin(lessonsTable, eq(lessonsTable.id, lessonAssetsTable.lessonId))
+    .innerJoin(courseModulesTable, eq(courseModulesTable.id, lessonsTable.moduleId))
+    .innerJoin(enrollmentsTable, and(eq(enrollmentsTable.courseId, courseModulesTable.courseId), eq(enrollmentsTable.userId, user.canonicalUserId)))
+    .where(and(eq(courseModulesTable.courseId, courseId), eq(lessonAssetsTable.id, assetId), eq(lessonAssetsTable.status, "uploaded")));
+  if (!row) { res.status(404).json({ error: "Video not found or enrollment required" }); return; }
+  await streamAsset(row.asset, req, res);
 });
 router.delete("/creator/assets/:assetId/download", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const assetId = id(req.params.assetId);

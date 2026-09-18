@@ -282,6 +282,65 @@ export interface VideoUploadInput {
   sizeBytes: number;
 }
 
+export type StudentLessonAssetKind = typeof StudentLessonAssetKind[keyof typeof StudentLessonAssetKind];
+
+
+export const StudentLessonAssetKind = {
+  video: 'video',
+} as const;
+
+export type StudentLessonAssetStatus = typeof StudentLessonAssetStatus[keyof typeof StudentLessonAssetStatus];
+
+
+export const StudentLessonAssetStatus = {
+  uploaded: 'uploaded',
+} as const;
+
+export interface StudentLessonAsset {
+  id: number;
+  lessonId: number;
+  kind: StudentLessonAssetKind;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  status: StudentLessonAssetStatus;
+  streamUrl: string;
+}
+
+export interface StudentLesson {
+  id: number;
+  moduleId: number;
+  title: string;
+  description?: string | null;
+  position: number;
+  isPreview: boolean;
+  assets: StudentLessonAsset[];
+}
+
+export interface StudentModule {
+  id: number;
+  courseId: number;
+  title: string;
+  position: number;
+  lessons: StudentLesson[];
+}
+
+export interface StudentCourse {
+  id: number;
+  title: string;
+  description: string;
+  /** @nullable */
+  thumbnailUrl?: string | null;
+  outcomes?: string[];
+  faqs?: CourseFaq[];
+  /** @nullable */
+  creatorName?: string | null;
+  level: string;
+  lessons: number;
+  productId?: number | null;
+  modules: StudentModule[];
+}
+
 export interface VideoUploadResponse {
   uploadURL: string;
   asset: LessonAsset;

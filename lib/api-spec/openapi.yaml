@@ -159,6 +159,15 @@ paths:
         "200": { description: Enrolled, content: { application/json: { schema: { $ref: "#/components/schemas/EnrollmentResult" } } } }
         "401": { description: Authentication required }
         "404": { description: Published course not found }
+  /student/courses/{courseId}:
+    get:
+      operationId: getStudentCourse
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: courseId, in: path, required: true, schema: { type: integer } }]
+      responses:
+        "200": { description: Enrolled course with playable lessons, content: { application/json: { schema: { $ref: "#/components/schemas/StudentCourse" } } } }
+        "403": { description: Enrollment required }
+        "404": { description: Course not found }
   /creator/products:
     get:
       operationId: listCreatorProducts
@@ -764,6 +773,53 @@ components:
         mimeType: { type: string }
         sizeBytes: { type: integer }
         status: { type: string, enum: [pending, uploaded, failed] }
+    StudentLessonAsset:
+      type: object
+      required: [id, lessonId, kind, filename, mimeType, sizeBytes, status, streamUrl]
+      properties:
+        id: { type: integer }
+        lessonId: { type: integer }
+        kind: { type: string, enum: [video] }
+        filename: { type: string }
+        mimeType: { type: string }
+        sizeBytes: { type: integer }
+        status: { type: string, enum: [uploaded] }
+        streamUrl: { type: string }
+    StudentLesson:
+      type: object
+      required: [id, moduleId, title, position, isPreview, assets]
+      properties:
+        id: { type: integer }
+        moduleId: { type: integer }
+        title: { type: string }
+        description: { type: string, nullable: true }
+        position: { type: integer }
+        isPreview: { type: boolean }
+        assets: { type: array, items: { $ref: "#/components/schemas/StudentLessonAsset" } }
+    StudentModule:
+      type: object
+      required: [id, courseId, title, position, lessons]
+      properties:
+        id: { type: integer }
+        courseId: { type: integer }
+        title: { type: string }
+        position: { type: integer }
+        lessons: { type: array, items: { $ref: "#/components/schemas/StudentLesson" } }
+    StudentCourse:
+      type: object
+      required: [id, title, description, level, lessons, modules]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        thumbnailUrl: { type: ["string", "null"] }
+        outcomes: { type: array, items: { type: string } }
+        faqs: { type: array, items: { $ref: "#/components/schemas/CourseFaq" } }
+        creatorName: { type: ["string", "null"] }
+        level: { type: string }
+        lessons: { type: integer }
+        productId: { type: integer, nullable: true }
+        modules: { type: array, items: { $ref: "#/components/schemas/StudentModule" } }
     VideoUploadResponse:
       type: object
       required: [uploadURL, asset]

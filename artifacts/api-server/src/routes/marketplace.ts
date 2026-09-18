@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { and, eq, ilike, desc, inArray, sql } from "drizzle-orm";
 import {
-  db, categoriesTable, coursesTable, courseModulesTable, lessonsTable, productsTable, usersTable, enrollmentsTable,
+  db, categoriesTable, coursesTable, courseModulesTable, lessonsTable, lessonAssetsTable, productsTable, usersTable, enrollmentsTable,
   ordersTable, orderItemsTable, wishlistTable, platformSettingsTable,
 } from "@workspace/db";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewares/auth";
@@ -56,6 +56,47 @@ router.post("/student/courses/:courseId/enroll", auth, async (req, res) => {
   if (!course) { res.status(404).json({ error: "Published course not found" }); return; }
   const inserted = await db.insert(enrollmentsTable).values({ userId, courseId }).onConflictDoNothing().returning({ id: enrollmentsTable.id });
   res.json({ enrolled: true, alreadyEnrolled: inserted.length === 0, courseId });
+});
+router.get("/student/courses/:courseId", auth, requireRole("student", "creator", "admin"), async (req, res) => {
+  const courseId = id(req.params.courseId), userId = await userOf(req as AuthenticatedRequest);
+  if (!courseId || !userId) { res.status(400).json({ error: "Invalid course" }); return; }
+  const [enrollment] = await db.select({ id: enrollmentsTable.id }).from(enrollmentsTable)
+    .where(and(eq(enrollmentsTable.courseId, courseId), eq(enrollmentsTable.userId, userId)));
+  if (!enrollment) { res.status(403).json({ error: "Enrollment required" }); return; }
+  const [row] = await db.select({ course: coursesTable, productId: productsTable.id, creatorName: usersTable.name }).from(coursesTable)
+    .leftJoin(productsTable, and(eq(productsTable.courseId, coursesTable.id), eq(productsTable.type, "course")))
+    .innerJoin(usersTable, eq(usersTable.id, coursesTable.creatorId))
+    .where(eq(coursesTable.id, courseId));
+  if (!row) { res.status(404).json({ error: "Course not found" }); return; }
+  const modules = await db.select().from(courseModulesTable).where(eq(courseModulesTable.courseId, courseId)).orderBy(courseModulesTable.position);
+  const moduleIds = modules.map((module) => module.id);
+  const lessons = moduleIds.length ? await db.select().from(lessonsTable).where(inArray(lessonsTable.moduleId, moduleIds)).orderBy(lessonsTable.position) : [];
+  const lessonIds = lessons.map((lesson) => lesson.id);
+  const assets = lessonIds.length ? await db.select({
+    id: lessonAssetsTable.id,
+    lessonId: lessonAssetsTable.lessonId,
+    kind: lessonAssetsTable.kind,
+    filename: lessonAssetsTable.filename,
+    mimeType: lessonAssetsTable.mimeType,
+    sizeBytes: lessonAssetsTable.sizeBytes,
+    status: lessonAssetsTable.status,
+  }).from(lessonAssetsTable).where(and(inArray(lessonAssetsTable.lessonId, lessonIds), eq(lessonAssetsTable.status, "uploaded"))) : [];
+  res.json({
+    ...row.course,
+    productId: row.productId,
+    creatorName: row.creatorName,
+    lessons: lessons.length,
+    modules: modules.map((module) => ({
+      ...module,
+      lessons: lessons.filter((lesson) => lesson.moduleId === module.id).map((lesson) => ({
+        ...lesson,
+        assets: assets.filter((asset) => asset.lessonId === lesson.id).map((asset) => ({
+          ...asset,
+          streamUrl: `/api/student/courses/${courseId}/assets/${asset.id}/stream`,
+        })),
+      })),
+    })),
+  });
 });
 
 router.post("/creator/products", auth, requireRole("creator", "admin"), async (req, res) => {

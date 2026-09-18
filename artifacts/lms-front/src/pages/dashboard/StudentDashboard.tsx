@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { UpgradeCreatorButton } from "@/components/auth/UpgradeCreatorButton";
 import { StudentLiveClasses } from "@/components/dashboard/StudentLiveClasses";
 import { LiveClassroom } from "@/components/dashboard/LiveClassroom";
+import { StudentCoursePlayer } from "@/components/dashboard/StudentCoursePlayer";
 
 export default function StudentDashboard() {
   const params = useParams();
@@ -26,6 +27,13 @@ export default function StudentDashboard() {
     return (
       <DashboardLayout role="student">
         <LiveClassroom id={Number(id)} backUrl="/dashboard/student/live-classes" />
+      </DashboardLayout>
+    );
+  }
+  if (section === "courses" && id) {
+    return (
+      <DashboardLayout role="student">
+        <StudentCoursePlayer courseId={Number(id)} />
       </DashboardLayout>
     );
   }
@@ -206,7 +214,7 @@ function Library() {
                   )}
                   <div className="mt-auto pt-4 border-t border-border flex justify-between items-center">
                     <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Enrolled</Badge>
-                    <Link href={`/courses/${course.id}`}><Button size="sm">Continue Learning</Button></Link>
+                     <Link href={`/dashboard/student/courses/${course.id}`}><Button size="sm">Continue Learning</Button></Link>
                   </div>
                </div>
              );

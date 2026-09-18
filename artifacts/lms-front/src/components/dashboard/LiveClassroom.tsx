@@ -14,11 +14,12 @@ import {
   useRecordLiveClassJoin, 
   useRecordLiveClassLeave,
   useStartLiveClassRecording,
-  useStopLiveClassRecording
+  useStopLiveClassRecording,
+  useCompleteLiveClass
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Video, Circle, Square, AlertCircle, Loader2, MonitorUp, MonitorX } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
@@ -30,6 +31,7 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
   
   const [tokenInfo, setTokenInfo] = useState<{ token: string, serverUrl: string, isHost: boolean, classTitle: string, status: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [disconnected, setDisconnected] = useState(false);
   
   const leaveRecordedRef = useRef(false);
 
@@ -54,12 +56,14 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
   }, [id, joinClass, tokenInfo, error]);
 
   const handleConnected = () => {
+    setDisconnected(false);
     recordJoin.mutate({ id }, {
       onError: (err) => console.error("Failed to record join:", err)
     });
   };
 
   const handleDisconnected = () => {
+    setDisconnected(true);
     if (!leaveRecordedRef.current) {
       leaveRecordedRef.current = true;
       recordLeave.mutate({ id }, {
@@ -100,6 +104,19 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
     );
   }
 
+  if (disconnected) {
+    return (
+      <div className="flex min-h-[70vh] flex-col items-center justify-center space-y-4 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-muted-foreground">
+          <Video className="h-8 w-8" />
+        </div>
+        <h2 className="text-2xl font-bold">Live class disconnected</h2>
+        <p className="max-w-md text-muted-foreground">The creator may have ended the live class, or your connection was interrupted.</p>
+        <Link href={backUrl}><Button>Back to live classes</Button></Link>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] -m-6">
       {/* Custom Header */}
@@ -123,7 +140,7 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
         </div>
         
         <div className="flex items-center gap-3">
-          {tokenInfo.isHost && <HostControls classId={id} />}
+          {tokenInfo.isHost && <HostControls classId={id} backUrl={backUrl} />}
         </div>
       </div>
 
@@ -236,10 +253,12 @@ function StudentBroadcastView() {
   );
 }
 
-function HostControls({ classId }: { classId: number }) {
+function HostControls({ classId, backUrl }: { classId: number; backUrl: string }) {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const startRecording = useStartLiveClassRecording();
   const stopRecording = useStopLiveClassRecording();
+  const completeClass = useCompleteLiveClass();
   const [isRecording, setIsRecording] = useState(false);
 
   const handleStartRecording = () => {
@@ -266,8 +285,23 @@ function HostControls({ classId }: { classId: number }) {
     });
   };
 
+  const handleEndClass = () => {
+    if (!confirm("End this live class now? All connected students will be disconnected.")) return;
+    completeClass.mutate({ id: classId }, {
+      onSuccess: () => {
+        toast({ title: "Live class ended", description: "Students have been disconnected from this classroom." });
+        setLocation(backUrl);
+      },
+      onError: (err) => toast({ title: "Could not end class", description: err.message, variant: "destructive" }),
+    });
+  };
+
   return (
     <div className="flex items-center gap-2">
+      <Button variant="destructive" size="sm" onClick={handleEndClass} disabled={completeClass.isPending}>
+        <Square className="mr-2 h-4 w-4 fill-current" />
+        {completeClass.isPending ? "Ending..." : "End Live Class"}
+      </Button>
       {isRecording ? (
         <Button variant="destructive" size="sm" onClick={handleStopRecording} disabled={stopRecording.isPending}>
           <Square className="w-4 h-4 mr-2 fill-current" />
