@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { LessonVideoUpload } from "@/components/dashboard/LessonVideoUpload";
-import { LiveClassesTab } from "@/components/dashboard/LiveClassesTab";
+import { LiveClassesTab, LiveClassFormDialog } from "@/components/dashboard/LiveClassesTab";
 
 export function CourseBuilder({
   productId,
@@ -565,6 +565,7 @@ function ModuleItem({ module, index, total, onMove, productId }: any) {
   const reorderLessons = useReorderCreatorCourseLessons();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isLiveClassFormOpen, setIsLiveClassFormOpen] = useState(false);
   const [title, setTitle] = useState(module.title);
 
   const saveTitle = () => {

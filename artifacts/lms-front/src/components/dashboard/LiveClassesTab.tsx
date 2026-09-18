@@ -42,6 +42,7 @@ import { LessonVideoUpload } from "@/components/dashboard/LessonVideoUpload";
 
 export function LiveClassesTab({ productId, role = 'creator' }: { productId: number, role?: 'creator' | 'admin' }) {
   const { data: classes, isLoading } = useListCreatorLiveClasses(productId);
+  const { data: builder } = useGetCreatorCourseBuilder(productId);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   return (
@@ -51,7 +52,7 @@ export function LiveClassesTab({ productId, role = 'creator' }: { productId: num
           <h2 className="text-[24px] font-bold text-black">Live Classes</h2>
           <p className="text-[#4D4D4D] text-[14px] mt-1">Schedule and manage live sessions for this course.</p>
         </div>
-        <LiveClassFormDialog productId={productId} open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <LiveClassFormDialog productId={productId} modules={builder?.modules} open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]"><Plus className="w-4 h-4 mr-2" /> Schedule Class</Button>
         </LiveClassFormDialog>
       </div>
@@ -63,14 +64,14 @@ export function LiveClassesTab({ productId, role = 'creator' }: { productId: num
           <Video className="w-10 h-10 text-[#9794AA] mx-auto mb-3" />
           <h3 className="font-bold text-[16px] text-black">No live classes scheduled</h3>
           <p className="text-[14px] text-[#4D4D4D] mb-4">Start by scheduling a live class for your students.</p>
-          <LiveClassFormDialog productId={productId} open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+          <LiveClassFormDialog productId={productId} modules={builder?.modules} open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <Button variant="outline" className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-10 px-6 rounded-md font-medium text-[14px]">Schedule Class</Button>
           </LiveClassFormDialog>
         </div>
       ) : (
         <div className="space-y-4">
           {classes.map((cls) => (
-            <LiveClassItem key={cls.id} liveClass={cls} productId={productId} role={role} />
+            <LiveClassItem key={cls.id} liveClass={cls} productId={productId} role={role} modules={builder?.modules} />
           ))}
         </div>
       )}
@@ -78,7 +79,7 @@ export function LiveClassesTab({ productId, role = 'creator' }: { productId: num
   );
 }
 
-function LiveClassItem({ liveClass, productId, role }: { liveClass: LiveClass, productId: number, role: 'creator' | 'admin' }) {
+function LiveClassItem({ liveClass, productId, role, modules }: { liveClass: LiveClass, productId: number, role: 'creator' | 'admin', modules?: any[] }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const deleteClass = useDeleteLiveClass();
@@ -186,7 +187,7 @@ function LiveClassItem({ liveClass, productId, role }: { liveClass: LiveClass, p
             <Button variant="ghost" size="icon" className="h-9 w-9 text-[#9794AA] hover:text-black hover:bg-gray-100"><MoreVertical className="w-4 h-4" /></Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <LiveClassFormDialog productId={productId} liveClass={liveClass} open={isEditOpen} onOpenChange={setIsEditOpen}>
+            <LiveClassFormDialog productId={productId} liveClass={liveClass} modules={modules} open={isEditOpen} onOpenChange={setIsEditOpen}>
               <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer font-medium text-[13px]">
                 <Edit2 className="w-4 h-4 mr-2" /> Edit Details
               </DropdownMenuItem>
@@ -303,18 +304,22 @@ function RecordingUploadDialog({ liveClass, productId }: { liveClass: LiveClass;
   );
 }
 
-function LiveClassFormDialog({ 
+export function LiveClassFormDialog({ 
   productId, 
   liveClass, 
   children,
   open,
-  onOpenChange
+  onOpenChange,
+  defaultModuleId,
+  modules
 }: { 
   productId: number, 
   liveClass?: LiveClass, 
   children: React.ReactNode,
   open: boolean,
-  onOpenChange: (open: boolean) => void
+  onOpenChange: (open: boolean) => void,
+  defaultModuleId?: number | null,
+  modules?: any[]
 }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -324,6 +329,7 @@ function LiveClassFormDialog({
 
   const [title, setTitle] = useState(liveClass?.title || "");
   const [description, setDescription] = useState(liveClass?.description || "");
+  const [moduleId, setModuleId] = useState<number | null>(liveClass?.moduleId ?? defaultModuleId ?? null);
   
   // Format dates for datetime-local input (YYYY-MM-DDThh:mm)
   const formatForInput = (isoString?: string | null) => {
@@ -341,8 +347,9 @@ function LiveClassFormDialog({
       setDescription(liveClass?.description || "");
       setStartsAt(formatForInput(liveClass?.startsAt));
       setEndsAt(formatForInput(liveClass?.endsAt));
+      setModuleId(liveClass?.moduleId ?? defaultModuleId ?? null);
     }
-  }, [open, liveClass]);
+  }, [open, liveClass, defaultModuleId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -360,7 +367,7 @@ function LiveClassFormDialog({
       return;
     }
 
-    const data = { title, description, startsAt: startIso, endsAt: endIso, timezone };
+    const data = { title, description, startsAt: startIso, endsAt: endIso, timezone, moduleId };
 
     if (isEditing) {
       updateClass.mutate({ id: liveClass.id, data }, {
@@ -399,6 +406,22 @@ function LiveClassFormDialog({
               <Label htmlFor="title">Class Title</Label>
               <Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Q&A Session: Week 1" />
             </div>
+            {modules && modules.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="module">Associated Module (Optional)</Label>
+                <Select value={moduleId ? moduleId.toString() : "none"} onValueChange={(val) => setModuleId(val === "none" ? null : parseInt(val))}>
+                  <SelectTrigger id="module">
+                    <SelectValue placeholder="Select a module" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Course-wide (No specific module)</SelectItem>
+                    {modules.map(m => (
+                      <SelectItem key={m.id} value={m.id.toString()}>{m.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="description">Description (Optional)</Label>
               <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} placeholder="What will be covered?" rows={3} className="resize-none" />
