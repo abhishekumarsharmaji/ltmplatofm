@@ -90,7 +90,7 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
         </div>
         <h2 className="text-2xl font-bold">Cannot Access Classroom</h2>
         <p className="text-muted-foreground">{error}</p>
-        <Link href={backUrl}><Button className="mt-4">Go Back</Button></Link>
+        <Link href={backUrl} className="mt-4 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Go Back</Link>
       </div>
     );
   }
@@ -112,7 +112,7 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
         </div>
         <h2 className="text-2xl font-bold">Live class disconnected</h2>
         <p className="max-w-md text-muted-foreground">The creator may have ended the live class, or your connection was interrupted.</p>
-        <Link href={backUrl}><Button>Back to live classes</Button></Link>
+        <Link href={backUrl} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Back to live classes</Link>
       </div>
     );
   }
@@ -122,8 +122,8 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
       {/* Custom Header */}
       <div className="h-16 px-6 bg-card border-b border-border flex items-center justify-between shrink-0 z-10 shadow-sm">
         <div className="flex items-center gap-4">
-          <Link href={backUrl}>
-            <Button variant="ghost" size="icon" className="hover:bg-muted"><ArrowLeft className="w-5 h-5" /></Button>
+          <Link href={backUrl} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-muted hover:text-accent-foreground h-9 w-9">
+            <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="w-8 h-8 bg-brand/10 text-brand rounded-lg flex items-center justify-center">
             <Video className="w-4 h-4" />

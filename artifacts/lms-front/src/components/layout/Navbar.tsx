@@ -150,10 +150,8 @@ export function Navbar() {
               <Link href="/auth/login" className="hidden lg:block text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors">
                 {t("login")}
               </Link>
-              <Link href="/auth/sign-up">
-                <Button data-testid="link-start-free" className="hidden sm:inline-flex h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md shadow-[0_10px_24px_rgba(21,207,116,0.35)] transition-all">
+              <Link href="/auth/sign-up" data-testid="link-start-free" className="hidden sm:inline-flex h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md shadow-[0_10px_24px_rgba(21,207,116,0.35)] transition-all items-center justify-center">
                   {t("join")}
-                </Button>
               </Link>
             </>
           )}

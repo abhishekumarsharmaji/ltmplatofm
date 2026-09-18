@@ -23,9 +23,7 @@ export function StudentLiveClasses() {
           <Video className="w-12 h-12 text-[#9794AA] mx-auto mb-4" />
           <h3 className="font-bold text-[18px] text-black mb-2">No courses enrolled</h3>
           <p className="text-[14px] text-[#4D4D4D] mb-6">Enroll in a course to see upcoming live classes.</p>
-          <Link href="/courses">
-            <Button className="h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">Browse Courses</Button>
-          </Link>
+          <Link href="/courses" className="h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)] inline-flex items-center justify-center">Browse Courses</Link>
         </div>
       </div>
     );
@@ -109,11 +107,9 @@ function StudentLiveClassItem({ liveClass }: { liveClass: LiveClass }) {
         </div>
         
         {liveClass.status === 'live' || liveClass.status === 'scheduled' ? (
-          <Link href={`/dashboard/student/live-classes/${liveClass.id}/classroom`}>
-            <Button className={`w-full h-11 rounded-md font-medium text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)] ${liveClass.status === 'live' ? 'bg-[#FE543D] hover:bg-red-600 shadow-[0_4px_14px_rgba(254,84,61,0.25)]' : 'bg-primary hover:bg-[#10A364]'}`}>
+          <Link href={`/dashboard/student/live-classes/${liveClass.id}/classroom`} className={`w-full h-11 rounded-md font-medium text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)] inline-flex items-center justify-center text-white ${liveClass.status === 'live' ? 'bg-[#FE543D] hover:bg-red-600 shadow-[0_4px_14px_rgba(254,84,61,0.25)]' : 'bg-primary hover:bg-[#10A364]'}`}>
               <Video className="w-4 h-4 mr-2" />
               {liveClass.status === 'live' ? 'Join Class Now' : 'Go to Classroom'}
-            </Button>
           </Link>
         ) : liveClass.recordingUrl ? (
           <Button className="w-full border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-11 rounded-md font-medium text-[14px]" asChild>

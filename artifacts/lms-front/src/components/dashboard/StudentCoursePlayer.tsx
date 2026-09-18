@@ -28,9 +28,7 @@ export function StudentCoursePlayer({ courseId }: { courseId: number }) {
       <div className="mx-auto max-w-xl py-24 text-center border border-[#E5E5E5] bg-white rounded-xl shadow-sm">
         <h2 className="text-[24px] font-bold text-black">Course unavailable</h2>
         <p className="mt-2 text-[15px] text-[#4D4D4D]">You must be enrolled to open this learning area.</p>
-        <Link href="/dashboard/student/library">
-          <Button className="mt-8 h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">Back to My Learning</Button>
-        </Link>
+        <Link href="/dashboard/student/library" className="mt-8 h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)] inline-flex items-center justify-center">Back to My Learning</Link>
       </div>
     );
   }
