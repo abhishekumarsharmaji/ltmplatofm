@@ -156,7 +156,8 @@ router.post("/creator/lessons/:lessonId/assets/request-upload", requireAuth, req
   if (!await ownedLesson(lessonId, auth)) { res.status(404).json({ error: "Lesson not found" }); return; }
   const upload = await createLessonAssetMultipartUpload(mimeType);
   const [asset] = await db.insert(lessonAssetsTable).values({ lessonId, kind: isVideo ? "video" : (attachment === "pdf" || attachment === "doc" || attachment === "ppt" || attachment === "xls" ? "document" : "other"), storageKey: upload.objectPath, objectPath: upload.objectPath, filename: filename.replace(/["\\\r\n]/g, "_"), mimeType, sizeBytes }).returning();
-  res.status(201).json({ asset, uploadId: upload.uploadId, partSize: VIDEO_PART_BYTES });
+  const { storageKey: _storageKey, objectPath: _objectPath, ...safeAsset } = asset;
+  res.status(201).json({ asset: safeAsset, uploadId: upload.uploadId, partSize: VIDEO_PART_BYTES });
 });
 router.post("/creator/lessons/:lessonId/assets/:assetId/part-url", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const lessonId = id(req.params.lessonId), assetId = id(req.params.assetId), auth = req as AuthenticatedRequest;
@@ -185,19 +186,21 @@ router.post("/creator/lessons/:lessonId/assets/:assetId/finalize", requireAuth, 
   const actualSize = Number(metadata.size ?? 0);
   const isVideo = asset.kind === "video";
   if (actualSize < 1 || actualSize > (isVideo ? MAX_VIDEO_BYTES : MAX_ATTACHMENT_BYTES) || (isVideo ? (metadata.contentType && !metadata.contentType.startsWith("video/")) : !attachmentKind(asset.filename, String(metadata.contentType ?? asset.mimeType)))) { res.status(422).json({ error: "Uploaded object type or size is not allowed" }); return; }
-  const previousAssets = await db.select().from(lessonAssetsTable).where(and(
+  const previousVideoAssets = isVideo ? await db.select().from(lessonAssetsTable).where(and(
     eq(lessonAssetsTable.lessonId, lessonId),
+    eq(lessonAssetsTable.kind, "video"),
     sql`${lessonAssetsTable.id} <> ${assetId}`,
-  ));
+  )) : [];
   const [updated] = await db.transaction(async (tx) => {
     const [result] = await tx.update(lessonAssetsTable).set({ status: "uploaded", sizeBytes: actualSize, mimeType: metadata.contentType ?? asset.mimeType }).where(eq(lessonAssetsTable.id, assetId)).returning();
-    if (isVideo && previousAssets.length) {
-      await tx.delete(lessonAssetsTable).where(inArray(lessonAssetsTable.id, previousAssets.map((item) => item.id)));
+    if (previousVideoAssets.length) {
+      await tx.delete(lessonAssetsTable).where(inArray(lessonAssetsTable.id, previousVideoAssets.map((item) => item.id)));
     }
     return [result];
   });
-  await Promise.all(previousAssets.map((item) => objectFile(item.objectPath).delete({ ignoreNotFound: true }).catch(() => undefined)));
-  res.json(updated);
+  await Promise.all(previousVideoAssets.map((item) => objectFile(item.objectPath).delete({ ignoreNotFound: true }).catch(() => undefined)));
+  const { storageKey: _updatedStorageKey, objectPath: _updatedObjectPath, ...safeUpdated } = updated;
+  res.json(safeUpdated);
 });
 router.post("/creator/lessons/:lessonId/assets/:assetId/abort", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const lessonId = id(req.params.lessonId), assetId = id(req.params.assetId), auth = req as AuthenticatedRequest;
