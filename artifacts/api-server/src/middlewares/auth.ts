@@ -41,12 +41,16 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
   const [user] = await db.select().from(lmsUsersTable).where(eq(lmsUsersTable.id, id));
   if (!user) { res.status(401).json({ error: "Authentication required" }); return; }
   const role: "student" | "creator" | "admin" = user.role === "creator" || user.role === "admin" ? user.role : "student";
-  const [canonical] = await db.insert(usersTable).values({
-    email: user.email, name: user.name, role, passwordHash: user.passwordHash,
-  }).onConflictDoUpdate({
-    target: usersTable.email,
-    set: { name: user.name, role, passwordHash: user.passwordHash, updatedAt: new Date() },
-  }).returning({ id: usersTable.id, role: usersTable.role });
+  let [canonical] = await db.select({ id: usersTable.id, role: usersTable.role })
+    .from(usersTable).where(eq(usersTable.email, user.email)).limit(1);
+  if (!canonical) {
+    [canonical] = await db.insert(usersTable).values({
+      email: user.email, name: user.name, role, passwordHash: user.passwordHash,
+    }).onConflictDoUpdate({
+      target: usersTable.email,
+      set: { role, updatedAt: new Date() },
+    }).returning({ id: usersTable.id, role: usersTable.role });
+  }
   (req as AuthenticatedRequest).user = user;
   (req as AuthenticatedRequest).canonicalUserId = canonical.id;
   (req as AuthenticatedRequest).canonicalRole = canonical.role;

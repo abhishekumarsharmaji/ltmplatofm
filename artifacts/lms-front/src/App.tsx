@@ -1,10 +1,9 @@
-import { type ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from '@/components/theme-provider';
-import NotFound from '@/pages/not-found';
 import {
   Route,
   Switch,
@@ -12,25 +11,24 @@ import {
   Router as WouterRouter,
 } from 'wouter';
 
-// Pages
-import Home from './pages/Home';
-import Courses from './pages/Courses';
-import CourseDetail from './pages/CourseDetail';
-import Products from './pages/Products';
-import ProductDetail from './pages/ProductDetail';
-import Pricing from './pages/Pricing';
-import PlatformPricing from './pages/PlatformPricing';
-import About from './pages/About';
-import Creators from './pages/Creators';
-import Login from './pages/auth/Login';
-import SignUp from './pages/auth/SignUp';
-import UnavailablePage from './pages/UnavailablePage';
-
-// Dashboards
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import StudentDashboard from './pages/dashboard/StudentDashboard';
-import CreatorDashboard from './pages/dashboard/CreatorDashboard';
-import AdminDashboard from './pages/dashboard/AdminDashboard';
+
+const Home = lazy(() => import('./pages/Home'));
+const Courses = lazy(() => import('./pages/Courses'));
+const CourseDetail = lazy(() => import('./pages/CourseDetail'));
+const Products = lazy(() => import('./pages/Products'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const PlatformPricing = lazy(() => import('./pages/PlatformPricing'));
+const About = lazy(() => import('./pages/About'));
+const Creators = lazy(() => import('./pages/Creators'));
+const Login = lazy(() => import('./pages/auth/Login'));
+const SignUp = lazy(() => import('./pages/auth/SignUp'));
+const UnavailablePage = lazy(() => import('./pages/UnavailablePage'));
+const NotFound = lazy(() => import('./pages/not-found'));
+const StudentDashboard = lazy(() => import('./pages/dashboard/StudentDashboard'));
+const CreatorDashboard = lazy(() => import('./pages/dashboard/CreatorDashboard'));
+const AdminDashboard = lazy(() => import('./pages/dashboard/AdminDashboard'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,12 +40,23 @@ const queryClient = new QueryClient({
         const status = typeof error === "object" && error !== null && "status" in error
           ? Number(error.status)
           : 0;
-        return failureCount < 3 && (status === 0 || status === 429 || status >= 500);
+        return failureCount < 2 && (status === 0 || status === 429 || status >= 500);
       },
-      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 5000),
+      retryDelay: (attempt) => Math.min(750 * 2 ** attempt, 2000),
+      staleTime: 60_000,
+      gcTime: 10 * 60_000,
+      refetchOnWindowFocus: false,
     },
   },
 });
+
+function RouteLoading() {
+  return (
+    <div className="flex min-h-[45vh] items-center justify-center" role="status" aria-label="Loading page">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+    </div>
+  );
+}
 
 function Router() {
   const Student = () => <ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>;
@@ -56,7 +65,8 @@ function Router() {
 
   return (
     <RoutedErrorBoundary>
-      <Switch>
+      <Suspense fallback={<RouteLoading />}>
+        <Switch>
         {/* Public Routes */}
         <Route path="/" component={Home} />
         <Route path="/courses" component={Courses} />
@@ -92,8 +102,9 @@ function Router() {
         <Route path="/dashboard/admin/:section/:id" component={Admin} />
         <Route path="/dashboard/admin/:section/:id/:action" component={Admin} />
         
-        <Route component={NotFound} />
-      </Switch>
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     </RoutedErrorBoundary>
   );
 }

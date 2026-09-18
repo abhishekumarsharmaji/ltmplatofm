@@ -174,9 +174,13 @@ router.get("/student/library", auth, requireRole("student", "creator", "admin"),
   res.json(await db.select({ enrollment: enrollmentsTable, course: coursesTable }).from(enrollmentsTable)
     .innerJoin(coursesTable, eq(coursesTable.id, enrollmentsTable.courseId)).where(eq(enrollmentsTable.userId, userId)));
 });
-router.get("/student/products/purchased", auth, async (req, res) => {
+router.get("/student/products/purchased", auth, requireRole("student", "creator", "admin"), async (req, res) => {
   const userId = await userOf(req as AuthenticatedRequest); if (!userId) { res.json([]); return; }
-  res.json(await db.select({ product: productsTable, order: ordersTable }).from(orderItemsTable).innerJoin(productsTable, eq(productsTable.id, orderItemsTable.productId)).innerJoin(ordersTable, and(eq(ordersTable.id, orderItemsTable.orderId), eq(ordersTable.userId, userId))));
+  res.json(await db.select({ product: productsTable, order: ordersTable }).from(orderItemsTable)
+    .innerJoin(productsTable, eq(productsTable.id, orderItemsTable.productId))
+    .innerJoin(ordersTable, and(eq(ordersTable.id, orderItemsTable.orderId), eq(ordersTable.userId, userId)))
+    .orderBy(desc(ordersTable.createdAt))
+    .limit(100));
 });
 router.get("/student/orders", auth, async (req, res) => { const userId = await userOf(req as AuthenticatedRequest); res.json(userId ? await db.select({ id: ordersTable.id, totalMinor: ordersTable.totalMinor, status: ordersTable.status, date: ordersTable.createdAt, currency: ordersTable.currency }).from(ordersTable).where(eq(ordersTable.userId, userId)) : []); });
 router.get("/student/wishlist", auth, async (req, res) => { const userId = await userOf(req as AuthenticatedRequest); res.json(userId ? await db.select({ wishlist: wishlistTable, product: productsTable }).from(wishlistTable).innerJoin(productsTable, eq(productsTable.id, wishlistTable.productId)).where(eq(wishlistTable.userId, userId)) : []); });

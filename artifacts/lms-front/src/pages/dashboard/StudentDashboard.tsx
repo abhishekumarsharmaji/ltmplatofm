@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useParams, Link } from "wouter";
 import { 
@@ -9,12 +10,17 @@ import {
   useMarketplaceCourses
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Package, ShoppingCart, Heart, Play, Trophy, CheckCircle2, Clock, Star } from "lucide-react";
+import { AlertCircle, BookOpen, Package, ShoppingCart, Heart, Play, Trophy, CheckCircle2, Clock, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UpgradeCreatorButton } from "@/components/auth/UpgradeCreatorButton";
-import { StudentLiveClasses } from "@/components/dashboard/StudentLiveClasses";
-import { LiveClassroom } from "@/components/dashboard/LiveClassroom";
-import { StudentCoursePlayer } from "@/components/dashboard/StudentCoursePlayer";
+
+const StudentLiveClasses = lazy(() => import("@/components/dashboard/StudentLiveClasses").then((module) => ({ default: module.StudentLiveClasses })));
+const LiveClassroom = lazy(() => import("@/components/dashboard/LiveClassroom").then((module) => ({ default: module.LiveClassroom })));
+const StudentCoursePlayer = lazy(() => import("@/components/dashboard/StudentCoursePlayer").then((module) => ({ default: module.StudentCoursePlayer })));
+
+function SectionLoading() {
+  return <div className="flex min-h-[40vh] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>;
+}
 
 export default function StudentDashboard() {
   const params = useParams();
@@ -26,14 +32,18 @@ export default function StudentDashboard() {
   if (section === "live-classes" && id && action === "classroom") {
     return (
       <DashboardLayout role="student">
-        <LiveClassroom id={Number(id)} backUrl="/dashboard/student/live-classes" />
+        <Suspense fallback={<SectionLoading />}>
+          <LiveClassroom id={Number(id)} backUrl="/dashboard/student/live-classes" />
+        </Suspense>
       </DashboardLayout>
     );
   }
   if (section === "courses" && id) {
     return (
       <DashboardLayout role="student">
-        <StudentCoursePlayer courseId={Number(id)} />
+        <Suspense fallback={<SectionLoading />}>
+          <StudentCoursePlayer courseId={Number(id)} />
+        </Suspense>
       </DashboardLayout>
     );
   }
@@ -43,7 +53,7 @@ export default function StudentDashboard() {
       {section === "overview" && <Overview name={session?.user?.name || "Student"} />}
       {section === "library" && <Library />}
       {section === "products" && <Products />}
-      {section === "live-classes" && !id && <StudentLiveClasses />}
+      {section === "live-classes" && !id && <Suspense fallback={<SectionLoading />}><StudentLiveClasses /></Suspense>}
       {section === "orders" && <Orders />}
       {section === "wishlist" && <Wishlist />}
     </DashboardLayout>
@@ -142,7 +152,7 @@ function Overview({ name }: { name: string }) {
                 <div className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-lg transition-shadow duration-300 flex flex-col h-full cursor-pointer overflow-hidden">
                   <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
                     {course.thumbnailUrl ? (
-                      <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img src={course.thumbnailUrl} alt={course.title} loading="lazy" decoding="async" width="640" height="400" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
                         <span className="text-4xl text-primary/30 font-bold">{course.title[0]}</span>
@@ -205,7 +215,7 @@ function Library() {
                <div key={i} className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-lg transition-shadow duration-300 flex flex-col h-full overflow-hidden">
                   <div className="relative aspect-[16/10] bg-gray-100 flex items-center justify-center overflow-hidden">
                     {course.thumbnailUrl ? (
-                      <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                       <img src={course.thumbnailUrl} alt={course.title} loading="lazy" decoding="async" width="640" height="400" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
                         <span className="text-4xl text-primary/30 font-bold">{course.title[0]}</span>
@@ -238,7 +248,7 @@ function Library() {
 }
 
 function Products() {
-  const { data: products, isLoading } = usePurchasedProducts();
+  const { data: products, isLoading, isError, isFetching, refetch } = usePurchasedProducts();
   
   return (
     <div className="space-y-8 max-w-6xl mx-auto pt-4">
@@ -249,6 +259,15 @@ function Products() {
       
       {isLoading ? (
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
+      ) : isError ? (
+        <div className="rounded-xl border border-red-100 bg-red-50 py-16 text-center">
+          <AlertCircle className="mx-auto mb-4 h-10 w-10 text-red-500" />
+          <h3 className="mb-2 text-[18px] font-bold text-black">Products couldn't load</h3>
+          <p className="mb-6 text-[14px] text-[#4D4D4D]">The server took too long to respond. Please try again.</p>
+          <Button onClick={() => refetch()} disabled={isFetching} className="h-11 bg-primary px-7 text-white hover:bg-[#10A364]">
+            {isFetching ? "Trying again..." : "Retry"}
+          </Button>
+        </div>
       ) : !products || products.length === 0 ? (
         <div className="text-center py-20 bg-white border border-[#E5E5E5] rounded-xl">
           <Package className="w-12 h-12 text-[#9794AA] mx-auto mb-4" />
