@@ -114,26 +114,18 @@ export default function Home() {
                 <div className="absolute top-[6%] right-[4%] w-4 h-4 bg-[#FE543D] rounded-full"></div>
                 <div className="absolute bottom-[4%] right-[22%] w-2.5 h-2.5 bg-primary rounded-full"></div>
                 
-                {/* Purple pill + Student 1 (Woman with books) */}
-                <div className="absolute left-[8%] bottom-[6%] z-10 w-[250px] aspect-[371/900] max-h-[86%]">
-                  <div className="absolute inset-x-[-14%] top-[6%] bottom-0 bg-gradient-to-b from-[#B88DC4] to-[#704FE6] rounded-full"></div>
+                {/* AI technology visual */}
+                <div className="absolute inset-x-[2%] top-[5%] bottom-[2%] z-0 flex items-center justify-center">
+                  <div className="absolute inset-[10%] rounded-full bg-[radial-gradient(circle,rgba(21,207,116,0.22)_0%,rgba(76,224,214,0.10)_45%,transparent_72%)] blur-2xl" />
+                  <div className="absolute inset-[4%] rounded-[48px] border border-emerald-100/70 bg-[linear-gradient(rgba(21,207,116,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(21,207,116,0.05)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(circle_at_center,black,transparent_76%)]" />
                   <img
-                    src={`${import.meta.env.BASE_URL}images/hero-student-1.webp`}
-                    alt="Student holding books"
-                    className="relative z-10 h-full w-full object-contain object-bottom"
-                    style={{ clipPath: "inset(0 -14% 0 -14% round 0 0 999px 999px)" }}
-                  />
-                </div>
-
-                {/* Blue pill + Student 2 (Man celebrating) */}
-                <div className="absolute right-[4%] top-[8%] z-0 w-[330px] aspect-[576/900] max-h-[84%]">
-                  {/* Explicit top radius (half the width): a "full" top radius would scale the bottom radius down to 0. */}
-                  <div className="absolute inset-x-0 top-[10%] bottom-0 bg-[#224FA3] rounded-t-[165px] rounded-b-[56px]"></div>
-                  <img
-                    src={`${import.meta.env.BASE_URL}images/hero-student-2.webp`}
-                    alt="Student celebrating"
-                    className="relative z-10 h-full w-full object-contain object-bottom"
-                    style={{ clipPath: "inset(0 0 0 0 round 0 0 56px 56px)" }}
+                    src={`${import.meta.env.BASE_URL}images/hero-ai-technology.webp`}
+                    alt="AI technology platform with a neural network and intelligent data systems"
+                    width="1100"
+                    height="1100"
+                    fetchPriority="high"
+                    decoding="async"
+                    className="relative z-10 h-full w-full object-contain mix-blend-multiply drop-shadow-[0_28px_55px_rgba(17,94,75,0.16)]"
                   />
                 </div>
 
