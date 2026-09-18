@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './addAdminUserEnrollment200';
 export * from './addWishlist201';
 export * from './adminCourse';
 export * from './adminCourseInput';
@@ -13,10 +14,13 @@ export * from './adminCreatedCourse';
 export * from './adminCreatorApplications200Item';
 export * from './adminCreatorApplicationsParams';
 export * from './adminCreatorApplicationsStatus';
+export * from './adminCreatorRoleInput';
+export * from './adminEnrollmentInput';
 export * from './adminOrders200Item';
 export * from './adminSettings200Item';
 export * from './adminUpdateSetting200';
 export * from './adminUpdateSettingInput';
+export * from './adminUserEnrollments200Item';
 export * from './category';
 export * from './categoryInput';
 export * from './course';

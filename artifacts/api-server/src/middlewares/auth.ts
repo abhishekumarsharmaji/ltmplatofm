@@ -64,6 +64,10 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
     [canonical] = await db.update(usersTable).set({ role: "admin", updatedAt: new Date() })
       .where(eq(usersTable.id, canonical.id)).returning({ id: usersTable.id, role: usersTable.role });
   }
+  if (isSuperAdminEmail(user.email) && user.role !== "admin") {
+    await db.update(lmsUsersTable).set({ role: "admin" }).where(eq(lmsUsersTable.id, user.id));
+    user.role = "admin";
+  }
   (req as AuthenticatedRequest).canonicalRole = isSuperAdminEmail(user.email) ? "admin" : canonical.role;
   next();
 };

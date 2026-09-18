@@ -1027,6 +1027,55 @@ export const AdminUsersResponseItem = zod.object({
 export const AdminUsersResponse = zod.array(AdminUsersResponseItem)
 
 
+export const UpdateAdminUserCreatorRoleParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UpdateAdminUserCreatorRoleBody = zod.object({
+  "enabled": zod.boolean()
+})
+
+export const UpdateAdminUserCreatorRoleResponse = zod.object({
+  "id": zod.number().int(),
+  "email": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['student', 'creator', 'admin']),
+  "isSuperAdmin": zod.boolean().optional(),
+  "createdAt": zod.coerce.date().optional()
+})
+
+
+export const AdminUserEnrollmentsParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const AdminUserEnrollmentsResponseItem = zod.object({
+
+}).passthrough()
+export const AdminUserEnrollmentsResponse = zod.array(AdminUserEnrollmentsResponseItem)
+
+
+export const AddAdminUserEnrollmentParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const AddAdminUserEnrollmentBody = zod.object({
+  "courseId": zod.number().int()
+})
+
+export const AddAdminUserEnrollmentResponse = zod.object({
+
+}).passthrough()
+
+
+export const RemoveAdminUserEnrollmentParams = zod.object({
+  "id": zod.coerce.number().int(),
+  "courseId": zod.coerce.number().int()
+})
+
+export const RemoveAdminUserEnrollmentResponse = zod.void()
+
+
 export const AdminCreatorsResponseItem = zod.object({
   "id": zod.number().int(),
   "email": zod.string(),

@@ -20,16 +20,20 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AddAdminUserEnrollment200,
   AddWishlist201,
   AdminCourse,
   AdminCourseInput,
   AdminCreatedCourse,
   AdminCreatorApplications200Item,
   AdminCreatorApplicationsParams,
+  AdminCreatorRoleInput,
+  AdminEnrollmentInput,
   AdminOrders200Item,
   AdminSettings200Item,
   AdminUpdateSetting200,
   AdminUpdateSettingInput,
+  AdminUserEnrollments200Item,
   Category,
   CategoryInput,
   Course,
@@ -3410,6 +3414,313 @@ export function useAdminUsers<TData = Awaited<ReturnType<typeof adminUsers>>, TE
 
 
 
+
+export const getUpdateAdminUserCreatorRoleUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/users/${id}/creator`
+}
+
+export const updateAdminUserCreatorRole = async (id: number,
+    adminCreatorRoleInput: AdminCreatorRoleInput, options?: Parameters<typeof customFetch>[1]): Promise<User> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<User>(getUpdateAdminUserCreatorRoleUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(adminCreatorRoleInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateAdminUserCreatorRoleMutationKey = () => ['updateAdminUserCreatorRole'] as const;
+
+export const getUpdateAdminUserCreatorRoleMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminUserCreatorRole>>, TError,UpdateAdminUserCreatorRoleMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAdminUserCreatorRole>>, TError,UpdateAdminUserCreatorRoleMutationVariables, TContext> => {
+
+const mutationKey = getUpdateAdminUserCreatorRoleMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAdminUserCreatorRole>>, UpdateAdminUserCreatorRoleMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateAdminUserCreatorRole(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAdminUserCreatorRoleMutationResult = NonNullable<Awaited<ReturnType<typeof updateAdminUserCreatorRole>>>
+    export type UpdateAdminUserCreatorRoleMutationBody = BodyType<AdminCreatorRoleInput>
+    export type UpdateAdminUserCreatorRoleMutationError = ErrorType<unknown>
+    export type UpdateAdminUserCreatorRoleMutationVariables = {id: number;data: BodyType<AdminCreatorRoleInput>}
+
+    export const useUpdateAdminUserCreatorRole = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdminUserCreatorRole>>, TError,UpdateAdminUserCreatorRoleMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAdminUserCreatorRole>>,
+        TError,
+        UpdateAdminUserCreatorRoleMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateAdminUserCreatorRoleMutationOptions(options));
+    }
+
+export const getAdminUserEnrollmentsUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/users/${id}/enrollments`
+}
+
+export const adminUserEnrollments = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<AdminUserEnrollments200Item[]> => {
+
+  return customFetch<AdminUserEnrollments200Item[]>(getAdminUserEnrollmentsUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminUserEnrollmentsQueryKey = (id: number,) => {
+    return [
+    `/api/admin/users/${id}/enrollments`
+    ] as const;
+    }
+
+
+export const getAdminUserEnrollmentsQueryOptions = <TData = Awaited<ReturnType<typeof adminUserEnrollments>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminUserEnrollments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminUserEnrollmentsQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminUserEnrollments>>> = ({ signal }) => adminUserEnrollments(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminUserEnrollments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminUserEnrollmentsQueryResult = NonNullable<Awaited<ReturnType<typeof adminUserEnrollments>>>
+export type AdminUserEnrollmentsQueryError = ErrorType<unknown>
+
+
+
+export function useAdminUserEnrollments<TData = Awaited<ReturnType<typeof adminUserEnrollments>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminUserEnrollments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminUserEnrollmentsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAddAdminUserEnrollmentUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/users/${id}/enrollments`
+}
+
+export const addAdminUserEnrollment = async (id: number,
+    adminEnrollmentInput: AdminEnrollmentInput, options?: Parameters<typeof customFetch>[1]): Promise<AddAdminUserEnrollment200> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<AddAdminUserEnrollment200>(getAddAdminUserEnrollmentUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(adminEnrollmentInput)
+  }
+);}
+
+
+
+
+
+export const getAddAdminUserEnrollmentMutationKey = () => ['addAdminUserEnrollment'] as const;
+
+export const getAddAdminUserEnrollmentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addAdminUserEnrollment>>, TError,AddAdminUserEnrollmentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addAdminUserEnrollment>>, TError,AddAdminUserEnrollmentMutationVariables, TContext> => {
+
+const mutationKey = getAddAdminUserEnrollmentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addAdminUserEnrollment>>, AddAdminUserEnrollmentMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  addAdminUserEnrollment(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddAdminUserEnrollmentMutationResult = NonNullable<Awaited<ReturnType<typeof addAdminUserEnrollment>>>
+    export type AddAdminUserEnrollmentMutationBody = BodyType<AdminEnrollmentInput>
+    export type AddAdminUserEnrollmentMutationError = ErrorType<unknown>
+    export type AddAdminUserEnrollmentMutationVariables = {id: number;data: BodyType<AdminEnrollmentInput>}
+
+    export const useAddAdminUserEnrollment = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addAdminUserEnrollment>>, TError,AddAdminUserEnrollmentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addAdminUserEnrollment>>,
+        TError,
+        AddAdminUserEnrollmentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddAdminUserEnrollmentMutationOptions(options));
+    }
+
+export const getRemoveAdminUserEnrollmentUrl = (id: number,
+    courseId: number,) => {
+
+
+
+
+  return `/api/admin/users/${id}/enrollments/${courseId}`
+}
+
+export const removeAdminUserEnrollment = async (id: number,
+    courseId: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getRemoveAdminUserEnrollmentUrl(id,courseId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRemoveAdminUserEnrollmentMutationKey = () => ['removeAdminUserEnrollment'] as const;
+
+export const getRemoveAdminUserEnrollmentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeAdminUserEnrollment>>, TError,RemoveAdminUserEnrollmentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeAdminUserEnrollment>>, TError,RemoveAdminUserEnrollmentMutationVariables, TContext> => {
+
+const mutationKey = getRemoveAdminUserEnrollmentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeAdminUserEnrollment>>, RemoveAdminUserEnrollmentMutationVariables> = (props) => {
+          const {id,courseId} = props ?? {};
+
+          return  removeAdminUserEnrollment(id,courseId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveAdminUserEnrollmentMutationResult = NonNullable<Awaited<ReturnType<typeof removeAdminUserEnrollment>>>
+
+    export type RemoveAdminUserEnrollmentMutationError = ErrorType<unknown>
+    export type RemoveAdminUserEnrollmentMutationVariables = {id: number;courseId: number}
+
+    export const useRemoveAdminUserEnrollment = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeAdminUserEnrollment>>, TError,RemoveAdminUserEnrollmentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof removeAdminUserEnrollment>>,
+        TError,
+        RemoveAdminUserEnrollmentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRemoveAdminUserEnrollmentMutationOptions(options));
+    }
 
 export const getAdminCreatorsUrl = () => {
 

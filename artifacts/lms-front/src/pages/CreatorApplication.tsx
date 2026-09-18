@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
-import { useGetMyCreatorApplication, useSubmitCreatorApplication } from "@workspace/api-client-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useGetMyCreatorApplication, useSubmitCreatorApplication, getGetMyCreatorApplicationQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +19,7 @@ const fields = [
 export default function CreatorApplication() {
   const { data: existing, isLoading } = useGetMyCreatorApplication();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const mutation = useSubmitCreatorApplication();
   const initial = useMemo(() => existing ?? {
     displayName: "", headline: "", bio: "", expertise: "", experienceYears: 0,
@@ -26,6 +28,14 @@ export default function CreatorApplication() {
   }, [existing]);
   const [form, setForm] = useState<any>(initial);
   const [topics, setTopics] = useState((initial.teachingTopics ?? []).join(", "));
+  const initialized = useRef(false);
+  useEffect(() => {
+    if (!isLoading && !initialized.current) {
+      setForm(initial);
+      setTopics((initial.teachingTopics ?? []).join(", "));
+      initialized.current = true;
+    }
+  }, [initial, isLoading]);
   const set = (key: string, value: unknown) => setForm((current: any) => ({ ...current, [key]: value }));
 
   if (isLoading) return <PublicLayout><div className="min-h-screen flex items-center justify-center">Loading application…</div></PublicLayout>;
@@ -33,7 +43,10 @@ export default function CreatorApplication() {
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     mutation.mutate({ data: { ...form, experienceYears: Number(form.experienceYears) || 0, teachingTopics: topics.split(",").map((topic) => topic.trim()).filter(Boolean) } }, {
-      onSuccess: () => toast({ title: "Application submitted", description: "The Super Admin will review your creator profile." }),
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: getGetMyCreatorApplicationQueryKey() });
+        toast({ title: "Application submitted", description: "The Super Admin will review your creator profile." });
+      },
       onError: (error: any) => toast({ title: "Could not submit application", description: error.message, variant: "destructive" }),
     });
   };

@@ -241,6 +241,14 @@ export interface RejectCreatorApplicationInput {
   reason: string;
 }
 
+export interface AdminCreatorRoleInput {
+  enabled: boolean;
+}
+
+export interface AdminEnrollmentInput {
+  courseId: number;
+}
+
 export interface Course {
   id: number;
   title: string;
@@ -595,6 +603,10 @@ export type StudentOrders200Item = { [key: string]: unknown };
 export type ListWishlist200Item = { [key: string]: unknown };
 
 export type AddWishlist201 = { [key: string]: unknown };
+
+export type AdminUserEnrollments200Item = { [key: string]: unknown };
+
+export type AddAdminUserEnrollment200 = { [key: string]: unknown };
 
 export type RequestLessonVideoPartUrl200 = {
   uploadURL: string;

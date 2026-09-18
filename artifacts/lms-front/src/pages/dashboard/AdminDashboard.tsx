@@ -3,6 +3,13 @@ import { useState } from "react";
 import { useParams } from "wouter";
 import { 
   useAdminUsers,
+  getAdminUsersQueryKey,
+  getAdminUserEnrollmentsQueryKey,
+  useAdminCourses,
+  useAdminUserEnrollments,
+  useAddAdminUserEnrollment,
+  useRemoveAdminUserEnrollment,
+  useUpdateAdminUserCreatorRole,
   useAdminCreators,
   useAdminProducts,
   useAdminOrders,
@@ -13,6 +20,7 @@ import {
   useApproveCreatorApplication,
   useRejectCreatorApplication
 } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { 
   Settings, Users, ShieldAlert, Activity, Globe, Paintbrush, 
@@ -21,6 +29,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { CategoryFormDialog } from "@/components/dashboard/CategoryFormDialog";
 import { SettingFormDialog } from "@/components/dashboard/SettingFormDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 import { AdminCourseStudioList } from "./admin/AdminCourseStudioList";
 import { AdminCourseStudio } from "./admin/AdminCourseStudio";
@@ -66,18 +76,29 @@ export default function AdminDashboard() {
 }
 
 function ApplicationsList() {
-  const { data: applications, isLoading } = useAdminCreatorApplications({ status: "pending" });
+  const [status, setStatus] = useState<"pending" | "approved" | "rejected">("pending");
+  const { data: applications, isLoading } = useAdminCreatorApplications({ status });
   const approve = useApproveCreatorApplication();
   const reject = useRejectCreatorApplication();
-  const refresh = () => window.location.reload();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const refresh = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/creator-applications"] }),
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] }),
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/session"] }),
+    ]);
+  };
+  const handleSuccess = async (message: string) => { await refresh(); toast({ title: message }); };
+  const handleError = (error: any) => toast({ title: "Action failed", description: error?.message ?? "Please try again.", variant: "destructive" });
   return (
     <div className="space-y-8 max-w-6xl mx-auto pt-4">
-      <div><h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Creator Applications</h2><p className="text-[16px] text-[#4D4D4D] mt-1">Review detailed teaching profiles before enabling creator tools.</p></div>
+      <div className="flex flex-wrap justify-between gap-4 items-end"><div><h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Creator Applications</h2><p className="text-[16px] text-[#4D4D4D] mt-1">Review detailed teaching profiles before enabling creator tools.</p></div><select value={status} onChange={(event) => setStatus(event.target.value as typeof status)} className="h-10 rounded-lg border border-[#D9DEE5] bg-white px-3 text-sm"><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></div>
       {isLoading ? <div className="py-20 text-center">Loading applications…</div> : !applications?.length ? <div className="bg-white border rounded-xl p-10 text-center text-[#69737D]">No pending applications.</div> : <div className="space-y-5">{applications.map((item: any) => {
         const app = item.application ?? item;
         const user = item.user;
         return <article key={app.id} className="bg-white border border-[#E5E5E5] rounded-xl p-6 shadow-sm">
-          <div className="flex flex-wrap justify-between gap-4"><div><h3 className="text-xl font-bold text-black">{app.displayName}</h3><p className="text-primary">{app.headline}</p><p className="text-sm text-[#69737D]">{user?.email} · {app.experienceYears} years experience</p></div><div className="flex gap-2"><Button disabled={approve.isPending} onClick={() => approve.mutate({ id: app.id }, { onSuccess: refresh })}>Approve</Button><Button variant="outline" disabled={reject.isPending} onClick={() => { const reason = window.prompt("Rejection reason"); if (reason) reject.mutate({ id: app.id, data: { reason } }, { onSuccess: refresh }); }}>Reject</Button></div></div>
+          <div className="flex flex-wrap justify-between gap-4"><div><h3 className="text-xl font-bold text-black">{app.displayName}</h3><p className="text-primary">{app.headline}</p><p className="text-sm text-[#69737D]">{user?.email} · {app.experienceYears} years experience</p></div>{status === "pending" && <div className="flex gap-2"><Button disabled={approve.isPending} onClick={() => approve.mutate({ id: app.id }, { onSuccess: () => handleSuccess("Application approved"), onError: handleError })}>Approve</Button><Button variant="outline" disabled={reject.isPending} onClick={() => { const reason = window.prompt("Rejection reason"); if (reason) reject.mutate({ id: app.id, data: { reason } }, { onSuccess: () => handleSuccess("Application rejected"), onError: handleError }); }}>Reject</Button></div>}</div>
           <div className="grid md:grid-cols-2 gap-5 mt-5 text-sm"><div><p className="font-bold mb-1">Expertise</p><p className="text-[#4D4D4D]">{app.expertise}</p></div><div><p className="font-bold mb-1">Teaching topics</p><p className="text-[#4D4D4D]">{app.teachingTopics?.join(", ")}</p></div><div><p className="font-bold mb-1">Course proposal</p><p className="text-[#4D4D4D] whitespace-pre-wrap">{app.courseProposal}</p></div><div><p className="font-bold mb-1">Target audience</p><p className="text-[#4D4D4D]">{app.targetAudience}</p></div><div className="md:col-span-2"><p className="font-bold mb-1">Motivation</p><p className="text-[#4D4D4D] whitespace-pre-wrap">{app.motivation}</p></div></div>
         </article>;
       })}</div>}
@@ -126,18 +147,6 @@ function Overview() {
 
 function UsersList() {
   const { data: users, isLoading } = useAdminUsers();
-  const [busy, setBusy] = useState<number | null>(null);
-  const updateCreator = async (id: number, enabled: boolean) => {
-    setBusy(id);
-    await fetch(`/api/admin/users/${id}/creator`, { method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ enabled }) });
-    window.location.reload();
-  };
-  const updateEnrollment = async (id: number, courseId: string, method: "POST" | "DELETE") => {
-    if (!courseId) return;
-    setBusy(id);
-    await fetch(`/api/admin/users/${id}/enrollments/${courseId}`, { method, credentials: "include", headers: method === "POST" ? { "Content-Type": "application/json" } : undefined, body: method === "POST" ? JSON.stringify({ courseId: Number(courseId) }) : undefined });
-    setBusy(null);
-  };
   
   return (
     <div className="space-y-8 max-w-6xl mx-auto pt-4">
@@ -171,9 +180,8 @@ function UsersList() {
                   </td>
                   <td className="p-4">
                     <div className="flex flex-wrap gap-2">
-                      {user.role !== "admin" && <Button size="sm" variant="outline" disabled={busy === user.id} onClick={() => updateCreator(user.id, user.role !== "creator")}>{user.role === "creator" ? "Revoke creator" : "Grant creator"}</Button>}
-                      {user.role !== "admin" && <Button size="sm" variant="outline" disabled={busy === user.id} onClick={() => { const courseId = window.prompt("Course ID to enroll"); if (courseId) updateEnrollment(user.id, courseId, "POST"); }}>Enroll</Button>}
-                      {user.role !== "admin" && <Button size="sm" variant="outline" disabled={busy === user.id} onClick={() => { const courseId = window.prompt("Course ID to remove"); if (courseId) updateEnrollment(user.id, courseId, "DELETE"); }}>Remove course</Button>}
+                      {user.role !== "admin" && <CreatorRoleButton user={user} />}
+                      {user.role !== "admin" && <EnrollmentManager user={user} />}
                     </div>
                   </td>
                 </tr>
@@ -184,6 +192,48 @@ function UsersList() {
       )}
     </div>
   );
+}
+
+function CreatorRoleButton({ user }: { user: any }) {
+  const mutation = useUpdateAdminUserCreatorRole();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const enabled = user.role !== "creator";
+  return <Button size="sm" variant="outline" disabled={mutation.isPending} onClick={() => mutation.mutate({ id: user.id, data: { enabled } }, {
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: getAdminUsersQueryKey() }); toast({ title: enabled ? "Creator access granted" : "Creator access revoked" }); },
+    onError: (error: any) => toast({ title: "Role update failed", description: error?.message ?? "Please try again.", variant: "destructive" }),
+  })}>{enabled ? "Grant creator" : "Revoke creator"}</Button>;
+}
+
+function EnrollmentManager({ user }: { user: any }) {
+  const [open, setOpen] = useState(false);
+  const { data: enrollments, isLoading } = useAdminUserEnrollments(user.id, { query: { enabled: open, queryKey: getAdminUserEnrollmentsQueryKey(user.id) } });
+  const { data: courses } = useAdminCourses();
+  const add = useAddAdminUserEnrollment();
+  const remove = useRemoveAdminUserEnrollment();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const enrolledIds = new Set((enrollments ?? []).map((item: any) => item.course?.id ?? item.enrollment?.courseId));
+  const enroll = (courseId: number) => add.mutate({ id: user.id, data: { courseId } }, {
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: getAdminUserEnrollmentsQueryKey(user.id) }); toast({ title: "Student enrolled" }); },
+    onError: (error: any) => toast({ title: "Enrollment failed", description: error?.message ?? "Please try again.", variant: "destructive" }),
+  });
+  const unenroll = (courseId: number) => remove.mutate({ id: user.id, courseId }, {
+    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: getAdminUserEnrollmentsQueryKey(user.id) }); toast({ title: "Enrollment removed" }); },
+    onError: (error: any) => toast({ title: "Could not remove enrollment", description: error?.message ?? "Please try again.", variant: "destructive" }),
+  });
+  return <>
+    <Button size="sm" variant="outline" onClick={() => setOpen(true)}>Manage learning</Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader><DialogTitle>Manage {user.name}'s learning</DialogTitle></DialogHeader>
+        <div className="space-y-5">
+          <section><p className="text-sm font-bold mb-2">Current enrollments</p>{isLoading ? <p className="text-sm text-[#69737D]">Loading…</p> : enrollments?.length ? <div className="space-y-2">{enrollments.map((item: any) => { const course = item.course; const courseId = course?.id ?? item.enrollment?.courseId; return <div key={courseId} className="flex items-center justify-between gap-3 border rounded-lg p-3"><span className="text-sm">{course?.title ?? `Course #${courseId}`}</span><Button size="sm" variant="outline" disabled={remove.isPending} onClick={() => unenroll(courseId)}>Remove</Button></div>; })}</div> : <p className="text-sm text-[#69737D]">No courses assigned yet.</p>}</section>
+          <section><p className="text-sm font-bold mb-2">Add course</p><div className="flex gap-2"><select className="flex-1 h-10 rounded-lg border px-3 text-sm" defaultValue="" onChange={(event) => { const id = Number(event.target.value); if (id && !enrolledIds.has(id)) enroll(id); }}><option value="" disabled>Select a course…</option>{(courses ?? []).filter((course: any) => !enrolledIds.has(course.id)).map((course: any) => <option key={course.id} value={course.id}>{course.title}</option>)}</select></div></section>
+        </div>
+      </DialogContent>
+    </Dialog>
+  </>;
 }
 
 function CreatorsList() {

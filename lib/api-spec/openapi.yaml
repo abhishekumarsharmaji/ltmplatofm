@@ -335,6 +335,31 @@ paths:
       operationId: adminUsers
       security: [{ cookieAuth: [] }]
       responses: { "200": { description: Users, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/User" } } } } } }
+  /admin/users/{id}/creator:
+    patch:
+      operationId: updateAdminUserCreatorRole
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/AdminCreatorRoleInput" } } } }
+      responses: { "200": { description: Updated user, content: { application/json: { schema: { $ref: "#/components/schemas/User" } } } } }
+  /admin/users/{id}/enrollments:
+    get:
+      operationId: adminUserEnrollments
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: User enrollments, content: { application/json: { schema: { type: array, items: { type: object } } } } } }
+    post:
+      operationId: addAdminUserEnrollment
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/AdminEnrollmentInput" } } } }
+      responses: { "200": { description: Enrollment result, content: { application/json: { schema: { type: object } } } } }
+  /admin/users/{id}/enrollments/{courseId}:
+    delete:
+      operationId: removeAdminUserEnrollment
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }, { name: courseId, in: path, required: true, schema: { type: integer } }]
+      responses: { "204": { description: Enrollment removed } }
   /admin/creators:
     get:
       operationId: adminCreators
@@ -716,6 +741,16 @@ components:
         createdAt:
           type: string
           format: date-time
+    AdminCreatorRoleInput:
+      type: object
+      required: [enabled]
+      properties:
+        enabled: { type: boolean }
+    AdminEnrollmentInput:
+      type: object
+      required: [courseId]
+      properties:
+        courseId: { type: integer }
     Course:
       type: object
       required: [id, title, description, level, lessons]
