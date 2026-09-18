@@ -31,21 +31,21 @@ export function AdminCourseStudioList() {
   );
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Course Studio</h2>
-          <p className="text-muted-foreground mt-1">Manage and repair all creator courses across the platform.</p>
+          <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Course Studio</h2>
+          <p className="text-[16px] text-[#4D4D4D] mt-1">Manage and repair all creator courses across the platform.</p>
         </div>
         <CreateCourseDialog />
       </div>
 
       <div className="flex items-center gap-2 max-w-sm">
         <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-3 h-5 w-5 text-[#9794AA]" />
           <Input 
             placeholder="Search by title or creator..." 
-            className="pl-9"
+            className="pl-10 h-11 border-[#E5E5E5] rounded-md shadow-none text-[15px]"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -57,16 +57,16 @@ export function AdminCourseStudioList() {
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : error ? (
-        <div className="text-center py-20 border border-destructive/20 bg-destructive/5 rounded-xl text-destructive">
+        <div className="text-center py-20 border border-red-200 bg-red-50 rounded-xl text-red-600">
           <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
           <h3 className="font-semibold text-lg">Failed to load courses</h3>
           <p className="text-sm mt-1">{error instanceof Error ? error.message : 'Unknown error'}</p>
         </div>
       ) : filtered?.length === 0 ? (
-        <div className="text-center py-20 border-2 border-dashed border-border rounded-xl">
-          <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="font-semibold text-lg">No courses found</h3>
-          <p className="text-muted-foreground text-sm mt-1 mb-6">Create a course manually or generate one with AI.</p>
+        <div className="text-center py-20 bg-white border border-[#E5E5E5] rounded-xl shadow-sm">
+          <BookOpen className="w-12 h-12 text-[#9794AA] mx-auto mb-4" />
+          <h3 className="font-bold text-[18px] text-black">No courses found</h3>
+          <p className="text-[14px] text-[#4D4D4D] mt-2 mb-6">Create a course manually or generate one with AI.</p>
           <CreateCourseDialog />
         </div>
       ) : (
@@ -82,42 +82,42 @@ export function AdminCourseStudioList() {
 
 function CourseCard({ course }: { course: AdminCourse }) {
   return (
-    <div className="bg-card border border-border rounded-xl p-5 shadow-sm hover:border-primary/50 transition-colors flex flex-col group relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-colors" />
+    <div className="bg-white border border-[#E5E5E5] rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col group relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-1 h-full bg-[#E3F9EF] group-hover:bg-primary transition-colors" />
       <div className="flex justify-between items-start mb-4">
-        <Badge variant="outline" className="bg-muted text-xs capitalize">
+        <Badge className="bg-gray-100 text-[#4D4D4D] hover:bg-gray-100 text-[10px] font-bold uppercase tracking-wider border-none shadow-none">
           {course.status}
         </Badge>
-        <span className="font-semibold text-sm text-foreground">
+        <span className="font-bold text-[16px] text-black">
           ${(course.priceMinor / 100).toFixed(2)} {course.currency}
         </span>
       </div>
       
-      <h3 className="font-bold text-lg leading-tight mb-2 line-clamp-2" title={course.title}>
+      <h3 className="font-bold text-[16px] text-black leading-snug mb-2 line-clamp-2 group-hover:text-primary transition-colors" title={course.title}>
         {course.title}
       </h3>
-      <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
+      <p className="text-[14px] text-[#4D4D4D] line-clamp-2 mb-4 flex-1">
         {course.description || "No description provided."}
       </p>
 
-      <div className="flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border">
+      <div className="flex items-center justify-between text-[13px] text-[#394649] pt-4 border-t border-[#E5E5E5]">
         <div className="flex items-center gap-1.5 truncate pr-2">
           <Users className="w-3.5 h-3.5 shrink-0" />
-          <span className="truncate">{course.creatorName}</span>
+          <span className="truncate font-medium">{course.creatorName}</span>
         </div>
-        <div className="flex items-center gap-3 shrink-0 font-medium">
-          <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" /> {course.moduleCount}</span>
-          <span className="flex items-center gap-1"><PlayCircle className="w-3.5 h-3.5" /> {course.lessonCount}</span>
+        <div className="flex items-center gap-3 shrink-0 font-medium text-[#4D4D4D]">
+          <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" /> {course.moduleCount}</span>
+          <span className="flex items-center gap-1.5"><PlayCircle className="w-3.5 h-3.5" /> {course.lessonCount}</span>
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-border flex">
+      <div className="mt-4 pt-4 border-t border-[#E5E5E5] flex">
         {course.productId ? (
-          <Link href={`/dashboard/admin/courses/${course.productId}/studio`} className="w-full inline-flex items-center justify-between whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-10 px-4 py-2 bg-primary/5 hover:bg-primary/10 text-primary">
-            Open Studio <ArrowRight className="w-4 h-4" />
+          <Link href={`/dashboard/admin/courses/${course.productId}/studio`} className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors h-10 px-4 py-2 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 text-[14px]">
+            Open Studio <ArrowRight className="w-4 h-4 ml-2" />
           </Link>
         ) : (
-          <span className="w-full text-sm text-destructive">Linked course product is missing</span>
+          <span className="w-full text-[13px] text-red-500 font-medium text-center">Linked course product is missing</span>
         )}
       </div>
     </div>
@@ -132,25 +132,25 @@ function CreateCourseDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="shadow-sm">
+        <Button className="h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
           <Plus className="w-4 h-4 mr-2" />
           New Course
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl overflow-hidden p-0 gap-0">
-        <DialogHeader className="p-6 pb-2 border-b border-border bg-muted/20">
-          <DialogTitle className="text-2xl">Create Course</DialogTitle>
-          <p className="text-sm text-muted-foreground mt-1">Assign a new course to a creator.</p>
+      <DialogContent className="sm:max-w-2xl overflow-hidden p-0 gap-0 border-[#E5E5E5] rounded-xl">
+        <DialogHeader className="p-6 pb-4 border-b border-[#E5E5E5] bg-[#FAFAFA]">
+          <DialogTitle className="text-[20px] font-bold text-black">Create Course</DialogTitle>
+          <p className="text-[14px] text-[#4D4D4D] mt-1">Assign a new course to a creator.</p>
           
-          <div className="pt-4 pb-2">
-            <Label className="mb-2 block">1. Select Creator</Label>
+          <div className="pt-5 pb-2">
+            <Label className="mb-2 block text-[14px] font-bold text-[#394649]">1. Select Creator</Label>
             <Select value={creatorId} onValueChange={setCreatorId}>
-              <SelectTrigger>
+              <SelectTrigger className="h-11 border-[#E5E5E5] rounded-md text-[14px]">
                 <SelectValue placeholder={creatorsLoading ? "Loading creators..." : "Choose a creator"} />
               </SelectTrigger>
               <SelectContent>
                 {creators?.map((c: any) => (
-                  <SelectItem key={c.id} value={c.id.toString()}>
+                  <SelectItem key={c.id} value={c.id.toString()} className="text-[14px]">
                     {c.name} ({c.email})
                   </SelectItem>
                 ))}
@@ -161,15 +161,15 @@ function CreateCourseDialog() {
 
         {creatorId ? (
           <Tabs defaultValue="manual" className="w-full flex flex-col h-[500px]">
-            <TabsList className="w-full justify-start rounded-none border-b border-border bg-card px-6 h-12">
-              <TabsTrigger value="manual" className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary rounded-md px-4">Manual Entry</TabsTrigger>
-              <TabsTrigger value="ai" className="data-[state=active]:bg-brand/10 data-[state=active]:text-brand rounded-md px-4">
-                <Sparkles className="w-3.5 h-3.5 mr-2 text-brand" />
+            <TabsList className="w-full justify-start rounded-none border-b border-[#E5E5E5] bg-white px-6 h-14">
+              <TabsTrigger value="manual" className="data-[state=active]:bg-[#E3F9EF] data-[state=active]:text-primary rounded-md px-5 h-10 text-[14px] font-medium mr-2 border-none shadow-none">Manual Entry</TabsTrigger>
+              <TabsTrigger value="ai" className="data-[state=active]:bg-[#F1EEFC] data-[state=active]:text-[#704FE6] rounded-md px-5 h-10 text-[14px] font-medium border-none shadow-none">
+                <Sparkles className="w-4 h-4 mr-2" />
                 AI Curriculum Builder
               </TabsTrigger>
             </TabsList>
             
-            <div className="flex-1 overflow-y-auto p-6 bg-card">
+            <div className="flex-1 overflow-y-auto p-6 bg-white">
               <TabsContent value="manual" className="m-0 h-full">
                 <ManualCourseForm creatorId={Number(creatorId)} onSuccess={() => setOpen(false)} />
               </TabsContent>
@@ -179,9 +179,9 @@ function CreateCourseDialog() {
             </div>
           </Tabs>
         ) : (
-          <div className="p-12 text-center text-muted-foreground flex flex-col items-center justify-center h-[400px]">
-            <Users className="w-12 h-12 mb-4 opacity-20" />
-            <p>Select a creator above to continue.</p>
+          <div className="p-12 text-center text-[#9794AA] flex flex-col items-center justify-center h-[400px] bg-white">
+            <Users className="w-12 h-12 mb-4 opacity-30" />
+            <p className="text-[15px]">Select a creator above to continue.</p>
           </div>
         )}
       </DialogContent>
@@ -219,21 +219,21 @@ function ManualCourseForm({ creatorId, onSuccess }: { creatorId: number, onSucce
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
-        <Label>Course Title</Label>
-        <Input required value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Complete React Bootcamp" />
+        <Label className="text-[14px] font-bold text-[#394649]">Course Title</Label>
+        <Input required value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Complete React Bootcamp" className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
       </div>
       <div className="space-y-2">
-        <Label>Description</Label>
-        <Textarea required value={description} onChange={e => setDescription(e.target.value)} rows={4} />
+        <Label className="text-[14px] font-bold text-[#394649]">Description</Label>
+        <Textarea required value={description} onChange={e => setDescription(e.target.value)} rows={4} className="border-[#E5E5E5] rounded-md text-[14px] resize-none" />
       </div>
       <div className="space-y-2">
-        <Label>Price (USD cents)</Label>
-        <Input type="number" required value={priceMinor} onChange={e => setPriceMinor(Number(e.target.value))} />
+        <Label className="text-[14px] font-bold text-[#394649]">Price (USD cents)</Label>
+        <Input type="number" required value={priceMinor} onChange={e => setPriceMinor(Number(e.target.value))} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
       </div>
-      <div className="pt-4 flex justify-end">
-        <Button type="submit" disabled={createCourse.isPending}>
+      <div className="pt-6 flex justify-end">
+        <Button type="submit" disabled={createCourse.isPending} className="h-11 px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
           {createCourse.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           Create Course
         </Button>

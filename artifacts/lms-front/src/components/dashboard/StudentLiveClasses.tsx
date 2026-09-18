@@ -14,26 +14,28 @@ export function StudentLiveClasses() {
 
   if (!library || library.length === 0) {
     return (
-      <div className="space-y-6 max-w-6xl mx-auto">
+      <div className="space-y-8 max-w-6xl mx-auto pt-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Upcoming Live Classes</h2>
-          <p className="text-muted-foreground mt-1">Live sessions from your enrolled courses.</p>
+          <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Upcoming Live Classes</h2>
+          <p className="text-[16px] text-[#4D4D4D] mt-1">Live sessions from your enrolled courses.</p>
         </div>
-        <div className="text-center py-20 bg-card border border-border rounded-2xl shadow-sm">
-          <Video className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="font-bold text-lg mb-2">No courses enrolled</h3>
-          <p className="text-muted-foreground mb-4">Enroll in a course to see upcoming live classes.</p>
-          <Link href="/courses"><Button>Browse Courses</Button></Link>
+        <div className="text-center py-20 bg-white border border-[#E5E5E5] rounded-xl shadow-sm">
+          <Video className="w-12 h-12 text-[#9794AA] mx-auto mb-4" />
+          <h3 className="font-bold text-[18px] text-black mb-2">No courses enrolled</h3>
+          <p className="text-[14px] text-[#4D4D4D] mb-6">Enroll in a course to see upcoming live classes.</p>
+          <Link href="/courses">
+            <Button className="h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">Browse Courses</Button>
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Upcoming Live Classes</h2>
-        <p className="text-muted-foreground mt-1">Live sessions from your enrolled courses.</p>
+        <h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Upcoming Live Classes</h2>
+        <p className="text-[16px] text-[#4D4D4D] mt-1">Live sessions from your enrolled courses.</p>
       </div>
 
       <div className="space-y-6">
@@ -59,9 +61,9 @@ function CourseLiveClasses({ courseId, courseTitle }: { courseId: number, course
   }
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-      <h3 className="text-xl font-bold mb-4">{courseTitle}</h3>
-      <div className="grid md:grid-cols-2 gap-4">
+    <div className="bg-white border border-[#E5E5E5] rounded-xl p-6 md:p-8 shadow-sm">
+      <h3 className="text-[20px] font-bold text-black mb-6">{courseTitle}</h3>
+      <div className="grid md:grid-cols-2 gap-6">
         {classes.map((cls) => (
           <StudentLiveClassItem key={cls.id} liveClass={cls} />
         ))}
@@ -73,52 +75,52 @@ function CourseLiveClasses({ courseId, courseTitle }: { courseId: number, course
 function StudentLiveClassItem({ liveClass }: { liveClass: LiveClass }) {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'live': return 'bg-destructive/10 text-destructive border-destructive/20 animate-pulse';
-      case 'completed': return 'bg-success/10 text-success border-success/20';
-      case 'cancelled': return 'bg-muted text-muted-foreground border-border';
-      default: return 'bg-brand/10 text-brand border-brand/20';
+      case 'live': return 'bg-[#FFEFEB] text-[#FE543D] animate-pulse';
+      case 'completed': return 'bg-[#E3F9EF] text-primary';
+      case 'cancelled': return 'bg-gray-100 text-[#9794AA]';
+      default: return 'bg-[#EAEFF8] text-[#224EA1]';
     }
   };
 
   return (
-    <div className="flex flex-col border border-border rounded-xl p-4 bg-muted/20 hover:border-primary/30 transition-colors">
-      <div className="flex items-start justify-between mb-2 gap-2">
-        <h4 className="font-bold">{liveClass.title}</h4>
-        <Badge variant="outline" className={getStatusColor(liveClass.status)}>
-          {liveClass.status === 'live' ? 'LIVE NOW' : liveClass.status.toUpperCase()}
+    <div className="flex flex-col border border-[#E5E5E5] rounded-lg p-5 bg-[#FAFAFA] hover:shadow-md transition-all group">
+      <div className="flex items-start justify-between mb-3 gap-2">
+        <h4 className="font-bold text-[16px] text-black group-hover:text-primary transition-colors">{liveClass.title}</h4>
+        <Badge className={`font-bold text-[10px] border-none shadow-none uppercase tracking-wider ${getStatusColor(liveClass.status)}`}>
+          {liveClass.status === 'live' ? 'LIVE NOW' : liveClass.status}
         </Badge>
       </div>
       {liveClass.description && (
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{liveClass.description}</p>
+        <p className="text-[14px] text-[#4D4D4D] line-clamp-2 mb-4">{liveClass.description}</p>
       )}
       
       <div className="flex-1" />
       
-      <div className="space-y-3 mt-4 pt-4 border-t border-border">
-        <div className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5" />
+      <div className="space-y-4 mt-2 pt-4 border-t border-[#E5E5E5]">
+        <div className="flex flex-col gap-2 text-[13px] font-medium text-[#4D4D4D]">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-[#9794AA]" />
             {format(parseISO(liveClass.startsAt), "MMMM d, yyyy")}
           </div>
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-[#9794AA]" />
             {format(parseISO(liveClass.startsAt), "h:mm a")} - {format(parseISO(liveClass.endsAt), "h:mm a")} ({liveClass.timezone})
           </div>
         </div>
         
         {liveClass.status === 'live' || liveClass.status === 'scheduled' ? (
           <Link href={`/dashboard/student/live-classes/${liveClass.id}/classroom`}>
-            <Button className="w-full" variant={liveClass.status === 'live' ? "destructive" : "default"}>
+            <Button className={`w-full h-11 rounded-md font-medium text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)] ${liveClass.status === 'live' ? 'bg-[#FE543D] hover:bg-red-600 shadow-[0_4px_14px_rgba(254,84,61,0.25)]' : 'bg-primary hover:bg-[#10A364]'}`}>
               <Video className="w-4 h-4 mr-2" />
               {liveClass.status === 'live' ? 'Join Class Now' : 'Go to Classroom'}
             </Button>
           </Link>
         ) : liveClass.recordingUrl ? (
-          <Button variant="outline" className="w-full" asChild>
+          <Button className="w-full border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-11 rounded-md font-medium text-[14px]" asChild>
             <a href={liveClass.recordingUrl} target="_blank" rel="noopener noreferrer">Watch Recording</a>
           </Button>
         ) : (
-          <Button variant="secondary" className="w-full" disabled>Class Ended</Button>
+          <Button variant="secondary" className="w-full h-11 rounded-md text-[14px] font-medium bg-gray-100 text-[#9794AA]" disabled>Class Ended</Button>
         )}
       </div>
     </div>
