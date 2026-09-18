@@ -6,6 +6,7 @@ import { db, lmsUsersTable, usersTable } from "@workspace/db";
 export const SESSION_COOKIE = "lms_session";
 export const SUPER_ADMIN_EMAIL = "xbhishekh@gmail.com";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
+export type EffectiveRole = "student" | "creator" | "admin";
 
 function secret() {
   if (!process.env.SESSION_SECRET) throw new Error("SESSION_SECRET is required");
@@ -40,35 +41,40 @@ export function isSuperAdminEmail(email: string) {
   return email.trim().toLowerCase() === SUPER_ADMIN_EMAIL;
 }
 
+/** One role policy for every auth surface. Admin is never inherited from legacy data. */
+export function effectiveRole(email: string, ...storedRoles: Array<string | null | undefined>): EffectiveRole {
+  if (isSuperAdminEmail(email)) return "admin";
+  return storedRoles.some((role) => role === "creator") ? "creator" : "student";
+}
+
+export async function reconcileEffectiveRole(user: typeof lmsUsersTable.$inferSelect) {
+  let [canonical] = await db.select({ id: usersTable.id, role: usersTable.role })
+    .from(usersTable).where(eq(usersTable.email, user.email)).limit(1);
+  const role = effectiveRole(user.email, user.role, canonical?.role);
+  if (!canonical) {
+    [canonical] = await db.insert(usersTable).values({
+      email: user.email, name: user.name, role, passwordHash: user.passwordHash,
+    }).returning({ id: usersTable.id, role: usersTable.role });
+  } else if (canonical.role !== role) {
+    [canonical] = await db.update(usersTable).set({ role, updatedAt: new Date() })
+      .where(eq(usersTable.id, canonical.id)).returning({ id: usersTable.id, role: usersTable.role });
+  }
+  if (user.role !== role) {
+    await db.update(lmsUsersTable).set({ role }).where(eq(lmsUsersTable.id, user.id));
+    user.role = role;
+  }
+  return { canonicalUserId: canonical.id, role };
+}
+
 export const requireAuth: RequestHandler = async (req, res, next) => {
   const id = readSession(req.cookies?.[SESSION_COOKIE]);
   if (!id) { res.status(401).json({ error: "Authentication required" }); return; }
   const [user] = await db.select().from(lmsUsersTable).where(eq(lmsUsersTable.id, id));
   if (!user) { res.status(401).json({ error: "Authentication required" }); return; }
-  const role: "student" | "creator" | "admin" = isSuperAdminEmail(user.email)
-    ? "admin"
-    : user.role === "creator" || user.role === "admin" ? user.role : "student";
-  let [canonical] = await db.select({ id: usersTable.id, role: usersTable.role })
-    .from(usersTable).where(eq(usersTable.email, user.email)).limit(1);
-  if (!canonical) {
-    [canonical] = await db.insert(usersTable).values({
-      email: user.email, name: user.name, role, passwordHash: user.passwordHash,
-    }).onConflictDoUpdate({
-      target: usersTable.email,
-      set: { role, updatedAt: new Date() },
-    }).returning({ id: usersTable.id, role: usersTable.role });
-  }
+  const reconciled = await reconcileEffectiveRole(user);
   (req as AuthenticatedRequest).user = user;
-  (req as AuthenticatedRequest).canonicalUserId = canonical.id;
-  if (isSuperAdminEmail(user.email) && canonical.role !== "admin") {
-    [canonical] = await db.update(usersTable).set({ role: "admin", updatedAt: new Date() })
-      .where(eq(usersTable.id, canonical.id)).returning({ id: usersTable.id, role: usersTable.role });
-  }
-  if (isSuperAdminEmail(user.email) && user.role !== "admin") {
-    await db.update(lmsUsersTable).set({ role: "admin" }).where(eq(lmsUsersTable.id, user.id));
-    user.role = "admin";
-  }
-  (req as AuthenticatedRequest).canonicalRole = isSuperAdminEmail(user.email) ? "admin" : canonical.role;
+  (req as AuthenticatedRequest).canonicalUserId = reconciled.canonicalUserId;
+  (req as AuthenticatedRequest).canonicalRole = reconciled.role;
   next();
 };
 

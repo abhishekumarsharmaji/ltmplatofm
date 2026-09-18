@@ -4,7 +4,7 @@ import {
   db, categoriesTable, coursesTable, courseModulesTable, lessonsTable, lessonAssetsTable, productsTable, usersTable, enrollmentsTable, lmsUsersTable, creatorProfilesTable,
   ordersTable, orderItemsTable, wishlistTable, platformSettingsTable,
 } from "@workspace/db";
-import { requireAuth, requireRole, requireSuperAdmin, isSuperAdminEmail, type AuthenticatedRequest } from "../middlewares/auth";
+import { requireAuth, requireRole, requireSuperAdmin, effectiveRole, isSuperAdminEmail, type AuthenticatedRequest } from "../middlewares/auth";
 import { objectFile } from "../lib/objectStorage";
 
 const router: IRouter = Router();
@@ -187,7 +187,10 @@ router.get("/student/wishlist", auth, async (req, res) => { const userId = await
 router.post("/student/wishlist/:productId", auth, async (req, res) => { const userId = await userOf(req as AuthenticatedRequest), productId = id(req.params.productId); if (!userId || !productId) { res.status(400).json({ error: "Invalid id" }); return; } const [row] = await db.insert(wishlistTable).values({ userId, productId }).onConflictDoNothing().returning(); res.status(201).json(row ?? { userId, productId }); });
 router.delete("/student/wishlist/:productId", auth, async (req, res) => { const userId = await userOf(req as AuthenticatedRequest), productId = id(req.params.productId); if (!userId || !productId) { res.status(400).json({ error: "Invalid id" }); return; } await db.delete(wishlistTable).where(and(eq(wishlistTable.userId, userId), eq(wishlistTable.productId, productId))); res.sendStatus(204); });
 
-router.get("/admin/users", auth, requireRole("admin"), requireSuperAdmin, async (_req, res) => res.json(await db.select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role, createdAt: usersTable.createdAt }).from(usersTable)));
+router.get("/admin/users", auth, requireRole("admin"), requireSuperAdmin, async (_req, res) => {
+  const users = await db.select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role, createdAt: usersTable.createdAt }).from(usersTable);
+  res.json(users.map((user) => ({ ...user, role: effectiveRole(user.email, user.role) })));
+});
 router.patch("/admin/users/:id/creator", auth, requireRole("admin"), requireSuperAdmin, async (req, res) => {
   const targetId = id(req.params.id), enable = req.body?.enabled !== false;
   if (!targetId) { res.status(400).json({ error: "Invalid user id" }); return; }

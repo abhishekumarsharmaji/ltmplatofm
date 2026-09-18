@@ -10,7 +10,7 @@ import {
   SignUpBody,
   SignUpResponse,
 } from "@workspace/api-zod";
-import { readSession, signSession, requireAuth, requireRole, requireSuperAdmin, isSuperAdminEmail, SESSION_COOKIE, sessionTtlSeconds, type AuthenticatedRequest } from "../middlewares/auth";
+import { readSession, signSession, requireAuth, requireRole, requireSuperAdmin, effectiveRole, reconcileEffectiveRole, isSuperAdminEmail, SESSION_COOKIE, sessionTtlSeconds, type AuthenticatedRequest } from "../middlewares/auth";
 
 const router: IRouter = Router();
 function hashPassword(password: string, salt = randomBytes(16).toString("hex")) {
@@ -32,14 +32,13 @@ router.get("/auth/session", async (req, res): Promise<void> => {
     res.json(GetSessionResponse.parse({ authenticated: false, user: null }));
     return;
   }
-  const [user] = await db.select({
-    id: lmsUsersTable.id,
-    email: lmsUsersTable.email,
-    name: lmsUsersTable.name,
-    role: lmsUsersTable.role,
-  }).from(lmsUsersTable).where(eq(lmsUsersTable.id, userId));
-  if (user && isSuperAdminEmail(user.email) && user.role !== "admin") user.role = "admin";
-  res.json(GetSessionResponse.parse(user ? { authenticated: true, user } : { authenticated: false, user: null }));
+  const [user] = await db.select().from(lmsUsersTable).where(eq(lmsUsersTable.id, userId));
+  if (!user) {
+    res.json(GetSessionResponse.parse({ authenticated: false, user: null }));
+    return;
+  }
+  const { role } = await reconcileEffectiveRole(user);
+  res.json(GetSessionResponse.parse({ authenticated: true, user: { id: user.id, email: user.email, name: user.name, role } }));
 });
 
 router.post("/auth/login", async (req, res): Promise<void> => {
@@ -60,7 +59,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     maxAge: sessionTtlSeconds * 1000,
     path: "/",
   });
-  const role = isSuperAdminEmail(user.email) ? "admin" : user.role;
+  const { role } = await reconcileEffectiveRole(user);
   res.json(LoginResponse.parse({ authenticated: true, user: { id: user.id, email: user.email, name: user.name, role } }));
 });
 
@@ -79,7 +78,7 @@ router.post("/auth/sign-up", async (req, res): Promise<void> => {
   const [user] = await db.insert(lmsUsersTable).values({
     email,
     name: parsed.data.name,
-    role: isSuperAdminEmail(email) ? "admin" : "student",
+    role: effectiveRole(email, "student"),
     passwordHash: hashPassword(parsed.data.password),
   }).returning({
     id: lmsUsersTable.id,
@@ -94,7 +93,7 @@ router.post("/auth/sign-up", async (req, res): Promise<void> => {
     maxAge: sessionTtlSeconds * 1000,
     path: "/",
   });
-  res.status(201).json(SignUpResponse.parse({ authenticated: true, user: { ...user, role: isSuperAdminEmail(email) ? "admin" : "student" } }));
+  res.status(201).json(SignUpResponse.parse({ authenticated: true, user: { ...user, role: effectiveRole(email, user.role) } }));
 });
 
 router.post("/auth/logout", (_req, res): void => {
@@ -177,6 +176,13 @@ router.get("/admin/creator-applications", requireAuth, requireRole("admin"), req
 router.post("/admin/creator-applications/:id/approve", requireAuth, requireRole("admin"), requireSuperAdmin, async (req, res): Promise<void> => {
   const id = Number(req.params.id); if (!Number.isInteger(id)) { res.status(400).json({ error: "Invalid application id" }); return; }
   const auth = req as AuthenticatedRequest;
+  const [applicationOwner] = await db.select({ email: usersTable.email }).from(creatorApplicationsTable)
+    .innerJoin(usersTable, eq(usersTable.id, creatorApplicationsTable.userId))
+    .where(eq(creatorApplicationsTable.id, id));
+  if (applicationOwner && isSuperAdminEmail(applicationOwner.email)) {
+    res.status(403).json({ error: "The permanent super administrator cannot become a creator" });
+    return;
+  }
   const result = await db.transaction(async (tx) => {
     const [application] = await tx.select().from(creatorApplicationsTable).where(eq(creatorApplicationsTable.id, id));
     if (!application) return null;
