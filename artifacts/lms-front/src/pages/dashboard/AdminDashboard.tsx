@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { useState } from "react";
 import { useParams } from "wouter";
 import { 
   useAdminUsers,
@@ -7,7 +8,10 @@ import {
   useAdminOrders,
   useAdminSettings,
   useListCategories,
-  useGetSession
+  useGetSession,
+  useAdminCreatorApplications,
+  useApproveCreatorApplication,
+  useRejectCreatorApplication
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -50,6 +54,7 @@ export default function AdminDashboard() {
       {section === "overview" && <Overview />}
       {section === "users" && <UsersList />}
       {section === "creators" && <CreatorsList />}
+      {section === "applications" && <ApplicationsList />}
       {section === "courses" && !id && <AdminCourseStudioList />}
       {section === "products" && <ProductsList />}
       {section === "live-classes" && !id && <AdminLiveClassesStandalone />}
@@ -57,6 +62,26 @@ export default function AdminDashboard() {
       {section === "categories" && <CategoriesList />}
       {section === "settings" && <SettingsView />}
     </DashboardLayout>
+  );
+}
+
+function ApplicationsList() {
+  const { data: applications, isLoading } = useAdminCreatorApplications({ status: "pending" });
+  const approve = useApproveCreatorApplication();
+  const reject = useRejectCreatorApplication();
+  const refresh = () => window.location.reload();
+  return (
+    <div className="space-y-8 max-w-6xl mx-auto pt-4">
+      <div><h2 className="text-[32px] md:text-[40px] font-bold text-black tracking-tight leading-tight">Creator Applications</h2><p className="text-[16px] text-[#4D4D4D] mt-1">Review detailed teaching profiles before enabling creator tools.</p></div>
+      {isLoading ? <div className="py-20 text-center">Loading applications…</div> : !applications?.length ? <div className="bg-white border rounded-xl p-10 text-center text-[#69737D]">No pending applications.</div> : <div className="space-y-5">{applications.map((item: any) => {
+        const app = item.application ?? item;
+        const user = item.user;
+        return <article key={app.id} className="bg-white border border-[#E5E5E5] rounded-xl p-6 shadow-sm">
+          <div className="flex flex-wrap justify-between gap-4"><div><h3 className="text-xl font-bold text-black">{app.displayName}</h3><p className="text-primary">{app.headline}</p><p className="text-sm text-[#69737D]">{user?.email} · {app.experienceYears} years experience</p></div><div className="flex gap-2"><Button disabled={approve.isPending} onClick={() => approve.mutate({ id: app.id }, { onSuccess: refresh })}>Approve</Button><Button variant="outline" disabled={reject.isPending} onClick={() => { const reason = window.prompt("Rejection reason"); if (reason) reject.mutate({ id: app.id, data: { reason } }, { onSuccess: refresh }); }}>Reject</Button></div></div>
+          <div className="grid md:grid-cols-2 gap-5 mt-5 text-sm"><div><p className="font-bold mb-1">Expertise</p><p className="text-[#4D4D4D]">{app.expertise}</p></div><div><p className="font-bold mb-1">Teaching topics</p><p className="text-[#4D4D4D]">{app.teachingTopics?.join(", ")}</p></div><div><p className="font-bold mb-1">Course proposal</p><p className="text-[#4D4D4D] whitespace-pre-wrap">{app.courseProposal}</p></div><div><p className="font-bold mb-1">Target audience</p><p className="text-[#4D4D4D]">{app.targetAudience}</p></div><div className="md:col-span-2"><p className="font-bold mb-1">Motivation</p><p className="text-[#4D4D4D] whitespace-pre-wrap">{app.motivation}</p></div></div>
+        </article>;
+      })}</div>}
+    </div>
   );
 }
 
@@ -101,6 +126,18 @@ function Overview() {
 
 function UsersList() {
   const { data: users, isLoading } = useAdminUsers();
+  const [busy, setBusy] = useState<number | null>(null);
+  const updateCreator = async (id: number, enabled: boolean) => {
+    setBusy(id);
+    await fetch(`/api/admin/users/${id}/creator`, { method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ enabled }) });
+    window.location.reload();
+  };
+  const updateEnrollment = async (id: number, courseId: string, method: "POST" | "DELETE") => {
+    if (!courseId) return;
+    setBusy(id);
+    await fetch(`/api/admin/users/${id}/enrollments/${courseId}`, { method, credentials: "include", headers: method === "POST" ? { "Content-Type": "application/json" } : undefined, body: method === "POST" ? JSON.stringify({ courseId: Number(courseId) }) : undefined });
+    setBusy(null);
+  };
   
   return (
     <div className="space-y-8 max-w-6xl mx-auto pt-4">
@@ -120,6 +157,7 @@ function UsersList() {
                 <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Name</th>
                 <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Email</th>
                 <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Role</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Controls</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5E5E5]">
@@ -130,6 +168,13 @@ function UsersList() {
                   <td className="p-4 text-[14px] text-[#4D4D4D]">{user.email}</td>
                   <td className="p-4">
                     <Badge className="bg-gray-100 text-[#394649] hover:bg-gray-100 border-none shadow-none uppercase text-[10px] font-bold">{user.role}</Badge>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex flex-wrap gap-2">
+                      {user.role !== "admin" && <Button size="sm" variant="outline" disabled={busy === user.id} onClick={() => updateCreator(user.id, user.role !== "creator")}>{user.role === "creator" ? "Revoke creator" : "Grant creator"}</Button>}
+                      {user.role !== "admin" && <Button size="sm" variant="outline" disabled={busy === user.id} onClick={() => { const courseId = window.prompt("Course ID to enroll"); if (courseId) updateEnrollment(user.id, courseId, "POST"); }}>Enroll</Button>}
+                      {user.role !== "admin" && <Button size="sm" variant="outline" disabled={busy === user.id} onClick={() => { const courseId = window.prompt("Course ID to remove"); if (courseId) updateEnrollment(user.id, courseId, "DELETE"); }}>Remove course</Button>}
+                    </div>
                   </td>
                 </tr>
               ))}

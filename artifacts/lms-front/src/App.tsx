@@ -24,6 +24,7 @@ const About = lazy(() => import('./pages/About'));
 const Creators = lazy(() => import('./pages/Creators'));
 const Login = lazy(() => import('./pages/auth/Login'));
 const SignUp = lazy(() => import('./pages/auth/SignUp'));
+const CreatorApplication = lazy(() => import('./pages/CreatorApplication'));
 const UnavailablePage = lazy(() => import('./pages/UnavailablePage'));
 const NotFound = lazy(() => import('./pages/not-found'));
 const StudentDashboard = lazy(() => import('./pages/dashboard/StudentDashboard'));
@@ -85,6 +86,7 @@ function Router() {
         {/* Auth Routes */}
         <Route path="/auth/login" component={Login} />
         <Route path="/auth/sign-up" component={SignUp} />
+         <Route path="/creator-application" component={CreatorApplication} />
         
         {/* Dashboard Routes - Support sub-routes via path params */}
         <Route path="/dashboard/student" component={Student} />

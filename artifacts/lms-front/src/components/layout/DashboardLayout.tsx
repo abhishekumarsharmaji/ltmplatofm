@@ -16,7 +16,8 @@ import {
   Globe,
   Video,
   Menu,
-  X
+  X,
+  ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getGetSessionQueryKey, logout, useGetSession } from "@workspace/api-client-react";
@@ -51,6 +52,7 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
           { href: `/dashboard/admin`, label: "Dashboard", icon: LayoutDashboard },
           { href: `/dashboard/admin/users`, label: "Users", icon: Users },
           { href: `/dashboard/admin/creators`, label: "Creators", icon: Award },
+           { href: `/dashboard/admin/applications`, label: "Applications", icon: ShieldCheck },
           { href: `/dashboard/admin/courses`, label: "Courses", icon: BookOpen },
           { href: `/dashboard/admin/live-classes`, label: "Live Classes", icon: Video },
           { href: `/dashboard/admin/products`, label: "Products", icon: Package },
