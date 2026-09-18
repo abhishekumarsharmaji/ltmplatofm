@@ -29,7 +29,7 @@ export default function ProductDetail() {
   const { data: session } = useGetSession();
   const isAuthenticated = session?.authenticated;
   const { data: ownedProducts } = useListStudentDigitalProducts({
-    query: { enabled: Boolean(isAuthenticated) },
+    query: { enabled: Boolean(isAuthenticated), queryKey: getListStudentDigitalProductsQueryKey() },
   });
   
   const { data: product, isLoading, isError } = useGetDigitalProduct(productId, { 
