@@ -31,7 +31,7 @@ export default function Pricing() {
       period: "per month",
       description: "Everything you need to master new skills.",
       features: [
-        "Unlimited access to all 500+ courses",
+        "Unlimited access to all courses",
         "Verified certificates of completion",
         "24/7 AI Tutor assistance",
         "Offline video downloads",

@@ -78,17 +78,18 @@ export default function About() {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-6 my-20">
-              <div className="bg-[#515151] rounded-lg py-12 flex flex-col items-center justify-center shadow-sm">
-                <div className="text-[46px] font-bold text-primary mb-2 leading-none">10k+</div>
-                <div className="font-bold text-white text-[16px] mb-2 uppercase tracking-wider">Active Creators</div>
-                <p className="text-[13px] text-gray-300 max-w-[200px] text-center mt-2">Instructors using our platform to teach daily.</p>
-              </div>
-              <div className="bg-[#515151] rounded-lg py-12 flex flex-col items-center justify-center shadow-sm">
-                <div className="text-[46px] font-bold text-primary mb-2 leading-none">2M+</div>
-                <div className="font-bold text-white text-[16px] mb-2 uppercase tracking-wider">Students Enrolled</div>
-                <p className="text-[13px] text-gray-300 max-w-[200px] text-center mt-2">Learners advancing their careers through our platform.</p>
-              </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 my-20" data-testid="about-stats">
+              {stats.map((stat) => (
+                <div key={stat.label} className="bg-[#515151] rounded-lg py-10 px-4 flex flex-col items-center justify-center shadow-sm text-center">
+                  {statsLoading ? (
+                    <div className="h-[46px] w-16 rounded bg-white/10 animate-pulse mb-2" aria-hidden="true" />
+                  ) : (
+                    <div className="text-[46px] font-bold text-primary mb-2 leading-none">{compact.format(stat.value)}</div>
+                  )}
+                  <div className="font-bold text-white text-[15px] mb-2 uppercase tracking-wider">{stat.label}</div>
+                  <p className="text-[13px] text-gray-300 max-w-[200px] mt-1">{stat.caption}</p>
+                </div>
+              ))}
             </div>
             
           </div>

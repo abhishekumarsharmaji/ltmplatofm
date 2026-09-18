@@ -25,10 +25,12 @@ export function StudentCoursePlayer({ courseId }: { courseId: number }) {
 
   if (error || !course) {
     return (
-      <div className="mx-auto max-w-xl py-20 text-center">
-        <h2 className="text-2xl font-bold">Course unavailable</h2>
-        <p className="mt-2 text-muted-foreground">You must be enrolled to open this learning area.</p>
-        <Link href="/dashboard/student/library"><Button className="mt-6">Back to My Learning</Button></Link>
+      <div className="mx-auto max-w-xl py-24 text-center border border-[#E5E5E5] bg-white rounded-xl shadow-sm">
+        <h2 className="text-[24px] font-bold text-black">Course unavailable</h2>
+        <p className="mt-2 text-[15px] text-[#4D4D4D]">You must be enrolled to open this learning area.</p>
+        <Link href="/dashboard/student/library">
+          <Button className="mt-8 h-11 px-6 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">Back to My Learning</Button>
+        </Link>
       </div>
     );
   }
@@ -38,46 +40,46 @@ export function StudentCoursePlayer({ courseId }: { courseId: number }) {
   const activeClasses = liveClasses?.filter((item) => item.status === "live" || item.status === "scheduled") ?? [];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
-      <div className="flex items-start gap-3">
+    <div className="mx-auto max-w-7xl space-y-8 pt-4">
+      <div className="flex items-start gap-4">
         <Link href="/dashboard/student/library">
-          <Button variant="ghost" size="icon" aria-label="Back to My Learning"><ArrowLeft className="h-5 w-5" /></Button>
+          <Button variant="ghost" size="icon" aria-label="Back to My Learning" className="h-10 w-10 border border-[#E5E5E5] bg-white text-[#394649] hover:bg-gray-50"><ArrowLeft className="h-5 w-5" /></Button>
         </Link>
         <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{course.title}</h1>
-            <Badge className="bg-success text-success-foreground">Enrolled</Badge>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-[28px] md:text-[32px] font-bold text-black tracking-tight leading-tight">{course.title}</h1>
+            <Badge className="bg-[#E3F9EF] text-primary border-none shadow-none font-bold uppercase tracking-wider text-[10px]">Enrolled</Badge>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-[14px] text-[#4D4D4D]">
             {course.creatorName ? `Created by ${course.creatorName}` : "Your enrolled course"}
           </p>
         </div>
       </div>
 
       {activeClasses.length > 0 && (
-        <section className="rounded-2xl border border-primary/25 bg-primary/5 p-4 md:p-6">
-          <div className="mb-4 flex items-center gap-2">
-            <Radio className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-bold">Live classes for this course</h2>
+        <section className="rounded-xl border border-primary/25 bg-[#FAFAFA] p-5 md:p-6 shadow-sm">
+          <div className="mb-4 flex items-center gap-2 text-primary">
+            <Radio className="h-5 w-5" />
+            <h2 className="text-[18px] font-bold">Live classes for this course</h2>
           </div>
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             {activeClasses.map((liveClass) => (
-              <div key={liveClass.id} className="rounded-xl border border-border bg-card p-4">
-                <div className="flex items-start justify-between gap-3">
+              <div key={liveClass.id} className="rounded-lg border border-[#E5E5E5] bg-white p-5 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between gap-3 mb-2">
                   <div>
-                    <h3 className="font-semibold">{liveClass.title}</h3>
-                    {liveClass.description && <p className="mt-1 text-sm text-muted-foreground">{liveClass.description}</p>}
+                    <h3 className="font-bold text-[16px] text-black">{liveClass.title}</h3>
+                    {liveClass.description && <p className="mt-1 text-[13px] text-[#4D4D4D]">{liveClass.description}</p>}
                   </div>
-                  <Badge variant="outline" className={liveClass.status === "live" ? "border-red-500/30 bg-red-500/10 text-red-400" : ""}>
+                  <Badge className={`border-none shadow-none font-bold uppercase tracking-wider text-[10px] ${liveClass.status === "live" ? "bg-[#FFEFEB] text-[#FE543D] animate-pulse" : "bg-[#E3F9EF] text-primary"}`}>
                     {liveClass.status === "live" ? "LIVE NOW" : "SCHEDULED"}
                   </Badge>
                 </div>
-                <div className="mt-3 space-y-1 text-xs text-muted-foreground">
-                  <p className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />{format(parseISO(liveClass.startsAt), "MMMM d, yyyy")}</p>
-                  <p className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{format(parseISO(liveClass.startsAt), "h:mm a")} ({liveClass.timezone})</p>
+                <div className="mt-4 space-y-2 text-[13px] text-[#4D4D4D] font-medium pt-4 border-t border-[#E5E5E5]">
+                  <p className="flex items-center gap-2"><Calendar className="h-4 w-4 text-[#9794AA]" />{format(parseISO(liveClass.startsAt), "MMMM d, yyyy")}</p>
+                  <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-[#9794AA]" />{format(parseISO(liveClass.startsAt), "h:mm a")} ({liveClass.timezone})</p>
                 </div>
                 <Link href={`/dashboard/student/live-classes/${liveClass.id}/classroom`}>
-                  <Button className="mt-4 w-full" variant={liveClass.status === "live" ? "destructive" : "default"}>
+                  <Button className={`mt-5 w-full h-11 font-medium rounded-md text-[14px] ${liveClass.status === "live" ? "bg-[#FE543D] hover:bg-red-600 text-white shadow-[0_4px_14px_rgba(254,84,61,0.25)]" : "bg-primary hover:bg-[#10A364] text-white shadow-[0_4px_14px_rgba(21,207,116,0.25)]"}`}>
                     <Video className="mr-2 h-4 w-4" />{liveClass.status === "live" ? "Join Live Class" : "Open Classroom"}
                   </Button>
                 </Link>
@@ -87,40 +89,40 @@ export function StudentCoursePlayer({ courseId }: { courseId: number }) {
         </section>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <main className="min-w-0 space-y-5">
-          <div className="overflow-hidden rounded-2xl border border-border bg-black shadow-sm">
-            <div className="aspect-video">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <main className="min-w-0 space-y-6">
+          <div className="overflow-hidden rounded-xl border border-[#E5E5E5] bg-black shadow-sm">
+            <div className="aspect-video relative">
               {videoAsset ? (
                 <SecureVideoPlayer key={videoAsset.id} streamUrl={videoAsset.streamUrl} watermark={watermark} />
               ) : (
                 <div className="flex h-full flex-col items-center justify-center px-6 text-center text-white">
-                  <MonitorPlay className="mb-3 h-12 w-12 text-white/30" />
-                  <p className="font-semibold">{selectedLesson ? "Video not added yet" : "Select a lesson"}</p>
-                  <p className="mt-1 text-sm text-white/60">The creator’s uploaded lesson video will play here.</p>
+                  <MonitorPlay className="mb-4 h-14 w-14 text-white/30" />
+                  <p className="font-bold text-[18px]">{selectedLesson ? "Video not added yet" : "Select a lesson"}</p>
+                  <p className="mt-2 text-[14px] text-white/60">The creator’s uploaded lesson video will play here.</p>
                 </div>
               )}
             </div>
           </div>
           {selectedLesson && (
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Current lesson</p>
-              <h2 className="mt-2 text-xl font-bold">{selectedLesson.title}</h2>
-              {selectedLesson.description && <p className="mt-2 leading-relaxed text-muted-foreground">{selectedLesson.description}</p>}
+            <div className="rounded-xl border border-[#E5E5E5] bg-white p-6 shadow-sm">
+              <p className="text-[12px] font-bold uppercase tracking-wider text-primary mb-2">Current lesson</p>
+              <h2 className="text-[24px] font-bold text-black">{selectedLesson.title}</h2>
+              {selectedLesson.description && <p className="mt-3 leading-relaxed text-[15px] text-[#4D4D4D]">{selectedLesson.description}</p>}
             </div>
           )}
         </main>
 
-        <aside className="overflow-hidden rounded-2xl border border-border bg-card lg:max-h-[calc(100vh-150px)]">
-          <div className="border-b border-border p-4">
-            <h2 className="font-bold">Course content</h2>
-            <p className="mt-1 text-xs text-muted-foreground">{lessons.length} lesson{lessons.length === 1 ? "" : "s"}</p>
+        <aside className="overflow-hidden rounded-xl border border-[#E5E5E5] bg-white shadow-sm lg:max-h-[calc(100vh-150px)]">
+          <div className="border-b border-[#E5E5E5] p-5 bg-[#FAFAFA]">
+            <h2 className="font-bold text-[18px] text-black">Course content</h2>
+            <p className="mt-1 text-[13px] text-[#9794AA]">{lessons.length} lesson{lessons.length === 1 ? "" : "s"}</p>
           </div>
           <div className="max-h-[560px] overflow-y-auto">
             {course.modules.map((module, moduleIndex) => (
-              <div key={module.id} className="border-b border-border last:border-0">
-                <div className="bg-muted/40 px-4 py-3">
-                  <p className="text-sm font-semibold">Module {moduleIndex + 1}: {module.title}</p>
+              <div key={module.id} className="border-b border-[#E5E5E5] last:border-0">
+                <div className="bg-[#F1EEFC] px-5 py-3 border-y border-[#E5E5E5] first:border-t-0">
+                  <p className="text-[13px] font-bold text-[#704FE6]">Module {moduleIndex + 1}: {module.title}</p>
                 </div>
                 {module.lessons.map((lesson, lessonIndex) => (
                   <LessonButton key={lesson.id} lesson={lesson} index={lessonIndex} active={lesson.id === selectedLesson?.id} onSelect={setSelectedLessonId} />
@@ -140,13 +142,13 @@ function LessonButton({ lesson, index, active, onSelect }: { lesson: StudentLess
     <button
       type="button"
       onClick={() => onSelect(lesson.id)}
-      className={`flex w-full items-start gap-3 border-t border-border px-4 py-4 text-left transition-colors ${active ? "bg-primary/10 text-primary" : "hover:bg-muted/40"}`}
+      className={`flex w-full items-start gap-3 border-t border-[#E5E5E5] px-5 py-4 text-left transition-colors first:border-t-0 ${active ? "bg-[#E3F9EF] text-primary" : "hover:bg-gray-50 text-[#394649]"}`}
     >
-      <PlayCircle className={`mt-0.5 h-4 w-4 shrink-0 ${hasVideo ? "" : "opacity-40"}`} />
-      <span className="min-w-0">
-        <span className="block text-xs text-muted-foreground">Lesson {index + 1}</span>
-        <span className="block truncate text-sm font-medium">{lesson.title}</span>
-        <span className="mt-1 block text-xs text-muted-foreground">{hasVideo ? "Video available" : "No video yet"}</span>
+      <PlayCircle className={`mt-0.5 h-4 w-4 shrink-0 ${hasVideo ? (active ? "text-primary" : "text-[#9794AA]") : "opacity-40"}`} />
+      <span className="min-w-0 flex-1">
+        <span className={`block text-[11px] font-bold uppercase tracking-wider ${active ? "text-primary/70" : "text-[#9794AA]"}`}>Lesson {index + 1}</span>
+        <span className={`block truncate text-[14px] font-bold mt-1 ${active ? "text-primary" : "text-black"}`}>{lesson.title}</span>
+        <span className={`mt-1 block text-[12px] ${active ? "text-primary/70" : "text-[#9794AA]"}`}>{hasVideo ? "Video available" : "No video yet"}</span>
       </span>
     </button>
   );
