@@ -82,12 +82,15 @@ function StudentLiveClassItem({ liveClass }: { liveClass: LiveClass }) {
 
   return (
     <div className="flex flex-col border border-[#E5E5E5] rounded-lg p-5 bg-[#FAFAFA] hover:shadow-md transition-all group">
-      <div className="flex items-start justify-between mb-3 gap-2">
+      <div className="flex items-start justify-between mb-2 gap-2">
         <h4 className="font-bold text-[16px] text-black group-hover:text-primary transition-colors">{liveClass.title}</h4>
-        <Badge className={`font-bold text-[10px] border-none shadow-none uppercase tracking-wider ${getStatusColor(liveClass.status)}`}>
+        <Badge className={`font-bold text-[10px] border-none shadow-none uppercase tracking-wider shrink-0 ${getStatusColor(liveClass.status)}`}>
           {liveClass.status === 'live' ? 'LIVE NOW' : liveClass.status}
         </Badge>
       </div>
+      {liveClass.moduleTitle && (
+        <p className="mb-2 text-[12px] font-bold text-[#704FE6] uppercase tracking-wider">{liveClass.moduleTitle}</p>
+      )}
       {liveClass.description && (
         <p className="text-[14px] text-[#4D4D4D] line-clamp-2 mb-4">{liveClass.description}</p>
       )}

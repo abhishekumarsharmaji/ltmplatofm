@@ -4,7 +4,7 @@ import { format, parseISO } from "date-fns";
 import { useGetSession, useGetStudentCourse, useListUpcomingLiveClasses, type StudentLesson } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Clock, MonitorPlay, PlayCircle, Radio, Video } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MonitorPlay, PlayCircle, Radio, Video, FileText, Download } from "lucide-react";
 import { SecureVideoPlayer } from "@/components/dashboard/SecureVideoPlayer";
 
 export function StudentCoursePlayer({ courseId }: { courseId: number }) {
@@ -34,7 +34,8 @@ export function StudentCoursePlayer({ courseId }: { courseId: number }) {
   }
 
   const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId) ?? lessons[0];
-  const videoAsset = selectedLesson?.assets.find((asset) => asset.status === "uploaded");
+  const videoAsset = selectedLesson?.assets.find((asset) => asset.status === "uploaded" && asset.kind === "video");
+  const resourceAssets = selectedLesson?.assets.filter((asset) => asset.status === "uploaded" && asset.kind !== "video") || [];
   const activeClasses = liveClasses?.filter((item) => item.status === "live" || item.status === "scheduled") ?? [];
 
   return (
@@ -66,6 +67,9 @@ export function StudentCoursePlayer({ courseId }: { courseId: number }) {
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div>
                     <h3 className="font-bold text-[16px] text-black">{liveClass.title}</h3>
+                    {liveClass.moduleTitle && (
+                      <p className="mt-1 text-[12px] font-bold text-[#704FE6] uppercase tracking-wider">{liveClass.moduleTitle}</p>
+                    )}
                     {liveClass.description && <p className="mt-1 text-[13px] text-[#4D4D4D]">{liveClass.description}</p>}
                   </div>
                   <Badge className={`border-none shadow-none font-bold uppercase tracking-wider text-[10px] ${liveClass.status === "live" ? "bg-[#FFEFEB] text-[#FE543D] animate-pulse" : "bg-[#E3F9EF] text-primary"}`}>
@@ -107,6 +111,35 @@ export function StudentCoursePlayer({ courseId }: { courseId: number }) {
               <p className="text-[12px] font-bold uppercase tracking-wider text-primary mb-2">Current lesson</p>
               <h2 className="text-[24px] font-bold text-black">{selectedLesson.title}</h2>
               {selectedLesson.description && <p className="mt-3 leading-relaxed text-[15px] text-[#4D4D4D]">{selectedLesson.description}</p>}
+              
+              {resourceAssets.length > 0 && (
+                <div className="mt-8 pt-6 border-t border-[#E5E5E5]">
+                  <h3 className="font-bold text-[18px] text-black mb-4">Downloads & Resources</h3>
+                  <div className="space-y-3">
+                    {resourceAssets.map(asset => (
+                      <div key={asset.id} className="flex items-center justify-between p-4 bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg hover:shadow-sm transition-all group">
+                        <div className="flex items-center gap-3 overflow-hidden mr-4">
+                          <div className="w-10 h-10 rounded bg-[#E3F9EF] flex items-center justify-center shrink-0">
+                            <FileText className="w-5 h-5 text-primary" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[14px] font-bold text-black truncate">{asset.filename}</p>
+                            <p className="text-[12px] text-[#9794AA] uppercase tracking-wider">
+                              {(asset.sizeBytes / (1024 * 1024)).toFixed(2)} MB • {asset.mimeType.split('/').pop()?.toUpperCase() || 'FILE'}
+                            </p>
+                          </div>
+                        </div>
+                        <Button asChild variant="outline" className="shrink-0 border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]">
+                          <a href={asset.downloadUrl || `/api/student/assets/${asset.id}/download`} target="_blank" rel="noopener noreferrer">
+                            <Download className="w-4 h-4 mr-2" />
+                            Download
+                          </a>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </main>

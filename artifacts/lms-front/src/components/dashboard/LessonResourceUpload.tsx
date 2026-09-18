@@ -7,10 +7,10 @@ import {
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Trash2, PlayCircle, AlertCircle } from "lucide-react";
+import { FileText, Upload, Trash2, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export function LessonVideoUpload({ lesson, productId }: { lesson: any, productId: number }) {
+export function LessonResourceUpload({ lesson, productId }: { lesson: any, productId: number }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -25,15 +25,10 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith("video/")) {
-      setError("Please select a valid video file.");
-      return;
-    }
-    
-    // R2 multipart uploads support course videos up to 10GB.
-    const MAX_SIZE = 10 * 1024 * 1024 * 1024;
+    // 100MB limit for resources
+    const MAX_SIZE = 100 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      setError("File exceeds 10GB limit.");
+      setError("File exceeds 100MB limit.");
       return;
     }
 
@@ -54,14 +49,18 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
         }
         return response.json() as Promise<T>;
       };
+      
+      const kind = file.type.includes("pdf") || file.type.includes("document") || file.type.includes("msword") || file.type.includes("powerpoint") || file.type.includes("excel") || file.type.includes("text") ? "document" : "other";
+
       const res = await apiJson<{ asset: any; uploadId: string; partSize: number }>(
         `/api/creator/lessons/${lesson.id}/assets/request-upload`,
         {
           method: "POST",
           body: JSON.stringify({
-          filename: file.name,
-          mimeType: file.type,
+            filename: file.name,
+            mimeType: file.type || "application/octet-stream",
             sizeBytes: file.size,
+            kind
           }),
         },
       );
@@ -95,6 +94,7 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
         });
         parts.push({ partNumber, eTag });
       };
+      
       try {
         const workers = Array.from({ length: Math.min(3, partCount) }, async () => {
           while (nextPart <= partCount) {
@@ -125,33 +125,33 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
       }
 
       setProgress(100);
-      toast({ title: "Video uploaded successfully" });
+      toast({ title: "Resource uploaded successfully" });
       
-      // Reset input
       if (fileInputRef.current) fileInputRef.current.value = "";
       
       queryClient.invalidateQueries({ queryKey: getGetCreatorCourseBuilderQueryKey(productId) });
       queryClient.invalidateQueries({ queryKey: getGetCreatorCourseReadinessQueryKey(productId) });
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Failed to upload video");
+      setError(err.message || "Failed to upload resource");
       toast({ title: "Upload failed", description: err.message, variant: "destructive" });
     } finally {
       setUploading(false);
     }
   };
 
-  const asset = lesson.assets?.find((a: any) => a.kind === "video");
-  const handleRemove = () => {
-    if (!asset || !confirm("Remove this lesson video?")) return;
-    removeAsset.mutate({ assetId: asset.id }, {
+  const assets = lesson.assets?.filter((a: any) => a.kind !== "video") || [];
+  
+  const handleRemove = (assetId: number) => {
+    if (!confirm("Remove this resource?")) return;
+    removeAsset.mutate({ assetId }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetCreatorCourseBuilderQueryKey(productId) });
-        toast({ title: "Video removed" });
+        toast({ title: "Resource removed" });
       },
       onError: (err: Error) => {
         setError(err.message);
-        toast({ title: "Could not remove video", description: err.message, variant: "destructive" });
+        toast({ title: "Could not remove resource", description: err.message, variant: "destructive" });
       },
     });
   };
@@ -160,14 +160,19 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
     <div className="mt-4 p-4 border-2 border-dashed border-[#E5E5E5] rounded-lg bg-[#FAFAFA]">
       <div className="flex items-center justify-between mb-3">
         <h5 className="text-[14px] font-bold text-black flex items-center gap-2">
-          <PlayCircle className="w-4 h-4 text-primary" />
-          Lesson Video
+          <FileText className="w-4 h-4 text-primary" />
+          Lesson Resources
         </h5>
-        {asset && (
-          <span className="text-[12px] text-[#4D4D4D] bg-white border border-[#E5E5E5] px-2 py-1 rounded">
-            {asset.status === "uploaded" ? "Ready" : asset.status}
-          </span>
-        )}
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-8 px-3 rounded-md font-medium text-[13px]"
+          disabled={uploading}
+        >
+          <Upload className="w-3 h-3 mr-2" />
+          Upload File
+        </Button>
       </div>
 
       {error && (
@@ -177,8 +182,8 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
         </div>
       )}
 
-      {uploading ? (
-        <div className="space-y-2">
+      {uploading && (
+        <div className="mb-4 space-y-2 bg-white p-3 rounded-md border border-[#E5E5E5]">
           <div className="flex justify-between text-[13px] text-[#4D4D4D] font-bold">
             <span>Uploading...</span>
             <span>{progress}%</span>
@@ -187,57 +192,57 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
             <div className="h-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
           </div>
         </div>
-      ) : asset && asset.status === "uploaded" ? (
-        <div className="flex items-center justify-between bg-white border border-[#E5E5E5] p-3 rounded-md shadow-sm">
-          <div className="flex flex-col truncate pr-4">
-            <span className="text-[14px] font-bold text-black truncate">{asset.filename}</span>
-            <span className="text-[12px] text-[#9794AA] mt-0.5">
-              {(asset.sizeBytes / (1024 * 1024)).toFixed(2)} MB
-            </span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <a 
-              href={`/api/creator/assets/${asset.id}/download`}
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-[13px] text-primary hover:text-[#10A364] hover:underline font-medium px-2"
-            >
-              Play / Download
-            </a>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-8 px-3 rounded-md font-medium text-[13px]"
-            >
-              Replace
-            </Button>
-            <Button
-              aria-label={`Remove ${asset.filename}`}
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 text-[#E53E3E] hover:bg-red-50 hover:text-[#E53E3E] rounded-md"
-              onClick={handleRemove}
-              disabled={removeAsset.isPending}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+      )}
+
+      {assets.length > 0 ? (
+        <div className="space-y-2">
+          {assets.map((asset: any) => (
+            <div key={asset.id} className="flex items-center justify-between bg-white border border-[#E5E5E5] p-3 rounded-md shadow-sm">
+              <div className="flex flex-col truncate pr-4">
+                <span className="text-[14px] font-bold text-black truncate">{asset.filename}</span>
+                <span className="text-[12px] text-[#9794AA] mt-0.5">
+                  {(asset.sizeBytes / (1024 * 1024)).toFixed(2)} MB • {asset.status === 'uploaded' ? 'Ready' : asset.status}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {asset.status === 'uploaded' && (
+                  <a 
+                    href={asset.downloadUrl || `/api/creator/assets/${asset.id}/download`}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[13px] text-primary hover:text-[#10A364] hover:underline font-medium px-2"
+                  >
+                    Download
+                  </a>
+                )}
+                <Button
+                  aria-label={`Remove ${asset.filename}`}
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-[#E53E3E] hover:bg-red-50 hover:text-[#E53E3E] rounded-md"
+                  onClick={() => handleRemove(asset.id)}
+                  disabled={removeAsset.isPending}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
         </div>
-      ) : (
+      ) : !uploading && (
         <div className="text-center py-6">
-          <Upload className="w-8 h-8 text-[#9794AA] mx-auto mb-3" />
-          <p className="text-[14px] text-[#4D4D4D] mb-4">
-            Upload a video for this lesson (Max 10GB)
+          <p className="text-[14px] text-[#4D4D4D] mb-1">
+            No resources added yet.
           </p>
-          <Button onClick={() => fileInputRef.current?.click()} className="h-9 px-4 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[13px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
-            Select Video File
-          </Button>
+          <p className="text-[12px] text-[#9794AA]">
+            Supports PDF, PPT, DOC, XLS, ZIP, TXT, JSON (Max 100MB)
+          </p>
         </div>
       )}
+
       <input 
         type="file" 
-        accept="video/mp4,video/webm,video/quicktime,video/x-m4v" 
+        accept=".pdf,.ppt,.pptx,.doc,.docx,.odt,.rtf,.xls,.xlsx,.csv,.ods,.zip,.7z,.rar,.txt,.json" 
         className="hidden" 
         ref={fileInputRef}
         onChange={handleFileSelect}
