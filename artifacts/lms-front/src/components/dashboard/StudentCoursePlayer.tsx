@@ -40,8 +40,8 @@ export function StudentCoursePlayer({ courseId }: { courseId: number }) {
   return (
     <div className="mx-auto max-w-7xl space-y-8 pt-4">
       <div className="flex items-start gap-4">
-        <Link href="/dashboard/student/library">
-          <Button variant="ghost" size="icon" aria-label="Back to My Learning" className="h-10 w-10 border border-[#E5E5E5] bg-white text-[#394649] hover:bg-gray-50"><ArrowLeft className="h-5 w-5" /></Button>
+        <Link href="/dashboard/student/library" aria-label="Back to My Learning" className="h-10 w-10 border border-[#E5E5E5] bg-white text-[#394649] hover:bg-gray-50 inline-flex items-center justify-center rounded-md">
+            <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
           <div className="flex flex-wrap items-center gap-3">

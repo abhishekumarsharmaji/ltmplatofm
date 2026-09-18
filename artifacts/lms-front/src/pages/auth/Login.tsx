@@ -40,9 +40,9 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-white flex text-[#394649] font-sans">
       {/* Left Column: Form */}
-      <div className="flex-1 flex flex-col justify-center px-8 sm:px-16 lg:px-24 xl:px-32 relative">
+      <div className="flex-1 flex flex-col justify-center px-6 sm:px-12 md:px-16 lg:px-24 xl:px-32 relative">
         {/* Top Logo */}
-        <div className="absolute top-10 left-8 sm:left-16 lg:left-24 xl:left-32">
+        <div className="absolute top-10 left-6 sm:left-12 md:left-16 lg:left-24 xl:left-32">
           <Link href="/" className="flex items-center space-x-2 shrink-0">
             <img src={`${import.meta.env.BASE_URL}brand/logo-mark.svg`} alt="CoreSkils" className="w-8 h-8" />
             <span className="font-bold text-xl text-black tracking-tight">

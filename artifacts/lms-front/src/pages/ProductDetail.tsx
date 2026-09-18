@@ -89,11 +89,9 @@ export default function ProductDetail() {
                     </ul>
                     
                     <div className="pt-4">
-                      <Link href="/checkout">
-                        <Button className="w-full h-[54px] bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)]" data-testid="button-purchase">
+                      <Link href="/checkout" className="w-full h-[54px] bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)] inline-flex items-center justify-center" data-testid="button-purchase">
                           <ShoppingCart className="w-5 h-5 mr-2" />
                           Purchase Now
-                        </Button>
                       </Link>
                     </div>
                   </div>

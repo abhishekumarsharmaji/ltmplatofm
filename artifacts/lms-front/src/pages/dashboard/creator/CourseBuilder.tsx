@@ -445,7 +445,7 @@ function BasicsTab({ productId, product, course }: { productId: number, product:
                     variant="ghost"
                     size="icon"
                     onClick={() => removeFaq(index)}
-                    className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-[#E53E3E] hover:text-[#E53E3E] hover:bg-red-50 h-8 w-8"
+                    className="absolute top-3 right-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-[#E53E3E] hover:text-[#E53E3E] hover:bg-red-50 h-10 w-10"
                   >
                     <Trash className="w-4 h-4" />
                   </Button>
@@ -638,13 +638,13 @@ function ModuleItem({ module, index, total, onMove, productId }: any) {
             </h3>
           )}
         </div>
-        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button aria-label={`Edit ${module.title}`} variant="ghost" size="icon" onClick={() => setIsEditing(!isEditing)} className="h-8 w-8 text-[#9794AA] hover:text-black">
+        <div className="flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+          <Button aria-label={`Edit ${module.title}`} variant="ghost" size="icon" onClick={() => setIsEditing(!isEditing)} className="h-10 w-10 text-[#9794AA] hover:text-black">
             <Edit2 className="w-4 h-4" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button aria-label={`More actions for ${module.title}`} variant="ghost" size="icon" className="h-8 w-8 text-[#9794AA] hover:text-black"><MoreVertical className="w-4 h-4" /></Button>
+              <Button aria-label={`More actions for ${module.title}`} variant="ghost" size="icon" className="h-10 w-10 text-[#9794AA] hover:text-black"><MoreVertical className="w-4 h-4" /></Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleAddLesson} className="cursor-pointer font-medium text-[13px]"><Plus className="w-4 h-4 mr-2" /> Add Lesson</DropdownMenuItem>
@@ -759,7 +759,7 @@ function LessonItem({ lesson, index, total, onMove, productId }: any) {
             <button aria-label={`Move ${lesson.title} down`} onClick={() => onMove(index, 'down')} disabled={index === total - 1} className="p-0.5 text-[#9794AA] hover:text-black disabled:opacity-30"><ChevronDown className="w-3 h-3" /></button>
           </div>
           <div
-            className="w-8 h-8 rounded flex items-center justify-center cursor-pointer hover:bg-[#E3F9EF] transition-colors"
+            className="w-10 h-10 rounded flex items-center justify-center cursor-pointer hover:bg-[#E3F9EF] transition-colors"
             onClick={() => setShowVideo(!showVideo)}
             title="Toggle video settings"
           >
