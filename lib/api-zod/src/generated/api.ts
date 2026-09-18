@@ -1750,6 +1750,37 @@ export const ListDigitalProductFilesResponseItem = zod.object({
 export const ListDigitalProductFilesResponse = zod.array(ListDigitalProductFilesResponseItem)
 
 
+export const GetDigitalProductReadinessParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const GetDigitalProductReadinessResponse = zod.object({
+
+}).passthrough()
+
+
+export const UnpublishDigitalProductParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const unpublishDigitalProductResponsePriceMinorMin = 0;
+
+
+
+export const UnpublishDigitalProductResponse = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(unpublishDigitalProductResponsePriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+})
+
+
 export const RequestDigitalFileUploadParams = zod.object({
   "productId": zod.coerce.number().int()
 })

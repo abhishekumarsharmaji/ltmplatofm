@@ -46,6 +46,7 @@ export * from './digitalProduct';
 export * from './digitalProductDetail';
 export * from './enrollmentResult';
 export * from './finalizeCourseThumbnailUpload200';
+export * from './getDigitalProductReadiness200';
 export * from './healthStatus';
 export * from './imageFinalizeInput';
 export * from './imageUploadInput';

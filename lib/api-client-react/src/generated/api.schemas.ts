@@ -747,6 +747,8 @@ export type ListDigitalProductsParams = {
 q?: string;
 };
 
+export type GetDigitalProductReadiness200 = { [key: string]: unknown };
+
 export type RequestDigitalFilePartUrl200 = {
   uploadURL: string;
 };

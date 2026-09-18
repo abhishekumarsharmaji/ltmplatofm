@@ -76,6 +76,23 @@ router.get("/creator/digital-products/:productId/files", requireAuth, requireRol
   const files = await db.select().from(digitalFilesTable).where(eq(digitalFilesTable.productId, productId)).orderBy(asc(digitalFilesTable.position));
   res.json(files.map(safeFile));
 });
+router.get("/creator/digital-products/:productId/readiness", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const productId = numericId(req.params.productId), auth = req as AuthenticatedRequest;
+  const product = productId ? await ownedProduct(productId, auth) : undefined;
+  if (!product) { res.status(404).json({ error: "Digital product not found" }); return; }
+  const [count] = await db.select({ count: sql<number>`count(*)::int` }).from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, product.id), eq(digitalFilesTable.status, "uploaded")));
+  const checks = {
+    title: product.title.trim().length > 1, description: product.description.trim().length > 0,
+    subtype: !!product.subtype, files: Number(count.count) > 0, free: product.priceMinor === 0,
+  };
+  res.json({ ready: Object.values(checks).every(Boolean), checks });
+});
+router.post("/creator/digital-products/:productId/unpublish", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
+  const productId = numericId(req.params.productId), auth = req as AuthenticatedRequest;
+  if (!productId || !await ownedProduct(productId, auth)) { res.status(404).json({ error: "Digital product not found" }); return; }
+  const [product] = await db.update(productsTable).set({ status: "draft", updatedAt: new Date() }).where(eq(productsTable.id, productId)).returning();
+  res.json(product);
+});
 router.post("/creator/digital-products/:productId/files/request-upload", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const productId = numericId(req.params.productId), auth = req as AuthenticatedRequest;
   if (!productId || !await ownedProduct(productId, auth)) { res.status(404).json({ error: "Digital product not found" }); return; }

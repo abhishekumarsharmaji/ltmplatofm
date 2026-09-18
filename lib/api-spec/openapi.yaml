@@ -572,6 +572,18 @@ paths:
       security: [{ cookieAuth: [] }]
       parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
       responses: { "200": { description: Product files, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/DigitalFile" } } } } } }
+  /creator/digital-products/{productId}/readiness:
+    get:
+      operationId: getDigitalProductReadiness
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Readiness, content: { application/json: { schema: { type: object } } } } }
+  /creator/digital-products/{productId}/unpublish:
+    post:
+      operationId: unpublishDigitalProduct
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Unpublished, content: { application/json: { schema: { $ref: "#/components/schemas/Product" } } } } }
   /creator/digital-products/{productId}/files/request-upload:
     post:
       operationId: requestDigitalFileUpload

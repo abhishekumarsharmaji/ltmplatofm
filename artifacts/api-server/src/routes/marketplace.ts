@@ -19,12 +19,13 @@ router.get("/marketplace/products", async (req, res) => {
   const rows = await db.select().from(productsTable)
     .where(and(eq(productsTable.status, "published"), q ? ilike(productsTable.title, `%${q}%`) : undefined, category ? eq(productsTable.categoryId, category) : undefined))
     .orderBy(desc(productsTable.createdAt));
-  res.json(rows);
+  res.json(rows.map((row) => row.type === "digital" ? { ...row, priceMinor: 0, isFree: true } : row));
 });
 router.get("/marketplace/products/:id", async (req, res) => {
   const productId = id(req.params.id); if (!productId) { res.status(400).json({ error: "Invalid id" }); return; }
   const [row] = await db.select().from(productsTable).where(and(eq(productsTable.id, productId), eq(productsTable.status, "published")));
-  if (!row) { res.status(404).json({ error: "Product not found" }); return; } res.json(row);
+  if (!row) { res.status(404).json({ error: "Product not found" }); return; }
+  res.json(row.type === "digital" ? { ...row, priceMinor: 0, isFree: true } : row);
 });
 router.get("/marketplace/courses/:id", async (req, res) => {
   const courseId = id(req.params.id); if (!courseId) { res.status(400).json({ error: "Invalid id" }); return; }
