@@ -2,18 +2,16 @@ import { useState } from "react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
-import { Search, Package, AlertCircle, ShoppingBag } from "lucide-react";
-import { useListProducts } from "@workspace/api-client-react";
+import { Search, Package, AlertCircle, Download } from "lucide-react";
+import { useListDigitalProducts } from "@workspace/api-client-react";
 
 export default function Products() {
   const [search, setSearch] = useState("");
   
-  const queryParams = { 
-    ...(search ? { q: search } : {})
-  };
-  
-  const productsQuery = useListProducts(queryParams);
-  const products = (productsQuery.data || []).filter((product) => product.type === "digital");
+  const productsQuery = useListDigitalProducts();
+  const products = (productsQuery.data || []).filter(product => 
+    !search || product.title.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <PublicLayout>
@@ -25,7 +23,7 @@ export default function Products() {
               Digital Products
             </h1>
             <p className="text-[#394649] text-[18px]">
-              Download premium templates, ebooks, kits, and tools to accelerate your workflow.
+              Download premium templates, ebooks, kits, and tools to accelerate your workflow. All completely free.
             </p>
           </div>
 
@@ -80,10 +78,10 @@ export default function Products() {
               {products.map(product => (
                 <Link key={product.id} href={`/products/${product.id}`}>
                   <div className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-shadow duration-300 flex flex-col h-full cursor-pointer overflow-hidden">
-                    <div className="relative aspect-square overflow-hidden bg-gray-100 flex items-center justify-center">
+                    <div className="relative aspect-square overflow-hidden bg-[#FAFAFA] flex items-center justify-center">
                       <Package className="w-16 h-16 text-primary/30 group-hover:scale-110 transition-transform duration-500" />
                       <span className="absolute top-3 left-3 bg-white/80 backdrop-blur-md border border-[#E5E5E5] text-black font-bold uppercase text-[10px] tracking-wider px-2 py-1 rounded">
-                        {product.type}
+                        {product.subtype || product.type}
                       </span>
                     </div>
                     
@@ -93,11 +91,9 @@ export default function Products() {
                       </h3>
                       
                       <div className="mt-auto pt-4 flex items-center justify-between border-t border-[#E5E5E5]">
-                        <span className="font-bold text-[18px] text-black">
-                          ${(product.priceMinor / 100).toFixed(2)} {product.currency.toUpperCase()}
-                        </span>
+                        <span className="font-bold text-[18px] text-black">Free</span>
                         <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                          <ShoppingBag className="w-4 h-4" />
+                          <Download className="w-4 h-4" />
                         </div>
                       </div>
                     </div>

@@ -13,6 +13,13 @@ import {
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { 
   useCreateCreatorProduct, 
   useUpdateCreatorProduct,
   getListCreatorProductsQueryKey 
@@ -23,7 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 const schema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
   description: z.string().optional(),
-  priceMinor: z.coerce.number().min(0),
+  subtype: z.string().optional(),
 });
 
 export function ProductFormDialog({ 
@@ -32,7 +39,7 @@ export function ProductFormDialog({
   children 
 }: { 
   type: "course" | "digital"; 
-  product?: { id: number; title: string; description: string; priceMinor: number };
+  product?: { id: number; title: string; description: string; subtype?: string };
   children: React.ReactNode 
 }) {
   const [open, setOpen] = useState(false);
@@ -46,7 +53,7 @@ export function ProductFormDialog({
     defaultValues: {
       title: product?.title || "",
       description: product?.description || "",
-      priceMinor: product?.priceMinor || 0,
+      subtype: product?.subtype || "",
     },
   });
 
@@ -55,7 +62,7 @@ export function ProductFormDialog({
       form.reset({
         title: product.title,
         description: product.description,
-        priceMinor: product.priceMinor,
+        subtype: product.subtype || "",
       });
     }
   }, [product, form, open]);
@@ -63,15 +70,18 @@ export function ProductFormDialog({
   const isPending = createProduct.isPending || updateProduct.isPending;
 
   const onSubmit = form.handleSubmit((data) => {
+    const submitData = {
+      ...data,
+      priceMinor: 0,
+      type,
+      currency: "usd",
+    };
+
     if (product) {
       updateProduct.mutate({
         id: product.id,
-        data: {
-          ...data,
-          type,
-          currency: "usd",
-        }
-      }, {
+        data: submitData
+      } as any, {
         onSuccess: () => {
           toast({ title: `${type === 'course' ? 'Course' : 'Product'} updated successfully.` });
           queryClient.invalidateQueries({ queryKey: getListCreatorProductsQueryKey() });
@@ -83,12 +93,8 @@ export function ProductFormDialog({
       });
     } else {
       createProduct.mutate({
-        data: {
-          ...data,
-          type,
-          currency: "usd",
-        }
-      }, {
+        data: submitData
+      } as any, {
         onSuccess: () => {
           toast({ title: `${type === 'course' ? 'Course' : 'Product'} created successfully.` });
           queryClient.invalidateQueries({ queryKey: getListCreatorProductsQueryKey() });
@@ -123,16 +129,27 @@ export function ProductFormDialog({
             <Label htmlFor="description" className="text-[14px] font-bold text-[#394649]">Description (optional)</Label>
             <Input id="description" {...form.register("description")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
           </div>
-          {type === "digital" ? (
+          {type === "digital" && (
             <div className="space-y-2">
-              <Label htmlFor="priceMinor" className="text-[14px] font-bold text-[#394649]">Price (in cents)</Label>
-              <Input id="priceMinor" type="number" {...form.register("priceMinor")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
-            </div>
-          ) : (
-            <div className="rounded-lg border border-[#E5E5E5] bg-[#FAFAFA] p-4 text-[13px] text-[#4D4D4D]">
-              All courses are free. Students can enroll instantly without payment.
+              <Label htmlFor="subtype" className="text-[14px] font-bold text-[#394649]">Product Type</Label>
+              <Select onValueChange={(v) => form.setValue("subtype", v)} defaultValue={form.getValues("subtype")}>
+                <SelectTrigger className="h-11 border-[#E5E5E5] rounded-md text-[14px]">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ebook">E-Book</SelectItem>
+                  <SelectItem value="template">Template</SelectItem>
+                  <SelectItem value="toolkit">Toolkit</SelectItem>
+                  <SelectItem value="document">Document</SelectItem>
+                  <SelectItem value="bundle">Bundle</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
+          <div className="rounded-lg border border-[#E5E5E5] bg-[#FAFAFA] p-4 text-[13px] text-[#4D4D4D]">
+            All content on CoreSkils is distributed for free. Price setup is fully automated.
+          </div>
           <div className="pt-2">
             <Button type="submit" disabled={isPending} className="w-full h-11 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
               {isPending ? "Saving..." : "Save"}
