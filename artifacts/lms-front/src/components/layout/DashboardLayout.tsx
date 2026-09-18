@@ -8,7 +8,6 @@ import {
   LogOut, 
   CreditCard,
   Award,
-  Bell,
   Users,
   Package,
   ShoppingCart,
@@ -84,7 +83,7 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
             <img src="/brand/logo-mark.svg" alt="LMS Platform" className="w-8 h-8" />
             <span className="font-bold text-[18px] text-black tracking-tight">LMS {role === 'creator' ? 'Creator' : role === 'admin' ? 'Admin' : 'Student'}</span>
           </Link>
-          <button className="md:hidden text-[#394649]" onClick={() => setIsMobileMenuOpen(false)}>
+          <button className="md:hidden text-[#394649]" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -131,17 +130,17 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
       <div className="flex-1 flex flex-col md:pl-64 min-h-screen">
         <header className="h-20 border-b border-[#E5E5E5] bg-white flex items-center justify-between px-4 md:px-8 sticky top-0 z-20">
           <div className="flex items-center gap-4">
-            <button className="md:hidden text-[#394649]" onClick={() => setIsMobileMenuOpen(true)}>
+            <button className="md:hidden text-[#394649]" onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu" aria-expanded={isMobileMenuOpen}>
               <Menu className="w-6 h-6" />
             </button>
             <h1 className="font-bold text-[20px] capitalize text-black hidden sm:block">{role} Portal</h1>
           </div>
-          <div className="flex items-center gap-4">
-            <button className="w-10 h-10 rounded-full border border-[#E5E5E5] bg-white flex items-center justify-center text-[#394649] hover:bg-gray-50 transition-colors relative">
-              <Bell className="w-[18px] h-[18px]" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-[#FE543D] rounded-full border-2 border-white"></span>
-            </button>
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-[14px] shadow-[0_4px_10px_rgba(21,207,116,0.2)]">
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:block text-[14px] font-medium text-[#394649]">{userName}</span>
+            <div
+              className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-[14px] shadow-[0_4px_10px_rgba(21,207,116,0.2)]"
+              aria-hidden="true"
+            >
               {userInitial}
             </div>
           </div>

@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { useMarketplaceCourses, useListCategories } from "@workspace/api-client-react";
+import { useMarketplaceCourses, useListCategories, getMarketplaceCoursesQueryKey } from "@workspace/api-client-react";
 import { Star, Clock, BookOpen, Share2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useTranslations } from "@/lib/i18n";
@@ -15,10 +15,10 @@ export default function Home() {
 
   // The active chip filters server-side by category id; "featured" shows the unfiltered list.
   const activeCategoryId = categories.find(c => c.slug === activeCategory)?.id;
-  const filteredQuery = useMarketplaceCourses(
-    activeCategoryId ? { category: String(activeCategoryId) } : {},
-    { query: { enabled: Boolean(activeCategoryId) } }
-  );
+  const filteredParams = activeCategoryId ? { category: String(activeCategoryId) } : {};
+  const filteredQuery = useMarketplaceCourses(filteredParams, {
+    query: { enabled: Boolean(activeCategoryId), queryKey: getMarketplaceCoursesQueryKey(filteredParams) },
+  });
   const displayCourses = useMemo(() => {
     const source = activeCategoryId ? (filteredQuery.data ?? []) : courses;
     return source.slice(0, 8); // Max 8
