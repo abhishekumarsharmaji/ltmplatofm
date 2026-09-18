@@ -555,6 +555,81 @@ paths:
       security: [{ cookieAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
       responses: { "200": { description: Recording stopped, content: { application/json: { schema: { $ref: "#/components/schemas/LiveClass" } } } } }
+  /marketplace/digital-products:
+    get:
+      operationId: listDigitalProducts
+      parameters: [{ name: q, in: query, schema: { type: string } }]
+      responses:
+        "200": { description: Published free digital products, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/DigitalProduct" } } } } }
+  /marketplace/digital-products/{id}:
+    get:
+      operationId: getDigitalProduct
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Product detail, content: { application/json: { schema: { $ref: "#/components/schemas/DigitalProductDetail" } } } }, "404": { description: Not found } }
+  /creator/digital-products/{productId}/files:
+    get:
+      operationId: listDigitalProductFiles
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Product files, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/DigitalFile" } } } } } }
+  /creator/digital-products/{productId}/files/request-upload:
+    post:
+      operationId: requestDigitalFileUpload
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/DigitalFileUploadInput" } } } }
+      responses: { "201": { description: Multipart upload, content: { application/json: { schema: { $ref: "#/components/schemas/DigitalFileUploadResponse" } } } } }
+  /creator/digital-products/{productId}/files/{fileId}/part-url:
+    post:
+      operationId: requestDigitalFilePartUrl
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }, { name: fileId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/MultipartPartInput" } } } }
+      responses: { "200": { description: Part upload URL, content: { application/json: { schema: { type: object, required: [uploadURL], properties: { uploadURL: { type: string } } } } } } }
+  /creator/digital-products/{productId}/files/{fileId}/finalize:
+    post:
+      operationId: finalizeDigitalFileUpload
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }, { name: fileId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/MultipartCompleteInput" } } } }
+      responses: { "200": { description: Uploaded file, content: { application/json: { schema: { $ref: "#/components/schemas/DigitalFile" } } } } }
+  /creator/digital-products/{productId}/files/{fileId}/abort:
+    post:
+      operationId: abortDigitalFileUpload
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }, { name: fileId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/MultipartAbortInput" } } } }
+      responses: { "204": { description: Upload aborted } }
+  /creator/digital-products/{productId}/files/{fileId}:
+    delete:
+      operationId: deleteDigitalProductFile
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }, { name: fileId, in: path, required: true, schema: { type: integer } }]
+      responses: { "204": { description: File removed } }
+  /student/digital-products/{productId}/acquire:
+    post:
+      operationId: acquireDigitalProduct
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Already owned, content: { application/json: { schema: { $ref: "#/components/schemas/DigitalAcquisition" } } } }, "201": { description: Acquired, content: { application/json: { schema: { $ref: "#/components/schemas/DigitalAcquisition" } } } } }
+  /student/digital-products:
+    get:
+      operationId: listStudentDigitalProducts
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Owned products, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/DigitalProduct" } } } } } }
+  /student/digital-products/{productId}:
+    get:
+      operationId: getStudentDigitalProduct
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Owned product, content: { application/json: { schema: { $ref: "#/components/schemas/DigitalProductDetail" } } } } }
+  /student/digital-products/{productId}/files/{fileId}/download:
+    get:
+      operationId: downloadDigitalProductFile
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }, { name: fileId, in: path, required: true, schema: { type: integer } }]
+      responses: { "307": { description: Short-lived signed download redirect } }
+
 components:
   securitySchemes:
     cookieAuth:
@@ -811,6 +886,9 @@ components:
         id: { type: integer }
         title: { type: string }
         description: { type: string }
+        shortSummary: { type: ["string", "null"] }
+        subtype: { type: ["string", "null"], enum: [ebook, template, toolkit, document, bundle, other, null] }
+        coverImageUrl: { type: ["string", "null"] }
         type: { type: string, enum: [course, digital] }
         priceMinor: { type: integer, minimum: 0 }
         currency: { type: string }
@@ -821,11 +899,65 @@ components:
       properties:
         title: { type: string, minLength: 2 }
         description: { type: string }
+        shortSummary: { type: string }
+        subtype: { type: string, enum: [ebook, template, toolkit, document, bundle, other] }
+        coverImageUrl: { type: string }
+        coverImageObjectPath: { type: string }
         type: { type: string, enum: [course, digital] }
         priceMinor: { type: integer, minimum: 0 }
         currency: { type: string }
         courseId: { type: integer }
         categoryId: { type: integer }
+    DigitalFile:
+      type: object
+      required: [id, productId, kind, filename, status, position]
+      properties:
+        id: { type: integer }
+        productId: { type: integer }
+        kind: { type: string }
+        filename: { type: string }
+        mimeType: { type: ["string", "null"] }
+        sizeBytes: { type: ["integer", "null"] }
+        status: { type: string, enum: [pending, uploaded, failed] }
+        position: { type: integer }
+        createdAt: { type: string, format: date-time }
+    DigitalProduct:
+      allOf:
+        - $ref: "#/components/schemas/Product"
+        - type: object
+          required: [isFree]
+          properties:
+            isFree: { type: boolean, const: true }
+            acquiredAt: { type: ["string", "null"], format: date-time }
+    DigitalProductDetail:
+      allOf:
+        - $ref: "#/components/schemas/DigitalProduct"
+        - type: object
+          required: [files]
+          properties:
+            creatorName: { type: ["string", "null"] }
+            files: { type: array, items: { $ref: "#/components/schemas/DigitalFile" } }
+    DigitalFileUploadInput:
+      type: object
+      required: [filename, mimeType, sizeBytes]
+      properties:
+        filename: { type: string, minLength: 1 }
+        mimeType: { type: string, minLength: 1 }
+        sizeBytes: { type: integer, minimum: 1, maximum: 262144000 }
+    DigitalFileUploadResponse:
+      type: object
+      required: [file, uploadId, partSize]
+      properties:
+        file: { $ref: "#/components/schemas/DigitalFile" }
+        uploadId: { type: string }
+        partSize: { type: integer }
+    DigitalAcquisition:
+      type: object
+      required: [productId, acquired, alreadyOwned]
+      properties:
+        productId: { type: integer }
+        acquired: { type: boolean }
+        alreadyOwned: { type: boolean }
     AdminCourseInput:
       type: object
       required: [creatorId, title, description, priceMinor, currency]

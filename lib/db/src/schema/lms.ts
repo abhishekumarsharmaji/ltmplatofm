@@ -100,6 +100,10 @@ export const productsTable = pgTable("products", {
   type: productTypeEnum("type").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull().default(""),
+  shortSummary: text("short_summary"),
+  subtype: text("subtype"),
+  coverImageUrl: text("cover_image_url"),
+  coverImageObjectPath: text("cover_image_object_path"),
   priceMinor: integer("price_minor").notNull().default(0),
   currency: text("currency").notNull().default("USD"),
   status: courseStatusEnum("status").notNull().default("draft"),
@@ -112,10 +116,25 @@ export const digitalFilesTable = pgTable("digital_files", {
   productId: integer("product_id").notNull().references(() => productsTable.id, { onDelete: "cascade" }),
   kind: fileKindEnum("kind").notNull(),
   storageKey: text("storage_key").notNull(),
+  objectPath: text("object_path"),
   filename: text("filename").notNull(),
+  mimeType: text("mime_type"),
   sizeBytes: integer("size_bytes"),
+  status: text("status").notNull().default("pending"),
+  position: integer("position").notNull().default(0),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+}, (t) => [index("digital_files_product_idx").on(t.productId), index("digital_files_product_position_idx").on(t.productId, t.position)]);
+
+export const digitalProductEntitlementsTable = pgTable("digital_product_entitlements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  productId: integer("product_id").notNull().references(() => productsTable.id, { onDelete: "cascade" }),
+  acquiredAt: timestamp("acquired_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex("digital_entitlements_user_product_unique").on(t.userId, t.productId),
+  index("digital_entitlements_user_idx").on(t.userId),
+]);
 
 export const lessonAssetStatusEnum = pgEnum("lesson_asset_status", ["pending", "uploaded", "failed"]);
 export const lessonAssetsTable = pgTable("lesson_assets", {

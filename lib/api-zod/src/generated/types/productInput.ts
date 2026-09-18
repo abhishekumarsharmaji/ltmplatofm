@@ -5,12 +5,17 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { ProductInputSubtype } from './productInputSubtype';
 import type { ProductInputType } from './productInputType';
 
 export interface ProductInput {
   /** @minLength 2 */
   title: string;
   description?: string;
+  shortSummary?: string;
+  subtype?: ProductInputSubtype;
+  coverImageUrl?: string;
+  coverImageObjectPath?: string;
   type?: ProductInputType;
   /** @minimum 0 */
   priceMinor?: number;

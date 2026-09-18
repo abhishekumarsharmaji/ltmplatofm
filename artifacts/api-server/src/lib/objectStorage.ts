@@ -68,6 +68,15 @@ export async function createLessonAssetMultipartUpload(contentType: string) {
   if (!result.UploadId) throw new Error("R2 did not create a multipart upload");
   return { uploadId: result.UploadId, objectPath: `r2://${bucket}/${name}` };
 }
+export async function createDigitalFileMultipartUpload(contentType: string) {
+  const { client, bucket } = r2Config();
+  const name = `digital-files/${randomUUID()}`;
+  const result = await client.send(new CreateMultipartUploadCommand({
+    Bucket: bucket, Key: name, ContentType: contentType,
+  }));
+  if (!result.UploadId) throw new Error("R2 did not create a multipart upload");
+  return { uploadId: result.UploadId, objectPath: `r2://${bucket}/${name}` };
+}
 export async function createLessonPartUploadUrl(objectPath: string, uploadId: string, partNumber: number) {
   const { client } = r2Config();
   const { bucket, name } = parseR2(objectPath);
@@ -103,6 +112,9 @@ export async function abortLessonMultipartUpload(objectPath: string, uploadId: s
     UploadId: uploadId,
   }));
 }
+export const createDigitalFilePartUploadUrl = createLessonPartUploadUrl;
+export const completeDigitalFileMultipartUpload = completeLessonMultipartUpload;
+export const abortDigitalFileMultipartUpload = abortLessonMultipartUpload;
 export async function createObjectDownloadUrl(objectPath: string, filename: string, contentType: string, expiresInSeconds: number, attachment = false) {
   if (!objectPath.startsWith("r2://")) return null;
   const { client } = r2Config();

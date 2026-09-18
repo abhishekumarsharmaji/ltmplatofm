@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { and, eq, ilike, desc, inArray, sql } from "drizzle-orm";
 import {
   db, categoriesTable, coursesTable, courseModulesTable, lessonsTable, lessonAssetsTable, productsTable, usersTable, enrollmentsTable, lmsUsersTable, creatorProfilesTable,
-  ordersTable, orderItemsTable, wishlistTable, platformSettingsTable,
+  ordersTable, orderItemsTable, wishlistTable, platformSettingsTable, digitalFilesTable,
 } from "@workspace/db";
 import { requireAuth, requireRole, requireSuperAdmin, effectiveRole, isSuperAdminEmail, type AuthenticatedRequest } from "../middlewares/auth";
 import { objectFile } from "../lib/objectStorage";
@@ -103,7 +103,8 @@ router.get("/student/courses/:courseId", auth, requireRole("student", "creator",
 router.post("/creator/products", auth, requireRole("creator", "admin"), async (req, res) => {
   const requestUser = req as AuthenticatedRequest;
   const creatorId = await userOf(requestUser); if (!creatorId) { res.status(409).json({ error: "Creator profile unavailable" }); return; }
-  const { title, description = "", type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId } = req.body ?? {};
+  const { title, description = "", shortSummary = null, subtype = "other", coverImageUrl = null, coverImageObjectPath = null, type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId } = req.body ?? {};
+  if (type === "digital" && requestedPrice !== undefined && requestedPrice !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
   const priceMinor = type === "course" ? 0 : requestedPrice;
   if (typeof title !== "string" || title.length < 2 || !["course", "digital"].includes(type) || !Number.isInteger(priceMinor) || priceMinor < 0) {
     res.status(400).json({ error: "Invalid product payload" }); return;
@@ -132,7 +133,9 @@ router.post("/creator/products", auth, requireRole("creator", "admin"), async (r
       linkedCourseId = course.id;
     }
     const [created] = await tx.insert(productsTable).values({
-      creatorId, title: title.trim(), description: String(description), type, priceMinor,
+      creatorId, title: title.trim(), description: String(description), shortSummary: typeof shortSummary === "string" ? shortSummary : null,
+      subtype: type === "digital" ? String(subtype) : null, coverImageUrl: typeof coverImageUrl === "string" ? coverImageUrl : null,
+      coverImageObjectPath: typeof coverImageObjectPath === "string" ? coverImageObjectPath : null, type, priceMinor,
       currency: String(currency).toUpperCase(), courseId: linkedCourseId, categoryId: id(categoryId) ?? undefined,
     }).returning();
     return created;
@@ -147,13 +150,21 @@ router.patch("/creator/products/:id", auth, requireRole("creator", "admin"), asy
   const productId = id(req.params.id), creatorId = await userOf(req as AuthenticatedRequest); if (!productId || !creatorId) { res.status(400).json({ error: "Invalid id" }); return; }
   const [existing] = await db.select().from(productsTable).where(eq(productsTable.id, productId));
   if (!existing || ((req as AuthenticatedRequest).user!.role !== "admin" && existing.creatorId !== creatorId)) { res.status(404).json({ error: "Product not found" }); return; }
-  const allowed = ["title", "description", "priceMinor", "currency", "categoryId"] as const;
+   const allowed = ["title", "description", "shortSummary", "subtype", "coverImageUrl", "coverImageObjectPath", "priceMinor", "currency", "categoryId"] as const;
+   if (existing.type === "digital" && req.body?.priceMinor !== undefined && req.body.priceMinor !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
   const patch = Object.fromEntries(allowed.filter((key) => req.body?.[key] !== undefined).map((key) => [key, key === "categoryId" ? id(req.body[key]) : req.body[key]]));
   const [row] = await db.update(productsTable).set({ ...patch, updatedAt: new Date() }).where(eq(productsTable.id, productId)).returning(); res.json(row);
 });
 router.post("/creator/products/:id/publish", auth, requireRole("creator", "admin"), async (req, res) => {
   const productId = id(req.params.id), creatorId = await userOf(req as AuthenticatedRequest); if (!productId || !creatorId) { res.status(400).json({ error: "Invalid id" }); return; }
   const where = (req as AuthenticatedRequest).user!.role === "admin" ? eq(productsTable.id, productId) : and(eq(productsTable.id, productId), eq(productsTable.creatorId, creatorId));
+  const [candidate] = await db.select().from(productsTable).where(where);
+  if (!candidate) { res.status(404).json({ error: "Product not found" }); return; }
+  if (candidate.type === "digital") {
+    if (!candidate.title.trim() || !candidate.description.trim() || !candidate.subtype || candidate.priceMinor !== 0) { res.status(422).json({ error: "Digital product needs a title, description, subtype, and free price" }); return; }
+    const [file] = await db.select({ id: digitalFilesTable.id }).from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, productId), eq(digitalFilesTable.status, "uploaded"))).limit(1);
+    if (!file) { res.status(422).json({ error: "Add at least one uploaded digital file before publishing" }); return; }
+  }
   const [row] = await db.update(productsTable).set({ status: "published", updatedAt: new Date() }).where(where).returning();
   if (!row) { res.status(404).json({ error: "Product not found" }); return; }
   if (row.courseId) {

@@ -6,12 +6,19 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ProductStatus } from './productStatus';
+import type { ProductSubtype } from './productSubtype';
 import type { ProductType } from './productType';
 
 export interface Product {
   id: number;
   title: string;
   description: string;
+  /** @nullable */
+  shortSummary?: string | null;
+  /** @nullable */
+  subtype?: ProductSubtype;
+  /** @nullable */
+  coverImageUrl?: string | null;
   type: ProductType;
   /** @minimum 0 */
   priceMinor: number;

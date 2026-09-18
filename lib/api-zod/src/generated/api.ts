@@ -437,6 +437,9 @@ export const ListProductsResponseItem = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(listProductsResponsePriceMinorMin),
   "currency": zod.string(),
@@ -457,6 +460,9 @@ export const GetProductResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(getProductResponsePriceMinorMin),
   "currency": zod.string(),
@@ -583,6 +589,9 @@ export const ListCreatorProductsResponseItem = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(listCreatorProductsResponsePriceMinorMin),
   "currency": zod.string(),
@@ -600,6 +609,10 @@ export const createCreatorProductBodyPriceMinorMin = 0;
 export const CreateCreatorProductBody = zod.object({
   "title": zod.string().min(createCreatorProductBodyTitleMin),
   "description": zod.string().optional(),
+  "shortSummary": zod.string().optional(),
+  "subtype": zod.enum(['ebook', 'template', 'toolkit', 'document', 'bundle', 'other']).optional(),
+  "coverImageUrl": zod.string().optional(),
+  "coverImageObjectPath": zod.string().optional(),
   "type": zod.enum(['course', 'digital']).optional(),
   "priceMinor": zod.number().int().min(createCreatorProductBodyPriceMinorMin).optional(),
   "currency": zod.string().optional(),
@@ -615,6 +628,9 @@ export const CreateCreatorProductResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(createCreatorProductResponsePriceMinorMin),
   "currency": zod.string(),
@@ -635,6 +651,10 @@ export const updateCreatorProductBodyPriceMinorMin = 0;
 export const UpdateCreatorProductBody = zod.object({
   "title": zod.string().min(updateCreatorProductBodyTitleMin),
   "description": zod.string().optional(),
+  "shortSummary": zod.string().optional(),
+  "subtype": zod.enum(['ebook', 'template', 'toolkit', 'document', 'bundle', 'other']).optional(),
+  "coverImageUrl": zod.string().optional(),
+  "coverImageObjectPath": zod.string().optional(),
   "type": zod.enum(['course', 'digital']).optional(),
   "priceMinor": zod.number().int().min(updateCreatorProductBodyPriceMinorMin).optional(),
   "currency": zod.string().optional(),
@@ -650,6 +670,9 @@ export const UpdateCreatorProductResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(updateCreatorProductResponsePriceMinorMin),
   "currency": zod.string(),
@@ -669,6 +692,9 @@ export const PublishCreatorProductResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(publishCreatorProductResponsePriceMinorMin),
   "currency": zod.string(),
@@ -689,6 +715,9 @@ export const GetCreatorCourseBuilderResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(getCreatorCourseBuilderResponseProductPriceMinorMin),
   "currency": zod.string(),
@@ -1272,6 +1301,9 @@ export const AdminProductsResponseItem = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(adminProductsResponsePriceMinorMin),
   "currency": zod.string(),
@@ -1634,5 +1666,269 @@ export const StopLiveClassRecordingResponse = zod.object({
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
+
+
+export const ListDigitalProductsQueryParams = zod.object({
+  "q": zod.coerce.string().optional()
+})
+
+export const listDigitalProductsResponseOnePriceMinorMin = 0;
+
+
+
+export const ListDigitalProductsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(listDigitalProductsResponseOnePriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+}).and(zod.object({
+  "isFree": zod.literal(true),
+  "acquiredAt": zod.coerce.date().nullish()
+}))
+export const ListDigitalProductsResponse = zod.array(ListDigitalProductsResponseItem)
+
+
+export const GetDigitalProductParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const getDigitalProductResponseOneOnePriceMinorMin = 0;
+
+
+
+export const GetDigitalProductResponse = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(getDigitalProductResponseOneOnePriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+}).and(zod.object({
+  "isFree": zod.literal(true),
+  "acquiredAt": zod.coerce.date().nullish()
+})).and(zod.object({
+  "creatorName": zod.string().nullish(),
+  "files": zod.array(zod.object({
+  "id": zod.number().int(),
+  "productId": zod.number().int(),
+  "kind": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string().nullish(),
+  "sizeBytes": zod.number().int().nullish(),
+  "status": zod.enum(['pending', 'uploaded', 'failed']),
+  "position": zod.number().int(),
+  "createdAt": zod.coerce.date().optional()
+}))
+}))
+
+
+export const ListDigitalProductFilesParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const ListDigitalProductFilesResponseItem = zod.object({
+  "id": zod.number().int(),
+  "productId": zod.number().int(),
+  "kind": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string().nullish(),
+  "sizeBytes": zod.number().int().nullish(),
+  "status": zod.enum(['pending', 'uploaded', 'failed']),
+  "position": zod.number().int(),
+  "createdAt": zod.coerce.date().optional()
+})
+export const ListDigitalProductFilesResponse = zod.array(ListDigitalProductFilesResponseItem)
+
+
+export const RequestDigitalFileUploadParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+
+
+export const requestDigitalFileUploadBodySizeBytesMax = 262144000;
+
+
+
+export const RequestDigitalFileUploadBody = zod.object({
+  "filename": zod.string().min(1),
+  "mimeType": zod.string().min(1),
+  "sizeBytes": zod.number().int().min(1).max(requestDigitalFileUploadBodySizeBytesMax)
+})
+
+export const RequestDigitalFileUploadResponse = zod.object({
+  "file": zod.object({
+  "id": zod.number().int(),
+  "productId": zod.number().int(),
+  "kind": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string().nullish(),
+  "sizeBytes": zod.number().int().nullish(),
+  "status": zod.enum(['pending', 'uploaded', 'failed']),
+  "position": zod.number().int(),
+  "createdAt": zod.coerce.date().optional()
+}),
+  "uploadId": zod.string(),
+  "partSize": zod.number().int()
+})
+
+
+export const RequestDigitalFilePartUrlParams = zod.object({
+  "productId": zod.coerce.number().int(),
+  "fileId": zod.coerce.number().int()
+})
+
+export const requestDigitalFilePartUrlBodyPartNumberMax = 10000;
+
+
+
+export const RequestDigitalFilePartUrlBody = zod.object({
+  "uploadId": zod.string(),
+  "partNumber": zod.number().int().min(1).max(requestDigitalFilePartUrlBodyPartNumberMax)
+})
+
+export const RequestDigitalFilePartUrlResponse = zod.object({
+  "uploadURL": zod.string()
+})
+
+
+export const FinalizeDigitalFileUploadParams = zod.object({
+  "productId": zod.coerce.number().int(),
+  "fileId": zod.coerce.number().int()
+})
+
+export const finalizeDigitalFileUploadBodyPartsItemPartNumberMax = 10000;
+
+
+
+
+export const FinalizeDigitalFileUploadBody = zod.object({
+  "uploadId": zod.string(),
+  "parts": zod.array(zod.object({
+  "partNumber": zod.number().int().min(1).max(finalizeDigitalFileUploadBodyPartsItemPartNumberMax),
+  "eTag": zod.string()
+})).min(1)
+})
+
+export const FinalizeDigitalFileUploadResponse = zod.object({
+  "id": zod.number().int(),
+  "productId": zod.number().int(),
+  "kind": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string().nullish(),
+  "sizeBytes": zod.number().int().nullish(),
+  "status": zod.enum(['pending', 'uploaded', 'failed']),
+  "position": zod.number().int(),
+  "createdAt": zod.coerce.date().optional()
+})
+
+
+export const AbortDigitalFileUploadParams = zod.object({
+  "productId": zod.coerce.number().int(),
+  "fileId": zod.coerce.number().int()
+})
+
+export const AbortDigitalFileUploadBody = zod.object({
+  "uploadId": zod.string()
+})
+
+export const AbortDigitalFileUploadResponse = zod.void()
+
+
+export const DeleteDigitalProductFileParams = zod.object({
+  "productId": zod.coerce.number().int(),
+  "fileId": zod.coerce.number().int()
+})
+
+export const DeleteDigitalProductFileResponse = zod.void()
+
+
+export const AcquireDigitalProductParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const AcquireDigitalProductResponse = zod.object({
+  "productId": zod.number().int(),
+  "acquired": zod.boolean(),
+  "alreadyOwned": zod.boolean()
+})
+
+
+export const listStudentDigitalProductsResponseOnePriceMinorMin = 0;
+
+
+
+export const ListStudentDigitalProductsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(listStudentDigitalProductsResponseOnePriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+}).and(zod.object({
+  "isFree": zod.literal(true),
+  "acquiredAt": zod.coerce.date().nullish()
+}))
+export const ListStudentDigitalProductsResponse = zod.array(ListStudentDigitalProductsResponseItem)
+
+
+export const GetStudentDigitalProductParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const getStudentDigitalProductResponseOneOnePriceMinorMin = 0;
+
+
+
+export const GetStudentDigitalProductResponse = zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "shortSummary": zod.string().nullish(),
+  "subtype": zod.union([zod.literal('ebook'),zod.literal('template'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
+  "coverImageUrl": zod.string().nullish(),
+  "type": zod.enum(['course', 'digital']),
+  "priceMinor": zod.number().int().min(getStudentDigitalProductResponseOneOnePriceMinorMin),
+  "currency": zod.string(),
+  "status": zod.enum(['draft', 'published', 'archived'])
+}).and(zod.object({
+  "isFree": zod.literal(true),
+  "acquiredAt": zod.coerce.date().nullish()
+})).and(zod.object({
+  "creatorName": zod.string().nullish(),
+  "files": zod.array(zod.object({
+  "id": zod.number().int(),
+  "productId": zod.number().int(),
+  "kind": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string().nullish(),
+  "sizeBytes": zod.number().int().nullish(),
+  "status": zod.enum(['pending', 'uploaded', 'failed']),
+  "position": zod.number().int(),
+  "createdAt": zod.coerce.date().optional()
+}))
+}))
+
+
+export const DownloadDigitalProductFileParams = zod.object({
+  "productId": zod.coerce.number().int(),
+  "fileId": zod.coerce.number().int()
+})
+
+export const DownloadDigitalProductFileResponse = zod.void()
 
 

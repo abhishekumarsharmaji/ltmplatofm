@@ -44,6 +44,12 @@ import type {
   CourseReadiness,
   CreatorApplication,
   CreatorApplicationInput,
+  DigitalAcquisition,
+  DigitalFile,
+  DigitalFileUploadInput,
+  DigitalFileUploadResponse,
+  DigitalProduct,
+  DigitalProductDetail,
   EnrollmentResult,
   FinalizeCourseThumbnailUpload200,
   HealthStatus,
@@ -54,6 +60,7 @@ import type {
   LessonAsset,
   LessonInput,
   LessonReorderInput,
+  ListDigitalProductsParams,
   ListProductsParams,
   ListUpcomingLiveClassesParams,
   ListWishlist200Item,
@@ -74,6 +81,7 @@ import type {
   PublishCreatorCourse200,
   PurchasedProducts200Item,
   RejectCreatorApplicationInput,
+  RequestDigitalFilePartUrl200,
   RequestLessonVideoPartUrl200,
   SalesSummary,
   Session,
@@ -6019,4 +6027,918 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getStopLiveClassRecordingMutationOptions(options));
     }
+
+export const getListDigitalProductsUrl = (params?: ListDigitalProductsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/marketplace/digital-products?${stringifiedParams}` : `/api/marketplace/digital-products`
+}
+
+export const listDigitalProducts = async (params?: ListDigitalProductsParams, options?: Parameters<typeof customFetch>[1]): Promise<DigitalProduct[]> => {
+
+  return customFetch<DigitalProduct[]>(getListDigitalProductsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListDigitalProductsQueryKey = (params?: ListDigitalProductsParams,) => {
+    return [
+    `/api/marketplace/digital-products`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListDigitalProductsQueryOptions = <TData = Awaited<ReturnType<typeof listDigitalProducts>>, TError = ErrorType<unknown>>(params?: ListDigitalProductsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDigitalProducts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListDigitalProductsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDigitalProducts>>> = ({ signal }) => listDigitalProducts(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listDigitalProducts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListDigitalProductsQueryResult = NonNullable<Awaited<ReturnType<typeof listDigitalProducts>>>
+export type ListDigitalProductsQueryError = ErrorType<unknown>
+
+
+
+export function useListDigitalProducts<TData = Awaited<ReturnType<typeof listDigitalProducts>>, TError = ErrorType<unknown>>(
+ params?: ListDigitalProductsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDigitalProducts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListDigitalProductsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetDigitalProductUrl = (id: number,) => {
+
+
+
+
+  return `/api/marketplace/digital-products/${id}`
+}
+
+export const getDigitalProduct = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<DigitalProductDetail> => {
+
+  return customFetch<DigitalProductDetail>(getGetDigitalProductUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDigitalProductQueryKey = (id: number,) => {
+    return [
+    `/api/marketplace/digital-products/${id}`
+    ] as const;
+    }
+
+
+export const getGetDigitalProductQueryOptions = <TData = Awaited<ReturnType<typeof getDigitalProduct>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDigitalProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDigitalProductQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDigitalProduct>>> = ({ signal }) => getDigitalProduct(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDigitalProduct>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetDigitalProductQueryResult = NonNullable<Awaited<ReturnType<typeof getDigitalProduct>>>
+export type GetDigitalProductQueryError = ErrorType<void>
+
+
+
+export function useGetDigitalProduct<TData = Awaited<ReturnType<typeof getDigitalProduct>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDigitalProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetDigitalProductQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListDigitalProductFilesUrl = (productId: number,) => {
+
+
+
+
+  return `/api/creator/digital-products/${productId}/files`
+}
+
+export const listDigitalProductFiles = async (productId: number, options?: Parameters<typeof customFetch>[1]): Promise<DigitalFile[]> => {
+
+  return customFetch<DigitalFile[]>(getListDigitalProductFilesUrl(productId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListDigitalProductFilesQueryKey = (productId: number,) => {
+    return [
+    `/api/creator/digital-products/${productId}/files`
+    ] as const;
+    }
+
+
+export const getListDigitalProductFilesQueryOptions = <TData = Awaited<ReturnType<typeof listDigitalProductFiles>>, TError = ErrorType<unknown>>(productId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDigitalProductFiles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListDigitalProductFilesQueryKey(productId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDigitalProductFiles>>> = ({ signal }) => listDigitalProductFiles(productId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: productId !== null && productId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listDigitalProductFiles>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListDigitalProductFilesQueryResult = NonNullable<Awaited<ReturnType<typeof listDigitalProductFiles>>>
+export type ListDigitalProductFilesQueryError = ErrorType<unknown>
+
+
+
+export function useListDigitalProductFiles<TData = Awaited<ReturnType<typeof listDigitalProductFiles>>, TError = ErrorType<unknown>>(
+ productId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDigitalProductFiles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListDigitalProductFilesQueryOptions(productId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRequestDigitalFileUploadUrl = (productId: number,) => {
+
+
+
+
+  return `/api/creator/digital-products/${productId}/files/request-upload`
+}
+
+export const requestDigitalFileUpload = async (productId: number,
+    digitalFileUploadInput: DigitalFileUploadInput, options?: Parameters<typeof customFetch>[1]): Promise<DigitalFileUploadResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<DigitalFileUploadResponse>(getRequestDigitalFileUploadUrl(productId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(digitalFileUploadInput)
+  }
+);}
+
+
+
+
+
+export const getRequestDigitalFileUploadMutationKey = () => ['requestDigitalFileUpload'] as const;
+
+export const getRequestDigitalFileUploadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestDigitalFileUpload>>, TError,RequestDigitalFileUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestDigitalFileUpload>>, TError,RequestDigitalFileUploadMutationVariables, TContext> => {
+
+const mutationKey = getRequestDigitalFileUploadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestDigitalFileUpload>>, RequestDigitalFileUploadMutationVariables> = (props) => {
+          const {productId,data} = props ?? {};
+
+          return  requestDigitalFileUpload(productId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestDigitalFileUploadMutationResult = NonNullable<Awaited<ReturnType<typeof requestDigitalFileUpload>>>
+    export type RequestDigitalFileUploadMutationBody = BodyType<DigitalFileUploadInput>
+    export type RequestDigitalFileUploadMutationError = ErrorType<unknown>
+    export type RequestDigitalFileUploadMutationVariables = {productId: number;data: BodyType<DigitalFileUploadInput>}
+
+    export const useRequestDigitalFileUpload = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestDigitalFileUpload>>, TError,RequestDigitalFileUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestDigitalFileUpload>>,
+        TError,
+        RequestDigitalFileUploadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestDigitalFileUploadMutationOptions(options));
+    }
+
+export const getRequestDigitalFilePartUrlUrl = (productId: number,
+    fileId: number,) => {
+
+
+
+
+  return `/api/creator/digital-products/${productId}/files/${fileId}/part-url`
+}
+
+export const requestDigitalFilePartUrl = async (productId: number,
+    fileId: number,
+    multipartPartInput: MultipartPartInput, options?: Parameters<typeof customFetch>[1]): Promise<RequestDigitalFilePartUrl200> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<RequestDigitalFilePartUrl200>(getRequestDigitalFilePartUrlUrl(productId,fileId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(multipartPartInput)
+  }
+);}
+
+
+
+
+
+export const getRequestDigitalFilePartUrlMutationKey = () => ['requestDigitalFilePartUrl'] as const;
+
+export const getRequestDigitalFilePartUrlMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestDigitalFilePartUrl>>, TError,RequestDigitalFilePartUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestDigitalFilePartUrl>>, TError,RequestDigitalFilePartUrlMutationVariables, TContext> => {
+
+const mutationKey = getRequestDigitalFilePartUrlMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestDigitalFilePartUrl>>, RequestDigitalFilePartUrlMutationVariables> = (props) => {
+          const {productId,fileId,data} = props ?? {};
+
+          return  requestDigitalFilePartUrl(productId,fileId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestDigitalFilePartUrlMutationResult = NonNullable<Awaited<ReturnType<typeof requestDigitalFilePartUrl>>>
+    export type RequestDigitalFilePartUrlMutationBody = BodyType<MultipartPartInput>
+    export type RequestDigitalFilePartUrlMutationError = ErrorType<unknown>
+    export type RequestDigitalFilePartUrlMutationVariables = {productId: number;fileId: number;data: BodyType<MultipartPartInput>}
+
+    export const useRequestDigitalFilePartUrl = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestDigitalFilePartUrl>>, TError,RequestDigitalFilePartUrlMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestDigitalFilePartUrl>>,
+        TError,
+        RequestDigitalFilePartUrlMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestDigitalFilePartUrlMutationOptions(options));
+    }
+
+export const getFinalizeDigitalFileUploadUrl = (productId: number,
+    fileId: number,) => {
+
+
+
+
+  return `/api/creator/digital-products/${productId}/files/${fileId}/finalize`
+}
+
+export const finalizeDigitalFileUpload = async (productId: number,
+    fileId: number,
+    multipartCompleteInput: MultipartCompleteInput, options?: Parameters<typeof customFetch>[1]): Promise<DigitalFile> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<DigitalFile>(getFinalizeDigitalFileUploadUrl(productId,fileId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(multipartCompleteInput)
+  }
+);}
+
+
+
+
+
+export const getFinalizeDigitalFileUploadMutationKey = () => ['finalizeDigitalFileUpload'] as const;
+
+export const getFinalizeDigitalFileUploadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof finalizeDigitalFileUpload>>, TError,FinalizeDigitalFileUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof finalizeDigitalFileUpload>>, TError,FinalizeDigitalFileUploadMutationVariables, TContext> => {
+
+const mutationKey = getFinalizeDigitalFileUploadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof finalizeDigitalFileUpload>>, FinalizeDigitalFileUploadMutationVariables> = (props) => {
+          const {productId,fileId,data} = props ?? {};
+
+          return  finalizeDigitalFileUpload(productId,fileId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type FinalizeDigitalFileUploadMutationResult = NonNullable<Awaited<ReturnType<typeof finalizeDigitalFileUpload>>>
+    export type FinalizeDigitalFileUploadMutationBody = BodyType<MultipartCompleteInput>
+    export type FinalizeDigitalFileUploadMutationError = ErrorType<unknown>
+    export type FinalizeDigitalFileUploadMutationVariables = {productId: number;fileId: number;data: BodyType<MultipartCompleteInput>}
+
+    export const useFinalizeDigitalFileUpload = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof finalizeDigitalFileUpload>>, TError,FinalizeDigitalFileUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof finalizeDigitalFileUpload>>,
+        TError,
+        FinalizeDigitalFileUploadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getFinalizeDigitalFileUploadMutationOptions(options));
+    }
+
+export const getAbortDigitalFileUploadUrl = (productId: number,
+    fileId: number,) => {
+
+
+
+
+  return `/api/creator/digital-products/${productId}/files/${fileId}/abort`
+}
+
+export const abortDigitalFileUpload = async (productId: number,
+    fileId: number,
+    multipartAbortInput: MultipartAbortInput, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<void>(getAbortDigitalFileUploadUrl(productId,fileId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(multipartAbortInput)
+  }
+);}
+
+
+
+
+
+export const getAbortDigitalFileUploadMutationKey = () => ['abortDigitalFileUpload'] as const;
+
+export const getAbortDigitalFileUploadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof abortDigitalFileUpload>>, TError,AbortDigitalFileUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof abortDigitalFileUpload>>, TError,AbortDigitalFileUploadMutationVariables, TContext> => {
+
+const mutationKey = getAbortDigitalFileUploadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof abortDigitalFileUpload>>, AbortDigitalFileUploadMutationVariables> = (props) => {
+          const {productId,fileId,data} = props ?? {};
+
+          return  abortDigitalFileUpload(productId,fileId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AbortDigitalFileUploadMutationResult = NonNullable<Awaited<ReturnType<typeof abortDigitalFileUpload>>>
+    export type AbortDigitalFileUploadMutationBody = BodyType<MultipartAbortInput>
+    export type AbortDigitalFileUploadMutationError = ErrorType<unknown>
+    export type AbortDigitalFileUploadMutationVariables = {productId: number;fileId: number;data: BodyType<MultipartAbortInput>}
+
+    export const useAbortDigitalFileUpload = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof abortDigitalFileUpload>>, TError,AbortDigitalFileUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof abortDigitalFileUpload>>,
+        TError,
+        AbortDigitalFileUploadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAbortDigitalFileUploadMutationOptions(options));
+    }
+
+export const getDeleteDigitalProductFileUrl = (productId: number,
+    fileId: number,) => {
+
+
+
+
+  return `/api/creator/digital-products/${productId}/files/${fileId}`
+}
+
+export const deleteDigitalProductFile = async (productId: number,
+    fileId: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteDigitalProductFileUrl(productId,fileId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteDigitalProductFileMutationKey = () => ['deleteDigitalProductFile'] as const;
+
+export const getDeleteDigitalProductFileMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDigitalProductFile>>, TError,DeleteDigitalProductFileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteDigitalProductFile>>, TError,DeleteDigitalProductFileMutationVariables, TContext> => {
+
+const mutationKey = getDeleteDigitalProductFileMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDigitalProductFile>>, DeleteDigitalProductFileMutationVariables> = (props) => {
+          const {productId,fileId} = props ?? {};
+
+          return  deleteDigitalProductFile(productId,fileId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteDigitalProductFileMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDigitalProductFile>>>
+
+    export type DeleteDigitalProductFileMutationError = ErrorType<unknown>
+    export type DeleteDigitalProductFileMutationVariables = {productId: number;fileId: number}
+
+    export const useDeleteDigitalProductFile = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDigitalProductFile>>, TError,DeleteDigitalProductFileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteDigitalProductFile>>,
+        TError,
+        DeleteDigitalProductFileMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteDigitalProductFileMutationOptions(options));
+    }
+
+export const getAcquireDigitalProductUrl = (productId: number,) => {
+
+
+
+
+  return `/api/student/digital-products/${productId}/acquire`
+}
+
+export const acquireDigitalProduct = async (productId: number, options?: Parameters<typeof customFetch>[1]): Promise<DigitalAcquisition> => {
+
+  return customFetch<DigitalAcquisition>(getAcquireDigitalProductUrl(productId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAcquireDigitalProductMutationKey = () => ['acquireDigitalProduct'] as const;
+
+export const getAcquireDigitalProductMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acquireDigitalProduct>>, TError,AcquireDigitalProductMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof acquireDigitalProduct>>, TError,AcquireDigitalProductMutationVariables, TContext> => {
+
+const mutationKey = getAcquireDigitalProductMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acquireDigitalProduct>>, AcquireDigitalProductMutationVariables> = (props) => {
+          const {productId} = props ?? {};
+
+          return  acquireDigitalProduct(productId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AcquireDigitalProductMutationResult = NonNullable<Awaited<ReturnType<typeof acquireDigitalProduct>>>
+
+    export type AcquireDigitalProductMutationError = ErrorType<unknown>
+    export type AcquireDigitalProductMutationVariables = {productId: number}
+
+    export const useAcquireDigitalProduct = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acquireDigitalProduct>>, TError,AcquireDigitalProductMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof acquireDigitalProduct>>,
+        TError,
+        AcquireDigitalProductMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAcquireDigitalProductMutationOptions(options));
+    }
+
+export const getListStudentDigitalProductsUrl = () => {
+
+
+
+
+  return `/api/student/digital-products`
+}
+
+export const listStudentDigitalProducts = async ( options?: Parameters<typeof customFetch>[1]): Promise<DigitalProduct[]> => {
+
+  return customFetch<DigitalProduct[]>(getListStudentDigitalProductsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListStudentDigitalProductsQueryKey = () => {
+    return [
+    `/api/student/digital-products`
+    ] as const;
+    }
+
+
+export const getListStudentDigitalProductsQueryOptions = <TData = Awaited<ReturnType<typeof listStudentDigitalProducts>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStudentDigitalProducts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListStudentDigitalProductsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listStudentDigitalProducts>>> = ({ signal }) => listStudentDigitalProducts({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listStudentDigitalProducts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListStudentDigitalProductsQueryResult = NonNullable<Awaited<ReturnType<typeof listStudentDigitalProducts>>>
+export type ListStudentDigitalProductsQueryError = ErrorType<unknown>
+
+
+
+export function useListStudentDigitalProducts<TData = Awaited<ReturnType<typeof listStudentDigitalProducts>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStudentDigitalProducts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListStudentDigitalProductsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetStudentDigitalProductUrl = (productId: number,) => {
+
+
+
+
+  return `/api/student/digital-products/${productId}`
+}
+
+export const getStudentDigitalProduct = async (productId: number, options?: Parameters<typeof customFetch>[1]): Promise<DigitalProductDetail> => {
+
+  return customFetch<DigitalProductDetail>(getGetStudentDigitalProductUrl(productId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentDigitalProductQueryKey = (productId: number,) => {
+    return [
+    `/api/student/digital-products/${productId}`
+    ] as const;
+    }
+
+
+export const getGetStudentDigitalProductQueryOptions = <TData = Awaited<ReturnType<typeof getStudentDigitalProduct>>, TError = ErrorType<unknown>>(productId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentDigitalProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentDigitalProductQueryKey(productId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentDigitalProduct>>> = ({ signal }) => getStudentDigitalProduct(productId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: productId !== null && productId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentDigitalProduct>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentDigitalProductQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentDigitalProduct>>>
+export type GetStudentDigitalProductQueryError = ErrorType<unknown>
+
+
+
+export function useGetStudentDigitalProduct<TData = Awaited<ReturnType<typeof getStudentDigitalProduct>>, TError = ErrorType<unknown>>(
+ productId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentDigitalProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentDigitalProductQueryOptions(productId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getDownloadDigitalProductFileUrl = (productId: number,
+    fileId: number,) => {
+
+
+
+
+  return `/api/student/digital-products/${productId}/files/${fileId}/download`
+}
+
+export const downloadDigitalProductFile = async (productId: number,
+    fileId: number, options?: Parameters<typeof customFetch>[1]): Promise<unknown> => {
+
+  return customFetch<unknown>(getDownloadDigitalProductFileUrl(productId,fileId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getDownloadDigitalProductFileQueryKey = (productId: number,
+    fileId: number,) => {
+    return [
+    `/api/student/digital-products/${productId}/files/${fileId}/download`
+    ] as const;
+    }
+
+
+export const getDownloadDigitalProductFileQueryOptions = <TData = Awaited<ReturnType<typeof downloadDigitalProductFile>>, TError = ErrorType<void>>(productId: number,
+    fileId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof downloadDigitalProductFile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getDownloadDigitalProductFileQueryKey(productId,fileId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof downloadDigitalProductFile>>> = ({ signal }) => downloadDigitalProductFile(productId,fileId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: productId !== null && productId !== undefined && fileId !== null && fileId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof downloadDigitalProductFile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type DownloadDigitalProductFileQueryResult = NonNullable<Awaited<ReturnType<typeof downloadDigitalProductFile>>>
+export type DownloadDigitalProductFileQueryError = ErrorType<void>
+
+
+
+export function useDownloadDigitalProductFile<TData = Awaited<ReturnType<typeof downloadDigitalProductFile>>, TError = ErrorType<void>>(
+ productId: number,
+    fileId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof downloadDigitalProductFile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getDownloadDigitalProductFileQueryOptions(productId,fileId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 

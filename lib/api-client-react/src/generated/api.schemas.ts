@@ -152,6 +152,21 @@ export interface Module {
 
 export type CourseBuilderCourse = { [key: string]: unknown };
 
+/**
+ * @nullable
+ */
+export type ProductSubtype = typeof ProductSubtype[keyof typeof ProductSubtype] | null;
+
+
+export const ProductSubtype = {
+  ebook: 'ebook',
+  template: 'template',
+  toolkit: 'toolkit',
+  document: 'document',
+  bundle: 'bundle',
+  other: 'other',
+} as const;
+
 export type ProductType = typeof ProductType[keyof typeof ProductType];
 
 
@@ -173,6 +188,12 @@ export interface Product {
   id: number;
   title: string;
   description: string;
+  /** @nullable */
+  shortSummary?: string | null;
+  /** @nullable */
+  subtype?: ProductSubtype;
+  /** @nullable */
+  coverImageUrl?: string | null;
   type: ProductType;
   /** @minimum 0 */
   priceMinor: number;
@@ -282,6 +303,18 @@ export interface Category {
   description?: string | null;
 }
 
+export type ProductInputSubtype = typeof ProductInputSubtype[keyof typeof ProductInputSubtype];
+
+
+export const ProductInputSubtype = {
+  ebook: 'ebook',
+  template: 'template',
+  toolkit: 'toolkit',
+  document: 'document',
+  bundle: 'bundle',
+  other: 'other',
+} as const;
+
 export type ProductInputType = typeof ProductInputType[keyof typeof ProductInputType];
 
 
@@ -294,12 +327,75 @@ export interface ProductInput {
   /** @minLength 2 */
   title: string;
   description?: string;
+  shortSummary?: string;
+  subtype?: ProductInputSubtype;
+  coverImageUrl?: string;
+  coverImageObjectPath?: string;
   type?: ProductInputType;
   /** @minimum 0 */
   priceMinor?: number;
   currency?: string;
   courseId?: number;
   categoryId?: number;
+}
+
+export type DigitalFileStatus = typeof DigitalFileStatus[keyof typeof DigitalFileStatus];
+
+
+export const DigitalFileStatus = {
+  pending: 'pending',
+  uploaded: 'uploaded',
+  failed: 'failed',
+} as const;
+
+export interface DigitalFile {
+  id: number;
+  productId: number;
+  kind: string;
+  filename: string;
+  /** @nullable */
+  mimeType?: string | null;
+  /** @nullable */
+  sizeBytes?: number | null;
+  status: DigitalFileStatus;
+  position: number;
+  createdAt?: string;
+}
+
+export type DigitalProduct = Product & ({
+  isFree: true;
+  /** @nullable */
+  acquiredAt?: string | null;
+});
+
+export type DigitalProductDetail = DigitalProduct & ({
+  /** @nullable */
+  creatorName?: string | null;
+  files: DigitalFile[];
+});
+
+export interface DigitalFileUploadInput {
+  /** @minLength 1 */
+  filename: string;
+  /** @minLength 1 */
+  mimeType: string;
+  /**
+     * @minimum 1
+     * @maximum 262144000
+     */
+  sizeBytes: number;
+}
+
+export interface DigitalFileUploadResponse {
+  file: DigitalFile;
+  uploadId: string;
+  partSize: number;
+}
+
+export interface DigitalAcquisition {
+  productId: number;
+  acquired: boolean;
+  alreadyOwned: boolean;
 }
 
 export interface AdminCourseInput {
@@ -645,5 +741,13 @@ export type AdminUpdateSetting200 = { [key: string]: unknown };
 
 export type ListUpcomingLiveClassesParams = {
 courseId: number;
+};
+
+export type ListDigitalProductsParams = {
+q?: string;
+};
+
+export type RequestDigitalFilePartUrl200 = {
+  uploadURL: string;
 };
 
