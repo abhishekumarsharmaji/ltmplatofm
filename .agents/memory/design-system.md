@@ -13,4 +13,8 @@ description: Standing decisions from the full-app restyle to the "Course Selling
 
 **Known static content (accepted, tell the user before changing):** `Pricing.tsx` and `PlatformPricing.tsx` plan names/prices are template copy — no billing exists. `/checkout` intentionally routes to `UnavailablePage` (payments declined for now).
 
+**Rule 3 — marketplace positioning.** CoreSkils is a marketplace where independent instructors list and run their own courses; public copy must not call them “our mentors” or imply CoreSkils owns their courses.
+**Why:** The user explicitly rejected company-owned course/mentor wording and wants positioning comparable to a large multi-instructor marketplace such as Udemy.
+**How to apply:** Describe CoreSkils as the platform and marketplace; describe educators as independent instructors/creators. Avoid fabricated scale, revenue, feature, or employment claims.
+
 **Figma source:** file key `KDJduvN1uukFx7jzPH9uOM` (CC BY 4.0, FAIZY KHAN); reference renders in `design-reference/figma/`. Fetched with the `FIGMA_TOKEN` secret via curl — there is no Replit Figma integration.
