@@ -82,7 +82,7 @@ export default function Home() {
       <div className="flex flex-col min-h-screen bg-white">
         
         {/* HERO SECTION */}
-        <section className="pt-32 pb-24 lg:pt-48 lg:pb-36 relative overflow-hidden">
+        <section className="pt-28 pb-16 lg:pt-36 lg:pb-20 relative overflow-hidden">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
               
@@ -108,24 +108,34 @@ export default function Home() {
               {/* Hero Right Composition */}
               <div className="relative h-[600px] hidden lg:block">
                 {/* Decorative floating dots */}
-                <div className="absolute top-[10%] left-[-5%] w-3 h-3 bg-[#FE543D] rounded-full"></div>
-                <div className="absolute top-[5%] right-[10%] w-4 h-4 bg-[#FE543D] rounded-full"></div>
-                <div className="absolute bottom-[20%] right-[15%] w-2 h-2 bg-primary rounded-full"></div>
+                <div className="absolute top-[24%] left-[-4%] w-3 h-3 bg-[#FE543D] rounded-full"></div>
+                <div className="absolute top-[6%] right-[4%] w-4 h-4 bg-[#FE543D] rounded-full"></div>
+                <div className="absolute bottom-[4%] right-[22%] w-2.5 h-2.5 bg-primary rounded-full"></div>
                 
-                {/* Purple Blob + Student 1 (Woman with books) */}
-                <div className="absolute left-[10%] bottom-[5%] z-10 w-[240px]">
-                  <div className="absolute inset-0 bg-gradient-to-b from-[#B88DC4] to-[#704FE6] rounded-full opacity-80" style={{ transform: "scale(1.1)", transformOrigin: "bottom" }}></div>
-                  <img src="/images/hero-student-1.webp" alt="Student" className="relative z-10 w-full rounded-b-full object-cover" style={{ clipPath: "inset(0 0 0 0 round 0 0 999px 999px)" }} />
+                {/* Purple pill + Student 1 (Woman with books) */}
+                <div className="absolute left-[8%] bottom-[6%] z-10 w-[250px] aspect-[371/900] max-h-[86%]">
+                  <div className="absolute inset-x-[-14%] top-[6%] bottom-0 bg-gradient-to-b from-[#B88DC4] to-[#704FE6] rounded-full"></div>
+                  <img
+                    src={`${import.meta.env.BASE_URL}images/hero-student-1.webp`}
+                    alt="Student holding books"
+                    className="relative z-10 h-full w-full object-contain object-bottom"
+                    style={{ clipPath: "inset(0 -14% 0 -14% round 0 0 999px 999px)" }}
+                  />
                 </div>
 
-                {/* Blue Blob + Student 2 (Man celebrating) */}
-                <div className="absolute right-[5%] top-[10%] z-0 w-[280px]">
-                  <div className="absolute inset-0 bg-[#224FA3] rounded-t-full rounded-b-[40px] opacity-100" style={{ transform: "scale(1.15) translateY(5%)" }}></div>
-                  <img src="/images/hero-student-2.webp" alt="Student celebrating" className="relative z-10 w-full object-cover" />
+                {/* Blue pill + Student 2 (Man celebrating) */}
+                <div className="absolute right-[4%] top-[8%] z-0 w-[330px] aspect-[576/900] max-h-[84%]">
+                  <div className="absolute inset-x-0 top-[10%] bottom-0 bg-[#224FA3] rounded-t-full rounded-b-[56px]"></div>
+                  <img
+                    src={`${import.meta.env.BASE_URL}images/hero-student-2.webp`}
+                    alt="Student celebrating"
+                    className="relative z-10 h-full w-full object-contain object-bottom"
+                    style={{ clipPath: "inset(0 0 0 0 round 0 0 56px 56px)" }}
+                  />
                 </div>
 
                 {/* Stat Pill 1 */}
-                <div className="absolute top-[5%] left-[5%] z-20 bg-white rounded-full py-3 px-6 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex items-center gap-3">
+                <div className="absolute top-[12%] left-[-6%] z-20 bg-white rounded-full py-3 px-6 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex items-center gap-3">
                   {isLoading ? (
                     <div className="flex items-center gap-3 w-[140px]">
                       <div className="flex flex-col gap-1 w-12">
@@ -156,7 +166,7 @@ export default function Home() {
                 </div>
 
                 {/* Stat Pill 2 */}
-                <div className="absolute bottom-[25%] right-[0%] z-20 bg-white rounded-[20px] py-4 px-6 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex flex-col min-w-[160px]">
+                <div className="absolute bottom-[14%] right-[-2%] z-20 bg-white rounded-[20px] py-4 px-6 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex flex-col min-w-[160px]">
                   {isLoading ? (
                     <>
                       <div className="h-8 bg-gray-100 animate-pulse rounded w-16 mb-2"></div>

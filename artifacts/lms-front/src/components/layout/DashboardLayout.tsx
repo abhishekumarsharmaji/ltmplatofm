@@ -87,12 +87,13 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
             const isActive = location === link.href || (link.href !== `/dashboard/${role}` && location.startsWith(link.href + '/'));
             return (
               <Link key={link.href} href={link.href}>
-                <div className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                <div className={`relative flex items-center gap-3 px-3 py-2.5 rounded-md text-[14px] font-medium transition-all cursor-pointer ${
                   isActive 
-                    ? "bg-primary text-primary-foreground shadow-sm" 
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "bg-[#E3F9EF] text-primary" 
+                    : "text-[#394649] hover:bg-gray-50 hover:text-primary"
                 }`}>
-                  <link.icon className="w-4 h-4" />
+                  {isActive && <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />}
+                  <link.icon className="w-[18px] h-[18px]" />
                   {link.label}
                 </div>
               </Link>
