@@ -125,7 +125,8 @@ export default function Home() {
 
                 {/* Blue pill + Student 2 (Man celebrating) */}
                 <div className="absolute right-[4%] top-[8%] z-0 w-[330px] aspect-[576/900] max-h-[84%]">
-                  <div className="absolute inset-x-0 top-[10%] bottom-0 bg-[#224FA3] rounded-t-full rounded-b-[56px]"></div>
+                  {/* Explicit top radius (half the width): a "full" top radius would scale the bottom radius down to 0. */}
+                  <div className="absolute inset-x-0 top-[10%] bottom-0 bg-[#224FA3] rounded-t-[165px] rounded-b-[56px]"></div>
                   <img
                     src={`${import.meta.env.BASE_URL}images/hero-student-2.webp`}
                     alt="Student celebrating"
