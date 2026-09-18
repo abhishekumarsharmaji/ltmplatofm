@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, ne } from "drizzle-orm";
 import { AccessToken, EgressClient, EncodedFileOutput, RoomServiceClient } from "livekit-server-sdk";
-import { db, coursesTable, enrollmentsTable, liveClassAttendanceTable, liveClassesTable, productsTable, usersTable } from "@workspace/db";
+import { db, coursesTable, courseModulesTable, enrollmentsTable, liveClassAttendanceTable, liveClassesTable, productsTable, usersTable } from "@workspace/db";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -13,7 +13,14 @@ function schedule(body: any) {
   if (typeof body?.title !== "string" || !body.title.trim() || typeof body?.timezone !== "string" || !body.timezone.trim()) return null;
   const startsAt = new Date(body.startsAt), endsAt = new Date(body.endsAt);
   if (!Number.isFinite(startsAt.getTime()) || !Number.isFinite(endsAt.getTime()) || endsAt <= startsAt) return null;
-  return { title: body.title.trim(), description: typeof body.description === "string" ? body.description : "", startsAt, endsAt, timezone: body.timezone.trim() };
+  return { title: body.title.trim(), description: typeof body.description === "string" ? body.description : "", startsAt, endsAt, timezone: body.timezone.trim(), moduleId: body.moduleId == null ? null : id(String(body.moduleId)) };
+}
+async function validModule(moduleId: number | null, product: typeof productsTable.$inferSelect, req: AuthenticatedRequest) {
+  if (moduleId === null) return true;
+  const [module] = await db.select({ id: courseModulesTable.id }).from(courseModulesTable).where(and(
+    eq(courseModulesTable.id, moduleId), eq(courseModulesTable.courseId, product.courseId!),
+  ));
+  return Boolean(module);
 }
 
 async function ownedClass(classId: number, req: AuthenticatedRequest) {
@@ -28,7 +35,8 @@ router.get("/creator/products/:productId/live-classes", requireAuth, requireRole
   if (!productId) { res.status(400).json({ error: "Invalid product id" }); return; }
   const [product] = await db.select().from(productsTable).where(and(eq(productsTable.id, productId), user.canonicalRole === "admin" ? undefined : eq(productsTable.creatorId, user.canonicalUserId!)));
   if (!product || !product.courseId) { res.status(404).json({ error: "Course product not found" }); return; }
-  res.json(await db.select().from(liveClassesTable).where(eq(liveClassesTable.productId, productId)).orderBy(desc(liveClassesTable.startsAt)));
+  const rows = await db.select({ liveClass: liveClassesTable, moduleTitle: courseModulesTable.title }).from(liveClassesTable).leftJoin(courseModulesTable, eq(courseModulesTable.id, liveClassesTable.moduleId)).where(eq(liveClassesTable.productId, productId)).orderBy(desc(liveClassesTable.startsAt));
+  res.json(rows.map(({ liveClass, moduleTitle }) => ({ ...liveClass, moduleTitle: moduleTitle ?? null })));
 });
 
 router.post("/creator/products/:productId/live-classes", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
@@ -36,8 +44,9 @@ router.post("/creator/products/:productId/live-classes", requireAuth, requireRol
   if (!productId || !values) { res.status(422).json({ error: "title, ISO startsAt/endsAt, timezone and endsAt > startsAt are required" }); return; }
   const [product] = await db.select().from(productsTable).where(and(eq(productsTable.id, productId), user.canonicalRole === "admin" ? undefined : eq(productsTable.creatorId, user.canonicalUserId!)));
   if (!product?.courseId) { res.status(404).json({ error: "Course product not found" }); return; }
+  if (!await validModule(values.moduleId, product, user)) { res.status(422).json({ error: "moduleId must belong to this course" }); return; }
   const [item] = await db.insert(liveClassesTable).values({ ...values, productId, courseId: product.courseId, creatorId: product.creatorId, roomName: `course-${product.courseId}-class-${randomUUID()}` }).returning();
-  res.status(201).json(item);
+  res.status(201).json({ ...item, moduleTitle: values.moduleId ? (await db.select({ title: courseModulesTable.title }).from(courseModulesTable).where(eq(courseModulesTable.id, values.moduleId)))[0]?.title ?? null : null });
 });
 
 router.get("/live-classes", requireAuth, async (req, res): Promise<void> => {
@@ -45,15 +54,19 @@ router.get("/live-classes", requireAuth, async (req, res): Promise<void> => {
   if (!courseId) { res.status(400).json({ error: "courseId is required" }); return; }
   const [enrolled] = await db.select({ id: enrollmentsTable.id }).from(enrollmentsTable).where(and(eq(enrollmentsTable.courseId, courseId), eq(enrollmentsTable.userId, user.canonicalUserId!)));
   if (user.canonicalRole === "student" && !enrolled) { res.status(403).json({ error: "Enrollment required" }); return; }
-  res.json(await db.select().from(liveClassesTable).where(and(eq(liveClassesTable.courseId, courseId), ne(liveClassesTable.status, "cancelled"))).orderBy(desc(liveClassesTable.startsAt)));
+  const rows = await db.select({ liveClass: liveClassesTable, moduleTitle: courseModulesTable.title }).from(liveClassesTable).leftJoin(courseModulesTable, eq(courseModulesTable.id, liveClassesTable.moduleId)).where(and(eq(liveClassesTable.courseId, courseId), ne(liveClassesTable.status, "cancelled"))).orderBy(desc(liveClassesTable.startsAt));
+  res.json(rows.map(({ liveClass, moduleTitle }) => ({ ...liveClass, moduleTitle: moduleTitle ?? null })));
 });
 
 router.patch("/creator/live-classes/:id", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const classId = id(req.params.id), values = schedule(req.body);
   if (!classId || !values) { res.status(422).json({ error: "Invalid schedule" }); return; }
-  if (!await ownedClass(classId, auth(req))) { res.status(404).json({ error: "Live class not found" }); return; }
+  const found = await ownedClass(classId, auth(req));
+  if (!found) { res.status(404).json({ error: "Live class not found" }); return; }
+  if (!await validModule(values.moduleId, found.product, auth(req))) { res.status(422).json({ error: "moduleId must belong to this course" }); return; }
   const [item] = await db.update(liveClassesTable).set({ ...values, updatedAt: new Date() }).where(eq(liveClassesTable.id, classId)).returning();
-  res.json(item);
+  const [module] = item.moduleId ? await db.select({ title: courseModulesTable.title }).from(courseModulesTable).where(eq(courseModulesTable.id, item.moduleId)) : [];
+  res.json({ ...item, moduleTitle: module?.title ?? null });
 });
 
 router.delete("/creator/live-classes/:id", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {

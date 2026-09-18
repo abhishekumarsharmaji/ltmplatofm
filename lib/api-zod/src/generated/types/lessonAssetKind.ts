@@ -11,4 +11,8 @@ export type LessonAssetKind = typeof LessonAssetKind[keyof typeof LessonAssetKin
 
 export const LessonAssetKind = {
   video: 'video',
+  document: 'document',
+  audio: 'audio',
+  image: 'image',
+  other: 'other',
 } as const;

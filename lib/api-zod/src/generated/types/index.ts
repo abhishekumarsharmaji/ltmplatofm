@@ -94,4 +94,5 @@ export * from './updateCreatorCourseBasics200';
 export * from './user';
 export * from './userRole';
 export * from './videoUploadInput';
+export * from './videoUploadInputKind';
 export * from './videoUploadResponse';

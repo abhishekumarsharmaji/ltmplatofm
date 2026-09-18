@@ -864,6 +864,7 @@ components:
         filename: { type: string }
         mimeType: { type: string, pattern: "^video/" }
         sizeBytes: { type: integer, minimum: 1, maximum: 10737418240 }
+        kind: { type: string, enum: [video, document, other] }
     MultipartPartInput:
       type: object
       required: [uploadId, partNumber]
@@ -891,29 +892,29 @@ components:
         uploadId: { type: string }
     LessonAsset:
       type: object
-      required: [id, lessonId, kind, storageKey, objectPath, filename, mimeType, sizeBytes, status]
+      required: [id, lessonId, kind, filename, mimeType, sizeBytes, status]
       properties:
         id: { type: integer }
         lessonId: { type: integer }
-        kind: { type: string, enum: [video] }
-        storageKey: { type: string }
-        objectPath: { type: string }
+        kind: { type: string, enum: [video, document, audio, image, other] }
         filename: { type: string }
         mimeType: { type: string }
         sizeBytes: { type: integer }
         status: { type: string, enum: [pending, uploaded, failed] }
+        downloadUrl: { type: string }
     StudentLessonAsset:
       type: object
       required: [id, lessonId, kind, filename, mimeType, sizeBytes, status, streamUrl]
       properties:
         id: { type: integer }
         lessonId: { type: integer }
-        kind: { type: string, enum: [video] }
+        kind: { type: string, enum: [video, document, audio, image, other] }
         filename: { type: string }
         mimeType: { type: string }
         sizeBytes: { type: integer }
         status: { type: string, enum: [uploaded] }
         streamUrl: { type: string }
+        downloadUrl: { type: string }
     StudentLesson:
       type: object
       required: [id, moduleId, title, position, isPreview, assets]
@@ -1011,12 +1012,16 @@ components:
         startsAt: { type: string, format: date-time }
         endsAt: { type: string, format: date-time }
         timezone: { type: string, minLength: 1 }
+        moduleId: { type: ["integer", "null"] }
     LiveClass:
       type: object
       required: [id, courseId, creatorId, title, description, startsAt, endsAt, timezone, status, roomName, recordingStatus, recordingUrl, createdAt, updatedAt]
       properties:
         id: { type: integer }
         courseId: { type: integer }
+        productId: { type: integer }
+        moduleId: { type: ["integer", "null"] }
+        moduleTitle: { type: ["string", "null"] }
         creatorId: { type: integer }
         title: { type: string }
         description: { type: string }

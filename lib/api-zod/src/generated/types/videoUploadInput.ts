@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { VideoUploadInputKind } from './videoUploadInputKind';
 
 export interface VideoUploadInput {
   filename: string;
@@ -15,4 +16,5 @@ export interface VideoUploadInput {
      * @maximum 10737418240
      */
   sizeBytes: number;
+  kind?: VideoUploadInputKind;
 }

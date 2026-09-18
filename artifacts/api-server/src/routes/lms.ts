@@ -244,7 +244,7 @@ router.get("/creator/products/:productId/builder", requireAuth, requireRole("cre
   const lessons = moduleIds.length ? await db.select().from(lessonsTable).where(inArray(lessonsTable.moduleId, moduleIds)).orderBy(lessonsTable.position) : [];
    const lessonIds = lessons.map((l) => l.id);
    const assets = lessonIds.length ? await db.select().from(lessonAssetsTable).where(inArray(lessonAssetsTable.lessonId, lessonIds)) : [];
-   res.json({ product: found.product, course: found.course, modules: modules.map((m) => ({ ...m, lessons: lessons.filter((l) => l.moduleId === m.id).map((l) => ({ ...l, assets: assets.filter((a) => a.lessonId === l.id) })) })) });
+    res.json({ product: found.product, course: found.course, modules: modules.map((m) => ({ ...m, lessons: lessons.filter((l) => l.moduleId === m.id).map((l) => ({ ...l, assets: assets.filter((a) => a.lessonId === l.id).map(({ storageKey, objectPath, ...asset }) => ({ ...asset, downloadUrl: `/api/creator/assets/${asset.id}/download` })) })) })) });
 });
 
 router.patch("/creator/products/:productId/builder", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {

@@ -228,6 +228,7 @@ export const liveClassesTable = pgTable("live_classes", {
   creatorId: integer("creator_id").notNull().references(() => usersTable.id),
   courseId: integer("course_id").notNull().references(() => coursesTable.id, { onDelete: "cascade" }),
   productId: integer("product_id").notNull().references(() => productsTable.id, { onDelete: "cascade" }),
+  moduleId: integer("module_id").references(() => courseModulesTable.id, { onDelete: "set null" }),
   title: text("title").notNull(),
   description: text("description").notNull().default(""),
   startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
@@ -241,7 +242,7 @@ export const liveClassesTable = pgTable("live_classes", {
   egressId: text("egress_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-}, (t) => [index("live_classes_product_idx").on(t.productId), index("live_classes_course_start_idx").on(t.courseId, t.startsAt)]);
+}, (t) => [index("live_classes_product_idx").on(t.productId), index("live_classes_course_start_idx").on(t.courseId, t.startsAt), index("live_classes_module_idx").on(t.moduleId)]);
 
 export const liveClassAttendanceTable = pgTable("live_class_attendance", {
   id: serial("id").primaryKey(),

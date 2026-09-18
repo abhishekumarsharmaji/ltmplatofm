@@ -55,8 +55,11 @@ async function createUploadUrl(folder: string): Promise<{ url: string; objectPat
 export const createLessonUploadUrl = () => createUploadUrl("lesson-videos");
 export const createCourseThumbnailUploadUrl = () => createUploadUrl("course-thumbnails");
 export async function createLessonMultipartUpload(contentType: string) {
+  return createLessonAssetMultipartUpload(contentType);
+}
+export async function createLessonAssetMultipartUpload(contentType: string) {
   const { client, bucket } = r2Config();
-  const name = `lesson-videos/${randomUUID()}`;
+  const name = `lesson-assets/${randomUUID()}`;
   const result = await client.send(new CreateMultipartUploadCommand({
     Bucket: bucket,
     Key: name,
@@ -100,7 +103,7 @@ export async function abortLessonMultipartUpload(objectPath: string, uploadId: s
     UploadId: uploadId,
   }));
 }
-export async function createObjectDownloadUrl(objectPath: string, filename: string, contentType: string, expiresInSeconds: number) {
+export async function createObjectDownloadUrl(objectPath: string, filename: string, contentType: string, expiresInSeconds: number, attachment = false) {
   if (!objectPath.startsWith("r2://")) return null;
   const { client } = r2Config();
   const { bucket, name } = parseR2(objectPath);
@@ -108,7 +111,7 @@ export async function createObjectDownloadUrl(objectPath: string, filename: stri
     Bucket: bucket,
     Key: name,
     ResponseContentType: contentType,
-    ResponseContentDisposition: `inline; filename="${filename.replace(/["\\\r\n]/g, "_")}"`,
+    ResponseContentDisposition: `${attachment ? "attachment" : "inline"}; filename="${filename.replace(/["\\\r\n]/g, "_")}"`,
   }), { expiresIn: expiresInSeconds });
 }
 export function objectFile(objectPath: string) {

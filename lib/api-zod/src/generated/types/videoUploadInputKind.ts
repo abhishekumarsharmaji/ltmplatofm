@@ -6,13 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type StudentLessonAssetKind = typeof StudentLessonAssetKind[keyof typeof StudentLessonAssetKind];
+export type VideoUploadInputKind = typeof VideoUploadInputKind[keyof typeof VideoUploadInputKind];
 
 
-export const StudentLessonAssetKind = {
+export const VideoUploadInputKind = {
   video: 'video',
   document: 'document',
-  audio: 'audio',
-  image: 'image',
   other: 'other',
 } as const;

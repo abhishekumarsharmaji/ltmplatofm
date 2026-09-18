@@ -90,6 +90,10 @@ export type LessonAssetKind = typeof LessonAssetKind[keyof typeof LessonAssetKin
 
 export const LessonAssetKind = {
   video: 'video',
+  document: 'document',
+  audio: 'audio',
+  image: 'image',
+  other: 'other',
 } as const;
 
 export type LessonAssetStatus = typeof LessonAssetStatus[keyof typeof LessonAssetStatus];
@@ -105,12 +109,11 @@ export interface LessonAsset {
   id: number;
   lessonId: number;
   kind: LessonAssetKind;
-  storageKey: string;
-  objectPath: string;
   filename: string;
   mimeType: string;
   sizeBytes: number;
   status: LessonAssetStatus;
+  downloadUrl?: string;
 }
 
 export interface LessonInput {
@@ -330,6 +333,15 @@ export interface AdminCourse {
   lessonCount: number;
 }
 
+export type VideoUploadInputKind = typeof VideoUploadInputKind[keyof typeof VideoUploadInputKind];
+
+
+export const VideoUploadInputKind = {
+  video: 'video',
+  document: 'document',
+  other: 'other',
+} as const;
+
 export interface VideoUploadInput {
   filename: string;
   /** @pattern ^video/ */
@@ -339,6 +351,7 @@ export interface VideoUploadInput {
      * @maximum 10737418240
      */
   sizeBytes: number;
+  kind?: VideoUploadInputKind;
 }
 
 export interface MultipartPartInput {
@@ -374,6 +387,10 @@ export type StudentLessonAssetKind = typeof StudentLessonAssetKind[keyof typeof 
 
 export const StudentLessonAssetKind = {
   video: 'video',
+  document: 'document',
+  audio: 'audio',
+  image: 'image',
+  other: 'other',
 } as const;
 
 export type StudentLessonAssetStatus = typeof StudentLessonAssetStatus[keyof typeof StudentLessonAssetStatus];
@@ -392,6 +409,7 @@ export interface StudentLessonAsset {
   sizeBytes: number;
   status: StudentLessonAssetStatus;
   streamUrl: string;
+  downloadUrl?: string;
 }
 
 export interface StudentLesson {
@@ -485,6 +503,8 @@ export interface LiveClassInput {
   endsAt: string;
   /** @minLength 1 */
   timezone: string;
+  /** @nullable */
+  moduleId?: number | null;
 }
 
 export type LiveClassStatus = typeof LiveClassStatus[keyof typeof LiveClassStatus];
@@ -511,6 +531,11 @@ export const LiveClassRecordingStatus = {
 export interface LiveClass {
   id: number;
   courseId: number;
+  productId?: number;
+  /** @nullable */
+  moduleId?: number | null;
+  /** @nullable */
+  moduleTitle?: string | null;
   creatorId: number;
   title: string;
   description: string;

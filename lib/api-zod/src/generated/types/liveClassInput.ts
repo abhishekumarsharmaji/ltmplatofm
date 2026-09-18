@@ -14,4 +14,6 @@ export interface LiveClassInput {
   endsAt: Date;
   /** @minLength 1 */
   timezone: string;
+  /** @nullable */
+  moduleId?: number | null;
 }

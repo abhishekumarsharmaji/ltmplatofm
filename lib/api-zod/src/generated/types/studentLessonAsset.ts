@@ -17,4 +17,5 @@ export interface StudentLessonAsset {
   sizeBytes: number;
   status: StudentLessonAssetStatus;
   streamUrl: string;
+  downloadUrl?: string;
 }

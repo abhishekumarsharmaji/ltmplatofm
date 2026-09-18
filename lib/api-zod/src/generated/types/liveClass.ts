@@ -11,6 +11,11 @@ import type { LiveClassStatus } from './liveClassStatus';
 export interface LiveClass {
   id: number;
   courseId: number;
+  productId?: number;
+  /** @nullable */
+  moduleId?: number | null;
+  /** @nullable */
+  moduleTitle?: string | null;
   creatorId: number;
   title: string;
   description: string;

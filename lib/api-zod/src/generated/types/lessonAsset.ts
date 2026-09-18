@@ -12,10 +12,9 @@ export interface LessonAsset {
   id: number;
   lessonId: number;
   kind: LessonAssetKind;
-  storageKey: string;
-  objectPath: string;
   filename: string;
   mimeType: string;
   sizeBytes: number;
   status: LessonAssetStatus;
+  downloadUrl?: string;
 }

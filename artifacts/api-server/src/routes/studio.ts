@@ -8,6 +8,7 @@ import {
   completeLessonMultipartUpload,
   createCourseThumbnailUploadUrl,
   createLessonMultipartUpload,
+  createLessonAssetMultipartUpload,
   createLessonPartUploadUrl,
   createObjectDownloadUrl,
   objectFile,
@@ -19,6 +20,21 @@ const id = (v: string | string[]) => { const value = Array.isArray(v) ? v[0] : v
 const MAX_VIDEO_BYTES = 10 * 1024 * 1024 * 1024;
 const VIDEO_PART_BYTES = 100 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const MAX_ATTACHMENT_BYTES = 100 * 1024 * 1024;
+const ATTACHMENTS: Record<string, string[]> = {
+  pdf: ["application/pdf"],
+  ppt: ["application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation"],
+  doc: ["application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.oasis.opendocument.text", "application/rtf", "text/rtf"],
+  xls: ["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "text/csv", "application/vnd.oasis.opendocument.spreadsheet"],
+  archive: ["application/zip", "application/x-7z-compressed", "application/vnd.rar", "application/x-rar-compressed"],
+  resource: ["text/plain", "text/markdown", "application/json", "application/octet-stream"],
+};
+const attachmentKind = (filename: string, mime: string) => {
+  const ext = filename.toLowerCase().split(".").pop() ?? "";
+  const group = ext === "pdf" ? "pdf" : ["ppt", "pptx"].includes(ext) ? "ppt" : ["doc", "docx", "odt", "rtf"].includes(ext) ? "doc" : ["xls", "xlsx", "csv", "ods"].includes(ext) ? "xls" : ["zip", "7z", "rar"].includes(ext) ? "archive" : null;
+  if (!group && ["txt", "md", "json", "yaml", "yml", "xml", "bin"].includes(ext)) return ATTACHMENTS.resource.includes(mime.toLowerCase()) ? "resource" : null;
+  return group && ATTACHMENTS[group].includes(mime.toLowerCase()) ? group : null;
+};
 // Signed R2 URLs are bearer links, so they are short-lived and a copied link dies quickly. Browsers keep
 // requesting the API URL for later byte ranges (a fresh redirect each time) and the student player also
 // recovers from an expired link, so a few minutes is enough for playback without leaving a long-lived link.
@@ -40,10 +56,10 @@ async function ownedLesson(lessonId: number, req: AuthenticatedRequest) {
   return row;
 }
 
-async function streamAsset(asset: typeof lessonAssetsTable.$inferSelect, req: Request, res: Response, signedUrlTtlSeconds: number) {
+async function streamAsset(asset: typeof lessonAssetsTable.$inferSelect, req: Request, res: Response, signedUrlTtlSeconds: number, attachment = false) {
   res.setHeader("Cache-Control", "private, no-store");
   res.setHeader("X-Content-Type-Options", "nosniff");
-  const directUrl = await createObjectDownloadUrl(asset.objectPath, asset.filename, asset.mimeType, signedUrlTtlSeconds);
+  const directUrl = await createObjectDownloadUrl(asset.objectPath, asset.filename, asset.mimeType, signedUrlTtlSeconds, attachment);
   if (directUrl) {
     res.redirect(307, directUrl);
     return;
@@ -52,7 +68,7 @@ async function streamAsset(asset: typeof lessonAssetsTable.$inferSelect, req: Re
   const size = Number(meta.size ?? asset.sizeBytes);
   const range = req.headers.range;
   res.setHeader("Content-Type", meta.contentType ?? asset.mimeType);
-  res.setHeader("Content-Disposition", `inline; filename="${asset.filename.replace(/["\\\r\n]/g, "_")}"`);
+  res.setHeader("Content-Disposition", `${attachment ? "attachment" : "inline"}; filename="${asset.filename.replace(/["\\\r\n]/g, "_")}"`);
   res.setHeader("Accept-Ranges", "bytes");
   if (!range) {
     res.setHeader("Content-Length", size);
@@ -133,11 +149,13 @@ router.post("/creator/products/:productId/thumbnail/finalize", requireAuth, requ
 
 router.post("/creator/lessons/:lessonId/assets/request-upload", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const lessonId = id(req.params.lessonId), auth = req as AuthenticatedRequest;
-  const { filename, mimeType, sizeBytes } = req.body ?? {};
-  if (!lessonId || typeof filename !== "string" || !/^video\/[^;]+$/i.test(mimeType ?? "") || !Number.isInteger(sizeBytes) || sizeBytes < 1 || sizeBytes > MAX_VIDEO_BYTES) { res.status(400).json({ error: "filename, video MIME type and sizeBytes up to 10GB are required" }); return; }
+  const { filename, mimeType, sizeBytes, kind = "video" } = req.body ?? {};
+  const isVideo = kind === "video";
+  const attachment = typeof filename === "string" && typeof mimeType === "string" ? attachmentKind(filename, mimeType) : null;
+  if (!lessonId || typeof filename !== "string" || !Number.isInteger(sizeBytes) || sizeBytes < 1 || (isVideo ? (!/^video\/[^;]+$/i.test(mimeType ?? "") || sizeBytes > MAX_VIDEO_BYTES) : (!attachment || sizeBytes > MAX_ATTACHMENT_BYTES))) { res.status(400).json({ error: "Invalid asset: videos allow up to 10GB; approved documents/resources allow up to 100MB" }); return; }
   if (!await ownedLesson(lessonId, auth)) { res.status(404).json({ error: "Lesson not found" }); return; }
-  const upload = await createLessonMultipartUpload(mimeType);
-  const [asset] = await db.insert(lessonAssetsTable).values({ lessonId, kind: "video", storageKey: upload.objectPath, objectPath: upload.objectPath, filename, mimeType, sizeBytes }).returning();
+  const upload = await createLessonAssetMultipartUpload(mimeType);
+  const [asset] = await db.insert(lessonAssetsTable).values({ lessonId, kind: isVideo ? "video" : (attachment === "pdf" || attachment === "doc" || attachment === "ppt" || attachment === "xls" ? "document" : "other"), storageKey: upload.objectPath, objectPath: upload.objectPath, filename: filename.replace(/["\\\r\n]/g, "_"), mimeType, sizeBytes }).returning();
   res.status(201).json({ asset, uploadId: upload.uploadId, partSize: VIDEO_PART_BYTES });
 });
 router.post("/creator/lessons/:lessonId/assets/:assetId/part-url", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
@@ -165,14 +183,15 @@ router.post("/creator/lessons/:lessonId/assets/:assetId/finalize", requireAuth, 
   await completeLessonMultipartUpload(asset.objectPath, uploadId, parts);
   const [metadata] = await objectFile(asset.objectPath).getMetadata();
   const actualSize = Number(metadata.size ?? 0);
-  if (actualSize < 1 || actualSize > MAX_VIDEO_BYTES || metadata.contentType && !metadata.contentType.startsWith("video/")) { res.status(422).json({ error: "Uploaded object is not a valid video" }); return; }
+  const isVideo = asset.kind === "video";
+  if (actualSize < 1 || actualSize > (isVideo ? MAX_VIDEO_BYTES : MAX_ATTACHMENT_BYTES) || (isVideo ? (metadata.contentType && !metadata.contentType.startsWith("video/")) : !attachmentKind(asset.filename, String(metadata.contentType ?? asset.mimeType)))) { res.status(422).json({ error: "Uploaded object type or size is not allowed" }); return; }
   const previousAssets = await db.select().from(lessonAssetsTable).where(and(
     eq(lessonAssetsTable.lessonId, lessonId),
     sql`${lessonAssetsTable.id} <> ${assetId}`,
   ));
   const [updated] = await db.transaction(async (tx) => {
     const [result] = await tx.update(lessonAssetsTable).set({ status: "uploaded", sizeBytes: actualSize, mimeType: metadata.contentType ?? asset.mimeType }).where(eq(lessonAssetsTable.id, assetId)).returning();
-    if (previousAssets.length) {
+    if (isVideo && previousAssets.length) {
       await tx.delete(lessonAssetsTable).where(inArray(lessonAssetsTable.id, previousAssets.map((item) => item.id)));
     }
     return [result];
@@ -191,13 +210,14 @@ router.post("/creator/lessons/:lessonId/assets/:assetId/abort", requireAuth, req
 });
 router.get("/creator/lessons/:lessonId/assets", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const lessonId = id(req.params.lessonId); if (!lessonId || !await ownedLesson(lessonId, req as AuthenticatedRequest)) { res.status(404).json({ error: "Lesson not found" }); return; }
-  res.json(await db.select().from(lessonAssetsTable).where(eq(lessonAssetsTable.lessonId, lessonId)));
+  const assets = await db.select().from(lessonAssetsTable).where(eq(lessonAssetsTable.lessonId, lessonId));
+  res.json(assets.map(({ storageKey, objectPath, ...asset }) => ({ ...asset, downloadUrl: `/api/creator/assets/${asset.id}/download` })));
 });
 router.get("/creator/assets/:assetId/download", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const assetId = id(req.params.assetId); if (!assetId) { res.status(400).json({ error: "Invalid asset id" }); return; }
   const [asset] = await db.select().from(lessonAssetsTable).where(eq(lessonAssetsTable.id, assetId));
   if (!asset || asset.status !== "uploaded" || !await ownedLesson(asset.lessonId, req as AuthenticatedRequest)) { res.status(404).json({ error: "Asset not found" }); return; }
-  await streamAsset(asset, req, res, CREATOR_DOWNLOAD_URL_TTL_SECONDS);
+  await streamAsset(asset, req, res, CREATOR_DOWNLOAD_URL_TTL_SECONDS, asset.kind !== "video");
 });
 router.get("/student/courses/:courseId/assets/:assetId/stream", requireAuth, requireRole("student", "creator", "admin"), async (req, res): Promise<void> => {
   const courseId = id(req.params.courseId), assetId = id(req.params.assetId), user = req as AuthenticatedRequest;
@@ -215,6 +235,17 @@ router.get("/student/courses/:courseId/assets/:assetId/stream", requireAuth, req
     .where(and(eq(courseModulesTable.courseId, courseId), eq(lessonAssetsTable.id, assetId), eq(lessonAssetsTable.status, "uploaded")));
   if (!row) { res.status(404).json({ error: "Video not found or enrollment required" }); return; }
   await streamAsset(row.asset, req, res, STUDENT_STREAM_URL_TTL_SECONDS);
+});
+router.get("/student/courses/:courseId/assets/:assetId/download", requireAuth, requireRole("student", "creator", "admin"), async (req, res): Promise<void> => {
+  const courseId = id(req.params.courseId), assetId = id(req.params.assetId), user = req as AuthenticatedRequest;
+  if (!courseId || !assetId) { res.status(400).json({ error: "Invalid course or asset" }); return; }
+  const [row] = await db.select({ asset: lessonAssetsTable }).from(lessonAssetsTable)
+    .innerJoin(lessonsTable, eq(lessonsTable.id, lessonAssetsTable.lessonId))
+    .innerJoin(courseModulesTable, eq(courseModulesTable.id, lessonsTable.moduleId))
+    .innerJoin(enrollmentsTable, and(eq(enrollmentsTable.courseId, courseModulesTable.courseId), eq(enrollmentsTable.userId, user.canonicalUserId!)))
+    .where(and(eq(courseModulesTable.courseId, courseId), eq(lessonAssetsTable.id, assetId), eq(lessonAssetsTable.status, "uploaded")));
+  if (!row || row.asset.kind === "video") { res.status(404).json({ error: "Download not found or enrollment required" }); return; }
+  await streamAsset(row.asset, req, res, STUDENT_STREAM_URL_TTL_SECONDS, true);
 });
 router.delete("/creator/assets/:assetId/download", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const assetId = id(req.params.assetId);
