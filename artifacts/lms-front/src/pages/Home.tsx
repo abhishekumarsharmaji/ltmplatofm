@@ -246,7 +246,7 @@ export default function Home() {
               </div>
             ) : displayCourses.length === 0 ? (
               <div className="text-center py-20 text-[#9794AA]">
-                No courses found for this category.
+                {t("courses.empty")}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -264,14 +264,14 @@ export default function Home() {
                       </div>
                       <div className="p-5 flex flex-col flex-1">
                         <div className="flex justify-between items-center text-[13px] text-[#394649] mb-3">
-                          <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" />{course.lessons || 0} Lessons</span>
-                          <span className="capitalize">{course.level || "Beginner"}</span>
+                          <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" />{course.lessons || 0} {t("courses.lessons")}</span>
+                          <span className="capitalize">{course.level || t("courses.beginner")}</span>
                         </div>
                         <h3 className="text-[16px] font-bold text-black leading-snug mb-3 line-clamp-2">
                           {course.title}
                         </h3>
                         <div className="mt-auto flex items-center justify-between text-[13px] text-[#394649]">
-                          <span>{course.creatorName || "Unknown Author"}</span>
+                          <span>{course.creatorName || t("courses.unknownAuthor")}</span>
                         </div>
                       </div>
                     </div>
@@ -280,11 +280,10 @@ export default function Home() {
               </div>
             )}
             
-            {/* We could add "View all courses" here if we wanted */}
             <div className="mt-12 text-center">
               <Link href="/courses">
                 <Button variant="outline" className="border-[#DADADA] text-[#394649] hover:bg-gray-50 h-11 px-8 rounded-md font-medium text-[16px]">
-                  View all courses
+                  {t("courses.viewAll")}
                 </Button>
               </Link>
             </div>
@@ -295,56 +294,58 @@ export default function Home() {
         <section className="bg-[#224EA1] py-20 text-center px-4">
           <div className="max-w-3xl mx-auto flex flex-col items-center">
             <h2 className="text-[40px] md:text-[48px] font-normal text-white mb-6 leading-tight">
-              Lorem Ipsum is simply dummy text of the printing
+              {t("cta.title1")}<br />{t("cta.title2")}
             </h2>
             <p className="text-white/80 text-[18px] mb-10 max-w-xl">
-              Lorem Ipsum is simply dummy text of the printing
+              {t("cta.subtitle")}
             </p>
             <Link href="/auth/sign-up">
               <Button className="h-[54px] px-10 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)]">
-                Start for free
+                {t("cta.button")}
               </Button>
             </Link>
           </div>
         </section>
 
         {/* MENTORS SECTION */}
-        <section className="py-24 bg-white">
-          <div className="container mx-auto px-4 lg:px-8">
-            <h2 className="text-center text-[46px] font-bold text-black mb-16">
-              Our Expert Mentors
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {mentorsList.map((mentor, i) => (
-                <div key={i} className="relative rounded-[12px] overflow-hidden aspect-[4/5] bg-gradient-to-br from-green-100 to-blue-50 group">
-                  {/* Avatar / Placeholder */}
-                  <div className="absolute inset-0 flex items-center justify-center text-6xl font-bold text-primary/20">
-                    {getInitials(mentor.name)}
-                  </div>
-                  
-                  {/* Share Icon */}
-                  <button className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/40 transition-colors z-20">
-                    <Share2 className="w-4 h-4" />
-                  </button>
+        {mentorsList.length > 0 && (
+          <section className="py-24 bg-white">
+            <div className="container mx-auto px-4 lg:px-8">
+              <h2 className="text-center text-[46px] font-bold text-black mb-16">
+                {t("mentors.title")}
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                {mentorsList.map((mentor, i) => (
+                  <div key={i} className="relative rounded-[12px] overflow-hidden aspect-[4/5] bg-gradient-to-br from-green-100 to-blue-50 group">
+                    {/* Avatar / Placeholder */}
+                    <div className="absolute inset-0 flex items-center justify-center text-6xl font-bold text-primary/20">
+                      {getInitials(mentor.name)}
+                    </div>
+                    
+                    {/* Share Icon */}
+                    <button className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/40 transition-colors z-20">
+                      <Share2 className="w-4 h-4" />
+                    </button>
 
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
-                  
-                  {/* Text Content */}
-                  <div className="absolute bottom-0 left-0 w-full p-6 z-20">
-                    <h3 className="text-white text-[24px] font-bold mb-1 border-b-2 border-white pb-1 inline-block">
-                      {mentor.name}
-                    </h3>
-                    <p className="text-white/80 text-[14px]">
-                      {mentor.count} Course{mentor.count !== 1 ? 's' : ''}
-                    </p>
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
+                    
+                    {/* Text Content */}
+                    <div className="absolute bottom-0 left-0 w-full p-6 z-20">
+                      <h3 className="text-white text-[24px] font-bold mb-1 border-b-2 border-white pb-1 inline-block">
+                        {mentor.name}
+                      </h3>
+                      <p className="text-white/80 text-[14px]">
+                        {mentor.count === 1 ? (t("mentors.subtitleSingle", { count: mentor.count }) as string) : (t("mentors.subtitlePlural", { count: mentor.count }) as string)}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
       </div>
     </PublicLayout>
