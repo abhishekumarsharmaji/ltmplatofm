@@ -80,32 +80,34 @@ export function CategoryFormDialog({
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{category ? 'Edit Category' : 'Create Category'}</DialogTitle>
+      <DialogContent className="border-[#E5E5E5] rounded-xl p-0 gap-0 overflow-hidden sm:max-w-[450px]">
+        <DialogHeader className="p-6 pb-4 border-b border-[#E5E5E5] bg-[#FAFAFA]">
+          <DialogTitle className="text-[20px] font-bold text-black">{category ? 'Edit Category' : 'Create Category'}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="p-6 space-y-5 bg-white">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input id="name" {...form.register("name")} />
+            <Label htmlFor="name" className="text-[14px] font-bold text-[#394649]">Name</Label>
+            <Input id="name" {...form.register("name")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
             {form.formState.errors.name && (
-              <p className="text-sm text-red-500">{form.formState.errors.name?.message as string}</p>
+              <p className="text-[13px] text-[#E53E3E] font-medium">{form.formState.errors.name?.message as string}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="slug">Slug</Label>
-            <Input id="slug" {...form.register("slug")} />
+            <Label htmlFor="slug" className="text-[14px] font-bold text-[#394649]">Slug</Label>
+            <Input id="slug" {...form.register("slug")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
             {form.formState.errors.slug && (
-              <p className="text-sm text-red-500">{form.formState.errors.slug?.message as string}</p>
+              <p className="text-[13px] text-[#E53E3E] font-medium">{form.formState.errors.slug?.message as string}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description (optional)</Label>
-            <Input id="description" {...form.register("description")} />
+            <Label htmlFor="description" className="text-[14px] font-bold text-[#394649]">Description (optional)</Label>
+            <Input id="description" {...form.register("description")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
           </div>
-          <Button type="submit" disabled={isPending} className="w-full">
-            {isPending ? "Saving..." : "Save"}
-          </Button>
+          <div className="pt-2">
+            <Button type="submit" disabled={isPending} className="w-full h-11 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
+              {isPending ? "Saving..." : "Save"}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

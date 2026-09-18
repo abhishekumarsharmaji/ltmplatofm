@@ -48,23 +48,23 @@ export function LiveClassesTab({ productId, role = 'creator' }: { productId: num
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold">Live Classes</h2>
-          <p className="text-muted-foreground text-sm mt-1">Schedule and manage live sessions for this course.</p>
+          <h2 className="text-[24px] font-bold text-black">Live Classes</h2>
+          <p className="text-[#4D4D4D] text-[14px] mt-1">Schedule and manage live sessions for this course.</p>
         </div>
         <LiveClassFormDialog productId={productId} open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <Button><Plus className="w-4 h-4 mr-2" /> Schedule Class</Button>
+          <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]"><Plus className="w-4 h-4 mr-2" /> Schedule Class</Button>
         </LiveClassFormDialog>
       </div>
 
       {isLoading ? (
         <div className="py-12 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : !classes || classes.length === 0 ? (
-        <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">
-          <Video className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-          <h3 className="font-medium">No live classes scheduled</h3>
-          <p className="text-sm text-muted-foreground mb-4">Start by scheduling a live class for your students.</p>
+        <div className="text-center py-12 border-2 border-dashed border-[#E5E5E5] rounded-xl bg-[#FAFAFA]">
+          <Video className="w-10 h-10 text-[#9794AA] mx-auto mb-3" />
+          <h3 className="font-bold text-[16px] text-black">No live classes scheduled</h3>
+          <p className="text-[14px] text-[#4D4D4D] mb-4">Start by scheduling a live class for your students.</p>
           <LiveClassFormDialog productId={productId} open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <Button variant="outline">Schedule Class</Button>
+            <Button variant="outline" className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-10 px-6 rounded-md font-medium text-[14px]">Schedule Class</Button>
           </LiveClassFormDialog>
         </div>
       ) : (
@@ -128,30 +128,30 @@ function LiveClassItem({ liveClass, productId, role }: { liveClass: LiveClass, p
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'live': return 'bg-destructive/10 text-destructive border-destructive/20 animate-pulse';
-      case 'completed': return 'bg-success/10 text-success border-success/20';
-      case 'cancelled': return 'bg-muted text-muted-foreground border-border';
-      default: return 'bg-brand/10 text-brand border-brand/20';
+      case 'live': return 'bg-[#FFEFEB] text-[#FE543D] animate-pulse';
+      case 'completed': return 'bg-[#E3F9EF] text-primary';
+      case 'cancelled': return 'bg-gray-100 text-[#9794AA]';
+      default: return 'bg-[#EAEFF8] text-[#224EA1]';
     }
   };
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-card border border-border rounded-xl shadow-sm gap-4">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-white border border-[#E5E5E5] rounded-lg shadow-sm gap-4 hover:shadow-md transition-shadow">
       <div className="flex-1">
-        <div className="flex items-center gap-2 mb-1">
-          <h3 className="font-bold text-lg">{liveClass.title}</h3>
-          <Badge variant="outline" className={getStatusColor(liveClass.status)}>
-            {liveClass.status === 'live' ? 'LIVE NOW' : liveClass.status.toUpperCase()}
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="font-bold text-[16px] text-black">{liveClass.title}</h3>
+          <Badge className={`font-bold text-[10px] uppercase tracking-wider border-none shadow-none ${getStatusColor(liveClass.status)}`}>
+            {liveClass.status === 'live' ? 'LIVE NOW' : liveClass.status}
           </Badge>
         </div>
-        <p className="text-sm text-muted-foreground line-clamp-1">{liveClass.description || "No description provided."}</p>
-        <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground font-medium">
-          <div className="flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5" />
+        <p className="text-[14px] text-[#4D4D4D] line-clamp-1">{liveClass.description || "No description provided."}</p>
+        <div className="flex items-center gap-4 mt-3 text-[13px] text-[#4D4D4D] font-medium">
+          <div className="flex items-center gap-1.5">
+            <Calendar className="w-4 h-4 text-[#9794AA]" />
             {format(parseISO(liveClass.startsAt), "MMM d, yyyy")}
           </div>
-          <div className="flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5">
+            <Clock className="w-4 h-4 text-[#9794AA]" />
             {format(parseISO(liveClass.startsAt), "h:mm a")} - {format(parseISO(liveClass.endsAt), "h:mm a")} ({liveClass.timezone})
           </div>
         </div>
@@ -163,41 +163,41 @@ function LiveClassItem({ liveClass, productId, role }: { liveClass: LiveClass, p
           <RecordingUploadDialog liveClass={liveClass} productId={productId} />
         )}
         {liveClass.status === "live" && (
-          <Button variant="destructive" size="sm" onClick={handleComplete} disabled={completeClass.isPending}>
+          <Button variant="destructive" size="sm" onClick={handleComplete} disabled={completeClass.isPending} className="h-9 px-4 bg-[#E53E3E] hover:bg-red-600 rounded-md font-medium text-[13px]">
             <CheckCircle className="mr-2 h-4 w-4" />
             {completeClass.isPending ? "Ending..." : "End Live Class"}
           </Button>
         )}
         {liveClass.status === 'scheduled' || liveClass.status === 'live' ? (
           <Link href={`/dashboard/${role}/live-classes/${liveClass.id}/classroom`}>
-            <Button variant={liveClass.status === 'live' ? "destructive" : "default"} size="sm">
+            <Button className={`h-9 px-4 rounded-md font-medium text-[13px] ${liveClass.status === 'live' ? 'bg-[#FE543D] hover:bg-red-600 text-white shadow-[0_4px_14px_rgba(254,84,61,0.25)]' : 'bg-primary hover:bg-[#10A364] text-white shadow-[0_4px_14px_rgba(21,207,116,0.25)]'}`} size="sm">
               <Video className="w-4 h-4 mr-2" />
               {liveClass.status === 'live' ? 'Join Class' : 'Enter Studio'}
             </Button>
           </Link>
         ) : liveClass.recordingUrl ? (
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]" asChild>
             <a href={liveClass.recordingUrl} target="_blank" rel="noopener noreferrer">View Recording</a>
           </Button>
         ) : null}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-9 w-9"><MoreVertical className="w-4 h-4" /></Button>
+            <Button variant="ghost" size="icon" className="h-9 w-9 text-[#9794AA] hover:text-black hover:bg-gray-100"><MoreVertical className="w-4 h-4" /></Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <LiveClassFormDialog productId={productId} liveClass={liveClass} open={isEditOpen} onOpenChange={setIsEditOpen}>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="cursor-pointer font-medium text-[13px]">
                 <Edit2 className="w-4 h-4 mr-2" /> Edit Details
               </DropdownMenuItem>
             </LiveClassFormDialog>
             {liveClass.status === 'scheduled' && (
-              <DropdownMenuItem onClick={handleCancel}>
+              <DropdownMenuItem onClick={handleCancel} className="cursor-pointer font-medium text-[13px]">
                 <XCircle className="w-4 h-4 mr-2" /> Cancel Class
               </DropdownMenuItem>
             )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={handleDelete}>
+            <DropdownMenuSeparator className="bg-[#E5E5E5]" />
+            <DropdownMenuItem className="text-[#E53E3E] focus:text-[#E53E3E] focus:bg-red-50 cursor-pointer font-medium text-[13px]" onClick={handleDelete}>
               <Trash className="w-4 h-4 mr-2" /> Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

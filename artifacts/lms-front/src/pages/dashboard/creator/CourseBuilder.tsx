@@ -724,25 +724,25 @@ function LessonItem({ lesson, index, total, onMove, productId }: any) {
 
   if (isEditing) {
     return (
-      <div className="bg-card border border-primary/30 rounded-lg p-4 shadow-sm animate-in fade-in duration-200 space-y-4">
+      <div className="bg-white border border-primary/30 rounded-lg p-4 shadow-[0_4px_14px_rgba(21,207,116,0.1)] animate-in fade-in duration-200 space-y-4">
         <div className="flex items-center justify-between">
-          <h4 className="font-semibold text-sm">Edit Lesson</h4>
-          <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}>Cancel</Button>
+          <h4 className="font-bold text-[14px] text-black">Edit Lesson</h4>
+          <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)} className="text-[#9794AA] hover:text-black">Cancel</Button>
         </div>
-        <div className="space-y-3">
-          <div className="space-y-1">
-            <Label className="text-xs">Title</Label>
-            <Input value={title} onChange={e => setTitle(e.target.value)} autoFocus />
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-[13px] font-bold text-[#394649]">Title</Label>
+            <Input value={title} onChange={e => setTitle(e.target.value)} autoFocus className="h-10 border-[#E5E5E5] text-[14px]" />
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs">Description</Label>
-            <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} className="resize-none" />
+          <div className="space-y-2">
+            <Label className="text-[13px] font-bold text-[#394649]">Description</Label>
+            <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} className="resize-none border-[#E5E5E5] text-[14px]" />
           </div>
-          <div className="flex items-center space-x-2 pt-1">
+          <div className="flex items-center space-x-3 pt-2">
             <Switch id={`preview-${lesson.id}`} checked={isPreview} onCheckedChange={setIsPreview} />
-            <Label htmlFor={`preview-${lesson.id}`} className="text-sm font-normal">Free preview</Label>
+            <Label htmlFor={`preview-${lesson.id}`} className="text-[14px] font-medium text-black">Free preview</Label>
           </div>
-          <Button className="w-full" size="sm" onClick={saveLesson} disabled={updateLesson.isPending}>Save Lesson</Button>
+          <Button className="w-full h-10 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px]" size="sm" onClick={saveLesson} disabled={updateLesson.isPending}>Save Lesson</Button>
         </div>
       </div>
     );
@@ -751,45 +751,45 @@ function LessonItem({ lesson, index, total, onMove, productId }: any) {
   const asset = lesson.assets?.find((a: any) => a.kind === "video");
 
   return (
-    <div className="flex flex-col p-3 bg-card border border-border rounded-lg group hover:border-primary/50 transition-colors">
+    <div className="flex flex-col p-3 bg-white border border-[#E5E5E5] rounded-lg group hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            <button aria-label={`Move ${lesson.title} up`} onClick={() => onMove(index, 'up')} disabled={index === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"><ChevronUp className="w-3 h-3" /></button>
-            <button aria-label={`Move ${lesson.title} down`} onClick={() => onMove(index, 'down')} disabled={index === total - 1} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"><ChevronDown className="w-3 h-3" /></button>
+            <button aria-label={`Move ${lesson.title} up`} onClick={() => onMove(index, 'up')} disabled={index === 0} className="p-0.5 text-[#9794AA] hover:text-black disabled:opacity-30"><ChevronUp className="w-3 h-3" /></button>
+            <button aria-label={`Move ${lesson.title} down`} onClick={() => onMove(index, 'down')} disabled={index === total - 1} className="p-0.5 text-[#9794AA] hover:text-black disabled:opacity-30"><ChevronDown className="w-3 h-3" /></button>
           </div>
           <div
-            className="w-8 h-8 rounded flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-colors"
+            className="w-8 h-8 rounded flex items-center justify-center cursor-pointer hover:bg-[#E3F9EF] transition-colors"
             onClick={() => setShowVideo(!showVideo)}
             title="Toggle video settings"
           >
             {asset && asset.status === 'uploaded' ? (
-              <Video className="w-4 h-4 text-success" />
+              <Video className="w-4 h-4 text-primary" />
             ) : (
-              <PlayCircle className="w-4 h-4 text-primary" />
+              <PlayCircle className="w-4 h-4 text-[#9794AA]" />
             )}
           </div>
           <div>
-            <h4 className="font-medium text-sm leading-none flex items-center gap-2">
+            <h4 className="font-bold text-[14px] text-black leading-none flex items-center gap-2">
               {lesson.title}
-              {lesson.isPreview && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">Preview</Badge>}
+              {lesson.isPreview && <Badge className="bg-[#E3F9EF] text-primary text-[10px] px-1.5 py-0 h-4 border-none shadow-none font-bold uppercase tracking-wider hover:bg-[#E3F9EF]">Preview</Badge>}
             </h4>
-            {lesson.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{lesson.description}</p>}
+            {lesson.description && <p className="text-[12px] text-[#4D4D4D] mt-1.5 line-clamp-1">{lesson.description}</p>}
           </div>
         </div>
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button aria-label={`Manage video for ${lesson.title}`} variant="ghost" size="icon" onClick={() => setShowVideo(!showVideo)} className={`h-8 w-8 ${showVideo ? 'text-primary bg-primary/10' : ''}`}>
-            <Video className="w-3.5 h-3.5" />
+          <Button aria-label={`Manage video for ${lesson.title}`} variant="ghost" size="icon" onClick={() => setShowVideo(!showVideo)} className={`h-8 w-8 ${showVideo ? 'text-primary bg-[#E3F9EF]' : 'text-[#9794AA] hover:text-black'}`}>
+            <Video className="w-4 h-4" />
           </Button>
-          <Button aria-label={`Edit ${lesson.title}`} variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="h-8 w-8">
-            <Edit2 className="w-3.5 h-3.5" />
+          <Button aria-label={`Edit ${lesson.title}`} variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="h-8 w-8 text-[#9794AA] hover:text-black">
+            <Edit2 className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             aria-label={`Delete ${lesson.title}`}
-            className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="h-8 w-8 text-[#E53E3E] hover:bg-red-50 hover:text-[#E53E3E]"
             onClick={() => {
               if(confirm('Delete this lesson?')) {
                 deleteLesson.mutate({ lessonId: lesson.id }, {
@@ -801,13 +801,13 @@ function LessonItem({ lesson, index, total, onMove, productId }: any) {
               }
             }}
           >
-            <Trash className="w-3.5 h-3.5" />
+            <Trash className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
       {showVideo && (
-        <div className="mt-4 pt-4 border-t border-border animate-in fade-in slide-in-from-top-2">
+        <div className="mt-4 pt-4 border-t border-[#E5E5E5] animate-in fade-in slide-in-from-top-2">
           <LessonVideoUpload lesson={lesson} productId={productId} />
         </div>
       )}
@@ -839,11 +839,11 @@ function PublishTab({ productId, product, readiness }: { productId: number, prod
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <div>
-        <h2 className="text-xl font-bold">Course Readiness</h2>
-        <p className="text-muted-foreground text-sm mt-1">Review your course before making it live.</p>
+        <h2 className="text-[24px] font-bold text-black">Course Readiness</h2>
+        <p className="text-[#4D4D4D] text-[14px] mt-1">Review your course before making it live.</p>
       </div>
 
-      <div className="bg-muted/30 border border-border rounded-xl p-5 space-y-4">
+      <div className="bg-[#FAFAFA] border border-[#E5E5E5] rounded-xl p-6 space-y-5">
         <ReadinessCheck
           passed={checks.title}
           title="Course Title"
@@ -866,20 +866,19 @@ function PublishTab({ productId, product, readiness }: { productId: number, prod
         />
       </div>
 
-      <div className="pt-6 border-t border-border flex items-center justify-between">
+      <div className="pt-6 border-t border-[#E5E5E5] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="font-bold">{isPublished ? 'Course is Live' : 'Publish Course'}</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="font-bold text-[18px] text-black">{isPublished ? 'Course is Live' : 'Publish Course'}</h3>
+          <p className="text-[14px] text-[#4D4D4D] mt-1">
             {isPublished
               ? 'Your course is visible to students.'
               : 'Make this course available for free enrollment.'}
           </p>
         </div>
         <Button
-          size="lg"
           onClick={handlePublish}
           disabled={!readiness?.ready || isPublished || publish.isPending}
-          className={isPublished ? "bg-success hover:bg-success/90 text-success-foreground" : ""}
+          className={`h-12 px-8 font-medium rounded-md text-[15px] shadow-[0_4px_14px_rgba(21,207,116,0.25)] ${isPublished ? "bg-[#10A364] text-white opacity-80" : "bg-primary hover:bg-[#10A364] text-white"}`}
         >
           {publish.isPending ? "Publishing..." : isPublished ? "Update Live Course" : "Publish Course"}
         </Button>
@@ -890,13 +889,13 @@ function PublishTab({ productId, product, readiness }: { productId: number, prod
 
 function ReadinessCheck({ passed, title, desc }: { passed: boolean, title: string, desc: string }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${passed ? 'bg-success/20 text-success' : 'bg-muted border border-border text-muted-foreground'}`}>
-        {passed ? <CheckCircle2 className="w-3.5 h-3.5" /> : <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />}
+    <div className="flex items-start gap-4">
+      <div className={`mt-0.5 w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${passed ? 'bg-[#E3F9EF] text-primary' : 'bg-gray-100 border border-[#E5E5E5] text-[#9794AA]'}`}>
+        {passed ? <CheckCircle2 className="w-4 h-4" /> : <span className="w-1.5 h-1.5 rounded-full bg-[#9794AA]/50" />}
       </div>
       <div>
-        <h4 className={`text-sm font-semibold ${passed ? 'text-foreground' : 'text-muted-foreground'}`}>{title}</h4>
-        <p className="text-xs text-muted-foreground">{desc}</p>
+        <h4 className={`text-[14px] font-bold ${passed ? 'text-black' : 'text-[#9794AA]'}`}>{title}</h4>
+        <p className="text-[13px] text-[#4D4D4D] mt-1">{desc}</p>
       </div>
     </div>
   );
