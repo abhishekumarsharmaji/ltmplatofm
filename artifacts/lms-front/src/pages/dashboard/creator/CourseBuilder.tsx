@@ -677,20 +677,48 @@ function ModuleItem({ module, index, total, onMove, productId }: any) {
       <div className="p-3 space-y-2">
         {(!module.lessons || module.lessons.length === 0) ? (
           <div className="text-center py-6">
-            <p className="text-[14px] text-[#4D4D4D] mb-3">No lessons in this module.</p>
-            <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]" onClick={handleAddLesson} disabled={createLesson.isPending}>Add First Lesson</Button>
+            <p className="text-[14px] text-[#4D4D4D] mb-4">No lessons in this module.</p>
+            <div className="flex justify-center gap-3">
+              <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]" onClick={handleAddLesson} disabled={createLesson.isPending}>
+                <Plus className="w-4 h-4 mr-2" /> Add First Lesson
+              </Button>
+              <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-9 px-4 rounded-md font-medium text-[13px]" onClick={() => setIsLiveClassFormOpen(true)}>
+                <Video className="w-4 h-4 mr-2" /> Schedule Live Class
+              </Button>
+            </div>
           </div>
         ) : (
-          module.lessons.map((lesson: any, lIndex: number) => (
-            <LessonItem
-              key={lesson.id}
-              lesson={lesson}
-              index={lIndex}
-              total={module.lessons.length}
-              onMove={handleMoveLesson}
-              productId={productId}
-            />
-          ))
+          <div className="space-y-2">
+            {module.lessons.map((lesson: any, lIndex: number) => (
+              <LessonItem
+                key={lesson.id}
+                lesson={lesson}
+                index={lIndex}
+                total={module.lessons.length}
+                onMove={handleMoveLesson}
+                productId={productId}
+              />
+            ))}
+            <div className="pt-2 flex flex-col sm:flex-row gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleAddLesson} 
+                disabled={createLesson.isPending} 
+                className="flex-1 border-dashed border-[#DADADA] text-[#394649] bg-[#FAFAFA] hover:bg-white h-10 rounded-md font-medium text-[13px]"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Lesson
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsLiveClassFormOpen(true)} 
+                className="flex-1 border-dashed border-[#DADADA] text-[#394649] bg-[#FAFAFA] hover:bg-white h-10 rounded-md font-medium text-[13px]"
+              >
+                <Video className="w-4 h-4 mr-2" />
+                Schedule Live Class
+              </Button>
+            </div>
+          </div>
         )}
       </div>
     </div>
