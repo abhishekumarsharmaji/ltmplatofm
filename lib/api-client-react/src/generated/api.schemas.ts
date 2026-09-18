@@ -293,6 +293,91 @@ export interface SalesSummary {
   orders: SalesSummaryOrdersItem[];
 }
 
+export interface LiveClassInput {
+  /** @minLength 1 */
+  title: string;
+  description?: string;
+  startsAt: string;
+  endsAt: string;
+  /** @minLength 1 */
+  timezone: string;
+}
+
+export type LiveClassStatus = typeof LiveClassStatus[keyof typeof LiveClassStatus];
+
+
+export const LiveClassStatus = {
+  scheduled: 'scheduled',
+  live: 'live',
+  completed: 'completed',
+  cancelled: 'cancelled',
+} as const;
+
+export type LiveClassRecordingStatus = typeof LiveClassRecordingStatus[keyof typeof LiveClassRecordingStatus];
+
+
+export const LiveClassRecordingStatus = {
+  idle: 'idle',
+  recording: 'recording',
+  processing: 'processing',
+  ready: 'ready',
+  failed: 'failed',
+} as const;
+
+export interface LiveClass {
+  id: number;
+  courseId: number;
+  creatorId: number;
+  title: string;
+  description: string;
+  startsAt: string;
+  endsAt: string;
+  timezone: string;
+  status: LiveClassStatus;
+  roomName: string;
+  recordingStatus: LiveClassRecordingStatus;
+  recordingUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type LiveClassJoinParticipantRole = typeof LiveClassJoinParticipantRole[keyof typeof LiveClassJoinParticipantRole];
+
+
+export const LiveClassJoinParticipantRole = {
+  host: 'host',
+  student: 'student',
+} as const;
+
+export interface LiveClassJoin {
+  serverUrl: string;
+  token: string;
+  class: LiveClass;
+  participantRole: LiveClassJoinParticipantRole;
+}
+
+export type LiveClassAttendanceRole = typeof LiveClassAttendanceRole[keyof typeof LiveClassAttendanceRole];
+
+
+export const LiveClassAttendanceRole = {
+  host: 'host',
+  student: 'student',
+} as const;
+
+export interface LiveClassAttendance {
+  id: number;
+  liveClassId: number;
+  userId: number;
+  name: string;
+  email: string;
+  role: LiveClassAttendanceRole;
+  firstJoinedAt: string;
+  /** @nullable */
+  lastLeftAt: string | null;
+  durationSeconds: number;
+  joinCount: number;
+}
+
 export type UpgradeCreator200 = {
   user: User;
 };
@@ -327,4 +412,8 @@ export type AdminOrders200Item = { [key: string]: unknown };
 export type AdminSettings200Item = { [key: string]: unknown };
 
 export type AdminUpdateSetting200 = { [key: string]: unknown };
+
+export type ListUpcomingLiveClassesParams = {
+courseId: number;
+};
 

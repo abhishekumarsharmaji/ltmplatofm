@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { LessonVideoUpload } from "@/components/dashboard/LessonVideoUpload";
+import { LiveClassesTab } from "@/components/dashboard/LiveClassesTab";
 
 export function CourseBuilder({
   productId,
@@ -50,7 +51,7 @@ export function CourseBuilder({
   backLabel?: string,
   role?: 'creator' | 'admin'
 }) {
-  const [activeTab, setActiveTab] = useState<"basics" | "curriculum" | "publish">("basics");
+  const [activeTab, setActiveTab] = useState<"basics" | "curriculum" | "live" | "publish">("basics");
   
   const { data: builder, isLoading, error } = useGetCreatorCourseBuilder(productId);
   const { data: readiness } = useGetCreatorCourseReadiness(productId);
@@ -97,6 +98,12 @@ export function CourseBuilder({
             label="Curriculum" 
           />
           <TabButton 
+            active={activeTab === "live"}
+            onClick={() => setActiveTab("live")}
+            icon={Video}
+            label="Live Classes"
+          />
+          <TabButton
             active={activeTab === "publish"} 
             onClick={() => setActiveTab("publish")} 
             icon={CheckCircle2} 
@@ -108,6 +115,7 @@ export function CourseBuilder({
         <div className="flex-1 bg-card border border-border rounded-xl p-6 shadow-sm min-h-[500px]">
           {activeTab === "basics" && <BasicsTab productId={productId} product={product} />}
           {activeTab === "curriculum" && <CurriculumTab productId={productId} modules={modules || []} />}
+          {activeTab === "live" && <LiveClassesTab productId={productId} role={role} />}
           {activeTab === "publish" && <PublishTab productId={productId} product={product} readiness={readiness} />}
         </div>
       </div>

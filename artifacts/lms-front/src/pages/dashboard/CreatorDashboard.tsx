@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { ProductFormDialog } from "@/components/dashboard/ProductFormDialog";
 import { PublishProductButton } from "@/components/dashboard/PublishProductButton";
 import { CourseBuilder } from "./creator/CourseBuilder";
+import { CreatorLiveClassesStandalone } from "@/components/dashboard/LiveClassesStandalone";
+import { LiveClassroom } from "@/components/dashboard/LiveClassroom";
 
 export default function CreatorDashboard() {
   const params = useParams();
@@ -23,11 +25,20 @@ export default function CreatorDashboard() {
     return <CourseBuilder productId={Number(id)} />;
   }
 
+  if (section === "live-classes" && id && action === "classroom") {
+    return (
+      <DashboardLayout role="creator">
+        <LiveClassroom id={Number(id)} backUrl="/dashboard/creator/courses" />
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout role="creator">
       {section === "overview" && <Overview />}
       {section === "courses" && !id && <Courses />}
       {section === "products" && <Products />}
+      {section === "live-classes" && !id && <CreatorLiveClassesStandalone />}
       {section === "sales" && <Sales />}
     </DashboardLayout>
   );

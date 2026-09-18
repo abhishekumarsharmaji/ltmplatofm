@@ -42,7 +42,12 @@ import type {
   LessonInput,
   LessonReorderInput,
   ListProductsParams,
+  ListUpcomingLiveClassesParams,
   ListWishlist200Item,
+  LiveClass,
+  LiveClassAttendance,
+  LiveClassInput,
+  LiveClassJoin,
   LoginInput,
   MarketplaceCoursesParams,
   Module,
@@ -3954,5 +3959,935 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getAdminUpdateSettingMutationOptions(options));
+    }
+
+export const getListCreatorLiveClassesUrl = (productId: number,) => {
+
+
+
+
+  return `/api/creator/products/${productId}/live-classes`
+}
+
+export const listCreatorLiveClasses = async (productId: number, options?: Parameters<typeof customFetch>[1]): Promise<LiveClass[]> => {
+
+  return customFetch<LiveClass[]>(getListCreatorLiveClassesUrl(productId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListCreatorLiveClassesQueryKey = (productId: number,) => {
+    return [
+    `/api/creator/products/${productId}/live-classes`
+    ] as const;
+    }
+
+
+export const getListCreatorLiveClassesQueryOptions = <TData = Awaited<ReturnType<typeof listCreatorLiveClasses>>, TError = ErrorType<unknown>>(productId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCreatorLiveClasses>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCreatorLiveClassesQueryKey(productId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCreatorLiveClasses>>> = ({ signal }) => listCreatorLiveClasses(productId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: productId !== null && productId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listCreatorLiveClasses>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListCreatorLiveClassesQueryResult = NonNullable<Awaited<ReturnType<typeof listCreatorLiveClasses>>>
+export type ListCreatorLiveClassesQueryError = ErrorType<unknown>
+
+
+
+export function useListCreatorLiveClasses<TData = Awaited<ReturnType<typeof listCreatorLiveClasses>>, TError = ErrorType<unknown>>(
+ productId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listCreatorLiveClasses>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListCreatorLiveClassesQueryOptions(productId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateLiveClassUrl = (productId: number,) => {
+
+
+
+
+  return `/api/creator/products/${productId}/live-classes`
+}
+
+export const createLiveClass = async (productId: number,
+    liveClassInput: LiveClassInput, options?: Parameters<typeof customFetch>[1]): Promise<LiveClass> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<LiveClass>(getCreateLiveClassUrl(productId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(liveClassInput)
+  }
+);}
+
+
+
+
+
+export const getCreateLiveClassMutationKey = () => ['createLiveClass'] as const;
+
+export const getCreateLiveClassMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLiveClass>>, TError,CreateLiveClassMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createLiveClass>>, TError,CreateLiveClassMutationVariables, TContext> => {
+
+const mutationKey = getCreateLiveClassMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createLiveClass>>, CreateLiveClassMutationVariables> = (props) => {
+          const {productId,data} = props ?? {};
+
+          return  createLiveClass(productId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateLiveClassMutationResult = NonNullable<Awaited<ReturnType<typeof createLiveClass>>>
+    export type CreateLiveClassMutationBody = BodyType<LiveClassInput>
+    export type CreateLiveClassMutationError = ErrorType<void>
+    export type CreateLiveClassMutationVariables = {productId: number;data: BodyType<LiveClassInput>}
+
+    export const useCreateLiveClass = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createLiveClass>>, TError,CreateLiveClassMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createLiveClass>>,
+        TError,
+        CreateLiveClassMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateLiveClassMutationOptions(options));
+    }
+
+export const getListUpcomingLiveClassesUrl = (params: ListUpcomingLiveClassesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/live-classes?${stringifiedParams}` : `/api/live-classes`
+}
+
+export const listUpcomingLiveClasses = async (params: ListUpcomingLiveClassesParams, options?: Parameters<typeof customFetch>[1]): Promise<LiveClass[]> => {
+
+  return customFetch<LiveClass[]>(getListUpcomingLiveClassesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListUpcomingLiveClassesQueryKey = (params?: ListUpcomingLiveClassesParams,) => {
+    return [
+    `/api/live-classes`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListUpcomingLiveClassesQueryOptions = <TData = Awaited<ReturnType<typeof listUpcomingLiveClasses>>, TError = ErrorType<unknown>>(params: ListUpcomingLiveClassesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listUpcomingLiveClasses>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListUpcomingLiveClassesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listUpcomingLiveClasses>>> = ({ signal }) => listUpcomingLiveClasses(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listUpcomingLiveClasses>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListUpcomingLiveClassesQueryResult = NonNullable<Awaited<ReturnType<typeof listUpcomingLiveClasses>>>
+export type ListUpcomingLiveClassesQueryError = ErrorType<unknown>
+
+
+
+export function useListUpcomingLiveClasses<TData = Awaited<ReturnType<typeof listUpcomingLiveClasses>>, TError = ErrorType<unknown>>(
+ params: ListUpcomingLiveClassesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listUpcomingLiveClasses>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListUpcomingLiveClassesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateLiveClassUrl = (id: number,) => {
+
+
+
+
+  return `/api/creator/live-classes/${id}`
+}
+
+export const updateLiveClass = async (id: number,
+    liveClassInput: LiveClassInput, options?: Parameters<typeof customFetch>[1]): Promise<LiveClass> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<LiveClass>(getUpdateLiveClassUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(liveClassInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateLiveClassMutationKey = () => ['updateLiveClass'] as const;
+
+export const getUpdateLiveClassMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLiveClass>>, TError,UpdateLiveClassMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateLiveClass>>, TError,UpdateLiveClassMutationVariables, TContext> => {
+
+const mutationKey = getUpdateLiveClassMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateLiveClass>>, UpdateLiveClassMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateLiveClass(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateLiveClassMutationResult = NonNullable<Awaited<ReturnType<typeof updateLiveClass>>>
+    export type UpdateLiveClassMutationBody = BodyType<LiveClassInput>
+    export type UpdateLiveClassMutationError = ErrorType<unknown>
+    export type UpdateLiveClassMutationVariables = {id: number;data: BodyType<LiveClassInput>}
+
+    export const useUpdateLiveClass = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateLiveClass>>, TError,UpdateLiveClassMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateLiveClass>>,
+        TError,
+        UpdateLiveClassMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateLiveClassMutationOptions(options));
+    }
+
+export const getDeleteLiveClassUrl = (id: number,) => {
+
+
+
+
+  return `/api/creator/live-classes/${id}`
+}
+
+export const deleteLiveClass = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteLiveClassUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteLiveClassMutationKey = () => ['deleteLiveClass'] as const;
+
+export const getDeleteLiveClassMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLiveClass>>, TError,DeleteLiveClassMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteLiveClass>>, TError,DeleteLiveClassMutationVariables, TContext> => {
+
+const mutationKey = getDeleteLiveClassMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteLiveClass>>, DeleteLiveClassMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteLiveClass(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteLiveClassMutationResult = NonNullable<Awaited<ReturnType<typeof deleteLiveClass>>>
+
+    export type DeleteLiveClassMutationError = ErrorType<unknown>
+    export type DeleteLiveClassMutationVariables = {id: number}
+
+    export const useDeleteLiveClass = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteLiveClass>>, TError,DeleteLiveClassMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteLiveClass>>,
+        TError,
+        DeleteLiveClassMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteLiveClassMutationOptions(options));
+    }
+
+export const getCancelLiveClassUrl = (id: number,) => {
+
+
+
+
+  return `/api/creator/live-classes/${id}/cancel`
+}
+
+export const cancelLiveClass = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LiveClass> => {
+
+  return customFetch<LiveClass>(getCancelLiveClassUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCancelLiveClassMutationKey = () => ['cancelLiveClass'] as const;
+
+export const getCancelLiveClassMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelLiveClass>>, TError,CancelLiveClassMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof cancelLiveClass>>, TError,CancelLiveClassMutationVariables, TContext> => {
+
+const mutationKey = getCancelLiveClassMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cancelLiveClass>>, CancelLiveClassMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  cancelLiveClass(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CancelLiveClassMutationResult = NonNullable<Awaited<ReturnType<typeof cancelLiveClass>>>
+
+    export type CancelLiveClassMutationError = ErrorType<unknown>
+    export type CancelLiveClassMutationVariables = {id: number}
+
+    export const useCancelLiveClass = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cancelLiveClass>>, TError,CancelLiveClassMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof cancelLiveClass>>,
+        TError,
+        CancelLiveClassMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCancelLiveClassMutationOptions(options));
+    }
+
+export const getCompleteLiveClassUrl = (id: number,) => {
+
+
+
+
+  return `/api/creator/live-classes/${id}/complete`
+}
+
+export const completeLiveClass = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LiveClass> => {
+
+  return customFetch<LiveClass>(getCompleteLiveClassUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCompleteLiveClassMutationKey = () => ['completeLiveClass'] as const;
+
+export const getCompleteLiveClassMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeLiveClass>>, TError,CompleteLiveClassMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof completeLiveClass>>, TError,CompleteLiveClassMutationVariables, TContext> => {
+
+const mutationKey = getCompleteLiveClassMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof completeLiveClass>>, CompleteLiveClassMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  completeLiveClass(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CompleteLiveClassMutationResult = NonNullable<Awaited<ReturnType<typeof completeLiveClass>>>
+
+    export type CompleteLiveClassMutationError = ErrorType<unknown>
+    export type CompleteLiveClassMutationVariables = {id: number}
+
+    export const useCompleteLiveClass = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeLiveClass>>, TError,CompleteLiveClassMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof completeLiveClass>>,
+        TError,
+        CompleteLiveClassMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCompleteLiveClassMutationOptions(options));
+    }
+
+export const getListLiveClassAttendanceUrl = (id: number,) => {
+
+
+
+
+  return `/api/creator/live-classes/${id}/attendance`
+}
+
+export const listLiveClassAttendance = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LiveClassAttendance[]> => {
+
+  return customFetch<LiveClassAttendance[]>(getListLiveClassAttendanceUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListLiveClassAttendanceQueryKey = (id: number,) => {
+    return [
+    `/api/creator/live-classes/${id}/attendance`
+    ] as const;
+    }
+
+
+export const getListLiveClassAttendanceQueryOptions = <TData = Awaited<ReturnType<typeof listLiveClassAttendance>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listLiveClassAttendance>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListLiveClassAttendanceQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listLiveClassAttendance>>> = ({ signal }) => listLiveClassAttendance(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listLiveClassAttendance>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListLiveClassAttendanceQueryResult = NonNullable<Awaited<ReturnType<typeof listLiveClassAttendance>>>
+export type ListLiveClassAttendanceQueryError = ErrorType<unknown>
+
+
+
+export function useListLiveClassAttendance<TData = Awaited<ReturnType<typeof listLiveClassAttendance>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listLiveClassAttendance>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListLiveClassAttendanceQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getJoinLiveClassUrl = (id: number,) => {
+
+
+
+
+  return `/api/live-classes/${id}/join`
+}
+
+export const joinLiveClass = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LiveClassJoin> => {
+
+  return customFetch<LiveClassJoin>(getJoinLiveClassUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getJoinLiveClassMutationKey = () => ['joinLiveClass'] as const;
+
+export const getJoinLiveClassMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinLiveClass>>, TError,JoinLiveClassMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof joinLiveClass>>, TError,JoinLiveClassMutationVariables, TContext> => {
+
+const mutationKey = getJoinLiveClassMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof joinLiveClass>>, JoinLiveClassMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  joinLiveClass(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type JoinLiveClassMutationResult = NonNullable<Awaited<ReturnType<typeof joinLiveClass>>>
+
+    export type JoinLiveClassMutationError = ErrorType<unknown>
+    export type JoinLiveClassMutationVariables = {id: number}
+
+    export const useJoinLiveClass = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof joinLiveClass>>, TError,JoinLiveClassMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof joinLiveClass>>,
+        TError,
+        JoinLiveClassMutationVariables,
+        TContext
+      > => {
+      return useMutation(getJoinLiveClassMutationOptions(options));
+    }
+
+export const getRecordLiveClassJoinUrl = (id: number,) => {
+
+
+
+
+  return `/api/live-classes/${id}/attendance/join`
+}
+
+export const recordLiveClassJoin = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getRecordLiveClassJoinUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRecordLiveClassJoinMutationKey = () => ['recordLiveClassJoin'] as const;
+
+export const getRecordLiveClassJoinMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordLiveClassJoin>>, TError,RecordLiveClassJoinMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof recordLiveClassJoin>>, TError,RecordLiveClassJoinMutationVariables, TContext> => {
+
+const mutationKey = getRecordLiveClassJoinMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recordLiveClassJoin>>, RecordLiveClassJoinMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  recordLiveClassJoin(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecordLiveClassJoinMutationResult = NonNullable<Awaited<ReturnType<typeof recordLiveClassJoin>>>
+
+    export type RecordLiveClassJoinMutationError = ErrorType<unknown>
+    export type RecordLiveClassJoinMutationVariables = {id: number}
+
+    export const useRecordLiveClassJoin = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordLiveClassJoin>>, TError,RecordLiveClassJoinMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof recordLiveClassJoin>>,
+        TError,
+        RecordLiveClassJoinMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRecordLiveClassJoinMutationOptions(options));
+    }
+
+export const getRecordLiveClassLeaveUrl = (id: number,) => {
+
+
+
+
+  return `/api/live-classes/${id}/attendance/leave`
+}
+
+export const recordLiveClassLeave = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getRecordLiveClassLeaveUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRecordLiveClassLeaveMutationKey = () => ['recordLiveClassLeave'] as const;
+
+export const getRecordLiveClassLeaveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordLiveClassLeave>>, TError,RecordLiveClassLeaveMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof recordLiveClassLeave>>, TError,RecordLiveClassLeaveMutationVariables, TContext> => {
+
+const mutationKey = getRecordLiveClassLeaveMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recordLiveClassLeave>>, RecordLiveClassLeaveMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  recordLiveClassLeave(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecordLiveClassLeaveMutationResult = NonNullable<Awaited<ReturnType<typeof recordLiveClassLeave>>>
+
+    export type RecordLiveClassLeaveMutationError = ErrorType<unknown>
+    export type RecordLiveClassLeaveMutationVariables = {id: number}
+
+    export const useRecordLiveClassLeave = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordLiveClassLeave>>, TError,RecordLiveClassLeaveMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof recordLiveClassLeave>>,
+        TError,
+        RecordLiveClassLeaveMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRecordLiveClassLeaveMutationOptions(options));
+    }
+
+export const getStartLiveClassRecordingUrl = (id: number,) => {
+
+
+
+
+  return `/api/creator/live-classes/${id}/recording/start`
+}
+
+export const startLiveClassRecording = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LiveClass> => {
+
+  return customFetch<LiveClass>(getStartLiveClassRecordingUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getStartLiveClassRecordingMutationKey = () => ['startLiveClassRecording'] as const;
+
+export const getStartLiveClassRecordingMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startLiveClassRecording>>, TError,StartLiveClassRecordingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof startLiveClassRecording>>, TError,StartLiveClassRecordingMutationVariables, TContext> => {
+
+const mutationKey = getStartLiveClassRecordingMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startLiveClassRecording>>, StartLiveClassRecordingMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  startLiveClassRecording(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StartLiveClassRecordingMutationResult = NonNullable<Awaited<ReturnType<typeof startLiveClassRecording>>>
+
+    export type StartLiveClassRecordingMutationError = ErrorType<void>
+    export type StartLiveClassRecordingMutationVariables = {id: number}
+
+    export const useStartLiveClassRecording = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startLiveClassRecording>>, TError,StartLiveClassRecordingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof startLiveClassRecording>>,
+        TError,
+        StartLiveClassRecordingMutationVariables,
+        TContext
+      > => {
+      return useMutation(getStartLiveClassRecordingMutationOptions(options));
+    }
+
+export const getStopLiveClassRecordingUrl = (id: number,) => {
+
+
+
+
+  return `/api/creator/live-classes/${id}/recording/stop`
+}
+
+export const stopLiveClassRecording = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LiveClass> => {
+
+  return customFetch<LiveClass>(getStopLiveClassRecordingUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getStopLiveClassRecordingMutationKey = () => ['stopLiveClassRecording'] as const;
+
+export const getStopLiveClassRecordingMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stopLiveClassRecording>>, TError,StopLiveClassRecordingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof stopLiveClassRecording>>, TError,StopLiveClassRecordingMutationVariables, TContext> => {
+
+const mutationKey = getStopLiveClassRecordingMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof stopLiveClassRecording>>, StopLiveClassRecordingMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  stopLiveClassRecording(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StopLiveClassRecordingMutationResult = NonNullable<Awaited<ReturnType<typeof stopLiveClassRecording>>>
+
+    export type StopLiveClassRecordingMutationError = ErrorType<unknown>
+    export type StopLiveClassRecordingMutationVariables = {id: number}
+
+    export const useStopLiveClassRecording = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stopLiveClassRecording>>, TError,StopLiveClassRecordingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof stopLiveClassRecording>>,
+        TError,
+        StopLiveClassRecordingMutationVariables,
+        TContext
+      > => {
+      return useMutation(getStopLiveClassRecordingMutationOptions(options));
     }
 

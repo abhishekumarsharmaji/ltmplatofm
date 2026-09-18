@@ -20,6 +20,8 @@ import { SettingFormDialog } from "@/components/dashboard/SettingFormDialog";
 
 import { AdminCourseStudioList } from "./admin/AdminCourseStudioList";
 import { AdminCourseStudio } from "./admin/AdminCourseStudio";
+import { AdminLiveClassesStandalone } from "@/components/dashboard/LiveClassesStandalone";
+import { LiveClassroom } from "@/components/dashboard/LiveClassroom";
 
 export default function AdminDashboard() {
   const params = useParams();
@@ -35,13 +37,22 @@ export default function AdminDashboard() {
     );
   }
 
+  if (section === "live-classes" && id && action === "classroom") {
+    return (
+      <DashboardLayout role="admin">
+        <LiveClassroom id={Number(id)} backUrl="/dashboard/admin/courses" />
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout role="admin">
       {section === "overview" && <Overview />}
       {section === "users" && <UsersList />}
       {section === "creators" && <CreatorsList />}
-      {section === "courses" && <AdminCourseStudioList />}
+      {section === "courses" && !id && <AdminCourseStudioList />}
       {section === "products" && <ProductsList />}
+      {section === "live-classes" && !id && <AdminLiveClassesStandalone />}
       {section === "orders" && <OrdersList />}
       {section === "categories" && <CategoriesList />}
       {section === "settings" && <SettingsView />}

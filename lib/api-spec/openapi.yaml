@@ -385,6 +385,91 @@ paths:
       parameters: [{ name: key, in: path, required: true, schema: { type: string } }]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/AdminUpdateSettingInput" } } } }
       responses: { "200": { description: Updated, content: { application/json: { schema: { type: object } } } } }
+  /creator/products/{productId}/live-classes:
+    get:
+      operationId: listCreatorLiveClasses
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Live classes, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/LiveClass" } } } } } }
+    post:
+      operationId: createLiveClass
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/LiveClassInput" } } } }
+      responses: { "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/LiveClass" } } } }, "422": { description: Invalid schedule } }
+  /live-classes:
+    get:
+      operationId: listUpcomingLiveClasses
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: courseId, in: query, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Enrolled course classes, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/LiveClass" } } } } } }
+  /creator/live-classes/{id}:
+    patch:
+      operationId: updateLiveClass
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/LiveClassInput" } } } }
+      responses: { "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/LiveClass" } } } } }
+    delete:
+      operationId: deleteLiveClass
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "204": { description: Deleted } }
+  /creator/live-classes/{id}/cancel:
+    post:
+      operationId: cancelLiveClass
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Cancelled, content: { application/json: { schema: { $ref: "#/components/schemas/LiveClass" } } } } }
+  /creator/live-classes/{id}/complete:
+    post:
+      operationId: completeLiveClass
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Completed, content: { application/json: { schema: { $ref: "#/components/schemas/LiveClass" } } } } }
+  /creator/live-classes/{id}/attendance:
+    get:
+      operationId: listLiveClassAttendance
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses:
+        "200":
+          description: Attendance report
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/LiveClassAttendance" }
+  /live-classes/{id}/join:
+    post:
+      operationId: joinLiveClass
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: LiveKit credentials, content: { application/json: { schema: { $ref: "#/components/schemas/LiveClassJoin" } } } } }
+  /live-classes/{id}/attendance/join:
+    post:
+      operationId: recordLiveClassJoin
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "204": { description: Attendance recorded } }
+  /live-classes/{id}/attendance/leave:
+    post:
+      operationId: recordLiveClassLeave
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "204": { description: Attendance recorded } }
+  /creator/live-classes/{id}/recording/start:
+    post:
+      operationId: startLiveClassRecording
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Recording started, content: { application/json: { schema: { $ref: "#/components/schemas/LiveClass" } } } }, "422": { description: Recording destination not configured } }
+  /creator/live-classes/{id}/recording/stop:
+    post:
+      operationId: stopLiveClassRecording
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Recording stopped, content: { application/json: { schema: { $ref: "#/components/schemas/LiveClass" } } } } }
 components:
   securitySchemes:
     cookieAuth:
@@ -661,4 +746,53 @@ components:
         orderCount: { type: integer }
         grossMinor: { type: integer }
         orders: { type: array, items: { type: object } }
+    LiveClassInput:
+      type: object
+      required: [title, startsAt, endsAt, timezone]
+      properties:
+        title: { type: string, minLength: 1 }
+        description: { type: string }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        timezone: { type: string, minLength: 1 }
+    LiveClass:
+      type: object
+      required: [id, courseId, creatorId, title, description, startsAt, endsAt, timezone, status, roomName, recordingStatus, recordingUrl, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        courseId: { type: integer }
+        creatorId: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        timezone: { type: string }
+        status: { type: string, enum: [scheduled, live, completed, cancelled] }
+        roomName: { type: string }
+        recordingStatus: { type: string, enum: [idle, recording, processing, ready, failed] }
+        recordingUrl: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    LiveClassJoin:
+      type: object
+      required: [serverUrl, token, class, participantRole]
+      properties:
+        serverUrl: { type: string }
+        token: { type: string }
+        class: { $ref: "#/components/schemas/LiveClass" }
+        participantRole: { type: string, enum: [host, student] }
+    LiveClassAttendance:
+      type: object
+      required: [id, liveClassId, userId, name, email, role, firstJoinedAt, lastLeftAt, durationSeconds, joinCount]
+      properties:
+        id: { type: integer }
+        liveClassId: { type: integer }
+        userId: { type: integer }
+        name: { type: string }
+        email: { type: string }
+        role: { type: string, enum: [host, student] }
+        firstJoinedAt: { type: string, format: date-time }
+        lastLeftAt: { type: ["string", "null"], format: date-time }
+        durationSeconds: { type: integer }
+        joinCount: { type: integer }
 

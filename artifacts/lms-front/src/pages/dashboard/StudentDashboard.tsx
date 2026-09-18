@@ -11,17 +11,30 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Package, ShoppingCart, Heart, Play, Trophy, CheckCircle2, Clock, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UpgradeCreatorButton } from "@/components/auth/UpgradeCreatorButton";
+import { StudentLiveClasses } from "@/components/dashboard/StudentLiveClasses";
+import { LiveClassroom } from "@/components/dashboard/LiveClassroom";
 
 export default function StudentDashboard() {
   const params = useParams();
   const section = params.section || "overview";
+  const id = params.id;
+  const action = params.action;
   const { data: session } = useGetSession();
+
+  if (section === "live-classes" && id && action === "classroom") {
+    return (
+      <DashboardLayout role="student">
+        <LiveClassroom id={Number(id)} backUrl="/dashboard/student/live-classes" />
+      </DashboardLayout>
+    );
+  }
   
   return (
     <DashboardLayout role="student">
       {section === "overview" && <Overview name={session?.user?.name || "Student"} />}
       {section === "library" && <Library />}
       {section === "products" && <Products />}
+      {section === "live-classes" && !id && <StudentLiveClasses />}
       {section === "orders" && <Orders />}
       {section === "wishlist" && <Wishlist />}
     </DashboardLayout>

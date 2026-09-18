@@ -187,15 +187,41 @@ export const couponsTable = pgTable("coupons", {
   expiresAt: timestamp("expires_at", { withTimezone: true }),
 }, (t) => [uniqueIndex("coupons_code_unique").on(t.code), check("coupons_percent_range", sql`${t.discountPercent} IS NULL OR ${t.discountPercent} BETWEEN 1 AND 100`)]);
 
+export const liveClassStatusEnum = pgEnum("live_class_status", ["scheduled", "live", "completed", "cancelled"]);
+export const recordingStatusEnum = pgEnum("recording_status", ["idle", "recording", "processing", "ready", "failed"]);
+export const attendanceRoleEnum = pgEnum("attendance_role", ["host", "student"]);
+
 export const liveClassesTable = pgTable("live_classes", {
   id: serial("id").primaryKey(),
   creatorId: integer("creator_id").notNull().references(() => usersTable.id),
-  courseId: integer("course_id").references(() => coursesTable.id, { onDelete: "set null" }),
+  courseId: integer("course_id").notNull().references(() => coursesTable.id, { onDelete: "cascade" }),
+  productId: integer("product_id").notNull().references(() => productsTable.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
+  description: text("description").notNull().default(""),
   startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
-  endsAt: timestamp("ends_at", { withTimezone: true }),
-  meetingUrl: text("meeting_url"),
-});
+  endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+  timezone: text("timezone").notNull(),
+  status: liveClassStatusEnum("status").notNull().default("scheduled"),
+  roomName: text("room_name").notNull().unique(),
+  recordingStatus: recordingStatusEnum("recording_status").notNull().default("idle"),
+  recordingUrl: text("recording_url"),
+  recordingObjectPath: text("recording_object_path"),
+  egressId: text("egress_id"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("live_classes_product_idx").on(t.productId), index("live_classes_course_start_idx").on(t.courseId, t.startsAt)]);
+
+export const liveClassAttendanceTable = pgTable("live_class_attendance", {
+  id: serial("id").primaryKey(),
+  liveClassId: integer("live_class_id").notNull().references(() => liveClassesTable.id, { onDelete: "cascade" }),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  role: attendanceRoleEnum("role").notNull(),
+  firstJoinedAt: timestamp("first_joined_at", { withTimezone: true }).notNull().defaultNow(),
+  currentJoinedAt: timestamp("current_joined_at", { withTimezone: true }),
+  lastLeftAt: timestamp("last_left_at", { withTimezone: true }),
+  durationSeconds: integer("duration_seconds").notNull().default(0),
+  joinCount: integer("join_count").notNull().default(0),
+}, (t) => [uniqueIndex("live_class_attendance_class_user_unique").on(t.liveClassId, t.userId), index("live_class_attendance_class_idx").on(t.liveClassId)]);
 
 export const certificatesTable = pgTable("certificates", {
   id: serial("id").primaryKey(),

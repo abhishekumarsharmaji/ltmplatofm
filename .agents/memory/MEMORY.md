@@ -1,1 +1,2 @@
 - [Replit App Storage signing](app-storage-signing.md) — generate presigned object URLs through the Replit sidecar, not GCS service-account signing.
+- [White-label live classrooms](white-label-live-classrooms.md) — keep scheduling and classroom UX inside the LMS; use LiveKit only as the real-time media engine.

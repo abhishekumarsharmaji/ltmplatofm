@@ -16,7 +16,8 @@ import {
   Globe,
   Sun,
   Moon,
-  Laptop
+  Laptop,
+  Video
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logout, useGetSession } from "@workspace/api-client-react";
@@ -32,6 +33,7 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
         return [
           { href: `/dashboard/student`, label: "Dashboard", icon: LayoutDashboard },
           { href: `/dashboard/student/library`, label: "My Learning", icon: BookOpen },
+          { href: `/dashboard/student/live-classes`, label: "Live Classes", icon: Video },
           { href: `/dashboard/student/products`, label: "Purchased Products", icon: Package },
           { href: `/dashboard/student/orders`, label: "Orders", icon: ShoppingCart },
           { href: `/dashboard/student/wishlist`, label: "Wishlist", icon: Heart },
@@ -40,6 +42,7 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
         return [
           { href: `/dashboard/creator`, label: "Dashboard", icon: LayoutDashboard },
           { href: `/dashboard/creator/courses`, label: "Courses", icon: BookOpen },
+          { href: `/dashboard/creator/live-classes`, label: "Live Classes", icon: Video },
           { href: `/dashboard/creator/products`, label: "Digital Products", icon: Package },
           { href: `/dashboard/creator/sales`, label: "Sales & Analytics", icon: BarChart },
         ];
@@ -49,6 +52,7 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
           { href: `/dashboard/admin/users`, label: "Users", icon: Users },
           { href: `/dashboard/admin/creators`, label: "Creators", icon: Award },
           { href: `/dashboard/admin/courses`, label: "Courses", icon: BookOpen },
+          { href: `/dashboard/admin/live-classes`, label: "Live Classes", icon: Video },
           { href: `/dashboard/admin/products`, label: "Products", icon: Package },
           { href: `/dashboard/admin/orders`, label: "Orders", icon: ShoppingCart },
           { href: `/dashboard/admin/categories`, label: "Categories", icon: Globe },
