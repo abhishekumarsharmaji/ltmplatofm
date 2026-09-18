@@ -9,7 +9,7 @@ import type { VideoUploadInputKind } from './videoUploadInputKind';
 
 export interface VideoUploadInput {
   filename: string;
-  /** @pattern ^video/ */
+  /** @minLength 1 */
   mimeType: string;
   /**
      * @minimum 1

@@ -1162,14 +1162,14 @@ export const RequestLessonVideoUploadParams = zod.object({
   "lessonId": zod.coerce.number().int()
 })
 
-export const requestLessonVideoUploadBodyMimeTypeRegExp = new RegExp('^video');
+
 export const requestLessonVideoUploadBodySizeBytesMax = 10737418240;
 
 
 
 export const RequestLessonVideoUploadBody = zod.object({
   "filename": zod.string(),
-  "mimeType": zod.string().regex(requestLessonVideoUploadBodyMimeTypeRegExp),
+  "mimeType": zod.string().min(1),
   "sizeBytes": zod.number().int().min(1).max(requestLessonVideoUploadBodySizeBytesMax),
   "kind": zod.enum(['video', 'document', 'other']).optional()
 })
