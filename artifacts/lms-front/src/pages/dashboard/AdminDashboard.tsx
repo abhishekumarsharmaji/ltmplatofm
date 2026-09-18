@@ -411,24 +411,26 @@ function OrdersList() {
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : (
         <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-          <table className="w-full text-left">
-            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
-              <tr>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">ID</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Item</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E5E5E5]">
-              {orders?.map((order: any, i) => (
-                <tr key={i} className="hover:bg-gray-50 transition-colors">
-                  <td className="p-4 text-[14px] text-[#4D4D4D]">{order.id}</td>
-                  <td className="p-4 font-bold text-[14px] text-black">{order.title}</td>
-                  <td className="p-4 font-bold text-[14px] text-primary">${((order.priceMinor ?? 0) / 100).toFixed(2)}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[500px] text-left">
+              <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
+                <tr>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">ID</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Item</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#E5E5E5]">
+                {orders?.map((order: any, i) => (
+                  <tr key={i} className="hover:bg-gray-50 transition-colors">
+                    <td className="p-4 text-[14px] text-[#4D4D4D]">{order.id}</td>
+                    <td className="p-4 font-bold text-[14px] text-black">{order.title}</td>
+                    <td className="p-4 font-bold text-[14px] text-primary">${((order.priceMinor ?? 0) / 100).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -457,30 +459,32 @@ function CategoriesList() {
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : (
         <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-          <table className="w-full text-left">
-            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
-              <tr>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Name</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Slug</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Description</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E5E5E5]">
-              {categories?.map((cat: any) => (
-                <tr key={cat.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="p-4 font-bold text-[14px] text-black">{cat.name}</td>
-                  <td className="p-4 text-[14px] font-mono text-[#9794AA]">{cat.slug}</td>
-                  <td className="p-4 text-[14px] text-[#4D4D4D]">{cat.description || "-"}</td>
-                  <td className="p-4 text-right">
-                    <CategoryFormDialog category={cat}>
-                      <Button className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium">Edit</Button>
-                    </CategoryFormDialog>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[700px] text-left">
+              <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
+                <tr>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Name</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Slug</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Description</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#E5E5E5]">
+                {categories?.map((cat: any) => (
+                  <tr key={cat.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="p-4 font-bold text-[14px] text-black">{cat.name}</td>
+                    <td className="p-4 text-[14px] font-mono text-[#9794AA]">{cat.slug}</td>
+                    <td className="p-4 text-[14px] text-[#4D4D4D]">{cat.description || "-"}</td>
+                    <td className="p-4 text-right">
+                      <CategoryFormDialog category={cat}>
+                        <Button className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium">Edit</Button>
+                      </CategoryFormDialog>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -509,32 +513,34 @@ function SettingsView() {
         <div className="py-20 flex justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>
       ) : (
         <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-          <table className="w-full text-left">
-            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
-              <tr>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Key</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Value</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E5E5E5]">
-              {(Array.isArray(settings) ? settings : Object.entries(settings || {}).map(([key, value]) => ({ key, value }))).map((setting: any) => {
-                const key = setting.key;
-                const value = setting.value;
-                return (
-                <tr key={key} className="hover:bg-gray-50 transition-colors">
-                  <td className="p-4 font-mono text-[14px] font-bold text-black">{key}</td>
-                  <td className="p-4 text-[14px] text-[#4D4D4D] max-w-[200px] truncate">{String(value)}</td>
-                  <td className="p-4 text-right">
-                    <SettingFormDialog settingKey={key} settingValue={String(value)}>
-                      <Button className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium">Edit</Button>
-                    </SettingFormDialog>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[500px] text-left">
+              <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
+                <tr>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Key</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Value</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Actions</th>
                 </tr>
-                );
-              })}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#E5E5E5]">
+                {(Array.isArray(settings) ? settings : Object.entries(settings || {}).map(([key, value]) => ({ key, value }))).map((setting: any) => {
+                  const key = setting.key;
+                  const value = setting.value;
+                  return (
+                  <tr key={key} className="hover:bg-gray-50 transition-colors">
+                    <td className="p-4 font-mono text-[14px] font-bold text-black">{key}</td>
+                    <td className="p-4 text-[14px] text-[#4D4D4D] max-w-[200px] truncate">{String(value)}</td>
+                    <td className="p-4 text-right">
+                      <SettingFormDialog settingKey={key} settingValue={String(value)}>
+                        <Button className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium">Edit</Button>
+                      </SettingFormDialog>
+                    </td>
+                  </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

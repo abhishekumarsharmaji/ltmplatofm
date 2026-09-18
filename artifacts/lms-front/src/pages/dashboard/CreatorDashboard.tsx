@@ -269,39 +269,41 @@ function Products() {
         </div>
       ) : (
         <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-          <table className="w-full text-left">
-            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
-              <tr>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Title</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Type</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Price</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Status</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E5E5E5]">
-              {products.map((item: any) => (
-                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="p-4 font-bold text-[14px] text-black">{item.title}</td>
-                  <td className="p-4"><Badge className="bg-gray-100 text-[#4D4D4D] hover:bg-gray-100 border-none shadow-none uppercase text-[10px] font-bold">{item.type}</Badge></td>
-                  <td className="p-4 font-medium text-[14px]">${(item.priceMinor / 100).toFixed(2)} {item.currency}</td>
-                  <td className="p-4">
-                    <Badge className={item.status === 'published' ? 'bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
-                      {item.status}
-                    </Badge>
-                  </td>
-                  <td className="p-4 text-right">
-                  <div className="flex gap-2 justify-end">
-                    <ProductFormDialog type="digital" product={item}>
-                      <Button className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium">Edit</Button>
-                    </ProductFormDialog>
-                    <PublishProductButton id={item.id} status={item.status} />
-                  </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[700px] text-left">
+              <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
+                <tr>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Title</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Type</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Price</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Status</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#E5E5E5]">
+                {products.map((item: any) => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="p-4 font-bold text-[14px] text-black">{item.title}</td>
+                    <td className="p-4"><Badge className="bg-gray-100 text-[#4D4D4D] hover:bg-gray-100 border-none shadow-none uppercase text-[10px] font-bold">{item.type}</Badge></td>
+                    <td className="p-4 font-medium text-[14px]">${(item.priceMinor / 100).toFixed(2)} {item.currency}</td>
+                    <td className="p-4">
+                      <Badge className={item.status === 'published' ? 'bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
+                        {item.status}
+                      </Badge>
+                    </td>
+                    <td className="p-4 text-right">
+                    <div className="flex gap-2 justify-end">
+                      <ProductFormDialog type="digital" product={item}>
+                        <Button className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium">Edit</Button>
+                      </ProductFormDialog>
+                      <PublishProductButton id={item.id} status={item.status} />
+                    </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -348,34 +350,36 @@ function Sales() {
           <div className="pt-4">
             <h3 className="text-[24px] font-bold text-black mb-6">Transaction History</h3>
             <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-              <table className="w-full text-left">
-                <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
-                  <tr>
-                    <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Date</th>
-                    <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Customer</th>
-                    <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Product</th>
-                    <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#E5E5E5]">
-                  {sales.orders && sales.orders.length > 0 ? (
-                    sales.orders.map((order: any, i) => (
-                      <tr key={i} className="hover:bg-gray-50 transition-colors">
-                        <td className="p-4 text-[14px] text-[#4D4D4D]">{order.createdAt ? new Date(String(order.createdAt)).toLocaleDateString() : '-'}</td>
-                        <td className="p-4 font-bold text-[14px]">{order.userName}</td>
-                        <td className="p-4 text-[14px] text-[#4D4D4D]">{order.productName}</td>
-                        <td className="p-4 font-bold text-[14px] text-right text-primary">+${((order.amountMinor || 0) / 100).toFixed(2)}</td>
-                      </tr>
-                    ))
-                  ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[600px] text-left">
+                  <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
                     <tr>
-                      <td colSpan={4} className="p-8 text-center text-[#9794AA]">
-                        No transactions found.
-                      </td>
+                      <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Date</th>
+                      <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Customer</th>
+                      <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Product</th>
+                      <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Amount</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-[#E5E5E5]">
+                    {sales.orders && sales.orders.length > 0 ? (
+                      sales.orders.map((order: any, i) => (
+                        <tr key={i} className="hover:bg-gray-50 transition-colors">
+                          <td className="p-4 text-[14px] text-[#4D4D4D]">{order.createdAt ? new Date(String(order.createdAt)).toLocaleDateString() : '-'}</td>
+                          <td className="p-4 font-bold text-[14px]">{order.userName}</td>
+                          <td className="p-4 text-[14px] text-[#4D4D4D]">{order.productName}</td>
+                          <td className="p-4 font-bold text-[14px] text-right text-primary">+${((order.amountMinor || 0) / 100).toFixed(2)}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="p-8 text-center text-[#9794AA]">
+                          No transactions found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </>

@@ -307,28 +307,30 @@ function Orders() {
         </div>
       ) : (
         <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-          <table className="w-full text-left">
-            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
-              <tr>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Order ID</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Date</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Status</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E5E5E5]">
-              {orders.map((item: any, i) => (
-                <tr key={i} className="hover:bg-gray-50 transition-colors">
-                  <td className="p-4 font-mono text-[14px] text-[#4D4D4D]">{item.id}</td>
-                  <td className="p-4 text-[14px] text-[#4D4D4D]">{item.date ? new Date(String(item.date)).toLocaleDateString() : '-'}</td>
-                  <td className="p-4 text-[14px]">
-                    <Badge className="bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] font-medium border-none shadow-none">{item.status}</Badge>
-                  </td>
-                  <td className="p-4 font-bold text-black text-right">${((item.totalMinor ?? 0) / 100).toFixed(2)}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[500px] text-left">
+              <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
+                <tr>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Order ID</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Date</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Status</th>
+                  <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider text-right">Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#E5E5E5]">
+                {orders.map((item: any, i) => (
+                  <tr key={i} className="hover:bg-gray-50 transition-colors">
+                    <td className="p-4 font-mono text-[14px] text-[#4D4D4D]">{item.id}</td>
+                    <td className="p-4 text-[14px] text-[#4D4D4D]">{item.date ? new Date(String(item.date)).toLocaleDateString() : '-'}</td>
+                    <td className="p-4 text-[14px]">
+                      <Badge className="bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] font-medium border-none shadow-none">{item.status}</Badge>
+                    </td>
+                    <td className="p-4 font-bold text-black text-right">${((item.totalMinor ?? 0) / 100).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
