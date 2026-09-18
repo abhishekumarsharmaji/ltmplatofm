@@ -198,10 +198,8 @@ export function Navbar() {
                 <Link href="/auth/login" className="text-[14px] font-medium text-[#4D4D4D]" onClick={() => setIsMobileMenuOpen(false)}>
                   {t("login")}
                 </Link>
-                <Link href="/auth/sign-up" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button className="w-full h-11 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md shadow-[0_10px_24px_rgba(21,207,116,0.35)]">
+                <Link href="/auth/sign-up" onClick={() => setIsMobileMenuOpen(false)} className="w-full h-11 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md shadow-[0_10px_24px_rgba(21,207,116,0.35)] inline-flex items-center justify-center">
                     {t("join")}
-                  </Button>
                 </Link>
               </>
             )}

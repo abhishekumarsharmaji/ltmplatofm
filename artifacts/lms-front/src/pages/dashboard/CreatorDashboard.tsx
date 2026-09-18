@@ -112,9 +112,7 @@ function Overview() {
         <div className="bg-white border border-[#E5E5E5] rounded-xl p-8 shadow-sm min-h-[400px]">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-[20px] font-bold text-black">Recent Orders</h3>
-            <Link href="/dashboard/creator/sales">
-              <Button variant="ghost" className="text-primary hover:bg-[#E3F9EF] hover:text-primary">View All</Button>
-            </Link>
+            <Link href="/dashboard/creator/sales" className="text-primary hover:bg-[#E3F9EF] hover:text-primary h-10 px-4 py-2 inline-flex items-center justify-center rounded-md font-medium">View All</Link>
           </div>
           
           <div className="space-y-2">
@@ -144,23 +142,17 @@ function Overview() {
         <div className="bg-[#515151] rounded-xl p-8 shadow-sm min-h-[400px] flex flex-col">
           <h3 className="text-[20px] font-bold text-white mb-8">Quick Actions</h3>
           <div className="space-y-4 flex-1 flex flex-col justify-center">
-            <Link href="/dashboard/creator/courses">
-              <Button className="w-full justify-start h-14 bg-white/10 hover:bg-white/20 text-white border-none rounded-lg text-[15px] transition-colors">
+            <Link href="/dashboard/creator/courses" className="w-full justify-start h-14 bg-white/10 hover:bg-white/20 text-white border-none rounded-lg text-[15px] transition-colors inline-flex items-center px-4">
                 <BookOpen className="w-5 h-5 mr-4" />
                 Manage Courses
-              </Button>
             </Link>
-            <Link href="/dashboard/creator/products">
-              <Button className="w-full justify-start h-14 bg-white/10 hover:bg-white/20 text-white border-none rounded-lg text-[15px] transition-colors">
+            <Link href="/dashboard/creator/products" className="w-full justify-start h-14 bg-white/10 hover:bg-white/20 text-white border-none rounded-lg text-[15px] transition-colors inline-flex items-center px-4">
                 <Package className="w-5 h-5 mr-4" />
                 Manage Products
-              </Button>
             </Link>
-            <Link href="/dashboard/creator/sales">
-              <Button className="w-full justify-start h-14 bg-white/10 hover:bg-white/20 text-white border-none rounded-lg text-[15px] transition-colors">
+            <Link href="/dashboard/creator/sales" className="w-full justify-start h-14 bg-white/10 hover:bg-white/20 text-white border-none rounded-lg text-[15px] transition-colors inline-flex items-center px-4">
                 <DollarSign className="w-5 h-5 mr-4" />
                 View Payouts
-              </Button>
             </Link>
           </div>
         </div>
@@ -225,9 +217,7 @@ function Courses() {
                   <Badge className={course.status === 'published' ? 'bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
                     {course.status}
                   </Badge>
-                  <Link href={`/dashboard/creator/courses/${course.id}/builder`}>
-                    <Button className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium">Edit Course</Button>
-                  </Link>
+                  <Link href={`/dashboard/creator/courses/${course.id}/builder`} className="h-[36px] px-4 border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 rounded-md text-[13px] font-medium inline-flex items-center justify-center">Edit Course</Link>
                 </div>
              </div>
           ))}

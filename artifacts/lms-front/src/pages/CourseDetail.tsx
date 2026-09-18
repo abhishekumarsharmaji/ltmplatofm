@@ -82,9 +82,7 @@ export default function CourseDetail() {
           <AlertCircle className="w-12 h-12 text-red-600 mb-4" />
           <h2 className="text-[24px] font-bold mb-2 text-black">Course not found</h2>
           <p className="text-[#394649]">The course you're looking for doesn't exist or has been removed.</p>
-          <Link href="/courses">
-            <Button className="mt-6 h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px]">Browse Courses</Button>
-          </Link>
+          <Link href="/courses" className="mt-6 h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] inline-flex items-center justify-center">Browse Courses</Link>
         </div>
       </PublicLayout>
     );
@@ -131,10 +129,8 @@ export default function CourseDetail() {
 
                 <div className="pt-6 flex gap-4 lg:hidden">
                   {isEnrolled ? (
-                    <Link href={`/dashboard/student/courses/${courseId}`}>
-                      <Button className="h-[54px] px-10 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)] w-full">
+                    <Link href={`/dashboard/student/courses/${courseId}`} className="h-[54px] px-10 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)] w-full inline-flex items-center justify-center">
                         Resume Learning
-                      </Button>
                     </Link>
                   ) : (
                     <Button
@@ -282,10 +278,8 @@ export default function CourseDetail() {
                   </div>
 
                   {isEnrolled ? (
-                    <Link href={`/dashboard/student/courses/${courseId}`}>
-                      <Button className="w-full h-[54px] bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)]">
+                    <Link href={`/dashboard/student/courses/${courseId}`} className="w-full h-[54px] bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)] inline-flex items-center justify-center">
                         Resume Learning
-                      </Button>
                     </Link>
                   ) : (
                     <Button

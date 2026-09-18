@@ -123,9 +123,7 @@ function Overview({ name }: { name: string }) {
             <h3 className="text-[28px] font-bold text-black tracking-tight">Available Courses</h3>
             <p className="text-[14px] text-[#4D4D4D]">New courses published by our creators.</p>
           </div>
-          <Link href="/courses">
-            <Button variant="outline" className="border-[#DADADA] text-[#394649] hover:bg-gray-50 h-10 px-6 rounded-md font-medium">View All</Button>
-          </Link>
+          <Link href="/courses" className="border border-[#DADADA] text-[#394649] hover:bg-gray-50 h-10 px-6 rounded-md font-medium inline-flex items-center justify-center">View All</Link>
         </div>
 
         {coursesLoading ? (
@@ -198,9 +196,7 @@ function Library() {
           <BookOpen className="w-12 h-12 text-[#9794AA] mx-auto mb-4" />
           <h3 className="font-bold text-[18px] text-black mb-2">No courses yet</h3>
           <p className="text-[14px] text-[#4D4D4D] mb-6">You haven't enrolled in any courses.</p>
-          <Link href="/courses">
-            <Button className="h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">Explore Courses</Button>
-          </Link>
+          <Link href="/courses" className="h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)] inline-flex items-center justify-center">Explore Courses</Link>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -222,9 +218,7 @@ function Library() {
                     <h3 className="text-[16px] font-bold text-black leading-snug mb-3 line-clamp-2 group-hover:text-primary transition-colors">{course.title}</h3>
                     <div className="mt-auto flex items-center justify-between">
                       <span className="text-[13px] text-[#394649]">{course.creatorName || "Unknown Author"}</span>
-                      <Link href={`/dashboard/student/courses/${course.id}`}>
-                        <Button className="h-[36px] px-4 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[13px]">Continue</Button>
-                      </Link>
+                      <Link href={`/dashboard/student/courses/${course.id}`} className="h-[36px] px-4 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[13px] inline-flex items-center justify-center">Continue</Link>
                     </div>
                   </div>
                </div>
@@ -262,9 +256,7 @@ function Products() {
           <Package className="w-12 h-12 text-[#9794AA] mx-auto mb-4" />
           <h3 className="font-bold text-[18px] text-black mb-2">No products yet</h3>
           <p className="text-[14px] text-[#4D4D4D] mb-6">You haven't purchased any digital products.</p>
-          <Link href="/products">
-            <Button className="h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">Explore Products</Button>
-          </Link>
+          <Link href="/products" className="h-[44px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)] inline-flex items-center justify-center">Explore Products</Link>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -275,9 +267,7 @@ function Products() {
                 </div>
                  <h3 className="font-bold text-[16px] text-black leading-snug line-clamp-2">{item.product?.title ?? item.title}</h3>
                 <div className="mt-4 pt-4 border-t border-[#E5E5E5]">
-                   <Link href={`/products/${item.product?.id ?? item.productId ?? item.id}`}>
-                     <Button className="w-full border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-10 rounded-md font-medium text-[14px]">Download Access</Button>
-                   </Link>
+                   <Link href={`/products/${item.product?.id ?? item.productId ?? item.id}`} className="w-full border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-10 rounded-md font-medium text-[14px] inline-flex items-center justify-center">Download Access</Link>
                 </div>
              </div>
           ))}
@@ -355,12 +345,8 @@ function Wishlist() {
           <h3 className="font-bold text-[18px] text-black mb-2">Your wishlist is empty</h3>
           <p className="text-[14px] text-[#4D4D4D] mb-8 max-w-md mx-auto">Save items you're interested in by clicking the heart icon on any course or product.</p>
           <div className="flex justify-center gap-4">
-            <Link href="/courses">
-              <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-11 px-8 rounded-md font-medium text-[16px]">Browse Courses</Button>
-            </Link>
-            <Link href="/products">
-              <Button className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-11 px-8 rounded-md font-medium text-[16px]">Browse Products</Button>
-            </Link>
+            <Link href="/courses" className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-11 px-8 rounded-md font-medium text-[16px] inline-flex items-center justify-center">Browse Courses</Link>
+            <Link href="/products" className="border border-[#DADADA] text-[#394649] bg-white hover:bg-gray-50 h-11 px-8 rounded-md font-medium text-[16px] inline-flex items-center justify-center">Browse Products</Link>
           </div>
         </div>
       ) : (
@@ -373,9 +359,7 @@ function Wishlist() {
                 <h3 className="font-bold text-[16px] text-black leading-snug line-clamp-1 mb-2 group-hover:text-primary transition-colors">{item.product?.title ?? item.title ?? "Saved Item"}</h3>
                 <div className="flex justify-between items-center mt-4 pt-4 border-t border-[#E5E5E5]">
                   <span className="font-bold text-[18px] text-black">${((item.product?.priceMinor ?? item.priceMinor ?? 0) / 100).toFixed(2)}</span>
-                  <Link href="/checkout">
-                    <Button className="h-[36px] px-5 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[13px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">Add to Cart</Button>
-                  </Link>
+                  <Link href="/checkout" className="h-[36px] px-5 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[13px] shadow-[0_4px_14px_rgba(21,207,116,0.25)] inline-flex items-center justify-center">Add to Cart</Link>
                 </div>
              </div>
           ))}

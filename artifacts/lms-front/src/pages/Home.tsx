@@ -68,12 +68,8 @@ export default function Home() {
                 <p className="text-[18px] text-[#4D4D4D] mb-10 max-w-[420px] leading-relaxed">
                   {t("hero.subtitle")}
                 </p>
-                <Link href="/courses">
-                  <Button 
-                    className="h-[54px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)]"
-                  >
+                <Link href="/courses" className="h-[54px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)] inline-flex items-center justify-center">
                     {t("hero.startLearning")}
-                  </Button>
                 </Link>
               </div>
 
@@ -205,10 +201,8 @@ export default function Home() {
             )}
             
             <div className="mt-12 text-center">
-              <Link href="/courses">
-                <Button variant="outline" className="border-[#DADADA] text-[#394649] hover:bg-gray-50 h-11 px-8 rounded-md font-medium text-[16px]">
+              <Link href="/courses" className="border border-[#DADADA] text-[#394649] hover:bg-gray-50 h-11 px-8 rounded-md font-medium text-[16px] inline-flex items-center justify-center">
                   {t("courses.viewAll")}
-                </Button>
               </Link>
             </div>
           </div>
@@ -223,10 +217,8 @@ export default function Home() {
             <p className="text-white/80 text-[18px] mb-10 max-w-xl">
               {t("cta.subtitle")}
             </p>
-            <Link href="/auth/sign-up">
-              <Button className="h-[54px] px-10 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)]">
+            <Link href="/auth/sign-up" className="h-[54px] px-10 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)] inline-flex items-center justify-center">
                 {t("cta.button")}
-              </Button>
             </Link>
           </div>
         </section>
