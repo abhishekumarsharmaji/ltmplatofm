@@ -778,18 +778,18 @@ function LessonItem({ lesson, index, total, onMove, productId }: any) {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button aria-label={`Manage video for ${lesson.title}`} variant="ghost" size="icon" onClick={() => setShowVideo(!showVideo)} className={`h-8 w-8 ${showVideo ? 'text-primary bg-[#E3F9EF]' : 'text-[#9794AA] hover:text-black'}`}>
+        <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+          <Button aria-label={`Manage video for ${lesson.title}`} variant="ghost" size="icon" onClick={() => setShowVideo(!showVideo)} className={`h-10 w-10 ${showVideo ? 'text-primary bg-[#E3F9EF]' : 'text-[#9794AA] hover:text-black'}`}>
             <Video className="w-4 h-4" />
           </Button>
-          <Button aria-label={`Edit ${lesson.title}`} variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="h-8 w-8 text-[#9794AA] hover:text-black">
+          <Button aria-label={`Edit ${lesson.title}`} variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="h-10 w-10 text-[#9794AA] hover:text-black">
             <Edit2 className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             aria-label={`Delete ${lesson.title}`}
-            className="h-8 w-8 text-[#E53E3E] hover:bg-red-50 hover:text-[#E53E3E]"
+            className="h-10 w-10 text-[#E53E3E] hover:bg-red-50 hover:text-[#E53E3E]"
             onClick={() => {
               if(confirm('Delete this lesson?')) {
                 deleteLesson.mutate({ lessonId: lesson.id }, {

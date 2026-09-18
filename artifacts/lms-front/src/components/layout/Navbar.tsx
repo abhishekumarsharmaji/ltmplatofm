@@ -93,7 +93,7 @@ export function Navbar() {
             <button 
               type="submit" 
               aria-label="Search"
-              className="absolute right-1.5 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white hover:bg-[#10A364] transition-colors"
+              className="absolute right-1.5 w-8 h-8 sm:w-9 sm:h-9 bg-primary rounded-full flex items-center justify-center text-white hover:bg-[#10A364] transition-colors"
             >
               <Search className="w-4 h-4" />
             </button>
@@ -182,9 +182,9 @@ export function Navbar() {
             <button 
               type="submit" 
               aria-label="Search"
-              className="absolute right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white"
+              className="absolute right-2 w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-5 h-5" />
             </button>
           </form>
           

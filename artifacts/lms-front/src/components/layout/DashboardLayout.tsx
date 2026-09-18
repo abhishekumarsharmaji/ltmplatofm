@@ -85,8 +85,8 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
             <img src={`${import.meta.env.BASE_URL}brand/logo-mark.svg`} alt="CoreSkils" className="w-8 h-8" />
             <span className="font-bold text-[18px] text-black tracking-tight">CoreSkils {role === 'creator' ? 'Creator' : role === 'admin' ? 'Admin' : 'Student'}</span>
           </Link>
-          <button className="md:hidden text-[#394649]" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
-            <X className="w-5 h-5" />
+          <button className="md:hidden text-[#394649] p-2" onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
+            <X className="w-6 h-6" />
           </button>
         </div>
         
@@ -132,7 +132,7 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
       <div className="flex-1 flex flex-col md:pl-64 min-h-screen">
         <header className="h-20 border-b border-[#E5E5E5] bg-white flex items-center justify-between px-4 md:px-8 sticky top-0 z-20">
           <div className="flex items-center gap-4">
-            <button className="md:hidden text-[#394649]" onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu" aria-expanded={isMobileMenuOpen}>
+            <button className="md:hidden text-[#394649] p-2" onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu" aria-expanded={isMobileMenuOpen}>
               <Menu className="w-6 h-6" />
             </button>
             <h1 className="font-bold text-[20px] capitalize text-black hidden sm:block">{role} Portal</h1>

@@ -216,7 +216,7 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
               aria-label={`Remove ${asset.filename}`}
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-[#E53E3E] hover:bg-red-50 hover:text-[#E53E3E] rounded-md"
+              className="h-10 w-10 text-[#E53E3E] hover:bg-red-50 hover:text-[#E53E3E] rounded-md"
               onClick={handleRemove}
               disabled={removeAsset.isPending}
             >
