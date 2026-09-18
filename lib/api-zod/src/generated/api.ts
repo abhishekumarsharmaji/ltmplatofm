@@ -24,6 +24,7 @@ export const GetSessionResponse = zod.object({
   "email": zod.string(),
   "name": zod.string(),
   "role": zod.enum(['student', 'creator', 'admin']),
+  "isSuperAdmin": zod.boolean().optional(),
   "createdAt": zod.coerce.date().optional()
 }),zod.null()]).optional()
 })
@@ -45,6 +46,7 @@ export const LoginResponse = zod.object({
   "email": zod.string(),
   "name": zod.string(),
   "role": zod.enum(['student', 'creator', 'admin']),
+  "isSuperAdmin": zod.boolean().optional(),
   "createdAt": zod.coerce.date().optional()
 }),zod.null()]).optional()
 })
@@ -69,6 +71,7 @@ export const SignUpResponse = zod.object({
   "email": zod.string(),
   "name": zod.string(),
   "role": zod.enum(['student', 'creator', 'admin']),
+  "isSuperAdmin": zod.boolean().optional(),
   "createdAt": zod.coerce.date().optional()
 }),zod.null()]).optional()
 })
@@ -125,15 +128,239 @@ export const ListCoursesResponseItem = zod.object({
 export const ListCoursesResponse = zod.array(ListCoursesResponseItem)
 
 
-export const UpgradeCreatorResponse = zod.object({
-  "user": zod.object({
+export const getMyCreatorApplicationResponseOneOneDisplayNameMin = 2;
+
+export const getMyCreatorApplicationResponseOneOneHeadlineMin = 2;
+
+export const getMyCreatorApplicationResponseOneOneBioMin = 20;
+
+export const getMyCreatorApplicationResponseOneOneExpertiseMin = 2;
+
+export const getMyCreatorApplicationResponseOneOneExperienceYearsMin = 0;
+
+export const getMyCreatorApplicationResponseOneOneCourseProposalMin = 20;
+
+export const getMyCreatorApplicationResponseOneOneTargetAudienceMin = 2;
+
+export const getMyCreatorApplicationResponseOneOneMotivationMin = 20;
+
+
+
+export const GetMyCreatorApplicationResponse = zod.union([zod.object({
+  "displayName": zod.string().min(getMyCreatorApplicationResponseOneOneDisplayNameMin),
+  "headline": zod.string().min(getMyCreatorApplicationResponseOneOneHeadlineMin),
+  "bio": zod.string().min(getMyCreatorApplicationResponseOneOneBioMin),
+  "expertise": zod.string().min(getMyCreatorApplicationResponseOneOneExpertiseMin),
+  "experienceYears": zod.number().int().min(getMyCreatorApplicationResponseOneOneExperienceYearsMin).optional(),
+  "portfolioUrl": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "websiteUrl": zod.string().nullish(),
+  "teachingTopics": zod.array(zod.string()),
+  "courseProposal": zod.string().min(getMyCreatorApplicationResponseOneOneCourseProposalMin),
+  "targetAudience": zod.string().min(getMyCreatorApplicationResponseOneOneTargetAudienceMin),
+  "sampleWorkUrl": zod.string().nullish(),
+  "motivation": zod.string().min(getMyCreatorApplicationResponseOneOneMotivationMin)
+}).and(zod.object({
   "id": zod.number().int(),
-  "email": zod.string(),
-  "name": zod.string(),
-  "role": zod.enum(['student', 'creator', 'admin']),
-  "createdAt": zod.coerce.date().optional()
+  "userId": zod.number().int(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "reviewReason": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "reviewedBy": zod.number().int().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})),zod.null()])
+
+
+export const submitCreatorApplicationBodyDisplayNameMin = 2;
+
+export const submitCreatorApplicationBodyHeadlineMin = 2;
+
+export const submitCreatorApplicationBodyBioMin = 20;
+
+export const submitCreatorApplicationBodyExpertiseMin = 2;
+
+export const submitCreatorApplicationBodyExperienceYearsMin = 0;
+
+export const submitCreatorApplicationBodyCourseProposalMin = 20;
+
+export const submitCreatorApplicationBodyTargetAudienceMin = 2;
+
+export const submitCreatorApplicationBodyMotivationMin = 20;
+
+
+
+export const SubmitCreatorApplicationBody = zod.object({
+  "displayName": zod.string().min(submitCreatorApplicationBodyDisplayNameMin),
+  "headline": zod.string().min(submitCreatorApplicationBodyHeadlineMin),
+  "bio": zod.string().min(submitCreatorApplicationBodyBioMin),
+  "expertise": zod.string().min(submitCreatorApplicationBodyExpertiseMin),
+  "experienceYears": zod.number().int().min(submitCreatorApplicationBodyExperienceYearsMin).optional(),
+  "portfolioUrl": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "websiteUrl": zod.string().nullish(),
+  "teachingTopics": zod.array(zod.string()),
+  "courseProposal": zod.string().min(submitCreatorApplicationBodyCourseProposalMin),
+  "targetAudience": zod.string().min(submitCreatorApplicationBodyTargetAudienceMin),
+  "sampleWorkUrl": zod.string().nullish(),
+  "motivation": zod.string().min(submitCreatorApplicationBodyMotivationMin)
 })
+
+export const submitCreatorApplicationResponseOneDisplayNameMin = 2;
+
+export const submitCreatorApplicationResponseOneHeadlineMin = 2;
+
+export const submitCreatorApplicationResponseOneBioMin = 20;
+
+export const submitCreatorApplicationResponseOneExpertiseMin = 2;
+
+export const submitCreatorApplicationResponseOneExperienceYearsMin = 0;
+
+export const submitCreatorApplicationResponseOneCourseProposalMin = 20;
+
+export const submitCreatorApplicationResponseOneTargetAudienceMin = 2;
+
+export const submitCreatorApplicationResponseOneMotivationMin = 20;
+
+
+
+export const SubmitCreatorApplicationResponse = zod.object({
+  "displayName": zod.string().min(submitCreatorApplicationResponseOneDisplayNameMin),
+  "headline": zod.string().min(submitCreatorApplicationResponseOneHeadlineMin),
+  "bio": zod.string().min(submitCreatorApplicationResponseOneBioMin),
+  "expertise": zod.string().min(submitCreatorApplicationResponseOneExpertiseMin),
+  "experienceYears": zod.number().int().min(submitCreatorApplicationResponseOneExperienceYearsMin).optional(),
+  "portfolioUrl": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "websiteUrl": zod.string().nullish(),
+  "teachingTopics": zod.array(zod.string()),
+  "courseProposal": zod.string().min(submitCreatorApplicationResponseOneCourseProposalMin),
+  "targetAudience": zod.string().min(submitCreatorApplicationResponseOneTargetAudienceMin),
+  "sampleWorkUrl": zod.string().nullish(),
+  "motivation": zod.string().min(submitCreatorApplicationResponseOneMotivationMin)
+}).and(zod.object({
+  "id": zod.number().int(),
+  "userId": zod.number().int(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "reviewReason": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "reviewedBy": zod.number().int().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}))
+
+
+export const AdminCreatorApplicationsQueryParams = zod.object({
+  "status": zod.enum(['pending', 'approved', 'rejected']).optional()
 })
+
+export const AdminCreatorApplicationsResponseItem = zod.object({
+
+}).passthrough()
+export const AdminCreatorApplicationsResponse = zod.array(AdminCreatorApplicationsResponseItem)
+
+
+export const ApproveCreatorApplicationParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const approveCreatorApplicationResponseOneDisplayNameMin = 2;
+
+export const approveCreatorApplicationResponseOneHeadlineMin = 2;
+
+export const approveCreatorApplicationResponseOneBioMin = 20;
+
+export const approveCreatorApplicationResponseOneExpertiseMin = 2;
+
+export const approveCreatorApplicationResponseOneExperienceYearsMin = 0;
+
+export const approveCreatorApplicationResponseOneCourseProposalMin = 20;
+
+export const approveCreatorApplicationResponseOneTargetAudienceMin = 2;
+
+export const approveCreatorApplicationResponseOneMotivationMin = 20;
+
+
+
+export const ApproveCreatorApplicationResponse = zod.object({
+  "displayName": zod.string().min(approveCreatorApplicationResponseOneDisplayNameMin),
+  "headline": zod.string().min(approveCreatorApplicationResponseOneHeadlineMin),
+  "bio": zod.string().min(approveCreatorApplicationResponseOneBioMin),
+  "expertise": zod.string().min(approveCreatorApplicationResponseOneExpertiseMin),
+  "experienceYears": zod.number().int().min(approveCreatorApplicationResponseOneExperienceYearsMin).optional(),
+  "portfolioUrl": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "websiteUrl": zod.string().nullish(),
+  "teachingTopics": zod.array(zod.string()),
+  "courseProposal": zod.string().min(approveCreatorApplicationResponseOneCourseProposalMin),
+  "targetAudience": zod.string().min(approveCreatorApplicationResponseOneTargetAudienceMin),
+  "sampleWorkUrl": zod.string().nullish(),
+  "motivation": zod.string().min(approveCreatorApplicationResponseOneMotivationMin)
+}).and(zod.object({
+  "id": zod.number().int(),
+  "userId": zod.number().int(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "reviewReason": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "reviewedBy": zod.number().int().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}))
+
+
+export const RejectCreatorApplicationParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+
+
+
+export const RejectCreatorApplicationBody = zod.object({
+  "reason": zod.string().min(1)
+})
+
+export const rejectCreatorApplicationResponseOneDisplayNameMin = 2;
+
+export const rejectCreatorApplicationResponseOneHeadlineMin = 2;
+
+export const rejectCreatorApplicationResponseOneBioMin = 20;
+
+export const rejectCreatorApplicationResponseOneExpertiseMin = 2;
+
+export const rejectCreatorApplicationResponseOneExperienceYearsMin = 0;
+
+export const rejectCreatorApplicationResponseOneCourseProposalMin = 20;
+
+export const rejectCreatorApplicationResponseOneTargetAudienceMin = 2;
+
+export const rejectCreatorApplicationResponseOneMotivationMin = 20;
+
+
+
+export const RejectCreatorApplicationResponse = zod.object({
+  "displayName": zod.string().min(rejectCreatorApplicationResponseOneDisplayNameMin),
+  "headline": zod.string().min(rejectCreatorApplicationResponseOneHeadlineMin),
+  "bio": zod.string().min(rejectCreatorApplicationResponseOneBioMin),
+  "expertise": zod.string().min(rejectCreatorApplicationResponseOneExpertiseMin),
+  "experienceYears": zod.number().int().min(rejectCreatorApplicationResponseOneExperienceYearsMin).optional(),
+  "portfolioUrl": zod.string().nullish(),
+  "linkedinUrl": zod.string().nullish(),
+  "websiteUrl": zod.string().nullish(),
+  "teachingTopics": zod.array(zod.string()),
+  "courseProposal": zod.string().min(rejectCreatorApplicationResponseOneCourseProposalMin),
+  "targetAudience": zod.string().min(rejectCreatorApplicationResponseOneTargetAudienceMin),
+  "sampleWorkUrl": zod.string().nullish(),
+  "motivation": zod.string().min(rejectCreatorApplicationResponseOneMotivationMin)
+}).and(zod.object({
+  "id": zod.number().int(),
+  "userId": zod.number().int(),
+  "status": zod.enum(['pending', 'approved', 'rejected']),
+  "reviewReason": zod.string().nullish(),
+  "reviewedAt": zod.coerce.date().nullish(),
+  "reviewedBy": zod.number().int().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}))
 
 
 export const MarketplaceCoursesQueryParams = zod.object({
@@ -794,6 +1021,7 @@ export const AdminUsersResponseItem = zod.object({
   "email": zod.string(),
   "name": zod.string(),
   "role": zod.enum(['student', 'creator', 'admin']),
+  "isSuperAdmin": zod.boolean().optional(),
   "createdAt": zod.coerce.date().optional()
 })
 export const AdminUsersResponse = zod.array(AdminUsersResponseItem)
@@ -804,6 +1032,7 @@ export const AdminCreatorsResponseItem = zod.object({
   "email": zod.string(),
   "name": zod.string(),
   "role": zod.enum(['student', 'creator', 'admin']),
+  "isSuperAdmin": zod.boolean().optional(),
   "createdAt": zod.coerce.date().optional()
 })
 export const AdminCreatorsResponse = zod.array(AdminCreatorsResponseItem)

@@ -1,10 +1,10 @@
 import { Router, type IRouter } from "express";
 import { and, eq, ilike, desc, inArray, sql } from "drizzle-orm";
 import {
-  db, categoriesTable, coursesTable, courseModulesTable, lessonsTable, lessonAssetsTable, productsTable, usersTable, enrollmentsTable,
+  db, categoriesTable, coursesTable, courseModulesTable, lessonsTable, lessonAssetsTable, productsTable, usersTable, enrollmentsTable, lmsUsersTable, creatorProfilesTable,
   ordersTable, orderItemsTable, wishlistTable, platformSettingsTable,
 } from "@workspace/db";
-import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewares/auth";
+import { requireAuth, requireRole, requireSuperAdmin, isSuperAdminEmail, type AuthenticatedRequest } from "../middlewares/auth";
 import { objectFile } from "../lib/objectStorage";
 
 const router: IRouter = Router();
@@ -187,7 +187,42 @@ router.get("/student/wishlist", auth, async (req, res) => { const userId = await
 router.post("/student/wishlist/:productId", auth, async (req, res) => { const userId = await userOf(req as AuthenticatedRequest), productId = id(req.params.productId); if (!userId || !productId) { res.status(400).json({ error: "Invalid id" }); return; } const [row] = await db.insert(wishlistTable).values({ userId, productId }).onConflictDoNothing().returning(); res.status(201).json(row ?? { userId, productId }); });
 router.delete("/student/wishlist/:productId", auth, async (req, res) => { const userId = await userOf(req as AuthenticatedRequest), productId = id(req.params.productId); if (!userId || !productId) { res.status(400).json({ error: "Invalid id" }); return; } await db.delete(wishlistTable).where(and(eq(wishlistTable.userId, userId), eq(wishlistTable.productId, productId))); res.sendStatus(204); });
 
-router.get("/admin/users", auth, requireRole("admin"), async (_req, res) => res.json(await db.select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role }).from(usersTable)));
+router.get("/admin/users", auth, requireRole("admin"), requireSuperAdmin, async (_req, res) => res.json(await db.select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role, createdAt: usersTable.createdAt }).from(usersTable)));
+router.patch("/admin/users/:id/creator", auth, requireRole("admin"), requireSuperAdmin, async (req, res) => {
+  const targetId = id(req.params.id), enable = req.body?.enabled !== false;
+  if (!targetId) { res.status(400).json({ error: "Invalid user id" }); return; }
+  const [target] = await db.select().from(usersTable).where(eq(usersTable.id, targetId));
+  if (!target) { res.status(404).json({ error: "User not found" }); return; }
+  if (isSuperAdminEmail(target.email)) { res.status(403).json({ error: "The permanent super administrator cannot be changed" }); return; }
+  const role = enable ? "creator" : "student";
+  const updated = await db.transaction(async (tx) => {
+    const [user] = await tx.update(usersTable).set({ role, updatedAt: new Date() }).where(eq(usersTable.id, targetId)).returning();
+    await tx.update(lmsUsersTable).set({ role }).where(eq(lmsUsersTable.email, target.email));
+    if (enable) await tx.insert(creatorProfilesTable).values({ userId: targetId, displayName: target.name }).onConflictDoNothing();
+    return user;
+  });
+  res.json(updated);
+});
+router.get("/admin/users/:id/enrollments", auth, requireRole("admin"), requireSuperAdmin, async (req, res) => {
+  const targetId = id(req.params.id); if (!targetId) { res.status(400).json({ error: "Invalid user id" }); return; }
+  res.json(await db.select({ enrollment: enrollmentsTable, course: coursesTable }).from(enrollmentsTable).innerJoin(coursesTable, eq(coursesTable.id, enrollmentsTable.courseId)).where(eq(enrollmentsTable.userId, targetId)));
+});
+router.post("/admin/users/:id/enrollments", auth, requireRole("admin"), requireSuperAdmin, async (req, res) => {
+  const targetId = id(req.params.id), courseId = id(req.body?.courseId);
+  if (!targetId || !courseId) { res.status(400).json({ error: "Valid user and course ids are required" }); return; }
+  const [target] = await db.select({ id: usersTable.id, email: usersTable.email }).from(usersTable).where(eq(usersTable.id, targetId));
+  if (!target || isSuperAdminEmail(target.email)) { res.status(404).json({ error: "Student not found" }); return; }
+  const [course] = await db.select({ id: coursesTable.id }).from(coursesTable).where(eq(coursesTable.id, courseId));
+  if (!course) { res.status(404).json({ error: "Course not found" }); return; }
+  const [row] = await db.insert(enrollmentsTable).values({ userId: targetId, courseId }).onConflictDoNothing().returning();
+  res.json({ enrolled: true, alreadyEnrolled: !row, courseId, userId: targetId });
+});
+router.delete("/admin/users/:id/enrollments/:courseId", auth, requireRole("admin"), requireSuperAdmin, async (req, res) => {
+  const targetId = id(req.params.id), courseId = id(req.params.courseId);
+  if (!targetId || !courseId) { res.status(400).json({ error: "Invalid user or course id" }); return; }
+  await db.delete(enrollmentsTable).where(and(eq(enrollmentsTable.userId, targetId), eq(enrollmentsTable.courseId, courseId)));
+  res.sendStatus(204);
+});
 router.get("/admin/creators", auth, requireRole("admin"), async (_req, res) => res.json(await db.select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role, createdAt: usersTable.createdAt }).from(usersTable).where(eq(usersTable.role, "creator"))));
 router.get("/admin/courses", auth, requireRole("admin"), async (_req, res) => res.json(await db.select({
   id: coursesTable.id, title: coursesTable.title, description: coursesTable.description, status: coursesTable.status,

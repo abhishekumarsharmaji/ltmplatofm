@@ -194,6 +194,34 @@ export const couponsTable = pgTable("coupons", {
 export const liveClassStatusEnum = pgEnum("live_class_status", ["scheduled", "live", "completed", "cancelled"]);
 export const recordingStatusEnum = pgEnum("recording_status", ["idle", "recording", "processing", "ready", "failed"]);
 export const attendanceRoleEnum = pgEnum("attendance_role", ["host", "student"]);
+export const creatorApplicationStatusEnum = pgEnum("creator_application_status", ["pending", "approved", "rejected"]);
+
+export const creatorApplicationsTable = pgTable("creator_applications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  displayName: text("display_name").notNull(),
+  headline: text("headline").notNull(),
+  bio: text("bio").notNull(),
+  expertise: text("expertise").notNull(),
+  experienceYears: integer("experience_years").notNull().default(0),
+  portfolioUrl: text("portfolio_url"),
+  linkedinUrl: text("linkedin_url"),
+  websiteUrl: text("website_url"),
+  teachingTopics: text("teaching_topics").array().notNull().default(sql`ARRAY[]::text[]`),
+  courseProposal: text("course_proposal").notNull(),
+  targetAudience: text("target_audience").notNull(),
+  sampleWorkUrl: text("sample_work_url"),
+  motivation: text("motivation").notNull(),
+  status: creatorApplicationStatusEnum("status").notNull().default("pending"),
+  reviewReason: text("review_reason"),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  reviewedBy: integer("reviewed_by").references(() => usersTable.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex("creator_applications_user_unique").on(t.userId),
+  index("creator_applications_status_idx").on(t.status),
+]);
 
 export const liveClassesTable = pgTable("live_classes", {
   id: serial("id").primaryKey(),

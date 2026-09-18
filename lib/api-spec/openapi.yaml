@@ -93,24 +93,37 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Course"
-  /creator/upgrade:
-    post:
-      operationId: upgradeCreator
-      tags: [auth]
+  /creator-applications/me:
+    get:
+      operationId: getMyCreatorApplication
       security: [{ cookieAuth: [] }]
       responses:
-        "200":
-          description: Creator account
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [user]
-                properties:
-                  user:
-                    $ref: "#/components/schemas/User"
-        "401": { description: Authentication required }
-        "403": { description: Forbidden }
+        "200": { description: Current application, content: { application/json: { schema: { anyOf: [{ $ref: "#/components/schemas/CreatorApplication" }, { type: "null" }] } } } }
+  /creator-applications:
+    post:
+      operationId: submitCreatorApplication
+      security: [{ cookieAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CreatorApplicationInput" } } } }
+      responses: { "200": { description: Updated application, content: { application/json: { schema: { $ref: "#/components/schemas/CreatorApplication" } } } }, "201": { description: Submitted, content: { application/json: { schema: { $ref: "#/components/schemas/CreatorApplication" } } } } }
+  /admin/creator-applications:
+    get:
+      operationId: adminCreatorApplications
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: status, in: query, schema: { type: string, enum: [pending, approved, rejected] } }]
+      responses: { "200": { description: Applications, content: { application/json: { schema: { type: array, items: { type: object } } } } } }
+  /admin/creator-applications/{id}/approve:
+    post:
+      operationId: approveCreatorApplication
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Approved application, content: { application/json: { schema: { $ref: "#/components/schemas/CreatorApplication" } } } } }
+  /admin/creator-applications/{id}/reject:
+    post:
+      operationId: rejectCreatorApplication
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/RejectCreatorApplicationInput" } } } }
+      responses: { "200": { description: Rejected application, content: { application/json: { schema: { $ref: "#/components/schemas/CreatorApplication" } } } } }
   /marketplace/courses:
     get:
       operationId: marketplaceCourses
@@ -649,6 +662,42 @@ components:
         checks: { type: object, additionalProperties: { type: boolean } }
         moduleCount: { type: integer }
         lessonCount: { type: integer }
+    CreatorApplicationInput:
+      type: object
+      required: [displayName, headline, bio, expertise, courseProposal, targetAudience, motivation, teachingTopics]
+      properties:
+        displayName: { type: string, minLength: 2 }
+        headline: { type: string, minLength: 2 }
+        bio: { type: string, minLength: 20 }
+        expertise: { type: string, minLength: 2 }
+        experienceYears: { type: integer, minimum: 0 }
+        portfolioUrl: { type: string, nullable: true }
+        linkedinUrl: { type: string, nullable: true }
+        websiteUrl: { type: string, nullable: true }
+        teachingTopics: { type: array, items: { type: string } }
+        courseProposal: { type: string, minLength: 20 }
+        targetAudience: { type: string, minLength: 2 }
+        sampleWorkUrl: { type: string, nullable: true }
+        motivation: { type: string, minLength: 20 }
+    CreatorApplication:
+      allOf:
+        - $ref: "#/components/schemas/CreatorApplicationInput"
+        - type: object
+          required: [id, userId, status, createdAt, updatedAt]
+          properties:
+            id: { type: integer }
+            userId: { type: integer }
+            status: { type: string, enum: [pending, approved, rejected] }
+            reviewReason: { type: string, nullable: true }
+            reviewedAt: { type: string, format: date-time, nullable: true }
+            reviewedBy: { type: integer, nullable: true }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+    RejectCreatorApplicationInput:
+      type: object
+      required: [reason]
+      properties:
+        reason: { type: string, minLength: 1 }
     User:
       type: object
       required: [id, email, name, role]
@@ -662,6 +711,8 @@ components:
         role:
           type: string
           enum: [student, creator, admin]
+        isSuperAdmin:
+          type: boolean
         createdAt:
           type: string
           format: date-time

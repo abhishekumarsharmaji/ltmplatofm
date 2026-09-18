@@ -24,6 +24,8 @@ import type {
   AdminCourse,
   AdminCourseInput,
   AdminCreatedCourse,
+  AdminCreatorApplications200Item,
+  AdminCreatorApplicationsParams,
   AdminOrders200Item,
   AdminSettings200Item,
   AdminUpdateSetting200,
@@ -36,6 +38,8 @@ import type {
   CourseOutline,
   CourseOutlineInput,
   CourseReadiness,
+  CreatorApplication,
+  CreatorApplicationInput,
   EnrollmentResult,
   FinalizeCourseThumbnailUpload200,
   HealthStatus,
@@ -65,6 +69,7 @@ import type {
   ProductInput,
   PublishCreatorCourse200,
   PurchasedProducts200Item,
+  RejectCreatorApplicationInput,
   RequestLessonVideoPartUrl200,
   SalesSummary,
   Session,
@@ -73,7 +78,6 @@ import type {
   StudentLibrary200Item,
   StudentOrders200Item,
   UpdateCreatorCourseBasics200,
-  UpgradeCreator200,
   User,
   VideoUploadInput,
   VideoUploadResponse
@@ -558,17 +562,248 @@ export function useListCourses<TData = Awaited<ReturnType<typeof listCourses>>, 
 
 
 
-export const getUpgradeCreatorUrl = () => {
+export const getGetMyCreatorApplicationUrl = () => {
 
 
 
 
-  return `/api/creator/upgrade`
+  return `/api/creator-applications/me`
 }
 
-export const upgradeCreator = async ( options?: Parameters<typeof customFetch>[1]): Promise<UpgradeCreator200> => {
+export const getMyCreatorApplication = async ( options?: Parameters<typeof customFetch>[1]): Promise<CreatorApplication | null> => {
 
-  return customFetch<UpgradeCreator200>(getUpgradeCreatorUrl(),
+  return customFetch<CreatorApplication | null>(getGetMyCreatorApplicationUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyCreatorApplicationQueryKey = () => {
+    return [
+    `/api/creator-applications/me`
+    ] as const;
+    }
+
+
+export const getGetMyCreatorApplicationQueryOptions = <TData = Awaited<ReturnType<typeof getMyCreatorApplication>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyCreatorApplication>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyCreatorApplicationQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyCreatorApplication>>> = ({ signal }) => getMyCreatorApplication({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyCreatorApplication>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyCreatorApplicationQueryResult = NonNullable<Awaited<ReturnType<typeof getMyCreatorApplication>>>
+export type GetMyCreatorApplicationQueryError = ErrorType<unknown>
+
+
+
+export function useGetMyCreatorApplication<TData = Awaited<ReturnType<typeof getMyCreatorApplication>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyCreatorApplication>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyCreatorApplicationQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSubmitCreatorApplicationUrl = () => {
+
+
+
+
+  return `/api/creator-applications`
+}
+
+export const submitCreatorApplication = async (creatorApplicationInput: CreatorApplicationInput, options?: Parameters<typeof customFetch>[1]): Promise<CreatorApplication> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<CreatorApplication>(getSubmitCreatorApplicationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(creatorApplicationInput)
+  }
+);}
+
+
+
+
+
+export const getSubmitCreatorApplicationMutationKey = () => ['submitCreatorApplication'] as const;
+
+export const getSubmitCreatorApplicationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitCreatorApplication>>, TError,SubmitCreatorApplicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitCreatorApplication>>, TError,SubmitCreatorApplicationMutationVariables, TContext> => {
+
+const mutationKey = getSubmitCreatorApplicationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitCreatorApplication>>, SubmitCreatorApplicationMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  submitCreatorApplication(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitCreatorApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof submitCreatorApplication>>>
+    export type SubmitCreatorApplicationMutationBody = BodyType<CreatorApplicationInput>
+    export type SubmitCreatorApplicationMutationError = ErrorType<unknown>
+    export type SubmitCreatorApplicationMutationVariables = {data: BodyType<CreatorApplicationInput>}
+
+    export const useSubmitCreatorApplication = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitCreatorApplication>>, TError,SubmitCreatorApplicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitCreatorApplication>>,
+        TError,
+        SubmitCreatorApplicationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSubmitCreatorApplicationMutationOptions(options));
+    }
+
+export const getAdminCreatorApplicationsUrl = (params?: AdminCreatorApplicationsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/creator-applications?${stringifiedParams}` : `/api/admin/creator-applications`
+}
+
+export const adminCreatorApplications = async (params?: AdminCreatorApplicationsParams, options?: Parameters<typeof customFetch>[1]): Promise<AdminCreatorApplications200Item[]> => {
+
+  return customFetch<AdminCreatorApplications200Item[]>(getAdminCreatorApplicationsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminCreatorApplicationsQueryKey = (params?: AdminCreatorApplicationsParams,) => {
+    return [
+    `/api/admin/creator-applications`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAdminCreatorApplicationsQueryOptions = <TData = Awaited<ReturnType<typeof adminCreatorApplications>>, TError = ErrorType<unknown>>(params?: AdminCreatorApplicationsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminCreatorApplications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminCreatorApplicationsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminCreatorApplications>>> = ({ signal }) => adminCreatorApplications(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminCreatorApplications>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminCreatorApplicationsQueryResult = NonNullable<Awaited<ReturnType<typeof adminCreatorApplications>>>
+export type AdminCreatorApplicationsQueryError = ErrorType<unknown>
+
+
+
+export function useAdminCreatorApplications<TData = Awaited<ReturnType<typeof adminCreatorApplications>>, TError = ErrorType<unknown>>(
+ params?: AdminCreatorApplicationsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminCreatorApplications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminCreatorApplicationsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getApproveCreatorApplicationUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/creator-applications/${id}/approve`
+}
+
+export const approveCreatorApplication = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<CreatorApplication> => {
+
+  return customFetch<CreatorApplication>(getApproveCreatorApplicationUrl(id),
   {
     ...options,
     method: 'POST'
@@ -581,13 +816,13 @@ export const upgradeCreator = async ( options?: Parameters<typeof customFetch>[1
 
 
 
-export const getUpgradeCreatorMutationKey = () => ['upgradeCreator'] as const;
+export const getApproveCreatorApplicationMutationKey = () => ['approveCreatorApplication'] as const;
 
-export const getUpgradeCreatorMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upgradeCreator>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof upgradeCreator>>, TError,void, TContext> => {
+export const getApproveCreatorApplicationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveCreatorApplication>>, TError,ApproveCreatorApplicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof approveCreatorApplication>>, TError,ApproveCreatorApplicationMutationVariables, TContext> => {
 
-const mutationKey = getUpgradeCreatorMutationKey();
+const mutationKey = getApproveCreatorApplicationMutationKey();
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -597,10 +832,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof upgradeCreator>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveCreatorApplication>>, ApproveCreatorApplicationMutationVariables> = (props) => {
+          const {id} = props ?? {};
 
-
-          return  upgradeCreator(requestOptions)
+          return  approveCreatorApplication(id,requestOptions)
         }
 
 
@@ -610,20 +845,103 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UpgradeCreatorMutationResult = NonNullable<Awaited<ReturnType<typeof upgradeCreator>>>
+    export type ApproveCreatorApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof approveCreatorApplication>>>
 
-    export type UpgradeCreatorMutationError = ErrorType<void>
+    export type ApproveCreatorApplicationMutationError = ErrorType<unknown>
+    export type ApproveCreatorApplicationMutationVariables = {id: number}
 
-
-    export const useUpgradeCreator = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upgradeCreator>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+    export const useApproveCreatorApplication = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveCreatorApplication>>, TError,ApproveCreatorApplicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof upgradeCreator>>,
+        Awaited<ReturnType<typeof approveCreatorApplication>>,
         TError,
-        void,
+        ApproveCreatorApplicationMutationVariables,
         TContext
       > => {
-      return useMutation(getUpgradeCreatorMutationOptions(options));
+      return useMutation(getApproveCreatorApplicationMutationOptions(options));
+    }
+
+export const getRejectCreatorApplicationUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/creator-applications/${id}/reject`
+}
+
+export const rejectCreatorApplication = async (id: number,
+    rejectCreatorApplicationInput: RejectCreatorApplicationInput, options?: Parameters<typeof customFetch>[1]): Promise<CreatorApplication> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<CreatorApplication>(getRejectCreatorApplicationUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(rejectCreatorApplicationInput)
+  }
+);}
+
+
+
+
+
+export const getRejectCreatorApplicationMutationKey = () => ['rejectCreatorApplication'] as const;
+
+export const getRejectCreatorApplicationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rejectCreatorApplication>>, TError,RejectCreatorApplicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof rejectCreatorApplication>>, TError,RejectCreatorApplicationMutationVariables, TContext> => {
+
+const mutationKey = getRejectCreatorApplicationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rejectCreatorApplication>>, RejectCreatorApplicationMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  rejectCreatorApplication(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RejectCreatorApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof rejectCreatorApplication>>>
+    export type RejectCreatorApplicationMutationBody = BodyType<RejectCreatorApplicationInput>
+    export type RejectCreatorApplicationMutationError = ErrorType<unknown>
+    export type RejectCreatorApplicationMutationVariables = {id: number;data: BodyType<RejectCreatorApplicationInput>}
+
+    export const useRejectCreatorApplication = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rejectCreatorApplication>>, TError,RejectCreatorApplicationMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof rejectCreatorApplication>>,
+        TError,
+        RejectCreatorApplicationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRejectCreatorApplicationMutationOptions(options));
     }
 
 export const getMarketplaceCoursesUrl = (params?: MarketplaceCoursesParams,) => {

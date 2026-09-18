@@ -12,5 +12,6 @@ export interface User {
   email: string;
   name: string;
   role: UserRole;
+  isSuperAdmin?: boolean;
   createdAt?: Date;
 }

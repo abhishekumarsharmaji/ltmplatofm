@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { db, lmsUsersTable, usersTable } from "@workspace/db";
 
 export const SESSION_COOKIE = "lms_session";
+export const SUPER_ADMIN_EMAIL = "xbhishekh@gmail.com";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 
 function secret() {
@@ -35,12 +36,18 @@ export type AuthenticatedRequest = Express.Request & {
   canonicalRole?: "student" | "creator" | "admin";
 };
 
+export function isSuperAdminEmail(email: string) {
+  return email.trim().toLowerCase() === SUPER_ADMIN_EMAIL;
+}
+
 export const requireAuth: RequestHandler = async (req, res, next) => {
   const id = readSession(req.cookies?.[SESSION_COOKIE]);
   if (!id) { res.status(401).json({ error: "Authentication required" }); return; }
   const [user] = await db.select().from(lmsUsersTable).where(eq(lmsUsersTable.id, id));
   if (!user) { res.status(401).json({ error: "Authentication required" }); return; }
-  const role: "student" | "creator" | "admin" = user.role === "creator" || user.role === "admin" ? user.role : "student";
+  const role: "student" | "creator" | "admin" = isSuperAdminEmail(user.email)
+    ? "admin"
+    : user.role === "creator" || user.role === "admin" ? user.role : "student";
   let [canonical] = await db.select({ id: usersTable.id, role: usersTable.role })
     .from(usersTable).where(eq(usersTable.email, user.email)).limit(1);
   if (!canonical) {
@@ -53,7 +60,11 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
   }
   (req as AuthenticatedRequest).user = user;
   (req as AuthenticatedRequest).canonicalUserId = canonical.id;
-  (req as AuthenticatedRequest).canonicalRole = canonical.role;
+  if (isSuperAdminEmail(user.email) && canonical.role !== "admin") {
+    [canonical] = await db.update(usersTable).set({ role: "admin", updatedAt: new Date() })
+      .where(eq(usersTable.id, canonical.id)).returning({ id: usersTable.id, role: usersTable.role });
+  }
+  (req as AuthenticatedRequest).canonicalRole = isSuperAdminEmail(user.email) ? "admin" : canonical.role;
   next();
 };
 
@@ -64,5 +75,14 @@ export function requireRole(...roles: string[]): RequestHandler {
     next();
   };
 }
+
+export const requireSuperAdmin: RequestHandler = (req, res, next) => {
+  const auth = req as AuthenticatedRequest;
+  if (!auth.user || !isSuperAdminEmail(auth.user.email)) {
+    res.status(403).json({ error: "Super administrator access required" });
+    return;
+  }
+  next();
+};
 
 export const sessionTtlSeconds = SESSION_TTL_SECONDS;

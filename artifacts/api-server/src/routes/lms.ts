@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { eq, ilike, and, inArray, sql } from "drizzle-orm";
-import { db, coursesTable, courseModulesTable, lessonsTable, lessonAssetsTable, productsTable, creatorProfilesTable, lmsCoursesTable, lmsUsersTable, usersTable } from "@workspace/db";
+import { db, coursesTable, courseModulesTable, lessonsTable, lessonAssetsTable, productsTable, creatorProfilesTable, lmsCoursesTable, lmsUsersTable, usersTable, creatorApplicationsTable } from "@workspace/db";
 import {
   GetSessionResponse,
   ListCoursesResponse,
@@ -10,7 +10,7 @@ import {
   SignUpBody,
   SignUpResponse,
 } from "@workspace/api-zod";
-import { readSession, signSession, requireAuth, requireRole, SESSION_COOKIE, sessionTtlSeconds, type AuthenticatedRequest } from "../middlewares/auth";
+import { readSession, signSession, requireAuth, requireRole, requireSuperAdmin, isSuperAdminEmail, SESSION_COOKIE, sessionTtlSeconds, type AuthenticatedRequest } from "../middlewares/auth";
 
 const router: IRouter = Router();
 function hashPassword(password: string, salt = randomBytes(16).toString("hex")) {
@@ -38,6 +38,7 @@ router.get("/auth/session", async (req, res): Promise<void> => {
     name: lmsUsersTable.name,
     role: lmsUsersTable.role,
   }).from(lmsUsersTable).where(eq(lmsUsersTable.id, userId));
+  if (user && isSuperAdminEmail(user.email) && user.role !== "admin") user.role = "admin";
   res.json(GetSessionResponse.parse(user ? { authenticated: true, user } : { authenticated: false, user: null }));
 });
 
@@ -59,7 +60,8 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     maxAge: sessionTtlSeconds * 1000,
     path: "/",
   });
-  res.json(LoginResponse.parse({ authenticated: true, user: { id: user.id, email: user.email, name: user.name, role: user.role } }));
+  const role = isSuperAdminEmail(user.email) ? "admin" : user.role;
+  res.json(LoginResponse.parse({ authenticated: true, user: { id: user.id, email: user.email, name: user.name, role } }));
 });
 
 router.post("/auth/sign-up", async (req, res): Promise<void> => {
@@ -77,7 +79,7 @@ router.post("/auth/sign-up", async (req, res): Promise<void> => {
   const [user] = await db.insert(lmsUsersTable).values({
     email,
     name: parsed.data.name,
-    role: "student",
+    role: isSuperAdminEmail(email) ? "admin" : "student",
     passwordHash: hashPassword(parsed.data.password),
   }).returning({
     id: lmsUsersTable.id,
@@ -92,7 +94,7 @@ router.post("/auth/sign-up", async (req, res): Promise<void> => {
     maxAge: sessionTtlSeconds * 1000,
     path: "/",
   });
-  res.status(201).json(SignUpResponse.parse({ authenticated: true, user }));
+  res.status(201).json(SignUpResponse.parse({ authenticated: true, user: { ...user, role: isSuperAdminEmail(email) ? "admin" : "student" } }));
 });
 
 router.post("/auth/logout", (_req, res): void => {
@@ -134,27 +136,66 @@ router.get("/marketplace/courses", async (req, res): Promise<void> => {
   res.json(ListCoursesResponse.parse(courses));
 });
 
-router.post("/creator/upgrade", requireAuth, async (req, res): Promise<void> => {
-  const user = (req as AuthenticatedRequest).user!;
-  if (user.role === "admin") {
-    res.status(403).json({ error: "Administrators cannot change role through self-service" });
-    return;
-  }
-  if (user.role !== "creator") {
-    const updated = await db.transaction(async (tx) => {
-      const [lms] = await tx.update(lmsUsersTable).set({ role: "creator" }).where(eq(lmsUsersTable.id, user.id)).returning({
-        id: lmsUsersTable.id, email: lmsUsersTable.email, name: lmsUsersTable.name, role: lmsUsersTable.role,
-      });
-      const [canonical] = await tx.update(usersTable).set({ role: "creator", name: lms.name, passwordHash: user.passwordHash, updatedAt: new Date() })
-        .where(eq(usersTable.id, (req as AuthenticatedRequest).canonicalUserId!)).returning();
-      await tx.insert(creatorProfilesTable).values({ userId: canonical.id, displayName: canonical.name })
-        .onConflictDoUpdate({ target: creatorProfilesTable.userId, set: { displayName: canonical.name, updatedAt: new Date() } });
-      return lms;
-    });
-    res.json({ user: updated });
-    return;
-  }
-  res.json({ user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+router.post("/creator/upgrade", (_req, res): void => { res.status(410).json({ error: "Direct creator upgrades are disabled. Submit a creator application." }); });
+
+function applicationPayload(body: any) {
+  const required = ["displayName", "headline", "bio", "expertise", "courseProposal", "targetAudience", "motivation"];
+  if (!body || required.some((key) => typeof body[key] !== "string" || !body[key].trim())) return null;
+  if (!Array.isArray(body.teachingTopics) || !body.teachingTopics.every((item: unknown) => typeof item === "string" && item.trim())) return null;
+  return {
+    displayName: body.displayName.trim(), headline: body.headline.trim(), bio: body.bio.trim(), expertise: body.expertise.trim(),
+    experienceYears: Number.isInteger(body.experienceYears) && body.experienceYears >= 0 ? body.experienceYears : 0,
+    portfolioUrl: body.portfolioUrl?.trim() || null, linkedinUrl: body.linkedinUrl?.trim() || null, websiteUrl: body.websiteUrl?.trim() || null,
+    teachingTopics: body.teachingTopics.map((item: string) => item.trim()), courseProposal: body.courseProposal.trim(),
+    targetAudience: body.targetAudience.trim(), sampleWorkUrl: body.sampleWorkUrl?.trim() || null, motivation: body.motivation.trim(),
+  };
+}
+
+router.get("/creator-applications/me", requireAuth, async (req, res): Promise<void> => {
+  const [application] = await db.select().from(creatorApplicationsTable).where(eq(creatorApplicationsTable.userId, (req as AuthenticatedRequest).canonicalUserId!));
+  res.json(application ?? null);
+});
+router.post("/creator-applications", requireAuth, async (req, res): Promise<void> => {
+  const auth = req as AuthenticatedRequest;
+  if (auth.canonicalRole !== "student") { res.status(403).json({ error: "Only student accounts can submit applications" }); return; }
+  const payload = applicationPayload(req.body);
+  if (!payload) { res.status(400).json({ error: "Complete creator application details are required" }); return; }
+  const [existing] = await db.select({ id: creatorApplicationsTable.id, status: creatorApplicationsTable.status }).from(creatorApplicationsTable).where(eq(creatorApplicationsTable.userId, auth.canonicalUserId!));
+  if (existing?.status === "approved") { res.status(409).json({ error: "This account is already an approved creator" }); return; }
+  const [application] = existing
+    ? await db.update(creatorApplicationsTable).set({ ...payload, status: "pending", reviewReason: null, reviewedAt: null, reviewedBy: null, updatedAt: new Date() }).where(eq(creatorApplicationsTable.id, existing.id)).returning()
+    : await db.insert(creatorApplicationsTable).values({ ...payload, userId: auth.canonicalUserId! }).returning();
+  res.status(existing ? 200 : 201).json(application);
+});
+router.get("/admin/creator-applications", requireAuth, requireRole("admin"), requireSuperAdmin, async (req, res): Promise<void> => {
+  const status = typeof req.query.status === "string" ? req.query.status : undefined;
+  const rows = await db.select({ application: creatorApplicationsTable, user: { id: usersTable.id, name: usersTable.name, email: usersTable.email, role: usersTable.role } })
+    .from(creatorApplicationsTable).innerJoin(usersTable, eq(usersTable.id, creatorApplicationsTable.userId))
+    .where(status && ["pending", "approved", "rejected"].includes(status) ? eq(creatorApplicationsTable.status, status as any) : undefined);
+  res.json(rows);
+});
+router.post("/admin/creator-applications/:id/approve", requireAuth, requireRole("admin"), requireSuperAdmin, async (req, res): Promise<void> => {
+  const id = Number(req.params.id); if (!Number.isInteger(id)) { res.status(400).json({ error: "Invalid application id" }); return; }
+  const auth = req as AuthenticatedRequest;
+  const result = await db.transaction(async (tx) => {
+    const [application] = await tx.select().from(creatorApplicationsTable).where(eq(creatorApplicationsTable.id, id));
+    if (!application) return null;
+    const [canonical] = await tx.update(usersTable).set({ role: "creator", updatedAt: new Date() }).where(eq(usersTable.id, application.userId)).returning();
+    await tx.update(lmsUsersTable).set({ role: "creator" }).where(eq(lmsUsersTable.email, canonical.email));
+    await tx.insert(creatorProfilesTable).values({ userId: canonical.id, displayName: application.displayName, bio: application.bio })
+      .onConflictDoUpdate({ target: creatorProfilesTable.userId, set: { displayName: application.displayName, bio: application.bio, updatedAt: new Date() } });
+    const [updated] = await tx.update(creatorApplicationsTable).set({ status: "approved", reviewedAt: new Date(), reviewedBy: auth.canonicalUserId!, reviewReason: null, updatedAt: new Date() }).where(eq(creatorApplicationsTable.id, id)).returning();
+    return updated;
+  });
+  if (!result) { res.status(404).json({ error: "Application not found" }); return; }
+  res.json(result);
+});
+router.post("/admin/creator-applications/:id/reject", requireAuth, requireRole("admin"), requireSuperAdmin, async (req, res): Promise<void> => {
+  const id = Number(req.params.id), reason = typeof req.body?.reason === "string" ? req.body.reason.trim() : "";
+  if (!Number.isInteger(id) || !reason) { res.status(400).json({ error: "Application id and rejection reason are required" }); return; }
+  const [result] = await db.update(creatorApplicationsTable).set({ status: "rejected", reviewReason: reason, reviewedAt: new Date(), reviewedBy: (req as AuthenticatedRequest).canonicalUserId!, updatedAt: new Date() }).where(eq(creatorApplicationsTable.id, id)).returning();
+  if (!result) { res.status(404).json({ error: "Application not found" }); return; }
+  res.json(result);
 });
 
 router.get("/creator/courses", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {

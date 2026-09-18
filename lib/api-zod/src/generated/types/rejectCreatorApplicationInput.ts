@@ -5,8 +5,8 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { User } from './user';
 
-export type UpgradeCreator200 = {
-  user: User;
-};
+export interface RejectCreatorApplicationInput {
+  /** @minLength 1 */
+  reason: string;
+}

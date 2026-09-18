@@ -37,6 +37,7 @@ export interface User {
   email: string;
   name: string;
   role: UserRole;
+  isSuperAdmin?: boolean;
   createdAt?: string;
 }
 
@@ -189,6 +190,55 @@ export interface CourseReadiness {
   checks: CourseReadinessChecks;
   moduleCount: number;
   lessonCount: number;
+}
+
+export interface CreatorApplicationInput {
+  /** @minLength 2 */
+  displayName: string;
+  /** @minLength 2 */
+  headline: string;
+  /** @minLength 20 */
+  bio: string;
+  /** @minLength 2 */
+  expertise: string;
+  /** @minimum 0 */
+  experienceYears?: number;
+  portfolioUrl?: string | null;
+  linkedinUrl?: string | null;
+  websiteUrl?: string | null;
+  teachingTopics: string[];
+  /** @minLength 20 */
+  courseProposal: string;
+  /** @minLength 2 */
+  targetAudience: string;
+  sampleWorkUrl?: string | null;
+  /** @minLength 20 */
+  motivation: string;
+}
+
+export type CreatorApplicationStatus = typeof CreatorApplicationStatus[keyof typeof CreatorApplicationStatus];
+
+
+export const CreatorApplicationStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type CreatorApplication = CreatorApplicationInput & ({
+  id: number;
+  userId: number;
+  status: CreatorApplicationStatus;
+  reviewReason?: string | null;
+  reviewedAt?: string | null;
+  reviewedBy?: number | null;
+  createdAt: string;
+  updatedAt: string;
+});
+
+export interface RejectCreatorApplicationInput {
+  /** @minLength 1 */
+  reason: string;
 }
 
 export interface Course {
@@ -504,9 +554,20 @@ export interface LiveClassAttendance {
   joinCount: number;
 }
 
-export type UpgradeCreator200 = {
-  user: User;
+export type AdminCreatorApplicationsParams = {
+status?: AdminCreatorApplicationsStatus;
 };
+
+export type AdminCreatorApplicationsStatus = typeof AdminCreatorApplicationsStatus[keyof typeof AdminCreatorApplicationsStatus];
+
+
+export const AdminCreatorApplicationsStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type AdminCreatorApplications200Item = { [key: string]: unknown };
 
 export type MarketplaceCoursesParams = {
 q?: string;
