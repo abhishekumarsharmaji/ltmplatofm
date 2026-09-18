@@ -104,12 +104,14 @@ router.get("/student/courses/:courseId", auth, requireRole("student", "creator",
 router.post("/creator/products", auth, requireRole("creator", "admin"), async (req, res) => {
   const requestUser = req as AuthenticatedRequest;
   const creatorId = await userOf(requestUser); if (!creatorId) { res.status(409).json({ error: "Creator profile unavailable" }); return; }
-  const { title, description = "", shortSummary = null, subtype = "other", coverImageUrl = null, coverImageObjectPath = null, type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId } = req.body ?? {};
+  const { title, description = "", shortSummary = null, subtype = "other", coverImageUrl = null, type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId } = req.body ?? {};
+  const digitalSubtypes = ["ebook", "template", "toolkit", "document", "bundle", "other"];
   if (type === "digital" && requestedPrice !== undefined && requestedPrice !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
   const priceMinor = type === "course" ? 0 : requestedPrice;
   if (typeof title !== "string" || title.length < 2 || !["course", "digital"].includes(type) || !Number.isInteger(priceMinor) || priceMinor < 0) {
     res.status(400).json({ error: "Invalid product payload" }); return;
   }
+  if (type === "digital" && !digitalSubtypes.includes(subtype)) { res.status(400).json({ error: "Invalid digital product type" }); return; }
   const row = await db.transaction(async (tx) => {
     let linkedCourseId = id(courseId) ?? undefined;
     if (type === "digital" && linkedCourseId) throw new Error("Digital products cannot be linked to a course");
@@ -136,7 +138,7 @@ router.post("/creator/products", auth, requireRole("creator", "admin"), async (r
     const [created] = await tx.insert(productsTable).values({
       creatorId, title: title.trim(), description: String(description), shortSummary: typeof shortSummary === "string" ? shortSummary : null,
       subtype: type === "digital" ? String(subtype) : null, coverImageUrl: typeof coverImageUrl === "string" ? coverImageUrl : null,
-      coverImageObjectPath: typeof coverImageObjectPath === "string" ? coverImageObjectPath : null, type, priceMinor,
+      coverImageObjectPath: null, type, priceMinor,
       currency: String(currency).toUpperCase(), courseId: linkedCourseId, categoryId: id(categoryId) ?? undefined,
     }).returning();
     return created;
@@ -151,8 +153,9 @@ router.patch("/creator/products/:id", auth, requireRole("creator", "admin"), asy
   const productId = id(req.params.id), creatorId = await userOf(req as AuthenticatedRequest); if (!productId || !creatorId) { res.status(400).json({ error: "Invalid id" }); return; }
   const [existing] = await db.select().from(productsTable).where(eq(productsTable.id, productId));
   if (!existing || ((req as AuthenticatedRequest).user!.role !== "admin" && existing.creatorId !== creatorId)) { res.status(404).json({ error: "Product not found" }); return; }
-   const allowed = ["title", "description", "shortSummary", "subtype", "coverImageUrl", "coverImageObjectPath", "priceMinor", "currency", "categoryId"] as const;
+   const allowed = ["title", "description", "shortSummary", "subtype", "coverImageUrl", "priceMinor", "currency", "categoryId"] as const;
    if (existing.type === "digital" && req.body?.priceMinor !== undefined && req.body.priceMinor !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
+   if (existing.type === "digital" && req.body?.subtype !== undefined && !["ebook", "template", "toolkit", "document", "bundle", "other"].includes(req.body.subtype)) { res.status(400).json({ error: "Invalid digital product type" }); return; }
   const patch = Object.fromEntries(allowed.filter((key) => req.body?.[key] !== undefined).map((key) => [key, key === "categoryId" ? id(req.body[key]) : req.body[key]]));
   const [row] = await db.update(productsTable).set({ ...patch, updatedAt: new Date() }).where(eq(productsTable.id, productId)).returning(); res.json(row);
 });

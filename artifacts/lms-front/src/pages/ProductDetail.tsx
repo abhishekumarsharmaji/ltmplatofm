@@ -4,11 +4,12 @@ import {
   useGetDigitalProduct, 
   useAcquireDigitalProduct, 
   useGetSession,
+  useListStudentDigitalProducts,
   getGetDigitalProductQueryKey,
   getListStudentDigitalProductsQueryKey
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, AlertCircle, Download, FileText, Package } from "lucide-react";
+import { AlertCircle, Download, FileText, Package, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function formatBytes(bytes: number, decimals = 2) {
@@ -27,12 +28,16 @@ export default function ProductDetail() {
   const queryClient = useQueryClient();
   const { data: session } = useGetSession();
   const isAuthenticated = session?.authenticated;
+  const { data: ownedProducts } = useListStudentDigitalProducts({
+    query: { enabled: Boolean(isAuthenticated) },
+  });
   
   const { data: product, isLoading, isError } = useGetDigitalProduct(productId, { 
     query: { enabled: !!productId, queryKey: getGetDigitalProductQueryKey(productId) } 
   });
   
   const acquireProduct = useAcquireDigitalProduct();
+  const isOwned = ownedProducts?.some((item) => item.id === productId) ?? false;
 
   const handleAcquire = () => {
     acquireProduct.mutate({ productId } as any, {
@@ -75,7 +80,11 @@ export default function ProductDetail() {
               
               <div className="lg:col-span-7 space-y-12">
                 <div className="relative aspect-square rounded-lg overflow-hidden bg-[#FAFAFA] border border-[#E5E5E5] flex items-center justify-center shadow-sm">
-                  <Package className="w-32 h-32 text-primary/20" />
+                  {product.coverImageUrl ? (
+                    <img src={product.coverImageUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <Package className="w-32 h-32 text-primary/20" />
+                  )}
                   <span className="absolute top-6 left-6 bg-white/80 backdrop-blur-md border border-[#E5E5E5] text-black font-bold uppercase tracking-wider text-[12px] px-3 py-1 rounded">
                     {product.subtype || product.type}
                   </span>
@@ -137,17 +146,17 @@ export default function ProductDetail() {
                         <span>Instant digital download</span>
                       </li>
                       <li className="flex items-center gap-3 text-[14px] text-[#394649]">
-                        <CheckCircle2 className="w-5 h-5 text-primary" />
-                        <span>Lifetime updates included</span>
+                        <FileText className="w-5 h-5 text-primary" />
+                        <span>{product.files.length} included {product.files.length === 1 ? "file" : "files"}</span>
                       </li>
                       <li className="flex items-center gap-3 text-[14px] text-[#394649]">
-                        <CheckCircle2 className="w-5 h-5 text-primary" />
-                        <span>Commercial use license</span>
+                        <ShieldCheck className="w-5 h-5 text-primary" />
+                        <span>Downloads available only from your account</span>
                       </li>
                     </ul>
                     
                     <div className="pt-4">
-                      {product.acquiredAt ? (
+                      {isOwned ? (
                         <Button 
                           onClick={() => setLocation(`/dashboard/student/products/${product.id}`)}
                           className="w-full h-[54px] bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)]"

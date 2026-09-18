@@ -148,7 +148,7 @@ export function CreatorProductManage({ productId }: { productId: number }) {
           </ProductFormDialog>
           <Button 
             onClick={handlePublishToggle}
-            disabled={(!readiness?.isReady && product.status !== "published") || publishProduct.isPending || unpublishProduct.isPending}
+            disabled={(!readiness?.ready && product.status !== "published") || publishProduct.isPending || unpublishProduct.isPending}
             className={product.status === "published" ? "bg-[#FFF0ED] text-[#E53E3E] hover:bg-[#FFE4DE]" : "bg-primary text-white hover:bg-[#10A364] shadow-[0_4px_14px_rgba(21,207,116,0.25)]"}
           >
             {product.status === "published" ? "Unpublish" : "Publish Product"}

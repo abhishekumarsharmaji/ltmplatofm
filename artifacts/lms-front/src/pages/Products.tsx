@@ -79,7 +79,11 @@ export default function Products() {
                 <Link key={product.id} href={`/products/${product.id}`}>
                   <div className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-shadow duration-300 flex flex-col h-full cursor-pointer overflow-hidden">
                     <div className="relative aspect-square overflow-hidden bg-[#FAFAFA] flex items-center justify-center">
-                      <Package className="w-16 h-16 text-primary/30 group-hover:scale-110 transition-transform duration-500" />
+                      {product.coverImageUrl ? (
+                        <img src={product.coverImageUrl} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      ) : (
+                        <Package className="w-16 h-16 text-primary/30 group-hover:scale-110 transition-transform duration-500" />
+                      )}
                       <span className="absolute top-3 left-3 bg-white/80 backdrop-blur-md border border-[#E5E5E5] text-black font-bold uppercase text-[10px] tracking-wider px-2 py-1 rounded">
                         {product.subtype || product.type}
                       </span>
@@ -89,6 +93,7 @@ export default function Products() {
                       <h3 className="text-[16px] font-bold text-black leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
                         {product.title}
                       </h3>
+                      {product.shortSummary && <p className="line-clamp-2 text-[13px] leading-relaxed text-[#4D4D4D]">{product.shortSummary}</p>}
                       
                       <div className="mt-auto pt-4 flex items-center justify-between border-t border-[#E5E5E5]">
                         <span className="font-bold text-[18px] text-black">Free</span>

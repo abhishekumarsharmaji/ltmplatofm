@@ -29,7 +29,9 @@ import { useToast } from "@/hooks/use-toast";
 
 const schema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
-  description: z.string().optional(),
+  description: z.string().min(1, "Add a description before publishing"),
+  shortSummary: z.string().max(180, "Keep the summary under 180 characters").optional(),
+  coverImageUrl: z.union([z.literal(""), z.string().url("Enter a valid image URL")]).optional(),
   subtype: z.string().optional(),
 });
 
@@ -39,7 +41,7 @@ export function ProductFormDialog({
   children 
 }: { 
   type: "course" | "digital"; 
-  product?: { id: number; title: string; description: string; subtype?: string };
+  product?: { id: number; title: string; description: string; shortSummary?: string | null; coverImageUrl?: string | null; subtype?: string | null };
   children: React.ReactNode 
 }) {
   const [open, setOpen] = useState(false);
@@ -53,6 +55,8 @@ export function ProductFormDialog({
     defaultValues: {
       title: product?.title || "",
       description: product?.description || "",
+      shortSummary: product?.shortSummary || "",
+      coverImageUrl: product?.coverImageUrl || "",
       subtype: product?.subtype || "",
     },
   });
@@ -62,6 +66,8 @@ export function ProductFormDialog({
       form.reset({
         title: product.title,
         description: product.description,
+        shortSummary: product.shortSummary || "",
+        coverImageUrl: product.coverImageUrl || "",
         subtype: product.subtype || "",
       });
     }
@@ -126,9 +132,24 @@ export function ProductFormDialog({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-[14px] font-bold text-[#394649]">Description (optional)</Label>
+            <Label htmlFor="description" className="text-[14px] font-bold text-[#394649]">Description</Label>
             <Input id="description" {...form.register("description")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
+            {form.formState.errors.description && <p className="text-[13px] font-medium text-[#E53E3E]">{form.formState.errors.description.message as string}</p>}
           </div>
+          {type === "digital" && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="shortSummary" className="text-[14px] font-bold text-[#394649]">Short Summary</Label>
+                <Input id="shortSummary" placeholder="A quick description for marketplace cards" {...form.register("shortSummary")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
+                {form.formState.errors.shortSummary && <p className="text-[13px] font-medium text-[#E53E3E]">{form.formState.errors.shortSummary.message as string}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="coverImageUrl" className="text-[14px] font-bold text-[#394649]">Cover Image URL (optional)</Label>
+                <Input id="coverImageUrl" placeholder="https://example.com/cover.jpg" {...form.register("coverImageUrl")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
+                {form.formState.errors.coverImageUrl && <p className="text-[13px] font-medium text-[#E53E3E]">{form.formState.errors.coverImageUrl.message as string}</p>}
+              </div>
+            </>
+          )}
           {type === "digital" && (
             <div className="space-y-2">
               <Label htmlFor="subtype" className="text-[14px] font-bold text-[#394649]">Product Type</Label>
@@ -148,7 +169,7 @@ export function ProductFormDialog({
             </div>
           )}
           <div className="rounded-lg border border-[#E5E5E5] bg-[#FAFAFA] p-4 text-[13px] text-[#4D4D4D]">
-            All content on CoreSkils is distributed for free. Price setup is fully automated.
+            Digital products are free to acquire in this version of CoreSkils.
           </div>
           <div className="pt-2">
             <Button type="submit" disabled={isPending} className="w-full h-11 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
