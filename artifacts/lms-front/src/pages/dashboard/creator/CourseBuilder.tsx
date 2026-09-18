@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { LessonVideoUpload } from "@/components/dashboard/LessonVideoUpload";
+import { LessonResourceUpload } from "@/components/dashboard/LessonResourceUpload";
 import { LiveClassesTab, LiveClassFormDialog } from "@/components/dashboard/LiveClassesTab";
 
 export function CourseBuilder({
@@ -649,6 +650,7 @@ function ModuleItem({ module, index, total, onMove, productId }: any) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleAddLesson} className="cursor-pointer font-medium text-[13px]"><Plus className="w-4 h-4 mr-2" /> Add Lesson</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsLiveClassFormOpen(true)} className="cursor-pointer font-medium text-[13px]"><Video className="w-4 h-4 mr-2" /> Schedule Live Class</DropdownMenuItem>
               <DropdownMenuItem
                 className="text-[#E53E3E] focus:text-[#E53E3E] focus:bg-red-50 cursor-pointer font-medium text-[13px]"
                 onClick={() => {
@@ -666,6 +668,9 @@ function ModuleItem({ module, index, total, onMove, productId }: any) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <LiveClassFormDialog productId={productId} defaultModuleId={module.id} open={isLiveClassFormOpen} onOpenChange={setIsLiveClassFormOpen}>
+            <span className="hidden" />
+          </LiveClassFormDialog>
         </div>
       </div>
 
@@ -700,6 +705,7 @@ function LessonItem({ lesson, index, total, onMove, productId }: any) {
 
   const [isEditing, setIsEditing] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [showResources, setShowResources] = useState(false);
   const [title, setTitle] = useState(lesson.title);
   const [description, setDescription] = useState(lesson.description || "");
   const [isPreview, setIsPreview] = useState(lesson.isPreview || false);
@@ -780,6 +786,9 @@ function LessonItem({ lesson, index, total, onMove, productId }: any) {
         </div>
 
         <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+          <Button aria-label={`Manage resources for ${lesson.title}`} variant="ghost" size="icon" onClick={() => setShowResources(!showResources)} className={`h-10 w-10 ${showResources ? 'text-primary bg-[#E3F9EF]' : 'text-[#9794AA] hover:text-black'}`}>
+            <FileText className="w-4 h-4" />
+          </Button>
           <Button aria-label={`Manage video for ${lesson.title}`} variant="ghost" size="icon" onClick={() => setShowVideo(!showVideo)} className={`h-10 w-10 ${showVideo ? 'text-primary bg-[#E3F9EF]' : 'text-[#9794AA] hover:text-black'}`}>
             <Video className="w-4 h-4" />
           </Button>
@@ -810,6 +819,12 @@ function LessonItem({ lesson, index, total, onMove, productId }: any) {
       {showVideo && (
         <div className="mt-4 pt-4 border-t border-[#E5E5E5] animate-in fade-in slide-in-from-top-2">
           <LessonVideoUpload lesson={lesson} productId={productId} />
+        </div>
+      )}
+
+      {showResources && (
+        <div className="mt-4 pt-4 border-t border-[#E5E5E5] animate-in fade-in slide-in-from-top-2">
+          <LessonResourceUpload lesson={lesson} productId={productId} />
         </div>
       )}
     </div>
