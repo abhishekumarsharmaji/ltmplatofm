@@ -13,15 +13,17 @@ export default function Home() {
   const { data: courses = [], isLoading: isLoadingCourses } = useMarketplaceCourses();
   const { data: categories = [], isLoading: isLoadingCategories } = useListCategories();
 
-  // Filter courses by category if not featured
+  // The active chip filters server-side by category id; "featured" shows the unfiltered list.
+  const activeCategoryId = categories.find(c => c.slug === activeCategory)?.id;
+  const filteredQuery = useMarketplaceCourses(
+    activeCategoryId ? { category: String(activeCategoryId) } : {},
+    { query: { enabled: Boolean(activeCategoryId) } }
+  );
   const displayCourses = useMemo(() => {
-    if (activeCategory === "featured") {
-      return courses.slice(0, 8); // Max 8
-    }
-    const cat = categories.find(c => c.slug === activeCategory);
-    if (!cat) return courses.slice(0, 8);
-    return courses.slice(0, 8);
-  }, [courses, categories, activeCategory]);
+    const source = activeCategoryId ? (filteredQuery.data ?? []) : courses;
+    return source.slice(0, 8); // Max 8
+  }, [courses, filteredQuery.data, activeCategoryId]);
+  const isLoadingDisplay = activeCategoryId ? filteredQuery.isLoading : isLoadingCourses;
 
   // Derived stats
   const totalCourses = courses.length;

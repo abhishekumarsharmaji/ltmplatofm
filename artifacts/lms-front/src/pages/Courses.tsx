@@ -1,13 +1,44 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Input } from "@/components/ui/input";
-import { Link } from "wouter";
+import { Link, useSearchParams } from "wouter";
 import { Search, BookOpen, AlertCircle } from "lucide-react";
 import { useMarketplaceCourses, useListCategories } from "@workspace/api-client-react";
 
 export default function Courses() {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
+  // Filters live in the URL (?q=&category=) so the navbar search and shared links work.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const search = (searchParams.get("q") ?? "").trim();
+  const category = searchParams.get("category") ?? "";
+  const [searchInput, setSearchInput] = useState(search);
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  const updateFilters = (next: { q?: string; category?: string }) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      for (const [key, value] of Object.entries(next)) {
+        if (value) params.set(key, value);
+        else params.delete(key);
+      }
+      return params;
+    }, { replace: true });
+  };
+
+  // Debounce typing before it hits the URL and the API.
+  useEffect(() => {
+    if (searchInput.trim() === search) return;
+    const handle = setTimeout(() => updateFilters({ q: searchInput.trim() }), 300);
+    return () => clearTimeout(handle);
+  }, [searchInput, search]);
+
+  const setCategory = (value: string) => updateFilters({ category: value });
+  const clearFilters = () => {
+    setSearchInput("");
+    updateFilters({ q: "", category: "" });
+  };
   
   const queryParams = { 
     ...(search ? { q: search } : {}),
@@ -40,8 +71,9 @@ export default function Courses() {
               <Input 
                 placeholder="What do you want to learn today?" 
                 className="pl-12 h-14 bg-white border-[#E5E5E5] text-[16px] text-black rounded-full shadow-sm focus-visible:ring-primary/50"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                aria-label="Search courses"
               />
             </div>
             
@@ -59,9 +91,9 @@ export default function Courses() {
               {categories.map(cat => (
                 <button 
                   key={cat.id}
-                  onClick={() => setCategory(cat.slug)}
+                  onClick={() => setCategory(String(cat.id))}
                   className={`px-5 py-2 rounded-full text-[14px] font-medium transition-colors border ${
-                    category === cat.slug 
+                    category === String(cat.id) 
                       ? "bg-primary border-primary text-white" 
                       : "bg-white border-[#DADADA] text-[#394649] hover:border-primary"
                   }`}
@@ -101,7 +133,7 @@ export default function Courses() {
               </p>
               <button 
                 className="mt-6 px-6 py-2 border border-[#DADADA] text-[#394649] hover:bg-gray-50 rounded-md font-medium"
-                onClick={() => { setSearch(""); setCategory(""); }}
+                onClick={clearFilters}
               >
                 Clear all filters
               </button>
