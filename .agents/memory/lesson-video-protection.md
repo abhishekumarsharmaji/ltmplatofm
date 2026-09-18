@@ -17,6 +17,11 @@ fullscreen on the wrapper). Treat the gate as a browser-behaviour filter, never 
 enrolled student copying the R2 link from DevTools within the TTL) needs Cloudflare Stream / HLS + DRM,
 which the user has not opted into.
 
+**DRM decision (2026-09-18):** User asked about Netflix-style "black screen on recording", was told it needs a licensed
+DRM provider (recommended VdoCipher for India/ed-tech; Mux as alternative; Windows Chrome/Firefox never blacks out
+even with DRM) and chose **not now** — current deterrents are enough. Do not re-pitch DRM unprompted; if it comes
+back, start with the VdoCipher free trial and keep the direct-to-R2 upload flow (import from R2 into the provider).
+
 **Verified behaviour (Sept 2026, Chromium via Playwright):**
 - Chromium keeps requesting the API URL for later byte ranges (seeks after the signed link expired got a fresh
   307 and playback continued) — so a short TTL does not break Chrome playback. The player's error-recovery
