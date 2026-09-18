@@ -9,7 +9,10 @@
     "dashboard": "Dashboard",
     "login": "Log in",
     "startFree": "Start Free",
-    "join": "Join"
+    "join": "Join",
+    "logout": "Log out",
+    "accountMenu": "Account menu",
+    "logoutFailed": "Could not log out. Please try again."
   },
   "seo": {
     "defaultDescription": "Online courses, exams, and verified certificates — learn at your own pace.",
