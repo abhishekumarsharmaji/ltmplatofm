@@ -10,6 +10,7 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
+- `GitHub Auto Sync` workflow (`scripts/github-sync.sh`) mirrors local `master` → `main` on github.com/abhishekumarsharmaji/ltmplatofm every 2 min while the workspace runs; needs the `GITHUB_TOKEN` secret (fine-grained, Contents read/write). It never overwrites commits made directly on GitHub — pull those in the Git pane first.
 
 ## Stack
 
