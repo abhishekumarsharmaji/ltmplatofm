@@ -33,7 +33,8 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Product name: **CoreSkils** (exact spelling, one “l”); official domain: `coreskils.com`.
+- Online learning marketplace and creator platform with courses, video lessons, live classes, digital products, and student/creator/admin dashboards.
 
 ## User preferences
 

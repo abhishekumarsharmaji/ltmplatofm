@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "BlVVUCvz3qCpGkF2TIiXT"
+uri = "file://CoreSkils-Brand-Kit.zip"
+type = "unspecified"
+title = "CoreSkils Brand Kit"
+description = "Logo SVGs, white variants, favicon, app icons, editable social-share artwork, 1200×630 OG image, and a concise usage guide."
+logical_id = "a4635734-eba9-4964-a163-3ab0d332e062"
+content_hash = "sha256:7a90c92b90d61a69eae99120ff0338bf0b615a69e1bd9d8c7c9386bd6fbe6247"
+size = 245992
+mtime_ms = 1789760392068
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:8374545a-039d-455a-8203-cca588963f72/a4635734-eba9-4964-a163-3ab0d332e062/0f4da281-73ff-4d93-b2bc-48342b9e40b5"
+storage_version_token = "1789760423397279"
+content_type = "application/octet-stream"
