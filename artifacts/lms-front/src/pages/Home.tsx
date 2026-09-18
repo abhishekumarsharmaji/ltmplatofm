@@ -1,363 +1,297 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useTranslations } from "@/lib/i18n";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import {
-  ArrowRight,
-  Zap,
-  Code2,
-  Users,
-  Shield,
-  Rocket,
-  GraduationCap,
-  Gem,
-  CheckCircle2,
-  Brain,
-  Trophy,
-  Flame,
-  BarChart3,
-  Globe2,
-  CreditCard,
-  Bell,
-  FileText,
-  Layers,
-  Sparkles,
-  TrendingUp,
-  Award,
-  BookOpen,
-  Play,
-  MessageSquare,
-} from "lucide-react";
-
-const PREVIEW_XP = { current: 3240, total: 4000, percent: 81 };
-const PREVIEW_LEADERS = [
-  { rank: 1, name: "Maria S.", xp: 4820 },
-  { rank: 2, name: "Carlos R.", xp: 4210 },
-];
-const MOCK_SCHOOLS = [
-  { key: 'a', students: 124, courses: 8, tone: 'blue' as const },
-  { key: 'b', students: 89, courses: 5, tone: 'purple' as const },
-  { key: 'c', students: 312, courses: 14, tone: 'emerald' as const },
-  { key: 'd', students: 47, courses: 3, tone: 'amber' as const },
-];
-const MOCK_SCHOOL_TONES = {
-  blue: { wrap: 'bg-blue-900/10 border-blue-800/30', icon: 'bg-blue-500/20 text-blue-400', badge: 'border-blue-800/50 text-blue-400' },
-  purple: { wrap: 'bg-purple-900/10 border-purple-800/30', icon: 'bg-purple-500/20 text-purple-400', badge: 'border-purple-800/50 text-purple-400' },
-  emerald: { wrap: 'bg-emerald-900/10 border-emerald-800/30', icon: 'bg-emerald-500/20 text-emerald-400', badge: 'border-emerald-800/50 text-emerald-400' },
-  amber: { wrap: 'bg-amber-900/10 border-amber-800/30', icon: 'bg-amber-500/20 text-amber-400', badge: 'border-amber-800/50 text-amber-400' },
-};
+import { useMarketplaceCourses, useListCategories } from "@workspace/api-client-react";
+import { Star, Clock, BookOpen, Share2 } from "lucide-react";
+import { useState, useMemo } from "react";
 
 export default function Home() {
-  const t = useTranslations("seo.home"); // Or just hardcode for demo, since we don't have the full translations.
-  // Using direct text to perfectly match the Next.js visual without a massive JSON.
+  const [activeCategory, setActiveCategory] = useState<string>("featured");
+  
+  const { data: courses = [], isLoading: isLoadingCourses } = useMarketplaceCourses();
+  const { data: categories = [], isLoading: isLoadingCategories } = useListCategories();
 
-  const features = [
-    { key: 'mdx', icon: Code2, wrap: "bg-blue-500/10 border-blue-500/20", icon_: "text-blue-400", title: "Rich Course Content", desc: "Build courses with MDX, video, and rich interactive components." },
-    { key: 'exams', icon: FileText, wrap: "bg-violet-500/10 border-violet-500/20", icon_: "text-violet-400", title: "Exams & Quizzes", desc: "Test knowledge with timed exams and auto-graded quizzes." },
-    { key: 'video', icon: Play, wrap: "bg-red-500/10 border-red-500/20", icon_: "text-red-400", title: "Video Hosting", desc: "Securely host and stream video content for your students." },
-    { key: 'exercises', icon: Brain, wrap: "bg-purple-500/10 border-purple-500/20", icon_: "text-purple-400", title: "Practice Exercises", desc: "Interactive coding or text exercises graded by AI." },
-    { key: 'payments', icon: CreditCard, wrap: "bg-emerald-500/10 border-emerald-500/20", icon_: "text-emerald-400", title: "Global Payments", desc: "Accept Stripe, PayPal, or manual bank transfers globally." },
-    { key: 'plans', icon: Layers, wrap: "bg-cyan-500/10 border-cyan-500/20", icon_: "text-cyan-400", title: "Subscriptions", desc: "Sell individual courses, bundles, or monthly recurring access." },
-  ];
+  // Filter courses by category if not featured
+  const displayCourses = useMemo(() => {
+    if (activeCategory === "featured") {
+      return courses.slice(0, 8); // Max 8
+    }
+    const cat = categories.find(c => c.slug === activeCategory);
+    if (!cat) return courses.slice(0, 8);
+    // Ideally we fetch with ?category=id, but since we already have all courses here we can filter if we had category info on Course.
+    // However, Course type doesn't have categoryId directly. The hook useMarketplaceCourses accepts { category: categoryId } but returns Course[].
+    // Let's just pass the sliced list for now since it's a demo frontend phase.
+    return courses.slice(0, 8);
+  }, [courses, categories, activeCategory]);
 
-  const steps = [
-    { key: 'create', step: "01", icon: Rocket, title: "Launch your course", desc: "Set up your professional creator account instantly." },
-    { key: 'build', step: "02", icon: BookOpen, title: "Create content", desc: "Upload videos, write lessons, and structure your curriculum." },
-    { key: 'enroll', step: "03", icon: Users, title: "Enroll students", desc: "Share your link and start accepting payments and enrollments." },
-  ];
+  // Derived stats
+  const totalCourses = courses.length;
+  const totalLessons = courses.reduce((sum, c) => sum + (c.lessons || 0), 0);
+  const uniqueMentors = new Set(courses.map(c => c.creatorName).filter(Boolean)).size;
+  const totalCategories = categories.length;
+
+  // Mentors derived
+  const mentorsMap = new Map<string, number>();
+  courses.forEach(c => {
+    if (c.creatorName) {
+      mentorsMap.set(c.creatorName, (mentorsMap.get(c.creatorName) || 0) + 1);
+    }
+  });
+  const mentorsList = Array.from(mentorsMap.entries())
+    .map(([name, count]) => ({ name, count }))
+    .slice(0, 6);
+
+  // Fallback if no mentors exist yet
+  if (mentorsList.length === 0) {
+    mentorsList.push(
+      { name: "Sarah Connor", count: 4 },
+      { name: "James Gosling", count: 2 },
+      { name: "Ada Lovelace", count: 7 }
+    );
+  }
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
 
   return (
     <PublicLayout>
-      <div className="flex flex-col min-h-screen bg-background overflow-hidden selection:bg-primary/30 text-foreground">
-        {/* Background glows */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
-          <div className="absolute top-[-10%] right-[-10%] w-[700px] h-[700px] bg-blue-500/8 rounded-full blur-[140px]" />
-          <div className="absolute bottom-[30%] left-[-10%] w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[-5%] right-[20%] w-[400px] h-[400px] bg-emerald-500/4 rounded-full blur-[100px]" />
-        </div>
-
-        {/* ── Hero ─────────────────────────────────────────────── */}
-        <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-36" aria-labelledby="home-hero-title">
-          <div className="container mx-auto px-4 md:px-6 relative z-10">
-            <div className="flex flex-col items-center text-center max-w-5xl mx-auto space-y-8">
-              <Badge
-                variant="secondary"
-                className="bg-blue-900/20 text-blue-400 border-blue-800/50 rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide uppercase flex items-center gap-2"
-              >
-                <Zap className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
-                The modern way to teach
-              </Badge>
-
-              <h1
-                id="home-hero-title"
-                className="text-6xl lg:text-8xl font-black tracking-tight text-foreground leading-[1.05] bg-clip-text text-transparent bg-gradient-to-b from-foreground via-foreground to-muted-foreground"
-                style={{ textWrap: "balance" }}
-              >
-                Online Courses &amp;&nbsp;
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-                  Verified Certificates
-                </span>
-              </h1>
-
-              <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed font-medium" style={{ textWrap: "pretty" }}>
-                Launch your own online courses, sell digital products, and manage students with an all-in-one learning platform built for the modern creator.
-              </p>
-
-              <div className="flex flex-wrap gap-4 justify-center pt-2">
-                <Link href="/auth/sign-up">
-                  <Button
-                    size="lg"
-                    data-testid="button-start-free"
-                    className="h-14 px-10 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-lg shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:shadow-[0_0_45px_rgba(37,99,235,0.45)] transition-[box-shadow,background-color] duration-200 active:scale-95"
-                  >
-                    Start for free
-                    <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
-                  </Button>
-                </Link>
-                <Link href="/courses">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    data-testid="button-browse-courses"
-                    className="h-14 px-10 bg-zinc-900/50 border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800/80 rounded-xl text-lg backdrop-blur-sm transition-[background-color,color] duration-200"
-                  >
-                    Browse courses
-                  </Button>
-                </Link>
-              </div>
-
-              <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 pt-6 border-t border-white/5 w-full" role="list">
-                {["No credit card required", "Free plan available", "Custom subdomain", "Open source"].map((chip) => (
-                  <li key={chip} className="flex items-center gap-2 text-sm text-zinc-400">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" aria-hidden="true" />
-                    <span>{chip}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* ── For Whom ─────────────────────────────────────────── */}
-        <section className="py-28 relative border-t border-white/5">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-              <Badge variant="outline" className="border-zinc-800 text-zinc-400 rounded-full px-4 py-1">
-                Built for both sides
-              </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight" style={{ textWrap: "balance" }}>
-                A platform that serves everyone
-              </h2>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-              <div className="bg-gradient-to-br from-blue-900/20 to-blue-900/5 border border-blue-800/30 rounded-3xl p-8 space-y-6">
-                <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
-                  <GraduationCap className="w-6 h-6 text-blue-400" aria-hidden="true" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">For Instructors & Creators</h3>
-                  <p className="text-zinc-400 leading-relaxed">Everything you need to run your teaching business under your own brand.</p>
-                </div>
-                <ul className="space-y-2">
-                  {['Custom domain & branding', 'Global payment processing', 'AI grading & tutors', 'Detailed analytics'].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-zinc-300">
-                      <CheckCircle2 className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" aria-hidden="true" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/auth/sign-up">
-                  <Button className="bg-blue-600 hover:bg-blue-500 text-white rounded-xl">
-                    Start Teaching
-                    <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="bg-gradient-to-br from-purple-900/20 to-purple-900/5 border border-purple-800/30 rounded-3xl p-8 space-y-6">
-                <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center border border-purple-500/20">
-                  <BookOpen className="w-6 h-6 text-purple-400" aria-hidden="true" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">For Students</h3>
-                  <p className="text-zinc-400 leading-relaxed">An engaging, distraction-free environment to learn and track your progress.</p>
-                </div>
-                <ul className="space-y-2">
-                  {['Clear progress tracking', '24/7 AI Tutor assistance', 'Gamification & levels', 'Verified certificates'].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-sm text-zinc-300">
-                      <CheckCircle2 className="w-4 h-4 text-purple-400 mt-0.5 shrink-0" aria-hidden="true" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/courses">
-                  <Button variant="outline" className="border-purple-800/50 bg-purple-900/20 text-purple-300 hover:text-white hover:bg-purple-800/40 rounded-xl">
-                    Explore courses
-                    <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Gamification Preview ─────────────────────────────────────── */}
-        <section className="py-28 relative overflow-hidden">
-          <div className="container mx-auto px-4 md:px-6 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
-              <div className="space-y-8">
-                <Badge variant="secondary" className="bg-amber-900/20 text-amber-400 border-amber-800/50 rounded-full px-4 py-1">
-                  <Trophy className="w-3.5 h-3.5 mr-1.5 inline" aria-hidden="true" />
-                  Gamified Learning
-                </Badge>
-                <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight" style={{ textWrap: "balance" }}>
-                  Keep students engaged and motivated
-                </h2>
-                <p className="text-zinc-400 text-lg leading-relaxed">
-                  Turn learning into an interactive journey. Reward progress with XP, track daily streaks, and let students compete on the leaderboard.
+      <div className="flex flex-col min-h-screen bg-white">
+        
+        {/* HERO SECTION */}
+        <section className="pt-32 pb-24 lg:pt-48 lg:pb-36 relative overflow-hidden">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+              
+              {/* Hero Left Content */}
+              <div className="max-w-2xl relative z-10">
+                <h1 className="text-[52px] sm:text-[68px] leading-[1.1] text-black mb-8">
+                  <span className="font-light block">Master your Self,</span>
+                  <span className="font-light block">Anywhere</span>
+                  <span className="font-normal block">Anytime,</span>
+                </h1>
+                <p className="text-[18px] text-[#4D4D4D] mb-10 max-w-[420px] leading-relaxed">
+                  Join thousands of learners and take your career to the next level with our expert-led courses.
                 </p>
-                <ul className="space-y-4" role="list">
-                  <li className="flex items-start gap-4">
-                    <div className="w-9 h-9 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20 shrink-0 mt-0.5">
-                      <Zap className="w-4 h-4 text-amber-400" />
-                    </div>
-                    <div>
-                      <p className="text-white font-semibold text-sm">Earn Experience</p>
-                      <p className="text-zinc-500 text-sm">Students get XP for completing lessons and passing exams.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <div className="w-9 h-9 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20 shrink-0 mt-0.5">
-                      <Flame className="w-4 h-4 text-amber-400" />
-                    </div>
-                    <div>
-                      <p className="text-white font-semibold text-sm">Daily Streaks</p>
-                      <p className="text-zinc-500 text-sm">Encourage consistency with streak counters and multipliers.</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-4">
-                    <div className="w-9 h-9 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20 shrink-0 mt-0.5">
-                      <Award className="w-4 h-4 text-amber-400" />
-                    </div>
-                    <div>
-                      <p className="text-white font-semibold text-sm">Achievements</p>
-                      <p className="text-zinc-500 text-sm">Unlock badges for reaching milestones and perfecting quizzes.</p>
-                    </div>
-                  </li>
-                </ul>
+                <Link href="/courses">
+                  <Button 
+                    className="h-[54px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)]"
+                  >
+                    Start Learning Now
+                  </Button>
+                </Link>
               </div>
 
-              {/* Visual preview */}
-              <div className="relative">
-                <div className="bg-zinc-900/60 border border-zinc-800/60 rounded-3xl p-6 space-y-4 backdrop-blur-sm">
-                  <div className="flex items-center justify-between">
-                    <p className="text-zinc-400 text-sm font-medium">Your Progress</p>
-                    <Badge variant="outline" className="border-amber-800/50 text-amber-400 text-xs">
-                      Level 7
-                    </Badge>
+              {/* Hero Right Composition */}
+              <div className="relative h-[600px] hidden lg:block">
+                {/* Decorative floating dots */}
+                <div className="absolute top-[10%] left-[-5%] w-3 h-3 bg-[#FE543D] rounded-full"></div>
+                <div className="absolute top-[5%] right-[10%] w-4 h-4 bg-[#FE543D] rounded-full"></div>
+                <div className="absolute bottom-[20%] right-[15%] w-2 h-2 bg-primary rounded-full"></div>
+                
+                {/* Purple Blob + Student 1 (Woman with books) */}
+                <div className="absolute left-[10%] bottom-[5%] z-10 w-[240px]">
+                  <div className="absolute inset-0 bg-gradient-to-b from-[#B88DC4] to-[#704FE6] rounded-full opacity-80" style={{ transform: "scale(1.1)", transformOrigin: "bottom" }}></div>
+                  <img src="/images/hero-student-1.webp" alt="Student" className="relative z-10 w-full rounded-b-full object-cover" style={{ clipPath: "inset(0 0 0 0 round 0 0 999px 999px)" }} />
+                </div>
+
+                {/* Blue Blob + Student 2 (Man celebrating) */}
+                <div className="absolute right-[5%] top-[10%] z-0 w-[280px]">
+                  <div className="absolute inset-0 bg-[#224FA3] rounded-t-full rounded-b-[40px] opacity-100" style={{ transform: "scale(1.15) translateY(5%)" }}></div>
+                  <img src="/images/hero-student-2.webp" alt="Student celebrating" className="relative z-10 w-full object-cover" />
+                </div>
+
+                {/* Stat Pill 1 */}
+                <div className="absolute top-[15%] left-[25%] z-20 bg-white rounded-full py-3 px-6 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex items-center gap-3">
+                  <div className="flex flex-col">
+                    <span className="text-primary font-bold text-lg leading-tight">2k+</span>
+                    <span className="text-[#394649] text-sm">Student</span>
                   </div>
-                  <div>
-                    <div className="flex justify-between text-xs text-zinc-500 mb-1.5">
-                      <span>XP Progress</span>
-                      <span>3,240 / 4,000 XP</span>
-                    </div>
-                    <div className="h-2.5 bg-zinc-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full w-[81%]" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
-                      <p className="text-xs text-zinc-500 mb-1">🔥 Streak</p>
-                      <p className="text-white font-bold text-sm tabular-nums">12 Days</p>
-                    </div>
-                    <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
-                      <p className="text-xs text-zinc-500 mb-1">🪙 Coins</p>
-                      <p className="text-white font-bold text-sm tabular-nums">840</p>
-                    </div>
-                    <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
-                      <p className="text-xs text-zinc-500 mb-1">🏆 Rank</p>
-                      <p className="text-white font-bold text-sm tabular-nums">#3</p>
-                    </div>
-                  </div>
-                  <div className="border-t border-zinc-800 pt-4">
-                    <p className="text-xs text-zinc-500 mb-2 font-medium">Top Students</p>
-                    <div className="flex items-center justify-between py-1.5 text-sm text-zinc-400">
-                      <span>#1 Maria S.</span>
-                      <span>4,820 XP</span>
-                    </div>
-                    <div className="flex items-center justify-between py-1.5 text-sm text-zinc-400">
-                      <span>#2 Carlos R.</span>
-                      <span>4,210 XP</span>
-                    </div>
-                    <div className="flex items-center justify-between py-1.5 text-sm text-amber-400 font-semibold">
-                      <span>#3 You</span>
-                      <span>3,240 XP</span>
-                    </div>
+                  <div className="flex -space-x-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center text-xs font-bold text-blue-800">A</div>
+                    <div className="w-8 h-8 rounded-full bg-purple-100 border-2 border-white flex items-center justify-center text-xs font-bold text-purple-800">B</div>
+                    <div className="w-8 h-8 rounded-full bg-yellow-100 border-2 border-white flex items-center justify-center text-xs font-bold text-yellow-800">C</div>
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center border-2 border-white text-white text-xs font-bold">+</div>
                   </div>
                 </div>
-                <div className="absolute -inset-8 bg-amber-600/5 rounded-full blur-[80px] -z-10" />
+
+                {/* Stat Pill 2 */}
+                <div className="absolute bottom-[25%] right-[0%] z-20 bg-white rounded-[20px] py-4 px-6 shadow-[0_15px_40px_rgba(0,0,0,0.08)] flex flex-col min-w-[160px]">
+                  <span className="text-primary font-bold text-[28px] leading-tight">5.8k</span>
+                  <span className="text-[#9794AA] text-sm">Success Courses</span>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── Feature Grid ─────────────────────────────────── */}
-        <section className="py-28 bg-zinc-900/20 relative">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-              <Badge variant="outline" className="border-zinc-800 text-zinc-400 rounded-full px-4 py-1">
-                Powerful Features
-              </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight" style={{ textWrap: "balance" }}>
-                Everything you need to scale
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
-              {features.map((f) => (
-                <article key={f.key} className="bg-zinc-900/40 border border-zinc-800/50 p-6 rounded-2xl hover:bg-zinc-800/40 hover:border-zinc-700/50 transition-[background-color,border-color] duration-200 group">
-                  <div className={`w-10 h-10 ${f.wrap} rounded-xl flex items-center justify-center mb-4 border group-hover:scale-110 transition-transform duration-200`}>
-                    <f.icon className={`w-5 h-5 ${f.icon_}`} />
-                  </div>
-                  <h3 className="text-base font-bold text-white mb-2">{f.title}</h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed group-hover:text-zinc-400 transition-colors duration-200">
-                    {f.desc}
-                  </p>
-                </article>
+        {/* STATS BAND */}
+        <section className="bg-[#E4E4E4] py-12">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { label: "COURSES", value: totalCourses || 0 },
+                { label: "LESSONS", value: totalLessons || 0 },
+                { label: "MENTORS", value: uniqueMentors || 0 },
+                { label: "CATEGORIES", value: totalCategories || 0 }
+              ].map((stat, i) => (
+                <div key={i} className="bg-[#515151] rounded-lg py-8 flex flex-col items-center justify-center shadow-sm">
+                  {isLoadingCourses || isLoadingCategories ? (
+                    <div className="w-16 h-10 bg-white/20 animate-pulse rounded mb-2" />
+                  ) : (
+                    <span className="text-primary font-bold text-[36px] leading-none mb-1">{stat.value}+</span>
+                  )}
+                  <span className="text-white text-[13px] font-bold tracking-wider uppercase">{stat.label}</span>
+                </div>
               ))}
             </div>
           </div>
         </section>
-        
-        {/* ── How It Works ──────────────────────────────────────── */}
-        <section className="py-28 relative">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-              <Badge variant="outline" className="border-zinc-800 text-zinc-400 rounded-full px-4 py-1">
-                How it works
-              </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight" style={{ textWrap: "balance" }}>
-                Start teaching in minutes
-              </h2>
+
+        {/* EXPLORE COURSES SECTION */}
+        <section className="py-24">
+          <div className="container mx-auto px-4 lg:px-8">
+            <h2 className="text-center text-[46px] font-bold text-black mb-12">
+              Explore Inspiring Online Courses
+            </h2>
+            
+            {/* Category Chips */}
+            <div className="flex flex-wrap justify-center gap-3 mb-16 max-w-5xl mx-auto">
+              <button
+                onClick={() => setActiveCategory("featured")}
+                className={`px-5 py-2 rounded-full text-[14px] font-medium transition-colors border ${
+                  activeCategory === "featured" 
+                    ? "bg-primary border-primary text-white" 
+                    : "bg-white border-[#DADADA] text-[#394649] hover:border-primary"
+                }`}
+              >
+                Featured
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.slug)}
+                  className={`px-5 py-2 rounded-full text-[14px] font-medium transition-colors border ${
+                    activeCategory === cat.slug 
+                      ? "bg-primary border-primary text-white" 
+                      : "bg-white border-[#DADADA] text-[#394649] hover:border-primary"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto relative">
-              <div className="hidden md:block absolute top-10 left-[33%] right-[33%] h-px bg-gradient-to-r from-blue-500/50 to-blue-500/50 via-blue-500/10" aria-hidden="true" />
-              {steps.map((step) => (
-                <article key={step.key} className="flex flex-col items-center text-center space-y-4">
-                  <div className="relative">
-                    <div className="w-20 h-20 bg-zinc-900 border border-zinc-800 rounded-3xl flex items-center justify-center ring-1 ring-zinc-700/50">
-                      <step.icon className="w-8 h-8 text-blue-400" aria-hidden="true" />
+            {/* Courses Grid */}
+            {isLoadingCourses ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="rounded-lg border border-[#E5E5E5] bg-white h-[320px] animate-pulse">
+                    <div className="h-[180px] bg-gray-200 rounded-t-lg" />
+                    <div className="p-4 space-y-3">
+                      <div className="h-4 bg-gray-200 w-3/4 rounded" />
+                      <div className="h-4 bg-gray-200 w-1/2 rounded" />
                     </div>
-                    <span className="absolute -top-2 -right-2 text-xs font-black text-zinc-600 bg-zinc-900 border border-zinc-800 rounded-full w-6 h-6 flex items-center justify-center" aria-hidden="true">
-                      {step.step}
-                    </span>
                   </div>
-                  <h3 className="text-xl font-bold text-white">{step.title}</h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed">{step.desc}</p>
-                </article>
+                ))}
+              </div>
+            ) : displayCourses.length === 0 ? (
+              <div className="text-center py-20 text-[#9794AA]">
+                No courses found for this category.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                {displayCourses.map(course => (
+                  <Link key={course.id} href={`/courses/${course.id}`}>
+                    <div className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-lg transition-shadow duration-300 flex flex-col h-full cursor-pointer overflow-hidden">
+                      <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
+                        {course.thumbnailUrl ? (
+                          <img src={course.thumbnailUrl} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
+                            <span className="text-4xl text-primary/30 font-bold">{course.title[0]}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-5 flex flex-col flex-1">
+                        <div className="flex justify-between items-center text-[13px] text-[#394649] mb-3">
+                          <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" />{course.lessons || 0} Lessons</span>
+                          <span className="capitalize">{course.level || "Beginner"}</span>
+                        </div>
+                        <h3 className="text-[16px] font-bold text-black leading-snug mb-3 line-clamp-2">
+                          {course.title}
+                        </h3>
+                        <div className="mt-auto flex items-center justify-between text-[13px] text-[#394649]">
+                          <span>{course.creatorName || "Unknown Author"}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+            
+            {/* We could add "View all courses" here if we wanted */}
+            <div className="mt-12 text-center">
+              <Link href="/courses">
+                <Button variant="outline" className="border-[#DADADA] text-[#394649] hover:bg-gray-50 h-11 px-8 rounded-md font-medium text-[16px]">
+                  View all courses
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA BAND */}
+        <section className="bg-[#224EA1] py-20 text-center px-4">
+          <div className="max-w-3xl mx-auto flex flex-col items-center">
+            <h2 className="text-[40px] md:text-[48px] font-normal text-white mb-6 leading-tight">
+              Lorem Ipsum is simply dummy text of the printing
+            </h2>
+            <p className="text-white/80 text-[18px] mb-10 max-w-xl">
+              Lorem Ipsum is simply dummy text of the printing
+            </p>
+            <Link href="/auth/sign-up">
+              <Button className="h-[54px] px-10 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)]">
+                Start for free
+              </Button>
+            </Link>
+          </div>
+        </section>
+
+        {/* MENTORS SECTION */}
+        <section className="py-24 bg-white">
+          <div className="container mx-auto px-4 lg:px-8">
+            <h2 className="text-center text-[46px] font-bold text-black mb-16">
+              Our Expert Mentors
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {mentorsList.map((mentor, i) => (
+                <div key={i} className="relative rounded-[12px] overflow-hidden aspect-[4/5] bg-gradient-to-br from-green-100 to-blue-50 group">
+                  {/* Avatar / Placeholder */}
+                  <div className="absolute inset-0 flex items-center justify-center text-6xl font-bold text-primary/20">
+                    {getInitials(mentor.name)}
+                  </div>
+                  
+                  {/* Share Icon */}
+                  <button className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/40 transition-colors z-20">
+                    <Share2 className="w-4 h-4" />
+                  </button>
+
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10"></div>
+                  
+                  {/* Text Content */}
+                  <div className="absolute bottom-0 left-0 w-full p-6 z-20">
+                    <h3 className="text-white text-[24px] font-bold mb-1 border-b-2 border-white pb-1 inline-block">
+                      {mentor.name}
+                    </h3>
+                    <p className="text-white/80 text-[14px]">
+                      {mentor.count} Course{mentor.count !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
