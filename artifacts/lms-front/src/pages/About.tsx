@@ -41,13 +41,13 @@ export default function About() {
                 About Us
               </span>
               <h1 className="text-[48px] sm:text-[60px] leading-[1.1] text-black">
-                <span className="font-light block">Empowering creators to</span>
-                <span className="font-bold block">share knowledge globally</span>
+                <span className="font-light block">A marketplace for</span>
+                <span className="font-bold block">learning and teaching</span>
               </h1>
             </div>
             
             <div className="text-[18px] md:text-[20px] leading-relaxed text-[#4D4D4D] text-center max-w-3xl mx-auto">
-              We built this platform because we believe that anyone with knowledge to share should have access to world-class tools to teach, engage, and monetize their audience.
+              CoreSkils connects learners with independent instructors. Instructors can create, organize, and publish their own courses, while learners can discover practical knowledge in one accessible marketplace.
             </div>
             
             <div className="my-16 relative h-[400px] md:h-[500px] rounded-lg overflow-hidden border border-[#E5E5E5] bg-gray-100 shadow-sm">
@@ -60,16 +60,16 @@ export default function About() {
             
             <div className="grid md:grid-cols-2 gap-12 lg:gap-16">
               <div className="space-y-4">
-                <h2 className="text-[32px] font-bold text-black">Our Mission</h2>
+                <h2 className="text-[32px] font-bold text-black">Our mission</h2>
                 <p className="text-[16px] text-[#394649] leading-relaxed">
-                  Our mission is to democratize education technology. Traditional LMS platforms are often clunky, expensive, and difficult to set up. We wanted to create a solution that feels as polished as modern consumer apps, but packs the power needed to run a full-scale online academy.
+                  Our mission is to make practical education easier to publish and easier to access. We give independent instructors a structured course platform and give learners a clear way to find, enroll in, and complete courses.
                 </p>
               </div>
               
               <div className="space-y-4">
-                <h2 className="text-[32px] font-bold text-black">Why We Are Different</h2>
+                <h2 className="text-[32px] font-bold text-black">How the marketplace works</h2>
                 <p className="text-[16px] text-[#394649] leading-relaxed">
-                  Unlike marketplaces that own your audience, or basic website builders that lack real learning tools, we provide the best of both worlds. You own your data, your brand, and your audience, while giving your students a premium learning experience complete with AI assistance, gamification, and verified certificates.
+                  Courses on CoreSkils are created and managed by independent instructors. CoreSkils provides the technology for course publishing, structured lessons, learning resources, enrollment, and live classes; each instructor remains responsible for their own course content.
                 </p>
               </div>
             </div>
@@ -95,14 +95,14 @@ export default function About() {
         <section className="bg-[#224EA1] py-20 text-center px-4">
           <div className="max-w-3xl mx-auto flex flex-col items-center">
             <h2 className="text-[40px] md:text-[48px] font-normal text-white mb-6 leading-tight">
-              Join the Movement
+              Learn or teach on CoreSkils
             </h2>
             <p className="text-white/80 text-[18px] mb-10 max-w-xl">
-              Whether you are an independent creator launching your first course, or a large organization looking to migrate your internal training, we have the tools to support you at every scale.
+              Explore courses as a learner, or apply as an instructor to create and publish your own course.
             </p>
             <Link href="/auth/sign-up">
               <Button className="h-[54px] px-10 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)]">
-                Get Started
+                Create a free account
               </Button>
             </Link>
           </div>

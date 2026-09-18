@@ -17,7 +17,7 @@
     "home": "Home"
   },
   "footer": {
-    "description": "The modern platform for creating and exploring online courses. Learn at your own pace from anywhere.",
+    "description": "A learning marketplace where independent instructors publish courses and learners build practical skills at their own pace.",
     "explore": "Explore",
     "teach": "Teach",
     "account": "Account",
@@ -34,18 +34,18 @@
       "myLearning": "My learning"
     },
     "copyright": "Copyright © {year} {platform}. All rights reserved.",
-    "tagline": "Made for creators and their students."
+    "tagline": "Learn from independent instructors. Teach what you know."
   },
   "home": {
     "hero": {
-      "title1": "Master your Self,",
-      "title2": "Anywhere",
-      "title3": "Anytime,",
-      "subtitle": "Join thousands of learners and take your career to the next level with our expert-led courses.",
-      "startLearning": "Start Learning Now",
+      "title1": "Learn practical skills.",
+      "title2": "Teach what",
+      "title3": "you know.",
+      "subtitle": "Discover courses published by independent instructors, or create and list your own course on one trusted marketplace.",
+      "startLearning": "Explore Courses",
       "pills": {
-        "mentors": "Mentors",
-        "mentor": "Mentor",
+        "mentors": "Instructors",
+        "mentor": "Instructor",
         "categories": "Categories",
         "category": "Category",
         "lessons": "Lessons",
@@ -57,11 +57,11 @@
     "stats": {
       "courses": "COURSES",
       "lessons": "LESSONS",
-      "mentors": "MENTORS",
+      "mentors": "INSTRUCTORS",
       "categories": "CATEGORIES"
     },
     "courses": {
-      "title": "Explore Inspiring Online Courses",
+      "title": "Explore courses from independent instructors",
       "featured": "Featured",
       "viewAll": "View all courses",
       "empty": "No courses found for this category.",
@@ -70,13 +70,13 @@
       "lessons": "Lessons"
     },
     "cta": {
-      "title1": "Start your learning",
-      "title2": "journey today",
-      "subtitle": "Join our community of students and expert mentors to expand your skills.",
-      "button": "Start for free"
+      "title1": "Learn something new",
+      "title2": "or share what you know",
+      "subtitle": "Create a free learner account, or apply to publish your own courses as an instructor.",
+      "button": "Join CoreSkils"
     },
     "mentors": {
-      "title": "Our Expert Mentors",
+      "title": "Featured Instructors",
       "subtitleSingle": "{count} Course",
       "subtitlePlural": "{count} Courses"
     }

@@ -69,10 +69,10 @@ export default function Courses() {
           
           <div className="max-w-3xl mb-9 md:mb-12 text-center mx-auto">
             <h1 className="text-[32px] sm:text-[40px] md:text-[46px] leading-tight font-bold mb-4 text-black">
-              Explore Inspiring Online Courses
+              Find the right course for your next skill
             </h1>
             <p className="text-[#394649] text-[15px] sm:text-[17px] md:text-[18px]">
-              Join thousands of learners and take your career to the next level with our expert-led courses.
+              Browse courses created and published by independent instructors across the CoreSkils marketplace.
             </p>
           </div>
 
