@@ -32,7 +32,22 @@ import StudentDashboard from './pages/dashboard/StudentDashboard';
 import CreatorDashboard from './pages/dashboard/CreatorDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Autoscale deployments can briefly return 5xx while the API wakes up.
+      // Retry transient failures with a visible loading state instead of
+      // immediately replacing the page with an error.
+      retry: (failureCount, error) => {
+        const status = typeof error === "object" && error !== null && "status" in error
+          ? Number(error.status)
+          : 0;
+        return failureCount < 3 && (status === 0 || status === 429 || status >= 500);
+      },
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 5000),
+    },
+  },
+});
 
 function Router() {
   const Student = () => <ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>;

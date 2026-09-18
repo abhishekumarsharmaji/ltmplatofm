@@ -120,7 +120,14 @@ export default function Courses() {
             <div className="text-center py-20 bg-red-50 rounded-lg border border-red-100 text-red-600">
               <AlertCircle className="w-8 h-8 mx-auto mb-4" />
               <h3 className="text-xl font-bold mb-2">Error loading courses</h3>
-              <p>Please try again later.</p>
+              <p className="mb-5">The server may still be starting. Please try again.</p>
+              <button
+                type="button"
+                onClick={() => courseQuery.refetch()}
+                className="px-5 py-2 rounded-md bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors"
+              >
+                Retry loading courses
+              </button>
             </div>
           ) : courses.length === 0 ? (
             <div className="text-center py-20 text-[#9794AA]">

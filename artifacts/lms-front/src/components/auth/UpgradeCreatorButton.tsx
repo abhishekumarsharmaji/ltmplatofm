@@ -15,7 +15,15 @@ export function UpgradeCreatorButton({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
-  const upgrade = useUpgradeCreator();
+  const upgrade = useUpgradeCreator({
+    mutation: {
+      // Role upgrade is idempotent, so retrying transient deployment/database
+      // failures is safe.
+      retry: (failureCount, error) =>
+        failureCount < 2 && (error.status === 429 || error.status >= 500),
+      retryDelay: (attempt) => 1000 * (attempt + 1),
+    },
+  });
   const { data: session } = useGetSession();
 
   const handleUpgrade = () => {
@@ -36,8 +44,19 @@ export function UpgradeCreatorButton({
           setLocation("/dashboard/creator");
         });
       },
-      onError: () => {
-        toast({ title: "Upgrade failed.", description: "Please try again later.", variant: "destructive" });
+      onError: (error) => {
+        if (error.status === 401) {
+          queryClient.setQueryData(getGetSessionQueryKey(), { authenticated: false, user: null });
+          setLocation("/auth/login");
+          return;
+        }
+        toast({
+          title: "Upgrade failed.",
+          description: error.status >= 500
+            ? "The server is temporarily unavailable. Please try again in a moment."
+            : error.message,
+          variant: "destructive",
+        });
       }
     });
   };
