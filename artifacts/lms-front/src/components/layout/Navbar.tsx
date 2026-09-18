@@ -84,6 +84,7 @@ export function Navbar() {
           
           <form onSubmit={handleSearch} className="hidden md:flex items-center relative w-full max-w-sm">
             <Input 
+              aria-label={t("searchPlaceholder")}
               placeholder={t("searchPlaceholder")}
               className="h-11 pl-5 pr-12 rounded-full border-[#E5E5E5] bg-white text-sm focus-visible:ring-1 focus-visible:ring-primary/50 placeholder:text-[#9794AA]"
               value={searchQuery}
@@ -91,6 +92,7 @@ export function Navbar() {
             />
             <button 
               type="submit" 
+              aria-label="Search"
               className="absolute right-1.5 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white hover:bg-[#10A364] transition-colors"
             >
               <Search className="w-4 h-4" />
@@ -160,6 +162,8 @@ export function Navbar() {
           <button 
             className="lg:hidden p-2 text-[#4D4D4D]" 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMobileMenuOpen}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -171,6 +175,7 @@ export function Navbar() {
         <div className="lg:hidden border-t border-gray-100 bg-white p-4 space-y-4 shadow-lg absolute w-full left-0">
           <form onSubmit={handleSearch} className="flex items-center relative w-full md:hidden">
             <Input 
+              aria-label={t("searchPlaceholder")}
               placeholder={t("searchPlaceholder")}
               className="h-12 pl-5 pr-12 rounded-full border-[#E5E5E5] bg-white text-sm"
               value={searchQuery}
@@ -178,6 +183,7 @@ export function Navbar() {
             />
             <button 
               type="submit" 
+              aria-label="Search"
               className="absolute right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white"
             >
               <Search className="w-4 h-4" />

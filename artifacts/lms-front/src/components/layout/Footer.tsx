@@ -1,95 +1,78 @@
 import { Link } from "wouter";
 import { useTranslations } from "@/lib/i18n";
-import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
+
+const linkClass = "text-[#9794AA] hover:text-white text-[14px] transition-colors";
 
 export function Footer() {
   const t = useTranslations("footer");
   const platformName = "LMS Platform";
   const currentYear = new Date().getFullYear();
 
+  // Only real destinations: every link below resolves to an existing route.
+  const columns = [
+    {
+      title: t("explore"),
+      links: [
+        { href: "/courses", label: t("links.courses") },
+        { href: "/products", label: t("links.products") },
+        { href: "/pricing", label: t("links.pricing") },
+        { href: "/about", label: t("links.about") },
+      ],
+    },
+    {
+      title: t("teach"),
+      links: [
+        { href: "/creators", label: t("links.forCreators") },
+        { href: "/platform-pricing", label: t("links.platformPricing") },
+        { href: "/dashboard/creator", label: t("links.creatorDashboard") },
+      ],
+    },
+    {
+      title: t("account"),
+      links: [
+        { href: "/auth/login", label: t("links.signIn") },
+        { href: "/auth/sign-up", label: t("links.joinFree") },
+        { href: "/dashboard/student", label: t("links.myLearning") },
+      ],
+    },
+  ];
+
   return (
     <footer className="bg-[#222222] pt-20 pb-8 text-white">
       <div className="container mx-auto px-4 md:px-8">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-8 mb-16">
-          
           {/* Brand & Description */}
           <div className="md:col-span-4 lg:col-span-5 flex flex-col">
-            <h2 className="text-[32px] font-bold tracking-tight mb-6">
-              {platformName}
-            </h2>
-            <p className="text-[#9794AA] text-[15px] leading-relaxed max-w-sm mb-8">
+            <Link href="/" className="flex items-center gap-3 mb-6 w-fit">
+              <img src={`${import.meta.env.BASE_URL}brand/logo-mark.svg`} alt="" className="w-9 h-9 invert" />
+              <span className="text-[32px] font-bold tracking-tight">{platformName}</span>
+            </Link>
+            <p className="text-[#9794AA] text-[15px] leading-relaxed max-w-sm">
               {t("description")}
             </p>
-            <div className="flex items-center gap-3">
-              {[
-                { icon: Youtube, label: "Youtube" },
-                { icon: Facebook, label: "Facebook" },
-                { icon: Instagram, label: "Instagram" },
-                { icon: Twitter, label: "Twitter" },
-                { icon: Linkedin, label: "LinkedIn" }
-              ].map((social, i) => (
-                <a 
-                  key={i} 
-                  href="#" 
-                  aria-label={social.label}
-                  className="w-10 h-10 rounded-full border border-[#515151] flex items-center justify-center text-white hover:bg-primary hover:border-primary transition-colors"
-                >
-                  <social.icon className="w-4 h-4" />
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Links Columns */}
           <div className="md:col-span-8 lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
-            
-            {/* Explore */}
-            <div className="flex flex-col">
-              <h4 className="text-[16px] font-bold mb-6">{t("explore")}</h4>
-              <ul className="space-y-4">
-                <li><Link href="/courses" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">Courses</Link></li>
-                <li><Link href="/platform-pricing" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">Pricing</Link></li>
-                <li><Link href="/creators" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">Creators</Link></li>
-                <li><Link href="/about" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">About</Link></li>
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div className="flex flex-col">
-              <h4 className="text-[16px] font-bold mb-6">{t("company")}</h4>
-              <ul className="space-y-4">
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("careers")}</a></li>
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("blog")}</a></li>
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("press")}</a></li>
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("partners")}</a></li>
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("newsletter")}</a></li>
-              </ul>
-            </div>
-
-            {/* Support */}
-            <div className="flex flex-col">
-              <h4 className="text-[16px] font-bold mb-6">{t("support")}</h4>
-              <ul className="space-y-4">
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("helpCenter")}</a></li>
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("houseRules")}</a></li>
-                <li><a href="#" className="text-[#9794AA] hover:text-white text-[14px] transition-colors">{t("contentGuidelines")}</a></li>
-              </ul>
-            </div>
-
+            {columns.map((column) => (
+              <div key={column.title} className="flex flex-col">
+                <h4 className="text-[16px] font-bold mb-6">{column.title}</h4>
+                <ul className="space-y-4">
+                  {column.links.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href} className={linkClass}>{link.label}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-[#515151] flex flex-col sm:flex-row justify-between items-center gap-4 text-[13px] text-[#9794AA]">
           <p>{t("copyright", { year: currentYear.toString(), platform: platformName })}</p>
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-            <a href="#" className="hover:text-white transition-colors">{t("privacyPolicy")}</a>
-            <a href="#" className="hover:text-white transition-colors">{t("termsOfUse")}</a>
-            <a href="#" className="hover:text-white transition-colors">{t("cookiesPolicy")}</a>
-            <a href="#" className="hover:text-white transition-colors">{t("preferences")}</a>
-            <a href="#" className="hover:text-white transition-colors">{t("ethicsLine")}</a>
-            <a href="#" className="hover:text-white transition-colors">{t("accessibility")}</a>
-          </div>
+          <p>{t("tagline")}</p>
         </div>
       </div>
     </footer>

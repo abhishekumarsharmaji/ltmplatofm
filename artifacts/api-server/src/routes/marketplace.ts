@@ -184,7 +184,7 @@ router.post("/student/wishlist/:productId", auth, async (req, res) => { const us
 router.delete("/student/wishlist/:productId", auth, async (req, res) => { const userId = await userOf(req as AuthenticatedRequest), productId = id(req.params.productId); if (!userId || !productId) { res.status(400).json({ error: "Invalid id" }); return; } await db.delete(wishlistTable).where(and(eq(wishlistTable.userId, userId), eq(wishlistTable.productId, productId))); res.sendStatus(204); });
 
 router.get("/admin/users", auth, requireRole("admin"), async (_req, res) => res.json(await db.select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role }).from(usersTable)));
-router.get("/admin/creators", auth, requireRole("admin"), async (_req, res) => res.json(await db.select().from(usersTable).where(eq(usersTable.role, "creator"))));
+router.get("/admin/creators", auth, requireRole("admin"), async (_req, res) => res.json(await db.select({ id: usersTable.id, email: usersTable.email, name: usersTable.name, role: usersTable.role, createdAt: usersTable.createdAt }).from(usersTable).where(eq(usersTable.role, "creator"))));
 router.get("/admin/courses", auth, requireRole("admin"), async (_req, res) => res.json(await db.select({
   id: coursesTable.id, title: coursesTable.title, description: coursesTable.description, status: coursesTable.status,
   priceMinor: coursesTable.priceMinor, currency: coursesTable.currency, productId: productsTable.id,

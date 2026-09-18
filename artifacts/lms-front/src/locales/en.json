@@ -19,23 +19,22 @@
   "footer": {
     "description": "The modern platform for creating and exploring online courses. Learn at your own pace from anywhere.",
     "explore": "Explore",
-    "company": "Company",
-    "support": "Support",
-    "careers": "Careers",
-    "blog": "Blog",
-    "press": "Press",
-    "partners": "Partners",
-    "newsletter": "Newsletter",
-    "helpCenter": "Help Center",
-    "houseRules": "House Rules",
-    "contentGuidelines": "Content Guidelines",
+    "teach": "Teach",
+    "account": "Account",
+    "links": {
+      "courses": "Courses",
+      "products": "Digital products",
+      "pricing": "Pricing",
+      "about": "About",
+      "forCreators": "For creators",
+      "platformPricing": "Platform pricing",
+      "creatorDashboard": "Creator dashboard",
+      "signIn": "Sign in",
+      "joinFree": "Join for free",
+      "myLearning": "My learning"
+    },
     "copyright": "Copyright © {year} {platform}. All rights reserved.",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfUse": "Terms of Use",
-    "cookiesPolicy": "Cookies Policy",
-    "preferences": "Preferences",
-    "ethicsLine": "Ethics Line",
-    "accessibility": "Accessibility"
+    "tagline": "Made for creators and their students."
   },
   "home": {
     "hero": {

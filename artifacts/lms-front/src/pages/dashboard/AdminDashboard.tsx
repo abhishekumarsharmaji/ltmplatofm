@@ -160,16 +160,16 @@ function CreatorsList() {
               <tr>
                 <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Name</th>
                 <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Email</th>
-                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Status</th>
+                <th className="p-4 text-[13px] font-bold text-[#394649] uppercase tracking-wider">Joined</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5E5E5]">
-              {creators?.map((creator: any) => (
+              {creators?.map((creator) => (
                 <tr key={creator.id} className="hover:bg-gray-50 transition-colors">
                   <td className="p-4 font-bold text-[14px] text-black">{creator.name}</td>
                   <td className="p-4 text-[14px] text-[#4D4D4D]">{creator.email}</td>
-                  <td className="p-4">
-                    <Badge className="bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium">Active</Badge>
+                  <td className="p-4 text-[14px] text-[#4D4D4D]">
+                    {creator.createdAt ? new Date(creator.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                   </td>
                 </tr>
               ))}

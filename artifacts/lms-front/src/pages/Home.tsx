@@ -245,7 +245,7 @@ export default function Home() {
             </div>
 
             {/* Courses Grid */}
-            {isLoadingCourses ? (
+            {isLoadingDisplay ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                 {[1, 2, 3, 4].map(i => (
                   <div key={i} className="rounded-lg border border-[#E5E5E5] bg-white h-[320px] animate-pulse">

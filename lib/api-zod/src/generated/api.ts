@@ -23,7 +23,8 @@ export const GetSessionResponse = zod.object({
   "id": zod.number().int(),
   "email": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['student', 'creator', 'admin'])
+  "role": zod.enum(['student', 'creator', 'admin']),
+  "createdAt": zod.coerce.date().optional()
 }),zod.null()]).optional()
 })
 
@@ -43,7 +44,8 @@ export const LoginResponse = zod.object({
   "id": zod.number().int(),
   "email": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['student', 'creator', 'admin'])
+  "role": zod.enum(['student', 'creator', 'admin']),
+  "createdAt": zod.coerce.date().optional()
 }),zod.null()]).optional()
 })
 
@@ -66,7 +68,8 @@ export const SignUpResponse = zod.object({
   "id": zod.number().int(),
   "email": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['student', 'creator', 'admin'])
+  "role": zod.enum(['student', 'creator', 'admin']),
+  "createdAt": zod.coerce.date().optional()
 }),zod.null()]).optional()
 })
 
@@ -127,7 +130,8 @@ export const UpgradeCreatorResponse = zod.object({
   "id": zod.number().int(),
   "email": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['student', 'creator', 'admin'])
+  "role": zod.enum(['student', 'creator', 'admin']),
+  "createdAt": zod.coerce.date().optional()
 })
 })
 
@@ -789,7 +793,8 @@ export const AdminUsersResponseItem = zod.object({
   "id": zod.number().int(),
   "email": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['student', 'creator', 'admin'])
+  "role": zod.enum(['student', 'creator', 'admin']),
+  "createdAt": zod.coerce.date().optional()
 })
 export const AdminUsersResponse = zod.array(AdminUsersResponseItem)
 
@@ -798,7 +803,8 @@ export const AdminCreatorsResponseItem = zod.object({
   "id": zod.number().int(),
   "email": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['student', 'creator', 'admin'])
+  "role": zod.enum(['student', 'creator', 'admin']),
+  "createdAt": zod.coerce.date().optional()
 })
 export const AdminCreatorsResponse = zod.array(AdminCreatorsResponseItem)
 

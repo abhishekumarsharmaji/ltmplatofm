@@ -662,6 +662,9 @@ components:
         role:
           type: string
           enum: [student, creator, admin]
+        createdAt:
+          type: string
+          format: date-time
     Course:
       type: object
       required: [id, title, description, level, lessons]
