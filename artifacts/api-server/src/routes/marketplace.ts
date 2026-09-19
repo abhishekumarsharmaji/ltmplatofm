@@ -250,14 +250,15 @@ router.get("/creator/sales-summary", auth, requireRole("creator", "admin"), asyn
   if (!creatorId) { res.json({ orderCount: 0, grossMinor: 0, orders: [] }); return; }
   const creatorProducts = and(eq(productsTable.id, orderItemsTable.productId), eq(productsTable.creatorId, creatorId));
   const [summary] = await db.select({
-    orderCount: sql<number>`count(distinct ${ordersTable.id})::int`,
-    grossMinor: sql<number>`coalesce(sum(${orderItemsTable.unitPriceMinor} * ${orderItemsTable.quantity}), 0)::int`,
+    orderCount: sql<string>`count(distinct ${ordersTable.id})::bigint`,
+    grossMinor: sql<string>`coalesce(sum(${orderItemsTable.unitPriceMinor}::bigint * ${orderItemsTable.quantity}::bigint), 0)::bigint`,
   }).from(ordersTable)
     .innerJoin(orderItemsTable, eq(orderItemsTable.orderId, ordersTable.id))
-    .innerJoin(productsTable, creatorProducts);
+    .innerJoin(productsTable, creatorProducts)
+    .where(eq(ordersTable.status, "paid"));
   const orders = await db.select({
     orderId: ordersTable.id,
-    amountMinor: sql<number>`(${orderItemsTable.unitPriceMinor} * ${orderItemsTable.quantity})::int`,
+    amountMinor: sql<string>`(${orderItemsTable.unitPriceMinor}::bigint * ${orderItemsTable.quantity}::bigint)::bigint`,
     status: ordersTable.status,
     userName: usersTable.name,
     productName: productsTable.title,
@@ -266,9 +267,14 @@ router.get("/creator/sales-summary", auth, requireRole("creator", "admin"), asyn
     .innerJoin(usersTable, eq(usersTable.id, ordersTable.userId))
     .innerJoin(orderItemsTable, eq(orderItemsTable.orderId, ordersTable.id))
     .innerJoin(productsTable, creatorProducts)
+    .where(eq(ordersTable.status, "paid"))
     .orderBy(desc(ordersTable.createdAt))
     .limit(100);
-  res.json({ orderCount: summary?.orderCount ?? 0, grossMinor: summary?.grossMinor ?? 0, orders });
+  res.json({
+    orderCount: Number(summary?.orderCount ?? 0),
+    grossMinor: Number(summary?.grossMinor ?? 0),
+    orders: orders.map((order) => ({ ...order, amountMinor: Number(order.amountMinor) })),
+  });
 });
 
 router.get("/student/library", auth, requireRole("student", "creator", "admin"), async (req, res) => {

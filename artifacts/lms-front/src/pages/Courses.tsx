@@ -131,7 +131,7 @@ export default function Courses() {
             <div className="text-center py-16 bg-[#FAFAFA] rounded-lg border border-[#E5E5E5] text-[#394649]">
               <AlertCircle className="w-8 h-8 mx-auto mb-4 text-[#9794AA]" />
               <h3 className="text-xl font-bold mb-2 text-black">Reconnecting to courses</h3>
-              <p className="mb-5">The catalog will refresh automatically in a moment.</p>
+              <p className="mb-5">Please try again when your connection is ready.</p>
               <button
                 type="button"
                 onClick={() => courseQuery.refetch()}
