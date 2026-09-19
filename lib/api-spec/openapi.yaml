@@ -848,6 +848,8 @@ components:
           type: string
         description:
           type: string
+        categoryId:
+          type: ["integer", "null"]
         thumbnailUrl:
           type: ["string", "null"]
         outcomes:

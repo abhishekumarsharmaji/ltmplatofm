@@ -322,6 +322,8 @@ export interface Course {
   title: string;
   description: string;
   /** @nullable */
+  categoryId?: number | null;
+  /** @nullable */
   thumbnailUrl?: string | null;
   outcomes?: string[];
   faqs?: CourseFaq[];

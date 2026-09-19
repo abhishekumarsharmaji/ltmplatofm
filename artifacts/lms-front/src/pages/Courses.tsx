@@ -52,9 +52,9 @@ export default function Courses() {
       // Keep the current catalog visible while filters refetch and allow enough
       // time for an autoscale API process to become ready.
       placeholderData: (previous) => previous,
-      retry: 4,
+      staleTime: 2 * 60 * 1000,
+      retry: 2,
       retryDelay: (attempt) => Math.min(750 * 2 ** attempt, 3000),
-      refetchInterval: (query) => query.state.status === "error" ? 3000 : false,
     },
   });
   const categoriesQuery = useListCategories();

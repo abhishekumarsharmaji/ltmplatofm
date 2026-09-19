@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { useMarketplaceCourses, useListCategories, getMarketplaceCoursesQueryKey } from "@workspace/api-client-react";
+import { useMarketplaceCourses, useListCategories } from "@workspace/api-client-react";
 import { Star, Clock, BookOpen, Share2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useTranslations } from "@/lib/i18n";
@@ -14,34 +14,28 @@ export default function Home() {
   const { data: courses = [], isLoading: isLoadingCourses } = useMarketplaceCourses();
   const { data: categories = [], isLoading: isLoadingCategories } = useListCategories();
 
-  // The active chip filters server-side by category id; "featured" shows the unfiltered list.
   const activeCategoryId = categories.find(c => c.slug === activeCategory)?.id;
-  const filteredParams = activeCategoryId ? { category: String(activeCategoryId) } : {};
-  const filteredQuery = useMarketplaceCourses(filteredParams, {
-    query: { enabled: Boolean(activeCategoryId), queryKey: getMarketplaceCoursesQueryKey(filteredParams) },
-  });
   const displayCourses = useMemo(() => {
-    const source = activeCategoryId ? (filteredQuery.data ?? []) : courses;
+    const source = activeCategoryId ? courses.filter((course) => course.categoryId === activeCategoryId) : courses;
     return source.slice(0, 8); // Max 8
-  }, [courses, filteredQuery.data, activeCategoryId]);
-  const isLoadingDisplay = activeCategoryId ? filteredQuery.isLoading : isLoadingCourses;
+  }, [courses, activeCategoryId]);
+  const isLoadingDisplay = isLoadingCourses;
 
-  // Derived stats
-  const totalCourses = courses.length;
-  const totalLessons = courses.reduce((sum, c) => sum + (c.lessons || 0), 0);
-  const uniqueMentors = new Set(courses.map(c => c.creatorName).filter(Boolean)).size;
-  const totalCategories = categories.length;
-
-  // Mentors derived
-  const mentorsMap = new Map<string, number>();
-  courses.forEach(c => {
-    if (c.creatorName) {
-      mentorsMap.set(c.creatorName, (mentorsMap.get(c.creatorName) || 0) + 1);
+  const { totalCourses, totalLessons, uniqueMentors, mentorsList } = useMemo(() => {
+    const mentors = new Map<string, number>();
+    let lessons = 0;
+    for (const course of courses) {
+      lessons += course.lessons || 0;
+      if (course.creatorName) mentors.set(course.creatorName, (mentors.get(course.creatorName) || 0) + 1);
     }
-  });
-  const mentorsList = Array.from(mentorsMap.entries())
-    .map(([name, count]) => ({ name, count }))
-    .slice(0, 6);
+    return {
+      totalCourses: courses.length,
+      totalLessons: lessons,
+      uniqueMentors: mentors.size,
+      mentorsList: Array.from(mentors.entries()).map(([name, count]) => ({ name, count })).slice(0, 6),
+    };
+  }, [courses]);
+  const totalCategories = categories.length;
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();

@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { lazy, Suspense } from "react";
 import { useParams, Link, useLocation } from "wouter";
 import { 
   useCreatorSalesSummary,
@@ -10,11 +11,16 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Package, DollarSign, Users, TrendingUp, BarChart3, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProductFormDialog } from "@/components/dashboard/ProductFormDialog";
-import { CourseBuilder } from "./creator/CourseBuilder";
-import { CreatorLiveClassesStandalone } from "@/components/dashboard/LiveClassesStandalone";
-import { LiveClassroom } from "@/components/dashboard/LiveClassroom";
 import { CourseThumbnail } from "@/components/courses/CourseThumbnail";
-import { CreatorProductManage } from "@/components/dashboard/digital-products/CreatorProductManage";
+
+const CourseBuilder = lazy(() => import("./creator/CourseBuilder").then((module) => ({ default: module.CourseBuilder })));
+const CreatorLiveClassesStandalone = lazy(() => import("@/components/dashboard/LiveClassesStandalone").then((module) => ({ default: module.CreatorLiveClassesStandalone })));
+const LiveClassroom = lazy(() => import("@/components/dashboard/LiveClassroom").then((module) => ({ default: module.LiveClassroom })));
+const CreatorProductManage = lazy(() => import("@/components/dashboard/digital-products/CreatorProductManage").then((module) => ({ default: module.CreatorProductManage })));
+
+function SectionFallback() {
+  return <div className="flex min-h-[40vh] items-center justify-center text-sm text-[#737373]">Loading workspace…</div>;
+}
 
 export default function CreatorDashboard() {
   const params = useParams();
@@ -23,13 +29,13 @@ export default function CreatorDashboard() {
   const action = params.action;
   
   if (section === "courses" && id && action === "builder") {
-    return <CourseBuilder productId={Number(id)} />;
+    return <Suspense fallback={<SectionFallback />}><CourseBuilder productId={Number(id)} /></Suspense>;
   }
 
   if (section === "products" && id && action === "manage") {
     return (
       <DashboardLayout role="creator">
-        <CreatorProductManage productId={Number(id)} />
+        <Suspense fallback={<SectionFallback />}><CreatorProductManage productId={Number(id)} /></Suspense>
       </DashboardLayout>
     );
   }
@@ -37,7 +43,7 @@ export default function CreatorDashboard() {
   if (section === "live-classes" && id && action === "classroom") {
     return (
       <DashboardLayout role="creator">
-        <LiveClassroom id={Number(id)} backUrl="/dashboard/creator/courses" />
+        <Suspense fallback={<SectionFallback />}><LiveClassroom id={Number(id)} backUrl="/dashboard/creator/courses" /></Suspense>
       </DashboardLayout>
     );
   }
@@ -47,7 +53,7 @@ export default function CreatorDashboard() {
       {section === "overview" && <Overview />}
       {section === "courses" && !id && <Courses />}
       {section === "products" && !id && <Products />}
-      {section === "live-classes" && !id && <CreatorLiveClassesStandalone />}
+      {section === "live-classes" && !id && <Suspense fallback={<SectionFallback />}><CreatorLiveClassesStandalone /></Suspense>}
       {section === "sales" && <Sales />}
     </DashboardLayout>
   );

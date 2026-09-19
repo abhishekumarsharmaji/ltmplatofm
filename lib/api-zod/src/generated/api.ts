@@ -88,6 +88,7 @@ export const ListCoursesResponseItem = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "categoryId": zod.number().int().nullish(),
   "thumbnailUrl": zod.string().nullish(),
   "outcomes": zod.array(zod.string()).optional(),
   "faqs": zod.array(zod.object({
@@ -376,6 +377,7 @@ export const MarketplaceCoursesResponseItem = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "categoryId": zod.number().int().nullish(),
   "thumbnailUrl": zod.string().nullish(),
   "outcomes": zod.array(zod.string()).optional(),
   "faqs": zod.array(zod.object({
@@ -526,6 +528,7 @@ export const GetMarketplaceCourseResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "description": zod.string(),
+  "categoryId": zod.number().int().nullish(),
   "thumbnailUrl": zod.string().nullish(),
   "outcomes": zod.array(zod.string()).optional(),
   "faqs": zod.array(zod.object({

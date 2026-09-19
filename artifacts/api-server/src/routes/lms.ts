@@ -119,6 +119,7 @@ router.get("/marketplace/courses", async (req, res): Promise<void> => {
     id: coursesTable.id,
     title: coursesTable.title,
     description: coursesTable.description,
+    categoryId: coursesTable.categoryId,
     thumbnailUrl: coursesTable.thumbnailUrl,
     outcomes: coursesTable.outcomes,
     faqs: coursesTable.faqs,

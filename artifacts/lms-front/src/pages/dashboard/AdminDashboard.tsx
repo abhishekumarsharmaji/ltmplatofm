@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { useParams } from "wouter";
 import { 
   useAdminUsers,
@@ -32,10 +32,14 @@ import { SettingFormDialog } from "@/components/dashboard/SettingFormDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
-import { AdminCourseStudioList } from "./admin/AdminCourseStudioList";
-import { AdminCourseStudio } from "./admin/AdminCourseStudio";
-import { AdminLiveClassesStandalone } from "@/components/dashboard/LiveClassesStandalone";
-import { LiveClassroom } from "@/components/dashboard/LiveClassroom";
+const AdminCourseStudioList = lazy(() => import("./admin/AdminCourseStudioList").then((module) => ({ default: module.AdminCourseStudioList })));
+const AdminCourseStudio = lazy(() => import("./admin/AdminCourseStudio").then((module) => ({ default: module.AdminCourseStudio })));
+const AdminLiveClassesStandalone = lazy(() => import("@/components/dashboard/LiveClassesStandalone").then((module) => ({ default: module.AdminLiveClassesStandalone })));
+const LiveClassroom = lazy(() => import("@/components/dashboard/LiveClassroom").then((module) => ({ default: module.LiveClassroom })));
+
+function SectionFallback() {
+  return <div className="flex min-h-[40vh] items-center justify-center text-sm text-[#737373]">Loading workspace…</div>;
+}
 
 export default function AdminDashboard() {
   const params = useParams();
@@ -46,7 +50,7 @@ export default function AdminDashboard() {
   if (section === "courses" && id && action === "studio") {
     return (
       <DashboardLayout role="admin">
-        <AdminCourseStudio productId={Number(id)} />
+        <Suspense fallback={<SectionFallback />}><AdminCourseStudio productId={Number(id)} /></Suspense>
       </DashboardLayout>
     );
   }
@@ -54,7 +58,7 @@ export default function AdminDashboard() {
   if (section === "live-classes" && id && action === "classroom") {
     return (
       <DashboardLayout role="admin">
-        <LiveClassroom id={Number(id)} backUrl="/dashboard/admin/courses" />
+        <Suspense fallback={<SectionFallback />}><LiveClassroom id={Number(id)} backUrl="/dashboard/admin/courses" /></Suspense>
       </DashboardLayout>
     );
   }
@@ -65,9 +69,9 @@ export default function AdminDashboard() {
       {section === "users" && <UsersList />}
       {section === "creators" && <CreatorsList />}
       {section === "applications" && <ApplicationsList />}
-      {section === "courses" && !id && <AdminCourseStudioList />}
+      {section === "courses" && !id && <Suspense fallback={<SectionFallback />}><AdminCourseStudioList /></Suspense>}
       {section === "products" && <ProductsList />}
-      {section === "live-classes" && !id && <AdminLiveClassesStandalone />}
+      {section === "live-classes" && !id && <Suspense fallback={<SectionFallback />}><AdminLiveClassesStandalone /></Suspense>}
       {section === "orders" && <OrdersList />}
       {section === "categories" && <CategoriesList />}
       {section === "settings" && <SettingsView />}
