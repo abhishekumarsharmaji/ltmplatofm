@@ -35,6 +35,16 @@ export function Footer() {
         { href: "/dashboard/student", label: t("links.myLearning") },
       ],
     },
+    {
+      title: "Policies",
+      links: [
+        { href: "/terms", label: "Terms & Conditions" },
+        { href: "/privacy", label: "Privacy Policy" },
+        { href: "/refund-policy", label: "Refund & Cancellation" },
+        { href: "/shipping-delivery", label: "Shipping & Delivery" },
+        { href: "/contact", label: "Contact Us" },
+      ],
+    },
   ];
 
   return (
@@ -53,7 +63,7 @@ export function Footer() {
           </div>
 
           {/* Links Columns */}
-          <div className="md:col-span-8 lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
+          <div className="md:col-span-8 lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-8">
             {columns.map((column) => (
               <div key={column.title} className="flex flex-col">
                 <h4 className="text-[16px] font-bold mb-6">{column.title}</h4>
@@ -72,7 +82,12 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-[#515151] flex flex-col sm:flex-row justify-between items-center gap-4 text-[13px] text-[#9794AA]">
           <p>{t("copyright", { year: currentYear.toString(), platform: platformName })}</p>
-          <p>{t("tagline")}</p>
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+            <Link href="/terms" className="hover:text-white">Terms</Link>
+            <Link href="/privacy" className="hover:text-white">Privacy</Link>
+            <Link href="/refund-policy" className="hover:text-white">Refunds</Link>
+            <Link href="/contact" className="hover:text-white">Contact</Link>
+          </div>
         </div>
       </div>
     </footer>

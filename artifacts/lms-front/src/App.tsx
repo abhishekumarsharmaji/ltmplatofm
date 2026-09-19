@@ -22,6 +22,11 @@ const Pricing = lazy(() => import('./pages/Pricing'));
 const PlatformPricing = lazy(() => import('./pages/PlatformPricing'));
 const About = lazy(() => import('./pages/About'));
 const Creators = lazy(() => import('./pages/Creators'));
+const TermsPage = lazy(() => import('./pages/CompliancePages').then((module) => ({ default: module.TermsPage })));
+const PrivacyPage = lazy(() => import('./pages/CompliancePages').then((module) => ({ default: module.PrivacyPage })));
+const RefundPage = lazy(() => import('./pages/CompliancePages').then((module) => ({ default: module.RefundPage })));
+const DeliveryPage = lazy(() => import('./pages/CompliancePages').then((module) => ({ default: module.DeliveryPage })));
+const ContactPage = lazy(() => import('./pages/CompliancePages').then((module) => ({ default: module.ContactPage })));
 const Login = lazy(() => import('./pages/auth/Login'));
 const SignUp = lazy(() => import('./pages/auth/SignUp'));
 const CreatorApplication = lazy(() => import('./pages/CreatorApplication'));
@@ -78,6 +83,11 @@ function Router() {
         <Route path="/platform-pricing" component={PlatformPricing} />
         <Route path="/about" component={About} />
         <Route path="/creators" component={Creators} />
+        <Route path="/terms" component={TermsPage} />
+        <Route path="/privacy" component={PrivacyPage} />
+        <Route path="/refund-policy" component={RefundPage} />
+        <Route path="/shipping-delivery" component={DeliveryPage} />
+        <Route path="/contact" component={ContactPage} />
         
         {/* Unavailable features */}
         <Route path="/checkout" component={UnavailablePage} />
