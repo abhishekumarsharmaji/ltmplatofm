@@ -74,7 +74,13 @@ export const coursesTable = pgTable("courses", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   publishedAt: timestamp("published_at", { withTimezone: true }),
-}, (t) => [uniqueIndex("courses_slug_unique").on(t.slug), index("courses_creator_idx").on(t.creatorId), check("courses_price_nonnegative", sql`${t.priceMinor} >= 0`)]);
+}, (t) => [
+  uniqueIndex("courses_slug_unique").on(t.slug),
+  index("courses_creator_idx").on(t.creatorId),
+  index("courses_status_created_idx").on(t.status, t.createdAt),
+  index("courses_status_category_idx").on(t.status, t.categoryId),
+  check("courses_price_nonnegative", sql`${t.priceMinor} >= 0`),
+]);
 
 export const courseModulesTable = pgTable("course_modules", {
   id: serial("id").primaryKey(),
@@ -124,6 +130,7 @@ export const productsTable = pgTable("products", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [
   index("products_creator_idx").on(t.creatorId),
+  index("products_status_created_idx").on(t.status, t.createdAt),
   uniqueIndex("products_public_slug_unique").on(t.publicSlug),
   check("products_price_nonnegative", sql`${t.priceMinor} >= 0`),
 ]);
@@ -175,7 +182,7 @@ export const ordersTable = pgTable("orders", {
   currency: text("currency").notNull().default("USD"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-}, (t) => [index("orders_user_idx").on(t.userId), check("orders_total_nonnegative", sql`${t.totalMinor} >= 0`)]);
+}, (t) => [index("orders_user_idx").on(t.userId), index("orders_user_created_idx").on(t.userId, t.createdAt), check("orders_total_nonnegative", sql`${t.totalMinor} >= 0`)]);
 
 export const orderItemsTable = pgTable("order_items", {
   id: serial("id").primaryKey(),
@@ -183,7 +190,7 @@ export const orderItemsTable = pgTable("order_items", {
   productId: integer("product_id").notNull().references(() => productsTable.id),
   quantity: integer("quantity").notNull().default(1),
   unitPriceMinor: integer("unit_price_minor").notNull(),
-}, (t) => [check("order_items_quantity_positive", sql`${t.quantity} > 0`), check("order_items_price_nonnegative", sql`${t.unitPriceMinor} >= 0`)]);
+}, (t) => [index("order_items_product_order_idx").on(t.productId, t.orderId), check("order_items_quantity_positive", sql`${t.quantity} > 0`), check("order_items_price_nonnegative", sql`${t.unitPriceMinor} >= 0`)]);
 
 export const enrollmentsTable = pgTable("enrollments", {
   id: serial("id").primaryKey(),

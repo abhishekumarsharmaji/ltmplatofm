@@ -247,8 +247,28 @@ router.post("/creator/products/:id/publish", auth, requireRole("creator", "admin
 });
 router.get("/creator/sales-summary", auth, requireRole("creator", "admin"), async (req, res) => {
   const creatorId = await userOf(req as AuthenticatedRequest);
-  const rows = creatorId ? await db.select({ orderId: ordersTable.id, totalMinor: ordersTable.totalMinor, status: ordersTable.status }).from(ordersTable).innerJoin(orderItemsTable, eq(orderItemsTable.orderId, ordersTable.id)).innerJoin(productsTable, and(eq(productsTable.id, orderItemsTable.productId), eq(productsTable.creatorId, creatorId))) : [];
-  res.json({ orderCount: rows.length, grossMinor: rows.reduce((sum, row) => sum + row.totalMinor, 0), orders: rows });
+  if (!creatorId) { res.json({ orderCount: 0, grossMinor: 0, orders: [] }); return; }
+  const creatorProducts = and(eq(productsTable.id, orderItemsTable.productId), eq(productsTable.creatorId, creatorId));
+  const [summary] = await db.select({
+    orderCount: sql<number>`count(distinct ${ordersTable.id})::int`,
+    grossMinor: sql<number>`coalesce(sum(${orderItemsTable.unitPriceMinor} * ${orderItemsTable.quantity}), 0)::int`,
+  }).from(ordersTable)
+    .innerJoin(orderItemsTable, eq(orderItemsTable.orderId, ordersTable.id))
+    .innerJoin(productsTable, creatorProducts);
+  const orders = await db.select({
+    orderId: ordersTable.id,
+    amountMinor: sql<number>`(${orderItemsTable.unitPriceMinor} * ${orderItemsTable.quantity})::int`,
+    status: ordersTable.status,
+    userName: usersTable.name,
+    productName: productsTable.title,
+    createdAt: ordersTable.createdAt,
+  }).from(ordersTable)
+    .innerJoin(usersTable, eq(usersTable.id, ordersTable.userId))
+    .innerJoin(orderItemsTable, eq(orderItemsTable.orderId, ordersTable.id))
+    .innerJoin(productsTable, creatorProducts)
+    .orderBy(desc(ordersTable.createdAt))
+    .limit(100);
+  res.json({ orderCount: summary?.orderCount ?? 0, grossMinor: summary?.grossMinor ?? 0, orders });
 });
 
 router.get("/student/library", auth, requireRole("student", "creator", "admin"), async (req, res) => {
