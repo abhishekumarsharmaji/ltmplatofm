@@ -14,6 +14,9 @@ export default function Products() {
     (!search || product.title.toLowerCase().includes(search.toLowerCase()) || product.shortSummary?.toLowerCase().includes(search.toLowerCase())) &&
     (type === "all" || product.subtype === type)
   );
+  const featuredTitle = "Freelancing Client Acquisition Toolkit";
+  const showFeatured = (type === "all" || type === "toolkit") &&
+    (!search || featuredTitle.toLowerCase().includes(search.toLowerCase()) || "outreach proposal templates client toolkit".includes(search.toLowerCase()));
 
   return (
     <PublicLayout>
@@ -25,7 +28,7 @@ export default function Products() {
               Digital Products
             </h1>
             <p className="text-[#394649] text-[16px] md:text-[18px] leading-relaxed">
-              Download premium templates, ebooks, kits, and tools to accelerate your workflow. All completely free.
+              Discover practical templates, ebooks, kits, and tools with clear pricing, digital delivery details, and support.
             </p>
           </div>
 
@@ -88,7 +91,7 @@ export default function Products() {
               <h3 className="text-xl font-bold mb-2">Error loading products</h3>
               <p>Please try again later.</p>
             </div>
-          ) : products.length === 0 ? (
+          ) : products.length === 0 && !showFeatured ? (
             <div className="text-center py-20 text-[#9794AA]">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-8 h-8 text-[#9794AA]" />
@@ -106,6 +109,29 @@ export default function Products() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {showFeatured && (
+                <Link href="/products/freelancing-client-acquisition-toolkit" data-testid="card-featured-freelancing-toolkit">
+                  <div className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-lg border border-[#B9DBC9] bg-white shadow-[0_10px_30px_rgba(20,90,60,.08)] transition-shadow duration-300 hover:shadow-[0_16px_40px_rgba(20,90,60,.14)]">
+                    <div className="relative aspect-square overflow-hidden bg-[#0B3027]">
+                      <img src={`${import.meta.env.BASE_URL}products/freelancing-toolkit-cover.svg`} alt="Freelancing Client Acquisition Toolkit" loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                      <span className="absolute left-3 top-3 rounded bg-[#19CE76] px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#07382A] shadow-sm">Featured toolkit</span>
+                    </div>
+                    <div className="flex flex-1 flex-col p-5">
+                      <h3 className="mb-2 text-[16px] font-bold leading-snug text-black transition-colors group-hover:text-primary">{featuredTitle}</h3>
+                      <p className="line-clamp-2 text-[13px] leading-relaxed text-[#4D4D4D]">Outreach scripts, proposal structure, discovery questions and an onboarding checklist.</p>
+                      <div className="mt-auto flex items-center justify-between border-t border-[#E5E5E5] pt-4">
+                        <div>
+                          <span className="block text-[18px] font-bold text-black">₹299</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-700">Payments coming soon</span>
+                        </div>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                          <Download className="h-4 w-4" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )}
               {products.map(product => (
                 <Link key={product.id} href={`/products/${product.id}`}>
                   <div className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-shadow duration-300 flex flex-col h-full cursor-pointer overflow-hidden">

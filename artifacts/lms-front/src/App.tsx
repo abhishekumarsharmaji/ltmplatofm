@@ -18,6 +18,7 @@ const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const FreelancingToolkit = lazy(() => import('./pages/FreelancingToolkit'));
 const Pricing = lazy(() => import('./pages/Pricing'));
 const PlatformPricing = lazy(() => import('./pages/PlatformPricing'));
 const About = lazy(() => import('./pages/About'));
@@ -78,6 +79,7 @@ function Router() {
         <Route path="/courses" component={Courses} />
         <Route path="/courses/:id" component={CourseDetail} />
         <Route path="/products" component={Products} />
+        <Route path="/products/freelancing-client-acquisition-toolkit" component={FreelancingToolkit} />
         <Route path="/products/:productId" component={ProductDetail} />
         <Route path="/pricing" component={Pricing} />
         <Route path="/platform-pricing" component={PlatformPricing} />
