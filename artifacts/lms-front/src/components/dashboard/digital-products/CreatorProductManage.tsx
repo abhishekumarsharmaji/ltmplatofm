@@ -107,14 +107,17 @@ export function CreatorProductManage({ productId }: { productId: number }) {
         }
       });
     } else {
-      publishProduct.mutate({ productId } as any, {
+      publishProduct.mutate({ id: productId }, {
         onSuccess: () => {
           toast({ title: "Product published successfully." });
           queryClient.invalidateQueries({ queryKey: getListCreatorProductsQueryKey() });
           queryClient.invalidateQueries({ queryKey: getGetDigitalProductReadinessQueryKey(productId) });
         },
-        onError: () => {
-          toast({ title: "Could not publish. Please check readiness.", variant: "destructive" });
+        onError: (error: any) => {
+          toast({
+            title: error?.data?.error || error?.response?.data?.error || "Could not publish. Please check readiness.",
+            variant: "destructive",
+          });
         }
       });
     }
