@@ -36,6 +36,17 @@ router.get("/marketplace/products/:id", async (req, res) => {
   if (!row) { res.status(404).json({ error: "Product not found" }); return; }
   res.json(row.type === "digital" ? { ...safeProduct(row), priceMinor: 0, isFree: true } : safeProduct(row));
 });
+router.get("/marketplace/products/:id/cover", async (req, res) => {
+  const productId = id(req.params.id);
+  if (!productId) { res.status(400).end(); return; }
+  const [product] = await db.select({ objectPath: productsTable.coverImageObjectPath }).from(productsTable).where(eq(productsTable.id, productId));
+  if (!product?.objectPath) { res.status(404).end(); return; }
+  const file = objectFile(product.objectPath);
+  const [metadata] = await file.getMetadata();
+  res.setHeader("Content-Type", metadata.contentType ?? "image/jpeg");
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  file.createReadStream().on("error", () => { if (!res.headersSent) res.status(404); res.end(); }).pipe(res);
+});
 router.get("/marketplace/courses/:id", async (req, res) => {
   const courseId = id(req.params.id); if (!courseId) { res.status(400).json({ error: "Invalid id" }); return; }
   const [row] = await db.select({ course: coursesTable, productId: productsTable.id, creatorName: usersTable.name }).from(coursesTable)

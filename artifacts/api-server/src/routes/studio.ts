@@ -7,6 +7,7 @@ import {
   abortLessonMultipartUpload,
   completeLessonMultipartUpload,
   createCourseThumbnailUploadUrl,
+  createProductCoverUploadUrl,
   createLessonMultipartUpload,
   createLessonAssetMultipartUpload,
   createLessonPartUploadUrl,
@@ -46,6 +47,13 @@ async function ownedProduct(productId: number, req: AuthenticatedRequest) {
   const [row] = await db.select({ product: productsTable, course: coursesTable }).from(productsTable)
     .innerJoin(coursesTable, eq(coursesTable.id, productsTable.courseId))
     .where(and(eq(productsTable.id, productId), req.canonicalRole === "admin" ? undefined : eq(productsTable.creatorId, req.canonicalUserId!)));
+  return row;
+}
+async function ownedAnyProduct(productId: number, req: AuthenticatedRequest) {
+  const [row] = await db.select().from(productsTable).where(and(
+    eq(productsTable.id, productId),
+    req.canonicalRole === "admin" ? undefined : eq(productsTable.creatorId, req.canonicalUserId!),
+  ));
   return row;
 }
 async function ownedLesson(lessonId: number, req: AuthenticatedRequest) {
@@ -128,17 +136,30 @@ router.post("/creator/products/:productId/thumbnail/request-upload", requireAuth
   if (!productId || !/^image\/(jpeg|png|webp)$/i.test(mimeType ?? "") || !Number.isInteger(sizeBytes) || sizeBytes < 1 || sizeBytes > MAX_IMAGE_BYTES) {
     res.status(400).json({ error: "A JPG, PNG or WebP image up to 10MB is required" }); return;
   }
-  if (!await ownedProduct(productId, auth)) { res.status(404).json({ error: "Course product not found" }); return; }
-  const upload = await createCourseThumbnailUploadUrl();
+  const product = await ownedAnyProduct(productId, auth);
+  if (!product) { res.status(404).json({ error: "Product not found" }); return; }
+  const upload = product.type === "course" ? await createCourseThumbnailUploadUrl() : await createProductCoverUploadUrl();
   res.status(201).json({ uploadURL: upload.url, objectPath: upload.objectPath });
 });
 router.post("/creator/products/:productId/thumbnail/finalize", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const productId = id(req.params.productId), auth = req as AuthenticatedRequest, objectPath = req.body?.objectPath;
-  const found = productId ? await ownedProduct(productId, auth) : undefined;
-  if (!productId || !found || typeof objectPath !== "string" || !objectPath.includes("/course-thumbnails/")) { res.status(404).json({ error: "Thumbnail upload not found" }); return; }
+  const product = productId ? await ownedAnyProduct(productId, auth) : undefined;
+  if (!productId || !product || typeof objectPath !== "string" || !objectPath.includes(product.type === "course" ? "/course-thumbnails/" : "/product-covers/")) { res.status(404).json({ error: "Thumbnail upload not found" }); return; }
   const [metadata] = await objectFile(objectPath).getMetadata();
   const actualSize = Number(metadata.size ?? 0), contentType = String(metadata.contentType ?? "");
-  if (actualSize < 1 || actualSize > MAX_IMAGE_BYTES || !/^image\/(jpeg|png|webp)$/i.test(contentType)) { res.status(422).json({ error: "Uploaded object is not a valid course image" }); return; }
+  if (actualSize < 1 || actualSize > MAX_IMAGE_BYTES || !/^image\/(jpeg|png|webp)$/i.test(contentType)) { res.status(422).json({ error: "Uploaded object is not a valid product image" }); return; }
+  if (product.type === "digital") {
+    if (product.coverImageObjectPath && product.coverImageObjectPath !== objectPath) {
+      await objectFile(product.coverImageObjectPath).delete({ ignoreNotFound: true }).catch(() => undefined);
+    }
+    const coverImageUrl = `/api/marketplace/products/${product.id}/cover`;
+    const [updated] = await db.update(productsTable).set({ coverImageObjectPath: objectPath, coverImageUrl, updatedAt: new Date() }).where(eq(productsTable.id, product.id)).returning();
+    const { coverImageObjectPath: _coverImageObjectPath, ...safeProduct } = updated;
+    res.json(safeProduct);
+    return;
+  }
+  const found = await ownedProduct(productId, auth);
+  if (!found) { res.status(404).json({ error: "Course product not found" }); return; }
   if (found.course.thumbnailObjectPath && found.course.thumbnailObjectPath !== objectPath) {
     await objectFile(found.course.thumbnailObjectPath).delete({ ignoreNotFound: true }).catch(() => undefined);
   }

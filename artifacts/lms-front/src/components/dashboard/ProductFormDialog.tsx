@@ -21,12 +21,15 @@ import {
 } from "@/components/ui/select";
 import { 
   useCreateCreatorProduct, 
+  useFinalizeCourseThumbnailUpload,
+  useRequestCourseThumbnailUpload,
   useUpdateCreatorProduct,
   getListCreatorProductsQueryKey 
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { ImagePlus } from "lucide-react";
 
 const schema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -47,11 +50,15 @@ export function ProductFormDialog({
   children: React.ReactNode 
 }) {
   const [open, setOpen] = useState(false);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(product?.coverImageUrl || null);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const createProduct = useCreateCreatorProduct();
   const updateProduct = useUpdateCreatorProduct();
+  const requestThumbnailUpload = useRequestCourseThumbnailUpload();
+  const finalizeThumbnailUpload = useFinalizeCourseThumbnailUpload();
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -76,9 +83,39 @@ export function ProductFormDialog({
         publicSlug: product.publicSlug || "",
       });
     }
+    setCoverFile(null);
+    setCoverPreview(product?.coverImageUrl || null);
   }, [product, form, open]);
 
-  const isPending = createProduct.isPending || updateProduct.isPending;
+  useEffect(() => () => {
+    if (coverPreview?.startsWith("blob:")) URL.revokeObjectURL(coverPreview);
+  }, [coverPreview]);
+
+  const isPending = createProduct.isPending || updateProduct.isPending || requestThumbnailUpload.isPending || finalizeThumbnailUpload.isPending;
+
+  const handleCoverSelection = (file?: File) => {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 10 * 1024 * 1024) {
+      toast({ title: "Choose a JPG, PNG or WebP image up to 10MB.", variant: "destructive" });
+      return;
+    }
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+  };
+
+  const uploadCover = async (productId: number, file: File) => {
+    const { uploadURL, objectPath } = await requestThumbnailUpload.mutateAsync({
+      productId,
+      data: { mimeType: file.type, sizeBytes: file.size },
+    });
+    const upload = await fetch(uploadURL, {
+      method: "PUT",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+    if (!upload.ok) throw new Error("Thumbnail upload failed");
+    await finalizeThumbnailUpload.mutateAsync({ productId, data: { objectPath } });
+  };
 
   const onSubmit = form.handleSubmit((data) => {
     const submitData = {
@@ -93,7 +130,15 @@ export function ProductFormDialog({
         id: product.id,
         data: submitData
       } as any, {
-        onSuccess: () => {
+        onSuccess: async () => {
+          if (coverFile) {
+            try {
+              await uploadCover(product.id, coverFile);
+            } catch (error: any) {
+              toast({ title: "Product updated, but thumbnail upload failed.", description: error?.message, variant: "destructive" });
+              return;
+            }
+          }
           toast({ title: `${type === 'course' ? 'Course' : 'Product'} updated successfully.` });
           queryClient.invalidateQueries({ queryKey: getListCreatorProductsQueryKey() });
           setOpen(false);
@@ -106,7 +151,14 @@ export function ProductFormDialog({
       createProduct.mutate({
         data: submitData
       } as any, {
-        onSuccess: (createdProduct) => {
+        onSuccess: async (createdProduct) => {
+          if (coverFile) {
+            try {
+              await uploadCover(createdProduct.id, coverFile);
+            } catch (error: any) {
+              toast({ title: "Product created, but thumbnail upload failed.", description: error?.message, variant: "destructive" });
+            }
+          }
           toast({ title: `${type === 'course' ? 'Course' : 'Product'} created successfully.` });
           queryClient.invalidateQueries({ queryKey: getListCreatorProductsQueryKey() });
           setOpen(false);
@@ -160,7 +212,36 @@ export function ProductFormDialog({
                 {form.formState.errors.publicSlug && <p className="text-[13px] font-medium text-[#E53E3E]">{form.formState.errors.publicSlug.message as string}</p>}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="coverImageUrl" className="text-[14px] font-bold text-[#394649]">Cover Image URL (optional)</Label>
+                <Label className="text-[14px] font-bold text-[#394649]">Product Thumbnail</Label>
+                <div className="relative flex min-h-36 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-[#DADADA] bg-[#FAFAFA]">
+                  {coverPreview ? (
+                    <img src={coverPreview} alt="Product thumbnail preview" className="absolute inset-0 h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 text-center text-[#737373]">
+                      <ImagePlus className="h-8 w-8 text-primary" />
+                      <span className="text-[13px]">JPG, PNG or WebP up to 10MB</span>
+                    </div>
+                  )}
+                  <Label
+                    htmlFor={`cover-upload-${product?.id ?? "new"}`}
+                    className="relative z-10 cursor-pointer rounded-md bg-white/95 px-4 py-2 text-[13px] font-bold text-[#394649] shadow-sm"
+                  >
+                    {coverPreview ? "Replace Thumbnail" : "Upload Thumbnail"}
+                  </Label>
+                  <Input
+                    id={`cover-upload-${product?.id ?? "new"}`}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={(event) => {
+                      handleCoverSelection(event.target.files?.[0]);
+                      event.target.value = "";
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="coverImageUrl" className="text-[12px] text-[#737373]">Or provide a Cover Image URL (optional)</Label>
                 <Input id="coverImageUrl" placeholder="https://example.com/cover.jpg" {...form.register("coverImageUrl")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
                 {form.formState.errors.coverImageUrl && <p className="text-[13px] font-medium text-[#E53E3E]">{form.formState.errors.coverImageUrl.message as string}</p>}
               </div>
