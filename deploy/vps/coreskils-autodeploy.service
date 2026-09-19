@@ -1,0 +1,16 @@
+[Unit]
+Description=Deploy latest CoreSkils GitHub main branch
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/coreskils/app
+Environment=HOME=/root
+Environment=COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+ExecStart=/bin/bash /opt/coreskils/app/deploy/vps/deploy.sh
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+TimeoutStartSec=900

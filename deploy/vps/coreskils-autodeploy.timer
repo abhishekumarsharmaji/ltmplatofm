@@ -1,0 +1,12 @@
+[Unit]
+Description=Check GitHub for CoreSkils updates every two minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+RandomizedDelaySec=15
+Persistent=true
+Unit=coreskils-autodeploy.service
+
+[Install]
+WantedBy=timers.target

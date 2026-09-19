@@ -151,12 +151,12 @@ curl https://coreskils.com/api/healthz
 
 ## 11. Future GitHub deployments
 
-After new code is present on GitHub `main`:
+For a one-time manual deployment after new code is present on GitHub `main`:
 
 ```bash
 cd /opt/coreskils/app
 chmod +x deploy/vps/deploy.sh
-./deploy/vps/deploy.sh
+./deploy/vps/deploy.sh --force
 ```
 
 If it fails, inspect logs before retrying:
@@ -164,6 +164,28 @@ If it fails, inspect logs before retrying:
 ```bash
 journalctl -u coreskils-api -n 100 --no-pager
 tail -n 100 /var/log/nginx/error.log
+```
+
+### Automatic GitHub deployments
+
+Install the included systemd timer once:
+
+```bash
+cp deploy/vps/coreskils-autodeploy.service /etc/systemd/system/
+cp deploy/vps/coreskils-autodeploy.timer /etc/systemd/system/
+chmod +x deploy/vps/deploy.sh
+systemctl daemon-reload
+systemctl enable --now coreskils-autodeploy.timer
+systemctl list-timers coreskils-autodeploy.timer
+```
+
+The VPS checks GitHub `main` every two minutes. It exits immediately when there is no new commit. When a commit exists it pulls with fast-forward safety, installs from the lockfile, typechecks, updates the database schema, builds both services, restarts the API and verifies health.
+
+Check automatic deployment status:
+
+```bash
+systemctl status coreskils-autodeploy.timer --no-pager
+journalctl -u coreskils-autodeploy.service -n 100 --no-pager
 ```
 
 ## 12. Razorpay website review checklist
