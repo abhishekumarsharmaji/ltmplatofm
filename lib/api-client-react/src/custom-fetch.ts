@@ -363,7 +363,10 @@ export async function customFetch<T = unknown>(
 
   const controller = new AbortController();
   const externalSignal = init.signal;
-  const abortFromExternal = () => controller.abort(externalSignal?.reason);
+  const abortFromExternal = () => {
+    if (externalSignal?.reason === undefined) controller.abort();
+    else controller.abort(externalSignal.reason);
+  };
   if (externalSignal?.aborted) abortFromExternal();
   else externalSignal?.addEventListener("abort", abortFromExternal, { once: true });
   const timeout = setTimeout(
