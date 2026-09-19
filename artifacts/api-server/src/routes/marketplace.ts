@@ -109,7 +109,7 @@ router.post("/creator/products", auth, requireRole("creator", "admin"), async (r
   const requestUser = req as AuthenticatedRequest;
   const creatorId = await userOf(requestUser); if (!creatorId) { res.status(409).json({ error: "Creator profile unavailable" }); return; }
   const { title, description = "", shortSummary = null, subtype = "other", coverImageUrl = null, type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId } = req.body ?? {};
-  const digitalSubtypes = ["ebook", "template", "toolkit", "document", "bundle", "other"];
+  const digitalSubtypes = ["ebook", "guide", "workbook", "checklist", "planner", "template", "spreadsheet", "presentation", "design_asset", "photo_preset", "audio", "video", "code", "plugin", "prompt_pack", "toolkit", "document", "bundle", "other"];
   if (type === "digital" && requestedPrice !== undefined && requestedPrice !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
   const priceMinor = type === "course" ? 0 : requestedPrice;
   if (typeof title !== "string" || title.length < 2 || !["course", "digital"].includes(type) || !Number.isInteger(priceMinor) || priceMinor < 0) {
@@ -160,7 +160,7 @@ router.patch("/creator/products/:id", auth, requireRole("creator", "admin"), asy
   if (!existing || ((req as AuthenticatedRequest).user!.role !== "admin" && existing.creatorId !== creatorId)) { res.status(404).json({ error: "Product not found" }); return; }
    const allowed = ["title", "description", "shortSummary", "subtype", "coverImageUrl", "priceMinor", "currency", "categoryId"] as const;
    if (existing.type === "digital" && req.body?.priceMinor !== undefined && req.body.priceMinor !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
-   if (existing.type === "digital" && req.body?.subtype !== undefined && !["ebook", "template", "toolkit", "document", "bundle", "other"].includes(req.body.subtype)) { res.status(400).json({ error: "Invalid digital product type" }); return; }
+   if (existing.type === "digital" && req.body?.subtype !== undefined && !["ebook", "guide", "workbook", "checklist", "planner", "template", "spreadsheet", "presentation", "design_asset", "photo_preset", "audio", "video", "code", "plugin", "prompt_pack", "toolkit", "document", "bundle", "other"].includes(req.body.subtype)) { res.status(400).json({ error: "Invalid digital product type" }); return; }
   const patch = Object.fromEntries(allowed.filter((key) => req.body?.[key] !== undefined).map((key) => [key, key === "categoryId" ? id(req.body[key]) : req.body[key]]));
   const [row] = await db.update(productsTable).set({ ...patch, updatedAt: new Date() }).where(eq(productsTable.id, productId)).returning(); res.json(safeProduct(row));
 });

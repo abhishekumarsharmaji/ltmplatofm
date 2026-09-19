@@ -7,10 +7,12 @@ import { useListDigitalProducts } from "@workspace/api-client-react";
 
 export default function Products() {
   const [search, setSearch] = useState("");
+  const [type, setType] = useState("all");
   
   const productsQuery = useListDigitalProducts();
   const products = (productsQuery.data || []).filter(product => 
-    !search || product.title.toLowerCase().includes(search.toLowerCase())
+    (!search || product.title.toLowerCase().includes(search.toLowerCase()) || product.shortSummary?.toLowerCase().includes(search.toLowerCase())) &&
+    (type === "all" || product.subtype === type)
   );
 
   return (
@@ -28,14 +30,43 @@ export default function Products() {
           </div>
 
           <div className="flex flex-col items-center gap-8 mb-16">
-            <div className="relative w-full max-w-2xl">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9794AA] w-5 h-5" />
-              <Input 
-                placeholder="Search for products..." 
-                className="pl-12 h-14 bg-white border-[#E5E5E5] text-[16px] text-black rounded-full shadow-sm focus-visible:ring-primary/50"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+            <div className="flex w-full max-w-3xl flex-col gap-3 sm:flex-row">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9794AA] w-5 h-5" />
+                <Input 
+                  placeholder="Search for products..." 
+                  className="pl-12 h-14 bg-white border-[#E5E5E5] text-[16px] text-black rounded-full shadow-sm focus-visible:ring-primary/50"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
+              <select
+                aria-label="Filter by product type"
+                value={type}
+                onChange={(event) => setType(event.target.value)}
+                className="h-14 rounded-full border border-[#E5E5E5] bg-white px-5 text-[14px] font-medium text-[#394649] shadow-sm outline-none focus:border-primary sm:w-60"
+              >
+                <option value="all">All product types</option>
+                <option value="ebook">Ebooks</option>
+                <option value="guide">Guides & Notes</option>
+                <option value="workbook">Workbooks</option>
+                <option value="checklist">Checklists</option>
+                <option value="planner">Planners</option>
+                <option value="template">Templates</option>
+                <option value="spreadsheet">Spreadsheets</option>
+                <option value="presentation">Presentations</option>
+                <option value="design_asset">Design Assets</option>
+                <option value="photo_preset">Photo Presets</option>
+                <option value="audio">Audio</option>
+                <option value="video">Videos</option>
+                <option value="code">Code & Scripts</option>
+                <option value="plugin">Plugins & Themes</option>
+                <option value="prompt_pack">Prompt Packs</option>
+                <option value="toolkit">Toolkits</option>
+                <option value="document">Documents</option>
+                <option value="bundle">Bundles</option>
+                <option value="other">Other</option>
+              </select>
             </div>
           </div>
 
@@ -68,7 +99,7 @@ export default function Products() {
               </p>
               <button 
                 className="mt-6 px-6 py-2 border border-[#DADADA] text-[#394649] hover:bg-gray-50 rounded-md font-medium"
-                onClick={() => setSearch("")}
+                onClick={() => { setSearch(""); setType("all"); }}
               >
                 Clear search
               </button>

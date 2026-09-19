@@ -13,7 +13,6 @@ import {
 const router: IRouter = Router();
 const MAX_FILE_BYTES = 250 * 1024 * 1024;
 const MAX_FILES = 25;
-const PRODUCT_SUBTYPES = ["ebook", "template", "toolkit", "document", "bundle", "other"] as const;
 const MIME_BY_EXT: Record<string, string[]> = {
   pdf: ["application/pdf"], epub: ["application/epub+zip"], mobi: ["application/x-mobipocket-ebook", "application/octet-stream"],
   azw: ["application/vnd.amazon.ebook", "application/octet-stream"], azw3: ["application/vnd.amazon.ebook", "application/octet-stream"],
@@ -23,14 +22,25 @@ const MIME_BY_EXT: Record<string, string[]> = {
   xls: ["application/vnd.ms-excel"], xlsx: ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
   csv: ["text/csv", "application/csv", "application/vnd.ms-excel"], ods: ["application/vnd.oasis.opendocument.spreadsheet"],
   zip: ["application/zip"], "7z": ["application/x-7z-compressed"], rar: ["application/vnd.rar", "application/x-rar-compressed"],
-  txt: ["text/plain"], json: ["application/json", "text/json"],
+  txt: ["text/plain"], md: ["text/markdown", "text/plain"], json: ["application/json", "text/json"],
+  html: ["text/html"], css: ["text/css"], js: ["text/javascript", "application/javascript"], ts: ["text/plain", "text/typescript", "application/typescript", "video/mp2t"],
+  jsx: ["text/plain", "text/javascript", "application/javascript", "application/octet-stream"], tsx: ["text/plain", "text/typescript", "application/typescript", "application/octet-stream"],
+  py: ["text/plain", "text/x-python", "application/x-python-code"], xml: ["application/xml", "text/xml"],
+  yaml: ["application/yaml", "text/yaml", "text/x-yaml", "application/x-yaml", "text/plain"], yml: ["application/yaml", "text/yaml", "text/x-yaml", "application/x-yaml", "text/plain"],
   png: ["image/png"], jpg: ["image/jpeg"], jpeg: ["image/jpeg"], webp: ["image/webp"], svg: ["image/svg+xml"],
+  psd: ["image/vnd.adobe.photoshop", "application/octet-stream"], ai: ["application/postscript", "application/pdf", "application/octet-stream"],
+  fig: ["application/octet-stream"], sketch: ["application/octet-stream"], indd: ["application/octet-stream", "application/x-indesign"],
+  mp3: ["audio/mpeg"], wav: ["audio/wav", "audio/x-wav"], m4a: ["audio/mp4", "audio/x-m4a"], aac: ["audio/aac"],
+  ogg: ["audio/ogg", "video/ogg"], mp4: ["video/mp4"], webm: ["video/webm"], mov: ["video/quicktime"],
+  ttf: ["font/ttf", "application/x-font-ttf", "application/octet-stream"], otf: ["font/otf", "application/x-font-opentype", "application/octet-stream"],
+  woff: ["font/woff", "application/font-woff", "application/octet-stream"], woff2: ["font/woff2", "application/octet-stream"],
 };
 const fileKind = (filename: string) => {
   const ext = filename.toLowerCase().split(".").pop() ?? "";
   if (["png", "jpg", "jpeg", "webp", "svg"].includes(ext)) return "image";
+  if (["mp4", "webm", "mov", "ogg"].includes(ext)) return "video";
   if (["zip", "7z", "rar"].includes(ext)) return "other";
-  if (["txt", "json"].includes(ext)) return "other";
+  if (["txt", "md", "json", "html", "css", "js", "ts", "jsx", "tsx", "py", "xml", "yaml", "yml", "mp3", "wav", "m4a", "aac", "ttf", "otf", "woff", "woff2"].includes(ext)) return "other";
   return "document";
 };
 const validFile = (filename: unknown, mime: unknown, size: unknown) => {

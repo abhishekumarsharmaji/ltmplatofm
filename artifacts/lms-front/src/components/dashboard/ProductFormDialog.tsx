@@ -153,13 +153,26 @@ export function ProductFormDialog({
           {type === "digital" && (
             <div className="space-y-2">
               <Label htmlFor="subtype" className="text-[14px] font-bold text-[#394649]">Product Type</Label>
-              <Select onValueChange={(v) => form.setValue("subtype", v)} defaultValue={form.getValues("subtype")}>
+              <Select value={form.watch("subtype")} onValueChange={(v) => form.setValue("subtype", v, { shouldDirty: true })}>
                 <SelectTrigger className="h-11 border-[#E5E5E5] rounded-md text-[14px]">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ebook">E-Book</SelectItem>
+                    <SelectItem value="guide">Guide / Notes</SelectItem>
+                    <SelectItem value="workbook">Workbook / Worksheet</SelectItem>
+                    <SelectItem value="checklist">Checklist</SelectItem>
+                    <SelectItem value="planner">Planner</SelectItem>
                   <SelectItem value="template">Template</SelectItem>
+                    <SelectItem value="spreadsheet">Spreadsheet / Calculator</SelectItem>
+                    <SelectItem value="presentation">Presentation</SelectItem>
+                    <SelectItem value="design_asset">Design Asset / UI Kit</SelectItem>
+                    <SelectItem value="photo_preset">Photo Preset / LUT</SelectItem>
+                    <SelectItem value="audio">Audio / Music Pack</SelectItem>
+                    <SelectItem value="video">Video / Recorded Class</SelectItem>
+                    <SelectItem value="code">Source Code / Script</SelectItem>
+                    <SelectItem value="plugin">Plugin / Theme</SelectItem>
+                    <SelectItem value="prompt_pack">AI Prompt Pack</SelectItem>
                   <SelectItem value="toolkit">Toolkit</SelectItem>
                   <SelectItem value="document">Document</SelectItem>
                   <SelectItem value="bundle">Bundle</SelectItem>

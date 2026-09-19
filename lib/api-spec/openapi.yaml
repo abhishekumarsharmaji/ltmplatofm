@@ -899,7 +899,7 @@ components:
         title: { type: string }
         description: { type: string }
         shortSummary: { type: ["string", "null"] }
-        subtype: { type: ["string", "null"], enum: [ebook, template, toolkit, document, bundle, other, null] }
+        subtype: { type: ["string", "null"], enum: [ebook, guide, workbook, checklist, planner, template, spreadsheet, presentation, design_asset, photo_preset, audio, video, code, plugin, prompt_pack, toolkit, document, bundle, other, null] }
         coverImageUrl: { type: ["string", "null"] }
         type: { type: string, enum: [course, digital] }
         priceMinor: { type: integer, minimum: 0 }
@@ -912,7 +912,7 @@ components:
         title: { type: string, minLength: 2 }
         description: { type: string }
         shortSummary: { type: string }
-        subtype: { type: string, enum: [ebook, template, toolkit, document, bundle, other] }
+        subtype: { type: string, enum: [ebook, guide, workbook, checklist, planner, template, spreadsheet, presentation, design_asset, photo_preset, audio, video, code, plugin, prompt_pack, toolkit, document, bundle, other] }
         coverImageUrl: { type: string }
         type: { type: string, enum: [course, digital] }
         priceMinor: { type: integer, minimum: 0 }

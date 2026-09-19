@@ -164,6 +164,7 @@ export function CreatorProductManage({ productId }: { productId: number }) {
               <input 
                 type="file" 
                 multiple 
+                accept=".pdf,.epub,.mobi,.azw,.azw3,.doc,.docx,.odt,.rtf,.ppt,.pptx,.xls,.xlsx,.csv,.ods,.zip,.7z,.rar,.txt,.md,.json,.html,.css,.js,.ts,.jsx,.tsx,.py,.xml,.yaml,.yml,.png,.jpg,.jpeg,.webp,.svg,.psd,.ai,.fig,.sketch,.indd,.mp3,.wav,.m4a,.aac,.ogg,.mp4,.webm,.mov,.ttf,.otf,.woff,.woff2"
                 className="hidden" 
                 ref={fileInputRef} 
                 onChange={handleFileChange}
@@ -181,7 +182,8 @@ export function CreatorProductManage({ productId }: { productId: number }) {
                 <div className="py-12 border-2 border-dashed border-[#E5E5E5] rounded-lg text-center bg-[#FAFAFA]">
                   <FileText className="w-10 h-10 text-[#9794AA] mx-auto mb-3" />
                   <p className="font-bold text-[15px] text-black">No files yet</p>
-                  <p className="text-[13px] text-[#4D4D4D] mt-1">Upload the files that users will receive.</p>
+                  <p className="text-[13px] text-[#4D4D4D] mt-1">Upload documents, templates, archives, media, code, fonts, or design assets.</p>
+                  <p className="text-[12px] text-[#737373] mt-2">Up to 25 files, 250MB each</p>
                 </div>
               ) : (
                 <>
