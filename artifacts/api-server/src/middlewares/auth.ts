@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db, lmsUsersTable, usersTable } from "@workspace/db";
 
 export const SESSION_COOKIE = "lms_session";
-export const SUPER_ADMIN_EMAIL = "xbhishekh@gmail.com";
+export const SUPER_ADMIN_EMAIL = "superadmin@gmail.com";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 export type EffectiveRole = "student" | "creator" | "admin";
 
