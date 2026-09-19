@@ -10,14 +10,18 @@ export default function FreelancingToolkit() {
   useEffect(() => {
     const previousTitle = document.title;
     const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     const previousDescription = description?.content;
+    const previousCanonical = canonical?.href;
     document.title = "Freelancing Client Acquisition Toolkit | CoreSkils";
     if (description) {
       description.content = "A practical digital toolkit with outreach scripts, proposal templates, discovery questions and an onboarding checklist for Indian freelancers.";
     }
+    if (canonical) canonical.href = PRODUCT_URL;
     return () => {
       document.title = previousTitle;
       if (description && previousDescription !== undefined) description.content = previousDescription;
+      if (canonical && previousCanonical) canonical.href = previousCanonical;
     };
   }, []);
 

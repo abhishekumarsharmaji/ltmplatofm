@@ -41,35 +41,40 @@ export default function About() {
                 About Us
               </span>
               <h1 className="text-[48px] sm:text-[60px] leading-[1.1] text-black">
-                <span className="font-light block">A marketplace for</span>
-                <span className="font-bold block">learning and teaching</span>
+                <span className="font-light block">Practical learning and</span>
+                <span className="font-bold block">useful digital products</span>
               </h1>
             </div>
             
             <div className="text-[18px] md:text-[20px] leading-relaxed text-[#4D4D4D] text-center max-w-3xl mx-auto">
-              CoreSkils connects learners with independent instructors. Instructors can create, organize, and publish their own courses, while learners can discover practical knowledge in one accessible marketplace.
+              CoreSkils is an India-based online learning and digital-products platform operated by Abhishek Kumar from Vadodara, Gujarat. Customers can explore practical courses and clearly described downloadable toolkits in one accessible website.
             </div>
             
-            <div className="my-16 relative h-[400px] md:h-[500px] rounded-lg overflow-hidden border border-[#E5E5E5] bg-gray-100 shadow-sm">
-              <img 
-                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=800&fit=crop" 
-                alt="Team collaborating" 
-                className="w-full h-full object-cover"
-              />
+            <div className="my-16 grid gap-5 rounded-2xl border border-[#CFE2D8] bg-[#F2FAF6] p-7 shadow-sm md:grid-cols-3 md:p-10">
+              {[
+                ["Clear product information", "Each paid digital product states its price, contents, format, intended audience, delivery method and usage licence."],
+                ["Electronic delivery", "Digital access is provided after verified payment confirmation. No physical shipment is involved unless explicitly stated."],
+                ["Accessible support", "Customers can contact growora.org@gmail.com for product, access, payment, refund or privacy questions."],
+              ].map(([title, body]) => (
+                <div key={title}>
+                  <h2 className="text-lg font-bold text-black">{title}</h2>
+                  <p className="mt-3 text-sm leading-6 text-[#4D5D57]">{body}</p>
+                </div>
+              ))}
             </div>
             
             <div className="grid md:grid-cols-2 gap-12 lg:gap-16">
               <div className="space-y-4">
-                <h2 className="text-[32px] font-bold text-black">Our mission</h2>
+                <h2 className="text-[32px] font-bold text-black">What we provide</h2>
                 <p className="text-[16px] text-[#394649] leading-relaxed">
-                  Our mission is to make practical education easier to publish and easier to access. We give independent instructors a structured course platform and give learners a clear way to find, enroll in, and complete courses.
+                  We provide practical educational resources, structured online courses, and digital toolkits that customers can use in their own learning or work. Product pages explain exactly what is included without promising guaranteed income, employment, or business results.
                 </p>
               </div>
               
               <div className="space-y-4">
-                <h2 className="text-[32px] font-bold text-black">How the marketplace works</h2>
+                <h2 className="text-[32px] font-bold text-black">How purchases work</h2>
                 <p className="text-[16px] text-[#394649] leading-relaxed">
-                  Courses on CoreSkils are created and managed by independent instructors. CoreSkils provides the technology for course publishing, structured lessons, learning resources, enrollment, and live classes; each instructor remains responsible for their own course content.
+                  Before purchase, customers can review pricing, deliverables, delivery terms, refund conditions and support details. When payments are enabled, access will be granted only after the payment provider confirms success. Complete card details, CVV, OTPs and UPI PINs are never collected by CoreSkils.
                 </p>
               </div>
             </div>
@@ -95,14 +100,14 @@ export default function About() {
         <section className="bg-[#224EA1] py-20 text-center px-4">
           <div className="max-w-3xl mx-auto flex flex-col items-center">
             <h2 className="text-[40px] md:text-[48px] font-normal text-white mb-6 leading-tight">
-              Learn or teach on CoreSkils
+              Explore CoreSkils digital resources
             </h2>
             <p className="text-white/80 text-[18px] mb-10 max-w-xl">
-              Explore courses as a learner, or apply as an instructor to create and publish your own course.
+              Review our digital products, download available samples, or contact support before purchasing.
             </p>
-            <Link href="/auth/sign-up">
+            <Link href="/products">
               <Button className="h-[54px] px-10 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)]">
-                Create a free account
+                Browse digital products
               </Button>
             </Link>
           </div>

@@ -15,16 +15,16 @@ export function Footer() {
       links: [
         { href: "/courses", label: t("links.courses") },
         { href: "/products", label: t("links.products") },
-        { href: "/pricing", label: t("links.pricing") },
+        { href: "/products/freelancing-client-acquisition-toolkit", label: "Featured toolkit" },
         { href: "/about", label: t("links.about") },
       ],
     },
     {
-      title: t("teach"),
+      title: "Customer help",
       links: [
-        { href: "/creators", label: t("links.forCreators") },
-        { href: "/platform-pricing", label: t("links.platformPricing") },
-        { href: "/dashboard/creator", label: t("links.creatorDashboard") },
+        { href: "/contact", label: "Contact support" },
+        { href: "/shipping-delivery", label: "Digital delivery" },
+        { href: "/refund-policy", label: "Refund requests" },
       ],
     },
     {
@@ -58,7 +58,12 @@ export function Footer() {
               <span className="text-[32px] font-bold tracking-tight">{platformName}</span>
             </Link>
             <p className="text-[#9794AA] text-[15px] leading-relaxed max-w-sm">
-              {t("description")}
+              Practical online courses and downloadable digital toolkits with clear product details, electronic delivery terms, and customer support.
+            </p>
+            <p className="mt-5 text-[13px] leading-6 text-[#B7B4C2]">
+              Operated by Abhishek Kumar<br />
+              Vadodara, Gujarat 391760, India<br />
+              <a href="mailto:growora.org@gmail.com" className="hover:text-white">growora.org@gmail.com</a>
             </p>
           </div>
 

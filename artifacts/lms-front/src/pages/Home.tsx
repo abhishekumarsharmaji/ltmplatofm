@@ -54,17 +54,23 @@ export default function Home() {
               
               {/* Hero Left Content */}
               <div className="max-w-2xl relative z-10">
-                <h1 className="text-[52px] sm:text-[68px] leading-[1.1] text-black mb-8">
-                  <span className="font-light block">{t("hero.title1")}</span>
-                  <span className="font-light block">{t("hero.title2")}</span>
-                  <span className="font-normal block">{t("hero.title3")}</span>
+                <p className="mb-5 text-sm font-bold uppercase tracking-[0.16em] text-[#0B8F50]">Courses & digital products</p>
+                <h1 className="text-[48px] sm:text-[64px] leading-[1.08] text-black mb-8">
+                  <span className="font-light block">Learn practical skills.</span>
+                  <span className="font-normal block">Use ready-to-apply</span>
+                  <span className="font-bold block">digital toolkits.</span>
                 </h1>
                 <p className="text-[18px] text-[#4D4D4D] mb-10 max-w-[420px] leading-relaxed">
-                  {t("hero.subtitle")}
+                  CoreSkils provides online learning resources and genuine downloadable products with clear pricing, delivery details, policies, and customer support.
                 </p>
-                <Link href="/courses" className="h-[54px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)] inline-flex items-center justify-center">
-                    {t("hero.startLearning")}
-                </Link>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/products" className="h-[54px] px-8 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)] inline-flex items-center justify-center">
+                    Explore digital products
+                  </Link>
+                  <Link href="/courses" className="h-[54px] px-8 border border-[#C9D4CF] hover:bg-[#F4F8F6] text-[#27463A] font-medium rounded-md text-[16px] inline-flex items-center justify-center">
+                    Browse courses
+                  </Link>
+                </div>
               </div>
 
               {/* Hero Right Composition */}
@@ -90,6 +96,53 @@ export default function Home() {
                 </div>
 
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-y border-[#DDE7E2] bg-[#F4FAF7] py-20">
+          <div className="container mx-auto grid items-center gap-10 px-4 lg:grid-cols-[.8fr_1.2fr] lg:px-8">
+            <img src={`${import.meta.env.BASE_URL}products/freelancing-toolkit-cover.svg`} alt="Freelancing Client Acquisition Toolkit" className="mx-auto w-full max-w-sm rounded-2xl shadow-[0_20px_55px_rgba(20,80,55,.2)]" loading="lazy" />
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#0B8F50]">Featured digital product</p>
+              <h2 className="mt-3 text-4xl font-bold leading-tight text-black">Freelancing Client Acquisition Toolkit</h2>
+              <p className="mt-5 max-w-2xl text-[17px] leading-8 text-[#4D5D57]">
+                Practical outreach scripts, proposal structure, discovery questions, pricing guidance, and an onboarding checklist for new freelancers. Includes a free sample PDF for evaluation.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-4">
+                <span className="text-3xl font-bold text-black">₹299 INR</span>
+                <span className="rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-amber-800">Checkout activation in progress</span>
+              </div>
+              <Link href="/products/freelancing-client-acquisition-toolkit" className="mt-7 inline-flex h-12 items-center justify-center rounded-md bg-[#123D32] px-7 font-semibold text-white hover:bg-[#0B3027]">
+                View product details
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white py-20">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#0B8F50]">Transparent digital delivery</p>
+              <h2 className="mt-3 text-4xl font-bold text-black">Know what happens before you pay</h2>
+            </div>
+            <div className="mt-12 grid gap-5 md:grid-cols-3">
+              {[
+                ["1", "Review the product", "Read the exact deliverables, file format, price, usage licence, refund conditions, and download a sample where available."],
+                ["2", "Pay through a secure gateway", "Once payments are active, checkout will use an authorised payment provider. CoreSkils will not collect card numbers, CVV, OTPs, or UPI PINs."],
+                ["3", "Receive digital access", "After server-side payment confirmation, access is delivered electronically to the customer account and registered email. No physical shipping applies."],
+              ].map(([step, title, body]) => (
+                <article key={step} className="rounded-2xl border border-[#DDE7E2] bg-[#FAFCFB] p-7">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#123D32] font-bold text-white">{step}</span>
+                  <h3 className="mt-5 text-xl font-bold">{title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-[#596963]">{body}</p>
+                </article>
+              ))}
+            </div>
+            <div className="mt-8 flex flex-wrap justify-center gap-5 text-sm font-semibold text-[#087B46]">
+              <Link href="/shipping-delivery">Digital delivery policy</Link>
+              <Link href="/refund-policy">Refund and cancellation policy</Link>
+              <Link href="/contact">Customer support</Link>
             </div>
           </div>
         </section>

@@ -1,7 +1,7 @@
 {
   "name": "CoreSkils",
   "short_name": "CoreSkils",
-  "description": "Build practical, career-ready skills through online courses and live classes.",
+  "description": "Practical online courses and downloadable digital toolkits with transparent delivery and support.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",
