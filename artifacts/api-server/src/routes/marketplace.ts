@@ -122,6 +122,10 @@ router.post("/creator/products", auth, requireRole("creator", "admin"), async (r
   }
   if (type === "digital" && !digitalSubtypes.includes(subtype)) { res.status(400).json({ error: "Invalid digital product type" }); return; }
   if (requestedSlug !== undefined && requestedSlug !== "" && !validPublicSlug(requestedSlug)) { res.status(400).json({ error: "Custom link must be 3–80 characters using lowercase letters, numbers, and hyphens" }); return; }
+  if (requestedSlug) {
+    const [conflict] = await db.select({ id: productsTable.id }).from(productsTable).where(eq(productsTable.publicSlug, String(requestedSlug).toLowerCase()));
+    if (conflict) { res.status(409).json({ error: "This custom link is already taken" }); return; }
+  }
   const row = await db.transaction(async (tx) => {
     let linkedCourseId = id(courseId) ?? undefined;
     if (type === "digital" && linkedCourseId) throw new Error("Digital products cannot be linked to a course");

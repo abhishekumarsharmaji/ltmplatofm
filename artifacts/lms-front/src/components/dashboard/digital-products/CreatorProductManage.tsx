@@ -152,7 +152,7 @@ export function CreatorProductManage({ productId }: { productId: number }) {
             </Badge>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 md:justify-end">
           {product.status === "published" && (
             <>
               <Button asChild variant="outline" className="border-[#DADADA] text-[#394649]">
