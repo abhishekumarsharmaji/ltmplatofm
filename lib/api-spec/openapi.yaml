@@ -902,6 +902,7 @@ components:
         subtype: { type: ["string", "null"], enum: [ebook, guide, workbook, checklist, planner, template, spreadsheet, presentation, design_asset, photo_preset, audio, video, code, plugin, prompt_pack, toolkit, document, bundle, other, null] }
         publicSlug: { type: ["string", "null"] }
         coverImageUrl: { type: ["string", "null"] }
+        salesPage: { $ref: "#/components/schemas/DigitalProductSalesPage" }
         type: { type: string, enum: [course, digital] }
         priceMinor: { type: integer, minimum: 0 }
         currency: { type: string }
@@ -916,11 +917,52 @@ components:
         subtype: { type: string, enum: [ebook, guide, workbook, checklist, planner, template, spreadsheet, presentation, design_asset, photo_preset, audio, video, code, plugin, prompt_pack, toolkit, document, bundle, other] }
         publicSlug: { type: string, minLength: 3, maxLength: 80, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }
         coverImageUrl: { type: string }
+        salesPage: { $ref: "#/components/schemas/DigitalProductSalesPageInput" }
         type: { type: string, enum: [course, digital] }
         priceMinor: { type: integer, minimum: 0 }
         currency: { type: string }
         courseId: { type: integer }
         categoryId: { type: integer }
+    DigitalProductSalesPage:
+      type: object
+      properties:
+        tagline: { type: string }
+        ctaLabel: { type: string }
+        benefits: { type: array, items: { type: string } }
+        targetAudience: { type: array, items: { type: string } }
+        includedItems: { type: array, items: { type: string } }
+        sections:
+          type: array
+          items: { $ref: "#/components/schemas/SalesPageSection" }
+        testimonials:
+          type: array
+          items: { $ref: "#/components/schemas/SalesPageTestimonial" }
+        faqs:
+          type: array
+          items: { $ref: "#/components/schemas/SalesPageFaq" }
+        supportEmail: { type: string }
+        terms: { type: string }
+    DigitalProductSalesPageInput:
+      allOf:
+        - $ref: "#/components/schemas/DigitalProductSalesPage"
+    SalesPageSection:
+      type: object
+      required: [heading, body]
+      properties:
+        heading: { type: string }
+        body: { type: string }
+    SalesPageTestimonial:
+      type: object
+      required: [name, quote]
+      properties:
+        name: { type: string }
+        quote: { type: string }
+    SalesPageFaq:
+      type: object
+      required: [question, answer]
+      properties:
+        question: { type: string }
+        answer: { type: string }
     DigitalFile:
       type: object
       required: [id, productId, kind, filename, status, position]

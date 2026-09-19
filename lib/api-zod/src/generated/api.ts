@@ -441,6 +441,27 @@ export const ListProductsResponseItem = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(listProductsResponsePriceMinorMin),
   "currency": zod.string(),
@@ -465,6 +486,27 @@ export const GetProductResponse = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(getProductResponsePriceMinorMin),
   "currency": zod.string(),
@@ -595,6 +637,27 @@ export const ListCreatorProductsResponseItem = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(listCreatorProductsResponsePriceMinorMin),
   "currency": zod.string(),
@@ -621,6 +684,27 @@ export const CreateCreatorProductBody = zod.object({
   "subtype": zod.enum(['ebook', 'guide', 'workbook', 'checklist', 'planner', 'template', 'spreadsheet', 'presentation', 'design_asset', 'photo_preset', 'audio', 'video', 'code', 'plugin', 'prompt_pack', 'toolkit', 'document', 'bundle', 'other']).optional(),
   "publicSlug": zod.string().min(createCreatorProductBodyPublicSlugMin).max(createCreatorProductBodyPublicSlugMax).regex(createCreatorProductBodyPublicSlugRegExp).optional(),
   "coverImageUrl": zod.string().optional(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']).optional(),
   "priceMinor": zod.number().int().min(createCreatorProductBodyPriceMinorMin).optional(),
   "currency": zod.string().optional(),
@@ -640,6 +724,27 @@ export const CreateCreatorProductResponse = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(createCreatorProductResponsePriceMinorMin),
   "currency": zod.string(),
@@ -669,6 +774,27 @@ export const UpdateCreatorProductBody = zod.object({
   "subtype": zod.enum(['ebook', 'guide', 'workbook', 'checklist', 'planner', 'template', 'spreadsheet', 'presentation', 'design_asset', 'photo_preset', 'audio', 'video', 'code', 'plugin', 'prompt_pack', 'toolkit', 'document', 'bundle', 'other']).optional(),
   "publicSlug": zod.string().min(updateCreatorProductBodyPublicSlugMin).max(updateCreatorProductBodyPublicSlugMax).regex(updateCreatorProductBodyPublicSlugRegExp).optional(),
   "coverImageUrl": zod.string().optional(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']).optional(),
   "priceMinor": zod.number().int().min(updateCreatorProductBodyPriceMinorMin).optional(),
   "currency": zod.string().optional(),
@@ -688,6 +814,27 @@ export const UpdateCreatorProductResponse = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(updateCreatorProductResponsePriceMinorMin),
   "currency": zod.string(),
@@ -711,6 +858,27 @@ export const PublishCreatorProductResponse = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(publishCreatorProductResponsePriceMinorMin),
   "currency": zod.string(),
@@ -735,6 +903,27 @@ export const GetCreatorCourseBuilderResponse = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(getCreatorCourseBuilderResponseProductPriceMinorMin),
   "currency": zod.string(),
@@ -1322,6 +1511,27 @@ export const AdminProductsResponseItem = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(adminProductsResponsePriceMinorMin),
   "currency": zod.string(),
@@ -1702,6 +1912,27 @@ export const ListDigitalProductsResponseItem = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(listDigitalProductsResponseOnePriceMinorMin),
   "currency": zod.string(),
@@ -1729,6 +1960,27 @@ export const GetDigitalProductResponse = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(getDigitalProductResponseOneOnePriceMinorMin),
   "currency": zod.string(),
@@ -1802,6 +2054,27 @@ export const UnpublishDigitalProductResponse = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(unpublishDigitalProductResponsePriceMinorMin),
   "currency": zod.string(),
@@ -1935,6 +2208,27 @@ export const ListStudentDigitalProductsResponseItem = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(listStudentDigitalProductsResponseOnePriceMinorMin),
   "currency": zod.string(),
@@ -1962,6 +2256,27 @@ export const GetStudentDigitalProductResponse = zod.object({
   "subtype": zod.union([zod.literal('ebook'),zod.literal('guide'),zod.literal('workbook'),zod.literal('checklist'),zod.literal('planner'),zod.literal('template'),zod.literal('spreadsheet'),zod.literal('presentation'),zod.literal('design_asset'),zod.literal('photo_preset'),zod.literal('audio'),zod.literal('video'),zod.literal('code'),zod.literal('plugin'),zod.literal('prompt_pack'),zod.literal('toolkit'),zod.literal('document'),zod.literal('bundle'),zod.literal('other'),zod.literal(null)]).nullish(),
   "publicSlug": zod.string().nullish(),
   "coverImageUrl": zod.string().nullish(),
+  "salesPage": zod.object({
+  "tagline": zod.string().optional(),
+  "ctaLabel": zod.string().optional(),
+  "benefits": zod.array(zod.string()).optional(),
+  "targetAudience": zod.array(zod.string()).optional(),
+  "includedItems": zod.array(zod.string()).optional(),
+  "sections": zod.array(zod.object({
+  "heading": zod.string(),
+  "body": zod.string()
+})).optional(),
+  "testimonials": zod.array(zod.object({
+  "name": zod.string(),
+  "quote": zod.string()
+})).optional(),
+  "faqs": zod.array(zod.object({
+  "question": zod.string(),
+  "answer": zod.string()
+})).optional(),
+  "supportEmail": zod.string().optional(),
+  "terms": zod.string().optional()
+}).optional(),
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(getStudentDigitalProductResponseOneOnePriceMinorMin),
   "currency": zod.string(),

@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { DigitalProductSalesPage } from './digitalProductSalesPage';
 import type { ProductStatus } from './productStatus';
 import type { ProductSubtype } from './productSubtype';
 import type { ProductType } from './productType';
@@ -21,6 +22,7 @@ export interface Product {
   publicSlug?: string | null;
   /** @nullable */
   coverImageUrl?: string | null;
+  salesPage?: DigitalProductSalesPage;
   type: ProductType;
   /** @minimum 0 */
   priceMinor: number;

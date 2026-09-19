@@ -13,6 +13,29 @@ const userOf = async (req: AuthenticatedRequest) => req.canonicalUserId;
 const id = (value: unknown) => Number.isInteger(Number(value)) ? Number(value) : null;
 const validPublicSlug = (value: unknown) => typeof value === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) && value.length >= 3 && value.length <= 80;
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "product";
+const cleanText = (value: unknown, max: number) => typeof value === "string" ? value.trim().slice(0, max) : "";
+const cleanList = (value: unknown, maxItems: number, maxLength: number) => Array.isArray(value) ? value.map((item) => cleanText(item, maxLength)).filter(Boolean).slice(0, maxItems) : [];
+const normalizeSalesPage = (value: unknown) => {
+  const page = value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+  const pairs = (key: string, first: string, second: string, maxItems: number, maxLength: number) =>
+    Array.isArray(page[key]) ? page[key].map((item) => {
+      const row = item && typeof item === "object" ? item as Record<string, unknown> : {};
+      return { [first]: cleanText(row[first], maxLength), [second]: cleanText(row[second], maxLength) };
+    }).filter((item) => item[first] && item[second]).slice(0, maxItems) : [];
+  const supportEmail = cleanText(page.supportEmail, 254).toLowerCase();
+  return {
+    tagline: cleanText(page.tagline, 180),
+    ctaLabel: cleanText(page.ctaLabel, 60),
+    benefits: cleanList(page.benefits, 12, 180),
+    targetAudience: cleanList(page.targetAudience, 12, 180),
+    includedItems: cleanList(page.includedItems, 20, 180),
+    sections: pairs("sections", "heading", "body", 12, 4000),
+    testimonials: pairs("testimonials", "name", "quote", 10, 500),
+    faqs: pairs("faqs", "question", "answer", 15, 1000),
+    supportEmail: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail) ? supportEmail : "",
+    terms: cleanText(page.terms, 5000),
+  };
+};
 const safeProduct = (product: typeof productsTable.$inferSelect) => {
   const { coverImageObjectPath: _coverImageObjectPath, ...publicProduct } = product;
   return publicProduct;
@@ -124,7 +147,7 @@ router.get("/student/courses/:courseId", auth, requireRole("student", "creator",
 router.post("/creator/products", auth, requireRole("creator", "admin"), async (req, res) => {
   const requestUser = req as AuthenticatedRequest;
   const creatorId = await userOf(requestUser); if (!creatorId) { res.status(409).json({ error: "Creator profile unavailable" }); return; }
-  const { title, description = "", shortSummary = null, subtype = "other", publicSlug: requestedSlug, coverImageUrl = null, type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId } = req.body ?? {};
+  const { title, description = "", shortSummary = null, subtype = "other", publicSlug: requestedSlug, coverImageUrl = null, salesPage, type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId } = req.body ?? {};
   const digitalSubtypes = ["ebook", "guide", "workbook", "checklist", "planner", "template", "spreadsheet", "presentation", "design_asset", "photo_preset", "audio", "video", "code", "plugin", "prompt_pack", "toolkit", "document", "bundle", "other"];
   if (type === "digital" && requestedPrice !== undefined && requestedPrice !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
   const priceMinor = type === "course" ? 0 : requestedPrice;
@@ -166,6 +189,7 @@ router.post("/creator/products", auth, requireRole("creator", "admin"), async (r
       publicSlug: requestedSlug ? String(requestedSlug).toLowerCase() : `${slugify(title)}-${Date.now().toString(36)}`,
       coverImageUrl: typeof coverImageUrl === "string" ? coverImageUrl : null,
       coverImageObjectPath: null, type, priceMinor,
+      salesPage: type === "digital" ? normalizeSalesPage(salesPage) : {},
       currency: String(currency).toUpperCase(), courseId: linkedCourseId, categoryId: id(categoryId) ?? undefined,
     }).returning();
     return created;
@@ -181,7 +205,7 @@ router.patch("/creator/products/:id", auth, requireRole("creator", "admin"), asy
   const productId = id(req.params.id), creatorId = await userOf(req as AuthenticatedRequest); if (!productId || !creatorId) { res.status(400).json({ error: "Invalid id" }); return; }
   const [existing] = await db.select().from(productsTable).where(eq(productsTable.id, productId));
   if (!existing || ((req as AuthenticatedRequest).user!.role !== "admin" && existing.creatorId !== creatorId)) { res.status(404).json({ error: "Product not found" }); return; }
-    const allowed = ["title", "description", "shortSummary", "subtype", "publicSlug", "coverImageUrl", "priceMinor", "currency", "categoryId"] as const;
+    const allowed = ["title", "description", "shortSummary", "subtype", "publicSlug", "coverImageUrl", "salesPage", "priceMinor", "currency", "categoryId"] as const;
    if (existing.type === "digital" && req.body?.priceMinor !== undefined && req.body.priceMinor !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
    if (existing.type === "digital" && req.body?.subtype !== undefined && !["ebook", "guide", "workbook", "checklist", "planner", "template", "spreadsheet", "presentation", "design_asset", "photo_preset", "audio", "video", "code", "plugin", "prompt_pack", "toolkit", "document", "bundle", "other"].includes(req.body.subtype)) { res.status(400).json({ error: "Invalid digital product type" }); return; }
     if (req.body?.publicSlug !== undefined) {
@@ -195,7 +219,10 @@ router.patch("/creator/products/:id", auth, requireRole("creator", "admin"), asy
       req.body.publicSlug = publicSlug;
       }
     }
-  const patch = Object.fromEntries(allowed.filter((key) => req.body?.[key] !== undefined).map((key) => [key, key === "categoryId" ? id(req.body[key]) : req.body[key]]));
+  const patch = Object.fromEntries(allowed.filter((key) => req.body?.[key] !== undefined).map((key) => [
+    key,
+    key === "categoryId" ? id(req.body[key]) : key === "salesPage" ? normalizeSalesPage(req.body[key]) : req.body[key],
+  ]));
   const [row] = await db.update(productsTable).set({ ...patch, updatedAt: new Date() }).where(eq(productsTable.id, productId)).returning(); res.json(safeProduct(row));
 });
 router.post("/creator/products/:id/publish", auth, requireRole("creator", "admin"), async (req, res) => {

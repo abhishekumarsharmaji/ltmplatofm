@@ -105,6 +105,18 @@ export const productsTable = pgTable("products", {
   publicSlug: text("public_slug"),
   coverImageUrl: text("cover_image_url"),
   coverImageObjectPath: text("cover_image_object_path"),
+  salesPage: jsonb("sales_page").$type<{
+    tagline?: string;
+    ctaLabel?: string;
+    benefits?: string[];
+    targetAudience?: string[];
+    includedItems?: string[];
+    sections?: Array<{ heading: string; body: string }>;
+    testimonials?: Array<{ name: string; quote: string }>;
+    faqs?: Array<{ question: string; answer: string }>;
+    supportEmail?: string;
+    terms?: string;
+  }>().notNull().default(sql`'{}'::jsonb`),
   priceMinor: integer("price_minor").notNull().default(0),
   currency: text("currency").notNull().default("USD"),
   status: courseStatusEnum("status").notNull().default("draft"),

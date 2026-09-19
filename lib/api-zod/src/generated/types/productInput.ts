@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { DigitalProductSalesPageInput } from './digitalProductSalesPageInput';
 import type { ProductInputSubtype } from './productInputSubtype';
 import type { ProductInputType } from './productInputType';
 
@@ -21,6 +22,7 @@ export interface ProductInput {
      */
   publicSlug?: string;
   coverImageUrl?: string;
+  salesPage?: DigitalProductSalesPageInput;
   type?: ProductInputType;
   /** @minimum 0 */
   priceMinor?: number;

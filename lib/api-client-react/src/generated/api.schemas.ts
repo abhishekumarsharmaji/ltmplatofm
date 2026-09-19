@@ -180,6 +180,34 @@ export const ProductSubtype = {
   other: 'other',
 } as const;
 
+export interface SalesPageSection {
+  heading: string;
+  body: string;
+}
+
+export interface SalesPageTestimonial {
+  name: string;
+  quote: string;
+}
+
+export interface SalesPageFaq {
+  question: string;
+  answer: string;
+}
+
+export interface DigitalProductSalesPage {
+  tagline?: string;
+  ctaLabel?: string;
+  benefits?: string[];
+  targetAudience?: string[];
+  includedItems?: string[];
+  sections?: SalesPageSection[];
+  testimonials?: SalesPageTestimonial[];
+  faqs?: SalesPageFaq[];
+  supportEmail?: string;
+  terms?: string;
+}
+
 export type ProductType = typeof ProductType[keyof typeof ProductType];
 
 
@@ -209,6 +237,7 @@ export interface Product {
   publicSlug?: string | null;
   /** @nullable */
   coverImageUrl?: string | null;
+  salesPage?: DigitalProductSalesPage;
   type: ProductType;
   /** @minimum 0 */
   priceMinor: number;
@@ -351,6 +380,8 @@ export const ProductInputType = {
   digital: 'digital',
 } as const;
 
+export type DigitalProductSalesPageInput = DigitalProductSalesPage;
+
 export interface ProductInput {
   /** @minLength 2 */
   title: string;
@@ -364,6 +395,7 @@ export interface ProductInput {
      */
   publicSlug?: string;
   coverImageUrl?: string;
+  salesPage?: DigitalProductSalesPageInput;
   type?: ProductInputType;
   /** @minimum 0 */
   priceMinor?: number;
