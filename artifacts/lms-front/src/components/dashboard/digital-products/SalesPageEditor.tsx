@@ -103,7 +103,7 @@ export function SalesPageEditor({ product }: { product: any }) {
 
   if (!isExpanded) {
     return (
-      <div className="bg-white border border-[#E5E5E5] rounded-xl p-6 shadow-sm flex items-center justify-between">
+      <div className="bg-white border border-[#E5E5E5] rounded-xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-[18px] font-bold text-black flex items-center gap-2">
             <LayoutTemplate className="w-5 h-5 text-primary" />
@@ -111,7 +111,7 @@ export function SalesPageEditor({ product }: { product: any }) {
           </h3>
           <p className="text-[13px] text-[#4D4D4D] mt-1">Design the public landing page for this product.</p>
         </div>
-        <Button type="button" onClick={() => setIsExpanded(true)} variant="outline" className="border-[#DADADA] text-[#394649]">
+        <Button type="button" onClick={() => setIsExpanded(true)} variant="outline" className="w-full sm:w-auto border-[#DADADA] text-[#394649]">
           Edit Sales Page
         </Button>
       </div>
@@ -120,7 +120,7 @@ export function SalesPageEditor({ product }: { product: any }) {
 
   return (
     <div className="bg-white border border-[#E5E5E5] rounded-xl overflow-hidden shadow-sm">
-      <div className="p-6 border-b border-[#E5E5E5] bg-[#FAFAFA] flex justify-between items-center">
+      <div className="p-4 sm:p-6 border-b border-[#E5E5E5] bg-[#FAFAFA] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h3 className="text-[18px] font-bold text-black flex items-center gap-2">
             <LayoutTemplate className="w-5 h-5 text-primary" />
@@ -128,12 +128,12 @@ export function SalesPageEditor({ product }: { product: any }) {
           </h3>
           <p className="text-[13px] text-[#4D4D4D] mt-1">Make your product shine. Leave fields blank to hide them.</p>
         </div>
-        <Button type="button" onClick={() => setIsExpanded(false)} variant="ghost" className="text-[#737373]">
+        <Button type="button" onClick={() => setIsExpanded(false)} variant="ghost" className="w-full sm:w-auto text-[#737373]">
           Cancel
         </Button>
       </div>
 
-      <form onSubmit={onSubmit} className="p-6 space-y-10">
+      <form onSubmit={onSubmit} className="p-4 sm:p-6 space-y-10">
         
         {/* Core Settings */}
         <div className="space-y-6">
@@ -160,9 +160,9 @@ export function SalesPageEditor({ product }: { product: any }) {
               </Button>
             </div>
             {benefitsArray.fields.map((field, index) => (
-              <div key={field.id} className="flex gap-2">
-                <Input placeholder="e.g. Save 10+ hours a week" {...register(`benefits.${index}.value` as const)} className="h-10 border-[#E5E5E5] rounded-md text-[14px]" />
-                <Button type="button" onClick={() => benefitsArray.remove(index)} variant="ghost" size="icon" className="shrink-0 text-[#9794AA] hover:text-[#E53E3E]">
+              <div key={field.id} className="flex gap-2 items-center">
+                <Input placeholder="e.g. Save 10+ hours a week" {...register(`benefits.${index}.value` as const)} className="h-10 border-[#E5E5E5] rounded-md text-[14px] flex-1 min-w-0" />
+                <Button type="button" onClick={() => benefitsArray.remove(index)} variant="ghost" size="icon" className="h-10 w-10 shrink-0 text-[#9794AA] hover:text-[#E53E3E] hover:bg-gray-100">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -178,9 +178,9 @@ export function SalesPageEditor({ product }: { product: any }) {
               </Button>
             </div>
             {audienceArray.fields.map((field, index) => (
-              <div key={field.id} className="flex gap-2">
-                <Input placeholder="e.g. Freelance designers" {...register(`targetAudience.${index}.value` as const)} className="h-10 border-[#E5E5E5] rounded-md text-[14px]" />
-                <Button type="button" onClick={() => audienceArray.remove(index)} variant="ghost" size="icon" className="shrink-0 text-[#9794AA] hover:text-[#E53E3E]">
+              <div key={field.id} className="flex gap-2 items-center">
+                <Input placeholder="e.g. Freelance designers" {...register(`targetAudience.${index}.value` as const)} className="h-10 border-[#E5E5E5] rounded-md text-[14px] flex-1 min-w-0" />
+                <Button type="button" onClick={() => audienceArray.remove(index)} variant="ghost" size="icon" className="h-10 w-10 shrink-0 text-[#9794AA] hover:text-[#E53E3E] hover:bg-gray-100">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -199,9 +199,9 @@ export function SalesPageEditor({ product }: { product: any }) {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             {itemsArray.fields.map((field, index) => (
-              <div key={field.id} className="flex gap-2">
-                <Input placeholder="e.g. 50+ Page PDF Guide" {...register(`includedItems.${index}.value` as const)} className="h-10 border-[#E5E5E5] rounded-md text-[14px]" />
-                <Button type="button" onClick={() => itemsArray.remove(index)} variant="ghost" size="icon" className="shrink-0 text-[#9794AA] hover:text-[#E53E3E]">
+              <div key={field.id} className="flex gap-2 items-center">
+                <Input placeholder="e.g. 50+ Page PDF Guide" {...register(`includedItems.${index}.value` as const)} className="h-10 border-[#E5E5E5] rounded-md text-[14px] flex-1 min-w-0" />
+                <Button type="button" onClick={() => itemsArray.remove(index)} variant="ghost" size="icon" className="h-10 w-10 shrink-0 text-[#9794AA] hover:text-[#E53E3E] hover:bg-gray-100">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -219,8 +219,8 @@ export function SalesPageEditor({ product }: { product: any }) {
             </Button>
           </div>
           {sectionsArray.fields.map((field, index) => (
-            <div key={field.id} className="p-4 border border-[#E5E5E5] bg-[#FAFAFA] rounded-lg relative space-y-3">
-              <Button type="button" onClick={() => sectionsArray.remove(index)} variant="ghost" size="icon" className="absolute top-2 right-2 text-[#9794AA] hover:text-[#E53E3E]">
+            <div key={field.id} className="p-4 border border-[#E5E5E5] bg-[#FAFAFA] rounded-lg relative space-y-4">
+              <Button type="button" onClick={() => sectionsArray.remove(index)} variant="ghost" size="icon" className="absolute top-2 right-2 text-[#9794AA] hover:text-[#E53E3E] hover:bg-gray-200">
                 <Trash2 className="w-4 h-4" />
               </Button>
               <div className="space-y-2 pr-8">
@@ -228,7 +228,7 @@ export function SalesPageEditor({ product }: { product: any }) {
                 <Input placeholder="e.g. Why I created this" {...register(`sections.${index}.heading` as const)} className="border-[#E5E5E5] rounded-md text-[14px]" />
                 {errors.sections?.[index]?.heading && <p className="text-[12px] text-[#E53E3E]">{errors.sections[index]?.heading?.message}</p>}
               </div>
-              <div className="space-y-2 pr-8">
+              <div className="space-y-2">
                 <Label className="text-[13px] font-bold">Body Content</Label>
                 <Textarea placeholder="Write the detailed section content here..." {...register(`sections.${index}.body` as const)} className="min-h-[100px] border-[#E5E5E5] rounded-md text-[14px]" />
                 {errors.sections?.[index]?.body && <p className="text-[12px] text-[#E53E3E]">{errors.sections[index]?.body?.message}</p>}
@@ -248,15 +248,15 @@ export function SalesPageEditor({ product }: { product: any }) {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             {testimonialsArray.fields.map((field, index) => (
-              <div key={field.id} className="p-4 border border-[#E5E5E5] bg-[#FAFAFA] rounded-lg relative space-y-3">
-                <Button type="button" onClick={() => testimonialsArray.remove(index)} variant="ghost" size="icon" className="absolute top-2 right-2 text-[#9794AA] hover:text-[#E53E3E]">
+              <div key={field.id} className="p-4 border border-[#E5E5E5] bg-[#FAFAFA] rounded-lg relative space-y-4">
+                <Button type="button" onClick={() => testimonialsArray.remove(index)} variant="ghost" size="icon" className="absolute top-2 right-2 text-[#9794AA] hover:text-[#E53E3E] hover:bg-gray-200">
                   <Trash2 className="w-4 h-4" />
                 </Button>
                 <div className="space-y-2 pr-8">
                   <Label className="text-[13px] font-bold">Name</Label>
                   <Input placeholder="e.g. Jane Doe" {...register(`testimonials.${index}.name` as const)} className="border-[#E5E5E5] rounded-md text-[14px]" />
                 </div>
-                <div className="space-y-2 pr-8">
+                <div className="space-y-2">
                   <Label className="text-[13px] font-bold">Quote</Label>
                   <Textarea placeholder="What did they say?" {...register(`testimonials.${index}.quote` as const)} className="min-h-[80px] border-[#E5E5E5] rounded-md text-[14px]" />
                 </div>
@@ -275,15 +275,15 @@ export function SalesPageEditor({ product }: { product: any }) {
             </Button>
           </div>
           {faqsArray.fields.map((field, index) => (
-            <div key={field.id} className="p-4 border border-[#E5E5E5] bg-[#FAFAFA] rounded-lg relative space-y-3">
-              <Button type="button" onClick={() => faqsArray.remove(index)} variant="ghost" size="icon" className="absolute top-2 right-2 text-[#9794AA] hover:text-[#E53E3E]">
+            <div key={field.id} className="p-4 border border-[#E5E5E5] bg-[#FAFAFA] rounded-lg relative space-y-4">
+              <Button type="button" onClick={() => faqsArray.remove(index)} variant="ghost" size="icon" className="absolute top-2 right-2 text-[#9794AA] hover:text-[#E53E3E] hover:bg-gray-200">
                 <Trash2 className="w-4 h-4" />
               </Button>
               <div className="space-y-2 pr-8">
                 <Label className="text-[13px] font-bold">Question</Label>
                 <Input placeholder="e.g. Is this a one-time purchase?" {...register(`faqs.${index}.question` as const)} className="border-[#E5E5E5] rounded-md text-[14px]" />
               </div>
-              <div className="space-y-2 pr-8">
+              <div className="space-y-2">
                 <Label className="text-[13px] font-bold">Answer</Label>
                 <Textarea placeholder="Detailed answer..." {...register(`faqs.${index}.answer` as const)} className="min-h-[80px] border-[#E5E5E5] rounded-md text-[14px]" />
               </div>
@@ -308,11 +308,11 @@ export function SalesPageEditor({ product }: { product: any }) {
           </div>
         </div>
 
-        <div className="pt-6 border-t border-[#E5E5E5] flex justify-end gap-3">
-          <Button type="button" onClick={() => setIsExpanded(false)} variant="ghost" className="text-[#737373]">
+        <div className="pt-6 border-t border-[#E5E5E5] flex flex-col-reverse sm:flex-row justify-end gap-3">
+          <Button type="button" onClick={() => setIsExpanded(false)} variant="ghost" className="w-full sm:w-auto text-[#737373] h-11">
             Cancel
           </Button>
-          <Button type="submit" disabled={updateProduct.isPending} className="bg-primary hover:bg-[#10A364] text-white px-8 shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
+          <Button type="submit" disabled={updateProduct.isPending} className="w-full sm:w-auto h-11 bg-primary hover:bg-[#10A364] text-white px-8 shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
             {updateProduct.isPending ? "Saving..." : "Save Sales Page"}
           </Button>
         </div>

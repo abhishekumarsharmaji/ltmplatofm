@@ -17,25 +17,25 @@ export default function Products() {
 
   return (
     <PublicLayout>
-      <div className="bg-white min-h-screen text-black pt-32 pb-24">
+      <div className="bg-white min-h-screen text-black pt-24 pb-16 md:pt-32 md:pb-24">
         <div className="container mx-auto px-4 md:px-8">
           
           <div className="max-w-3xl mb-12 text-center mx-auto">
-            <h1 className="text-[40px] md:text-[46px] font-bold mb-4 text-black">
+            <h1 className="text-[32px] sm:text-[40px] md:text-[46px] font-bold mb-4 text-black leading-tight">
               Digital Products
             </h1>
-            <p className="text-[#394649] text-[18px]">
+            <p className="text-[#394649] text-[16px] md:text-[18px] leading-relaxed">
               Download premium templates, ebooks, kits, and tools to accelerate your workflow. All completely free.
             </p>
           </div>
 
-          <div className="flex flex-col items-center gap-8 mb-16">
+          <div className="flex flex-col items-center gap-8 mb-12 md:mb-16">
             <div className="flex w-full max-w-3xl flex-col gap-3 sm:flex-row">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9794AA] w-5 h-5" />
                 <Input 
                   placeholder="Search for products..." 
-                  className="pl-12 h-14 bg-white border-[#E5E5E5] text-[16px] text-black rounded-full shadow-sm focus-visible:ring-primary/50"
+                  className="pl-12 h-14 bg-white border-[#E5E5E5] text-[16px] text-black rounded-xl sm:rounded-full shadow-sm focus-visible:ring-primary/50 w-full"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -44,7 +44,7 @@ export default function Products() {
                 aria-label="Filter by product type"
                 value={type}
                 onChange={(event) => setType(event.target.value)}
-                className="h-14 rounded-full border border-[#E5E5E5] bg-white px-5 text-[14px] font-medium text-[#394649] shadow-sm outline-none focus:border-primary sm:w-60"
+                className="h-14 w-full sm:w-60 rounded-xl sm:rounded-full border border-[#E5E5E5] bg-white px-5 text-[14px] font-medium text-[#394649] shadow-sm outline-none focus:border-primary"
               >
                 <option value="all">All product types</option>
                 <option value="ebook">Ebooks</option>
@@ -71,8 +71,8 @@ export default function Products() {
           </div>
 
           {productsQuery.isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map(i => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="rounded-lg border border-[#E5E5E5] bg-white h-[320px] animate-pulse">
                   <div className="h-[180px] bg-gray-200 rounded-t-lg" />
                   <div className="p-4 space-y-3">
@@ -105,17 +105,17 @@ export default function Products() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map(product => (
                 <Link key={product.id} href={`/products/${product.id}`}>
                   <div className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-shadow duration-300 flex flex-col h-full cursor-pointer overflow-hidden">
-                    <div className="relative aspect-square overflow-hidden bg-[#FAFAFA] flex items-center justify-center">
+                    <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden bg-[#FAFAFA] flex items-center justify-center">
                       {product.coverImageUrl ? (
                         <img src={product.coverImageUrl} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       ) : (
                         <Package className="w-16 h-16 text-primary/30 group-hover:scale-110 transition-transform duration-500" />
                       )}
-                      <span className="absolute top-3 left-3 bg-white/80 backdrop-blur-md border border-[#E5E5E5] text-black font-bold uppercase text-[10px] tracking-wider px-2 py-1 rounded">
+                      <span className="absolute top-3 left-3 bg-white/80 backdrop-blur-md border border-[#E5E5E5] text-black font-bold uppercase text-[10px] tracking-wider px-2 py-1 rounded shadow-sm">
                         {product.subtype || product.type}
                       </span>
                     </div>

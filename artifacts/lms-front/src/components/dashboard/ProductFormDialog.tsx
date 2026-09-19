@@ -180,10 +180,10 @@ export function ProductFormDialog({
         {children}
       </DialogTrigger>
       <DialogContent className="flex max-h-[calc(100vh-2rem)] flex-col overflow-hidden border-[#E5E5E5] rounded-xl p-0 gap-0 sm:max-w-[450px]">
-        <DialogHeader className="p-6 pb-4 border-b border-[#E5E5E5] bg-[#FAFAFA]">
+        <DialogHeader className="p-4 sm:p-6 pb-4 border-b border-[#E5E5E5] bg-[#FAFAFA]">
           <DialogTitle className="text-[20px] font-bold text-black">{product ? 'Edit' : 'Create'} {type === 'course' ? 'Course' : 'Digital Product'}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="min-h-0 overflow-y-auto p-6 space-y-5 bg-white">
+        <form onSubmit={onSubmit} className="min-h-0 overflow-y-auto p-4 sm:p-6 space-y-5 bg-white">
           <div className="space-y-2">
             <Label htmlFor="title" className="text-[14px] font-bold text-[#394649]">Title</Label>
             <Input id="title" {...form.register("title")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
@@ -206,25 +206,25 @@ export function ProductFormDialog({
               <div className="space-y-2">
                 <Label htmlFor="publicSlug" className="text-[14px] font-bold text-[#394649]">Custom Share Link</Label>
                 <div className="flex h-11 overflow-hidden rounded-md border border-[#E5E5E5]">
-                  <span className="flex items-center bg-[#FAFAFA] px-3 text-[13px] text-[#737373]">/products/</span>
-                  <Input id="publicSlug" placeholder="my-digital-product" {...form.register("publicSlug")} className="h-11 flex-1 border-0 rounded-none text-[14px] focus-visible:ring-0" />
+                  <span className="flex items-center bg-[#FAFAFA] px-2 sm:px-3 text-[12px] sm:text-[13px] text-[#737373] whitespace-nowrap">/products/</span>
+                  <Input id="publicSlug" placeholder="my-digital-product" {...form.register("publicSlug")} className="h-11 flex-1 border-0 rounded-none text-[14px] focus-visible:ring-0 min-w-0" />
                 </div>
                 {form.formState.errors.publicSlug && <p className="text-[13px] font-medium text-[#E53E3E]">{form.formState.errors.publicSlug.message as string}</p>}
               </div>
               <div className="space-y-2">
                 <Label className="text-[14px] font-bold text-[#394649]">Product Thumbnail</Label>
-                <div className="relative flex min-h-36 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-[#DADADA] bg-[#FAFAFA]">
+                <div className="relative flex min-h-[144px] items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-[#DADADA] bg-[#FAFAFA]">
                   {coverPreview ? (
                     <img src={coverPreview} alt="Product thumbnail preview" className="absolute inset-0 h-full w-full object-cover" />
                   ) : (
-                    <div className="flex flex-col items-center gap-2 text-center text-[#737373]">
+                    <div className="flex flex-col items-center gap-2 text-center text-[#737373] p-4">
                       <ImagePlus className="h-8 w-8 text-primary" />
                       <span className="text-[13px]">JPG, PNG or WebP up to 10MB</span>
                     </div>
                   )}
                   <Label
                     htmlFor={`cover-upload-${product?.id ?? "new"}`}
-                    className="relative z-10 cursor-pointer rounded-md bg-white/95 px-4 py-2 text-[13px] font-bold text-[#394649] shadow-sm"
+                    className="relative z-10 cursor-pointer rounded-md bg-white/95 px-4 py-2 text-[13px] font-bold text-[#394649] shadow-sm hover:bg-white transition-colors"
                   >
                     {coverPreview ? "Replace Thumbnail" : "Upload Thumbnail"}
                   </Label>
@@ -256,20 +256,20 @@ export function ProductFormDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ebook">E-Book</SelectItem>
-                    <SelectItem value="guide">Guide / Notes</SelectItem>
-                    <SelectItem value="workbook">Workbook / Worksheet</SelectItem>
-                    <SelectItem value="checklist">Checklist</SelectItem>
-                    <SelectItem value="planner">Planner</SelectItem>
+                  <SelectItem value="guide">Guide / Notes</SelectItem>
+                  <SelectItem value="workbook">Workbook / Worksheet</SelectItem>
+                  <SelectItem value="checklist">Checklist</SelectItem>
+                  <SelectItem value="planner">Planner</SelectItem>
                   <SelectItem value="template">Template</SelectItem>
-                    <SelectItem value="spreadsheet">Spreadsheet / Calculator</SelectItem>
-                    <SelectItem value="presentation">Presentation</SelectItem>
-                    <SelectItem value="design_asset">Design Asset / UI Kit</SelectItem>
-                    <SelectItem value="photo_preset">Photo Preset / LUT</SelectItem>
-                    <SelectItem value="audio">Audio / Music Pack</SelectItem>
-                    <SelectItem value="video">Video / Recorded Class</SelectItem>
-                    <SelectItem value="code">Source Code / Script</SelectItem>
-                    <SelectItem value="plugin">Plugin / Theme</SelectItem>
-                    <SelectItem value="prompt_pack">AI Prompt Pack</SelectItem>
+                  <SelectItem value="spreadsheet">Spreadsheet / Calculator</SelectItem>
+                  <SelectItem value="presentation">Presentation</SelectItem>
+                  <SelectItem value="design_asset">Design Asset / UI Kit</SelectItem>
+                  <SelectItem value="photo_preset">Photo Preset / LUT</SelectItem>
+                  <SelectItem value="audio">Audio / Music Pack</SelectItem>
+                  <SelectItem value="video">Video / Recorded Class</SelectItem>
+                  <SelectItem value="code">Source Code / Script</SelectItem>
+                  <SelectItem value="plugin">Plugin / Theme</SelectItem>
+                  <SelectItem value="prompt_pack">AI Prompt Pack</SelectItem>
                   <SelectItem value="toolkit">Toolkit</SelectItem>
                   <SelectItem value="document">Document</SelectItem>
                   <SelectItem value="bundle">Bundle</SelectItem>
@@ -278,10 +278,10 @@ export function ProductFormDialog({
               </Select>
             </div>
           )}
-          <div className="rounded-lg border border-[#E5E5E5] bg-[#FAFAFA] p-4 text-[13px] text-[#4D4D4D]">
+          <div className="rounded-lg border border-[#E5E5E5] bg-[#FAFAFA] p-4 text-[13px] text-[#4D4D4D] leading-relaxed">
             Digital products are free to acquire in this version of CoreSkils.
           </div>
-          <div className="sticky bottom-0 -mx-6 -mb-6 border-t border-[#E5E5E5] bg-white px-6 py-4">
+          <div className="sticky bottom-0 -mx-4 sm:-mx-6 -mb-4 sm:-mb-6 border-t border-[#E5E5E5] bg-white px-4 sm:px-6 py-4">
             <Button type="submit" disabled={isPending} className="w-full h-11 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
               {isPending ? "Saving..." : "Save"}
             </Button>

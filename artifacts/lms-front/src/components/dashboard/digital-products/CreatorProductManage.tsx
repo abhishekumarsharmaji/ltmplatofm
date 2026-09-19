@@ -136,15 +136,17 @@ export function CreatorProductManage({ productId }: { productId: number }) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-8 space-y-8">
+    <div className="max-w-4xl mx-auto py-4 md:py-8 space-y-6 md:space-y-8">
       <div className="flex items-center gap-4 text-[#4D4D4D] text-[14px]">
-        <Link href="/dashboard/creator/products" className="hover:text-primary flex items-center gap-1"><ArrowLeft className="w-4 h-4" /> Back to Products</Link>
+        <Link href="/dashboard/creator/products" className="hover:text-primary flex items-center gap-1">
+          <ArrowLeft className="w-4 h-4" /> Back to Products
+        </Link>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between md:items-start gap-4">
+      <div className="flex flex-col lg:flex-row justify-between lg:items-start gap-6">
         <div>
-          <h1 className="text-[32px] font-bold text-black tracking-tight">{product.title}</h1>
-          <div className="flex items-center gap-3 mt-2">
+          <h1 className="text-[28px] sm:text-[32px] font-bold text-black tracking-tight leading-tight">{product.title}</h1>
+          <div className="flex items-center gap-3 mt-3">
             <Badge className="bg-gray-100 text-[#4D4D4D] border-none uppercase text-[10px] font-bold">
               {product.subtype || product.type || "Product"}
             </Badge>
@@ -153,34 +155,34 @@ export function CreatorProductManage({ productId }: { productId: number }) {
             </Badge>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 md:justify-end">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 lg:justify-end w-full lg:w-auto">
           {product.status === "published" && (
-            <>
-              <Button asChild variant="outline" className="border-[#DADADA] text-[#394649]">
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button asChild variant="outline" className="flex-1 sm:flex-none border-[#DADADA] text-[#394649] h-11">
                 <a href={sharePath} target="_blank" rel="noreferrer"><Share2 className="mr-2 h-4 w-4" />View</a>
               </Button>
-              <Button onClick={copyShareLink} variant="outline" className="border-[#DADADA] text-[#394649]">
+              <Button onClick={copyShareLink} variant="outline" className="flex-1 sm:flex-none border-[#DADADA] text-[#394649] h-11">
                 <Copy className="mr-2 h-4 w-4" />Copy Link
               </Button>
-            </>
+            </div>
           )}
           <ProductFormDialog type="digital" product={product as any}>
-            <Button variant="outline" className="border-[#DADADA] text-[#394649]">Edit Metadata</Button>
+            <Button variant="outline" className="w-full sm:w-auto border-[#DADADA] text-[#394649] h-11">Edit Metadata</Button>
           </ProductFormDialog>
           <Button 
             onClick={handlePublishToggle}
             disabled={(!readiness?.ready && product.status !== "published") || publishProduct.isPending || unpublishProduct.isPending}
-            className={product.status === "published" ? "bg-[#FFF0ED] text-[#E53E3E] hover:bg-[#FFE4DE]" : "bg-primary text-white hover:bg-[#10A364] shadow-[0_4px_14px_rgba(21,207,116,0.25)]"}
+            className={`w-full sm:w-auto h-11 ${product.status === "published" ? "bg-[#FFF0ED] text-[#E53E3E] hover:bg-[#FFE4DE]" : "bg-primary text-white hover:bg-[#10A364] shadow-[0_4px_14px_rgba(21,207,116,0.25)]"}`}
           >
             {product.status === "published" ? "Unpublish" : "Publish Product"}
           </Button>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-6">
-          <div className="bg-white border border-[#E5E5E5] rounded-xl p-6 shadow-sm">
-            <div className="flex justify-between items-center mb-6">
+      <div className="grid lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white border border-[#E5E5E5] rounded-xl p-4 sm:p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
               <h3 className="text-[18px] font-bold text-black">Files</h3>
               <input 
                 type="file" 
@@ -190,7 +192,7 @@ export function CreatorProductManage({ productId }: { productId: number }) {
                 ref={fileInputRef} 
                 onChange={handleFileChange}
               />
-              <Button onClick={() => fileInputRef.current?.click()} disabled={isUploading} variant="outline" size="sm" className="h-9 border-[#DADADA] text-[#394649]">
+              <Button onClick={() => fileInputRef.current?.click()} disabled={isUploading} variant="outline" size="sm" className="w-full sm:w-auto h-10 border-[#DADADA] text-[#394649]">
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Files
               </Button>
@@ -200,21 +202,21 @@ export function CreatorProductManage({ productId }: { productId: number }) {
               {filesLoading ? (
                 <div className="py-8 text-center text-[#9794AA]">Loading files...</div>
               ) : files?.length === 0 && Object.keys(uploadProgress).length === 0 ? (
-                <div className="py-12 border-2 border-dashed border-[#E5E5E5] rounded-lg text-center bg-[#FAFAFA]">
+                <div className="py-12 px-4 border-2 border-dashed border-[#E5E5E5] rounded-lg text-center bg-[#FAFAFA]">
                   <FileText className="w-10 h-10 text-[#9794AA] mx-auto mb-3" />
                   <p className="font-bold text-[15px] text-black">No files yet</p>
-                  <p className="text-[13px] text-[#4D4D4D] mt-1">Upload documents, templates, archives, media, code, fonts, or design assets.</p>
+                  <p className="text-[13px] text-[#4D4D4D] mt-1 max-w-sm mx-auto">Upload documents, templates, archives, media, code, fonts, or design assets.</p>
                   <p className="text-[12px] text-[#737373] mt-2">Up to 25 files, 250MB each</p>
                 </div>
               ) : (
                 <>
                   {files?.map(file => (
-                    <div key={file.id} className="flex items-center justify-between p-3 border border-[#E5E5E5] rounded-lg bg-[#FAFAFA]">
-                      <div className="flex items-center gap-3 overflow-hidden">
+                    <div key={file.id} className="flex items-center justify-between p-3 border border-[#E5E5E5] rounded-lg bg-[#FAFAFA] gap-3">
+                      <div className="flex items-center gap-3 overflow-hidden flex-1">
                         <div className="w-10 h-10 bg-white rounded flex items-center justify-center border border-[#E5E5E5] shrink-0">
                           <FileText className="w-5 h-5 text-primary" />
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <p className="text-[14px] font-bold text-black truncate">{file.filename}</p>
                           <p className="text-[12px] text-[#4D4D4D]">{formatBytes(file.sizeBytes || 0)}</p>
                         </div>
@@ -222,7 +224,7 @@ export function CreatorProductManage({ productId }: { productId: number }) {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="text-[#9794AA] hover:text-[#E53E3E] hover:bg-transparent shrink-0 ml-4"
+                        className="text-[#9794AA] hover:text-[#E53E3E] hover:bg-white bg-transparent shrink-0"
                         onClick={() => handleDeleteFile(file.id)}
                         disabled={deleteFile.isPending}
                       >
@@ -236,8 +238,8 @@ export function CreatorProductManage({ productId }: { productId: number }) {
                       <div className="absolute top-0 left-0 h-1 bg-primary transition-all duration-300" style={{ width: `${prog}%` }}></div>
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin shrink-0"></div>
-                        <div>
-                          <p className="text-[14px] font-bold text-black">Uploading file...</p>
+                        <div className="min-w-0">
+                          <p className="text-[14px] font-bold text-black truncate">Uploading file...</p>
                           <p className="text-[12px] text-[#4D4D4D]">{prog}% complete</p>
                         </div>
                       </div>
@@ -252,16 +254,16 @@ export function CreatorProductManage({ productId }: { productId: number }) {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white border border-[#E5E5E5] rounded-xl p-6 shadow-sm">
+          <div className="bg-white border border-[#E5E5E5] rounded-xl p-4 sm:p-6 shadow-sm">
             <h3 className="text-[18px] font-bold text-black mb-4">Readiness</h3>
             {readiness ? (
               <ul className="space-y-3">
-                <li className="flex gap-3 text-[14px]">
-                  {readiness.checks.title && readiness.checks.description ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0" /> : <AlertCircle className="w-5 h-5 text-warning shrink-0" />}
+                <li className="flex gap-3 text-[14px] items-start">
+                  {readiness.checks.title && readiness.checks.description ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />}
                   <span className={readiness.checks.title && readiness.checks.description ? "text-[#394649]" : "text-black font-medium"}>Title and description</span>
                 </li>
-                <li className="flex gap-3 text-[14px]">
-                  {readiness.checks.files ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0" /> : <AlertCircle className="w-5 h-5 text-warning shrink-0" />}
+                <li className="flex gap-3 text-[14px] items-start">
+                  {readiness.checks.files ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />}
                   <span className={readiness.checks.files ? "text-[#394649]" : "text-black font-medium"}>At least 1 file uploaded</span>
                 </li>
               </ul>
