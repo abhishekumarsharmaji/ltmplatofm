@@ -5,3 +5,4 @@
 - [Design system](design-system.md) — app is pinned light-only (hex-heavy pages); real data only; pricing pages and /checkout are known static/unavailable.
 - [Visual verification](visual-verification.md) — screenshot logged-in pages with scripts/dev-screenshot.mjs + curl cookie jar (strip #HttpOnly_); dev accounts live in dev DB only.
 - [Digital-product payments](digital-product-payments.md) — remain free for now; later Razorpay/ZapUPI must grant entitlements only after verified server-side payment success.
+- [Public product links](public-product-links.md) — share links use the active origin plus creator-owned unique slugs; only published/custom domains are stable.
