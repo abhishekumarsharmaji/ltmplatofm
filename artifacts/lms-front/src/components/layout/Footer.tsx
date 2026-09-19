@@ -57,7 +57,7 @@ export function Footer() {
               <span className="text-[32px] font-bold tracking-tight">{platformName}</span>
             </Link>
             <p className="text-[#9794AA] text-[15px] leading-relaxed max-w-sm">
-              Practical online courses and downloadable digital toolkits with clear product details, electronic delivery terms, and customer support.
+              Practical downloadable digital toolkits with clear product details, electronic delivery terms, and customer support.
             </p>
             <p className="mt-5 text-[13px] leading-6 text-[#B7B4C2]">
               Operated by Abhishek Kumar<br />
