@@ -26,6 +26,7 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 const schema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -46,6 +47,7 @@ export function ProductFormDialog({
   children: React.ReactNode 
 }) {
   const [open, setOpen] = useState(false);
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const createProduct = useCreateCreatorProduct();
@@ -104,11 +106,14 @@ export function ProductFormDialog({
       createProduct.mutate({
         data: submitData
       } as any, {
-        onSuccess: () => {
+        onSuccess: (createdProduct) => {
           toast({ title: `${type === 'course' ? 'Course' : 'Product'} created successfully.` });
           queryClient.invalidateQueries({ queryKey: getListCreatorProductsQueryKey() });
           setOpen(false);
           form.reset();
+          if (type === "digital") {
+            setLocation(`/dashboard/creator/products/${createdProduct.id}/manage`);
+          }
         },
         onError: () => {
           toast({ title: "Failed to create.", variant: "destructive" });
@@ -122,11 +127,11 @@ export function ProductFormDialog({
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="border-[#E5E5E5] rounded-xl p-0 gap-0 overflow-hidden sm:max-w-[450px]">
+      <DialogContent className="flex max-h-[calc(100vh-2rem)] flex-col overflow-hidden border-[#E5E5E5] rounded-xl p-0 gap-0 sm:max-w-[450px]">
         <DialogHeader className="p-6 pb-4 border-b border-[#E5E5E5] bg-[#FAFAFA]">
           <DialogTitle className="text-[20px] font-bold text-black">{product ? 'Edit' : 'Create'} {type === 'course' ? 'Course' : 'Digital Product'}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="p-6 space-y-5 bg-white">
+        <form onSubmit={onSubmit} className="min-h-0 overflow-y-auto p-6 space-y-5 bg-white">
           <div className="space-y-2">
             <Label htmlFor="title" className="text-[14px] font-bold text-[#394649]">Title</Label>
             <Input id="title" {...form.register("title")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
@@ -195,7 +200,7 @@ export function ProductFormDialog({
           <div className="rounded-lg border border-[#E5E5E5] bg-[#FAFAFA] p-4 text-[13px] text-[#4D4D4D]">
             Digital products are free to acquire in this version of CoreSkils.
           </div>
-          <div className="pt-2">
+          <div className="sticky bottom-0 -mx-6 -mb-6 border-t border-[#E5E5E5] bg-white px-6 py-4">
             <Button type="submit" disabled={isPending} className="w-full h-11 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
               {isPending ? "Saving..." : "Save"}
             </Button>
