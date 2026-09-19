@@ -1,172 +1,56 @@
-import { useState } from "react";
-import { PublicLayout } from "@/components/layout/PublicLayout";
-import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
-import { Search, Package, AlertCircle, Download } from "lucide-react";
-import { useListDigitalProducts } from "@workspace/api-client-react";
+import { CheckCircle2, Download } from "lucide-react";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 
 export default function Products() {
-  const [search, setSearch] = useState("");
-  const [type, setType] = useState("all");
-  
-  const productsQuery = useListDigitalProducts();
-  const products = (productsQuery.data || []).filter(product => 
-    (!search || product.title.toLowerCase().includes(search.toLowerCase()) || product.shortSummary?.toLowerCase().includes(search.toLowerCase())) &&
-    (type === "all" || product.subtype === type)
-  );
-  const featuredTitle = "Freelancing Client Acquisition Toolkit";
-  const showFeatured = (type === "all" || type === "toolkit") &&
-    (!search || featuredTitle.toLowerCase().includes(search.toLowerCase()) || "outreach proposal templates client toolkit".includes(search.toLowerCase()));
-
   return (
     <PublicLayout>
-      <div className="bg-white min-h-screen text-black pt-24 pb-16 md:pt-32 md:pb-24">
-        <div className="container mx-auto px-4 md:px-8">
-          
-          <div className="max-w-3xl mb-12 text-center mx-auto">
-            <h1 className="text-[32px] sm:text-[40px] md:text-[46px] font-bold mb-4 text-black leading-tight">
-              Digital Products
-            </h1>
-            <p className="text-[#394649] text-[16px] md:text-[18px] leading-relaxed">
-              Discover practical templates, ebooks, kits, and tools with clear pricing, digital delivery details, and support.
+      <main className="min-h-screen bg-[#F7FAF8] pb-24 pt-28 sm:pt-36">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <header className="mx-auto max-w-3xl text-center">
+            <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#0B8F50]">CoreSkils catalogue</p>
+            <h1 className="mt-3 text-4xl font-bold text-black sm:text-5xl">Digital Products</h1>
+            <p className="mt-5 text-lg leading-8 text-[#52635C]">
+              Genuine downloadable resources with transparent pricing, clear deliverables, electronic delivery terms, and customer support.
             </p>
-          </div>
+          </header>
 
-          <div className="flex flex-col items-center gap-8 mb-12 md:mb-16">
-            <div className="flex w-full max-w-3xl flex-col gap-3 sm:flex-row">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9794AA] w-5 h-5" />
-                <Input 
-                  placeholder="Search for products..." 
-                  className="pl-12 h-14 bg-white border-[#E5E5E5] text-[16px] text-black rounded-xl sm:rounded-full shadow-sm focus-visible:ring-primary/50 w-full"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-              <select
-                aria-label="Filter by product type"
-                value={type}
-                onChange={(event) => setType(event.target.value)}
-                className="h-14 w-full sm:w-60 rounded-xl sm:rounded-full border border-[#E5E5E5] bg-white px-5 text-[14px] font-medium text-[#394649] shadow-sm outline-none focus:border-primary"
-              >
-                <option value="all">All product types</option>
-                <option value="ebook">Ebooks</option>
-                <option value="guide">Guides & Notes</option>
-                <option value="workbook">Workbooks</option>
-                <option value="checklist">Checklists</option>
-                <option value="planner">Planners</option>
-                <option value="template">Templates</option>
-                <option value="spreadsheet">Spreadsheets</option>
-                <option value="presentation">Presentations</option>
-                <option value="design_asset">Design Assets</option>
-                <option value="photo_preset">Photo Presets</option>
-                <option value="audio">Audio</option>
-                <option value="video">Videos</option>
-                <option value="code">Code & Scripts</option>
-                <option value="plugin">Plugins & Themes</option>
-                <option value="prompt_pack">Prompt Packs</option>
-                <option value="toolkit">Toolkits</option>
-                <option value="document">Documents</option>
-                <option value="bundle">Bundles</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          </div>
-
-          {productsQuery.isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="rounded-lg border border-[#E5E5E5] bg-white h-[320px] animate-pulse">
-                  <div className="h-[180px] bg-gray-200 rounded-t-lg" />
-                  <div className="p-4 space-y-3">
-                    <div className="h-4 bg-gray-200 w-3/4 rounded" />
-                    <div className="h-4 bg-gray-200 w-1/2 rounded" />
+          <section className="mx-auto mt-14 grid max-w-5xl overflow-hidden rounded-2xl border border-[#C9DED3] bg-white shadow-[0_20px_60px_rgba(20,80,55,.1)] md:grid-cols-[.82fr_1.18fr]">
+            <img src={`${import.meta.env.BASE_URL}products/freelancing-toolkit-cover.svg`} alt="Freelancing Client Acquisition Toolkit" className="h-full w-full bg-[#0B3027] object-cover" />
+            <div className="flex flex-col p-7 sm:p-10">
+              <span className="w-fit rounded-full bg-[#E4F8EE] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[#087B46]">Digital toolkit</span>
+              <h2 className="mt-5 text-3xl font-bold leading-tight text-black">Freelancing Client Acquisition Toolkit</h2>
+              <p className="mt-4 leading-7 text-[#52635C]">Practical outreach scripts, proposal guidance, discovery questions, follow-up sequences, pricing worksheets, and an onboarding checklist.</p>
+              <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+                {["PDF guide and templates", "Single-user licence", "Electronic delivery", "Email support"].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm font-semibold text-[#31443D]"><CheckCircle2 className="h-4 w-4 text-[#0B9E59]" />{item}</li>
+                ))}
+              </ul>
+              <div className="mt-8 border-t border-[#E1E9E5] pt-6">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <span className="block text-3xl font-bold text-black">₹299 INR</span>
+                    <span className="mt-1 block text-xs font-bold uppercase tracking-wide text-amber-700">Payment activation in progress</span>
                   </div>
+                  <Link href="/products/freelancing-client-acquisition-toolkit" className="inline-flex h-12 items-center justify-center rounded-md bg-[#123D32] px-6 font-semibold text-white hover:bg-[#0B3027]">
+                    View product
+                  </Link>
                 </div>
-              ))}
-            </div>
-          ) : productsQuery.isError ? (
-            <div className="text-center py-20 bg-red-50 rounded-lg border border-red-100 text-red-600">
-              <AlertCircle className="w-8 h-8 mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2">Error loading products</h3>
-              <p>Please try again later.</p>
-            </div>
-          ) : products.length === 0 && !showFeatured ? (
-            <div className="text-center py-20 text-[#9794AA]">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-8 h-8 text-[#9794AA]" />
               </div>
-              <h3 className="text-xl font-bold mb-2 text-black">No products found</h3>
-              <p className="text-[#394649] max-w-md mx-auto">
-                We couldn't find any products matching your current filters. Try adjusting your search terms.
-              </p>
-              <button 
-                className="mt-6 px-6 py-2 border border-[#DADADA] text-[#394649] hover:bg-gray-50 rounded-md font-medium"
-                onClick={() => { setSearch(""); setType("all"); }}
-              >
-                Clear search
-              </button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {showFeatured && (
-                <Link href="/products/freelancing-client-acquisition-toolkit" data-testid="card-featured-freelancing-toolkit">
-                  <div className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-lg border border-[#B9DBC9] bg-white shadow-[0_10px_30px_rgba(20,90,60,.08)] transition-shadow duration-300 hover:shadow-[0_16px_40px_rgba(20,90,60,.14)]">
-                    <div className="relative aspect-square overflow-hidden bg-[#0B3027]">
-                      <img src={`${import.meta.env.BASE_URL}products/freelancing-toolkit-cover.svg`} alt="Freelancing Client Acquisition Toolkit" loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-                      <span className="absolute left-3 top-3 rounded bg-[#19CE76] px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[#07382A] shadow-sm">Featured toolkit</span>
-                    </div>
-                    <div className="flex flex-1 flex-col p-5">
-                      <h3 className="mb-2 text-[16px] font-bold leading-snug text-black transition-colors group-hover:text-primary">{featuredTitle}</h3>
-                      <p className="line-clamp-2 text-[13px] leading-relaxed text-[#4D4D4D]">Outreach scripts, proposal structure, discovery questions and an onboarding checklist.</p>
-                      <div className="mt-auto flex items-center justify-between border-t border-[#E5E5E5] pt-4">
-                        <div>
-                          <span className="block text-[18px] font-bold text-black">₹299</span>
-                          <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-700">Payments coming soon</span>
-                        </div>
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
-                          <Download className="h-4 w-4" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              )}
-              {products.map(product => (
-                <Link key={product.id} href={`/products/${product.id}`}>
-                  <div className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-shadow duration-300 flex flex-col h-full cursor-pointer overflow-hidden">
-                    <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden bg-[#FAFAFA] flex items-center justify-center">
-                      {product.coverImageUrl ? (
-                        <img src={product.coverImageUrl} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                      ) : (
-                        <Package className="w-16 h-16 text-primary/30 group-hover:scale-110 transition-transform duration-500" />
-                      )}
-                      <span className="absolute top-3 left-3 bg-white/80 backdrop-blur-md border border-[#E5E5E5] text-black font-bold uppercase text-[10px] tracking-wider px-2 py-1 rounded shadow-sm">
-                        {product.subtype || product.type}
-                      </span>
-                    </div>
-                    
-                    <div className="p-5 flex flex-col flex-1">
-                      <h3 className="text-[16px] font-bold text-black leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                        {product.title}
-                      </h3>
-                      {product.shortSummary && <p className="line-clamp-2 text-[13px] leading-relaxed text-[#4D4D4D]">{product.shortSummary}</p>}
-                      
-                      <div className="mt-auto pt-4 flex items-center justify-between border-t border-[#E5E5E5]">
-                        <span className="font-bold text-[18px] text-black">Free</span>
-                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                          <Download className="w-4 h-4" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+          </section>
+
+          <div className="mx-auto mt-10 flex max-w-5xl flex-col items-center justify-between gap-5 rounded-xl border border-[#DDE7E2] bg-white p-6 text-center sm:flex-row sm:text-left">
+            <div>
+              <h2 className="font-bold text-black">Evaluate before purchase</h2>
+              <p className="mt-1 text-sm text-[#596963]">Download the free sample to review the content style and practical approach.</p>
             </div>
-          )}
-          
+            <a href={`${import.meta.env.BASE_URL}products/freelancing-client-acquisition-toolkit-sample.pdf`} download className="inline-flex h-11 shrink-0 items-center gap-2 rounded-md border border-[#0B9E59] px-5 font-semibold text-[#087B46] hover:bg-[#F1FAF5]">
+              <Download className="h-4 w-4" /> Download sample PDF
+            </a>
+          </div>
         </div>
-      </div>
+      </main>
     </PublicLayout>
   );
 }

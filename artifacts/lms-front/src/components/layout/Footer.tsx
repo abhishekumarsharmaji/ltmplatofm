@@ -13,7 +13,6 @@ export function Footer() {
     {
       title: t("explore"),
       links: [
-        { href: "/courses", label: t("links.courses") },
         { href: "/products", label: t("links.products") },
         { href: "/products/freelancing-client-acquisition-toolkit", label: "Featured toolkit" },
         { href: "/about", label: t("links.about") },
@@ -32,7 +31,7 @@ export function Footer() {
       links: [
         { href: "/auth/login", label: t("links.signIn") },
         { href: "/auth/sign-up", label: t("links.joinFree") },
-        { href: "/dashboard/student", label: t("links.myLearning") },
+        { href: "/contact", label: "Account support" },
       ],
     },
     {

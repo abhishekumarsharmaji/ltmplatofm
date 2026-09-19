@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { ThemeProvider } from '@/components/theme-provider';
 import {
   Route,
+  Redirect,
   Switch,
   useLocation,
   Router as WouterRouter,
@@ -14,15 +15,9 @@ import {
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 const Home = lazy(() => import('./pages/Home'));
-const Courses = lazy(() => import('./pages/Courses'));
-const CourseDetail = lazy(() => import('./pages/CourseDetail'));
 const Products = lazy(() => import('./pages/Products'));
-const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const FreelancingToolkit = lazy(() => import('./pages/FreelancingToolkit'));
-const Pricing = lazy(() => import('./pages/Pricing'));
-const PlatformPricing = lazy(() => import('./pages/PlatformPricing'));
 const About = lazy(() => import('./pages/About'));
-const Creators = lazy(() => import('./pages/Creators'));
 const TermsPage = lazy(() => import('./pages/CompliancePages').then((module) => ({ default: module.TermsPage })));
 const PrivacyPage = lazy(() => import('./pages/CompliancePages').then((module) => ({ default: module.PrivacyPage })));
 const RefundPage = lazy(() => import('./pages/CompliancePages').then((module) => ({ default: module.RefundPage })));
@@ -76,15 +71,15 @@ function Router() {
         <Switch>
         {/* Public Routes */}
         <Route path="/" component={Home} />
-        <Route path="/courses" component={Courses} />
-        <Route path="/courses/:id" component={CourseDetail} />
+        <Route path="/courses"><Redirect to="/products" /></Route>
+        <Route path="/courses/:id"><Redirect to="/products" /></Route>
         <Route path="/products" component={Products} />
         <Route path="/products/freelancing-client-acquisition-toolkit" component={FreelancingToolkit} />
-        <Route path="/products/:productId" component={ProductDetail} />
-        <Route path="/pricing" component={Pricing} />
-        <Route path="/platform-pricing" component={PlatformPricing} />
+        <Route path="/products/:productId"><Redirect to="/products" /></Route>
+        <Route path="/pricing"><Redirect to="/products" /></Route>
+        <Route path="/platform-pricing"><Redirect to="/products" /></Route>
         <Route path="/about" component={About} />
-        <Route path="/creators" component={Creators} />
+        <Route path="/creators"><Redirect to="/products" /></Route>
         <Route path="/terms" component={TermsPage} />
         <Route path="/privacy" component={PrivacyPage} />
         <Route path="/refund-policy" component={RefundPage} />
