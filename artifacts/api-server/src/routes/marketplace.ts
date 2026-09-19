@@ -11,6 +11,8 @@ const router: IRouter = Router();
 const auth = requireAuth;
 const userOf = async (req: AuthenticatedRequest) => req.canonicalUserId;
 const id = (value: unknown) => Number.isInteger(Number(value)) ? Number(value) : null;
+const validPublicSlug = (value: unknown) => typeof value === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) && value.length >= 3 && value.length <= 80;
+const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "product";
 const safeProduct = (product: typeof productsTable.$inferSelect) => {
   const { coverImageObjectPath: _coverImageObjectPath, ...publicProduct } = product;
   return publicProduct;
@@ -26,8 +28,11 @@ router.get("/marketplace/products", async (req, res) => {
   res.json(rows.map((row) => row.type === "digital" ? { ...safeProduct(row), priceMinor: 0, isFree: true } : safeProduct(row)));
 });
 router.get("/marketplace/products/:id", async (req, res) => {
-  const productId = id(req.params.id); if (!productId) { res.status(400).json({ error: "Invalid id" }); return; }
-  const [row] = await db.select().from(productsTable).where(and(eq(productsTable.id, productId), eq(productsTable.status, "published")));
+  const productId = id(req.params.id);
+  const [row] = await db.select().from(productsTable).where(and(
+    productId ? eq(productsTable.id, productId) : eq(productsTable.publicSlug, String(req.params.id).toLowerCase()),
+    eq(productsTable.status, "published"),
+  ));
   if (!row) { res.status(404).json({ error: "Product not found" }); return; }
   res.json(row.type === "digital" ? { ...safeProduct(row), priceMinor: 0, isFree: true } : safeProduct(row));
 });
@@ -108,7 +113,7 @@ router.get("/student/courses/:courseId", auth, requireRole("student", "creator",
 router.post("/creator/products", auth, requireRole("creator", "admin"), async (req, res) => {
   const requestUser = req as AuthenticatedRequest;
   const creatorId = await userOf(requestUser); if (!creatorId) { res.status(409).json({ error: "Creator profile unavailable" }); return; }
-  const { title, description = "", shortSummary = null, subtype = "other", coverImageUrl = null, type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId } = req.body ?? {};
+  const { title, description = "", shortSummary = null, subtype = "other", publicSlug: requestedSlug, coverImageUrl = null, type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId } = req.body ?? {};
   const digitalSubtypes = ["ebook", "guide", "workbook", "checklist", "planner", "template", "spreadsheet", "presentation", "design_asset", "photo_preset", "audio", "video", "code", "plugin", "prompt_pack", "toolkit", "document", "bundle", "other"];
   if (type === "digital" && requestedPrice !== undefined && requestedPrice !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
   const priceMinor = type === "course" ? 0 : requestedPrice;
@@ -116,6 +121,7 @@ router.post("/creator/products", auth, requireRole("creator", "admin"), async (r
     res.status(400).json({ error: "Invalid product payload" }); return;
   }
   if (type === "digital" && !digitalSubtypes.includes(subtype)) { res.status(400).json({ error: "Invalid digital product type" }); return; }
+  if (requestedSlug !== undefined && requestedSlug !== "" && !validPublicSlug(requestedSlug)) { res.status(400).json({ error: "Custom link must be 3–80 characters using lowercase letters, numbers, and hyphens" }); return; }
   const row = await db.transaction(async (tx) => {
     let linkedCourseId = id(courseId) ?? undefined;
     if (type === "digital" && linkedCourseId) throw new Error("Digital products cannot be linked to a course");
@@ -141,7 +147,9 @@ router.post("/creator/products", auth, requireRole("creator", "admin"), async (r
     }
     const [created] = await tx.insert(productsTable).values({
       creatorId, title: title.trim(), description: String(description), shortSummary: typeof shortSummary === "string" ? shortSummary : null,
-      subtype: type === "digital" ? String(subtype) : null, coverImageUrl: typeof coverImageUrl === "string" ? coverImageUrl : null,
+      subtype: type === "digital" ? String(subtype) : null,
+      publicSlug: requestedSlug ? String(requestedSlug).toLowerCase() : `${slugify(title)}-${Date.now().toString(36)}`,
+      coverImageUrl: typeof coverImageUrl === "string" ? coverImageUrl : null,
       coverImageObjectPath: null, type, priceMinor,
       currency: String(currency).toUpperCase(), courseId: linkedCourseId, categoryId: id(categoryId) ?? undefined,
     }).returning();
@@ -158,9 +166,20 @@ router.patch("/creator/products/:id", auth, requireRole("creator", "admin"), asy
   const productId = id(req.params.id), creatorId = await userOf(req as AuthenticatedRequest); if (!productId || !creatorId) { res.status(400).json({ error: "Invalid id" }); return; }
   const [existing] = await db.select().from(productsTable).where(eq(productsTable.id, productId));
   if (!existing || ((req as AuthenticatedRequest).user!.role !== "admin" && existing.creatorId !== creatorId)) { res.status(404).json({ error: "Product not found" }); return; }
-   const allowed = ["title", "description", "shortSummary", "subtype", "coverImageUrl", "priceMinor", "currency", "categoryId"] as const;
+    const allowed = ["title", "description", "shortSummary", "subtype", "publicSlug", "coverImageUrl", "priceMinor", "currency", "categoryId"] as const;
    if (existing.type === "digital" && req.body?.priceMinor !== undefined && req.body.priceMinor !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
    if (existing.type === "digital" && req.body?.subtype !== undefined && !["ebook", "guide", "workbook", "checklist", "planner", "template", "spreadsheet", "presentation", "design_asset", "photo_preset", "audio", "video", "code", "plugin", "prompt_pack", "toolkit", "document", "bundle", "other"].includes(req.body.subtype)) { res.status(400).json({ error: "Invalid digital product type" }); return; }
+    if (req.body?.publicSlug !== undefined) {
+      if (req.body.publicSlug === "" || req.body.publicSlug === null) {
+        req.body.publicSlug = null;
+      } else {
+      const publicSlug = String(req.body.publicSlug).toLowerCase();
+      if (!validPublicSlug(publicSlug)) { res.status(400).json({ error: "Custom link must be 3–80 characters using lowercase letters, numbers, and hyphens" }); return; }
+      const [conflict] = await db.select({ id: productsTable.id }).from(productsTable).where(eq(productsTable.publicSlug, publicSlug));
+      if (conflict && conflict.id !== productId) { res.status(409).json({ error: "This custom link is already taken" }); return; }
+      req.body.publicSlug = publicSlug;
+      }
+    }
   const patch = Object.fromEntries(allowed.filter((key) => req.body?.[key] !== undefined).map((key) => [key, key === "categoryId" ? id(req.body[key]) : req.body[key]]));
   const [row] = await db.update(productsTable).set({ ...patch, updatedAt: new Date() }).where(eq(productsTable.id, productId)).returning(); res.json(safeProduct(row));
 });

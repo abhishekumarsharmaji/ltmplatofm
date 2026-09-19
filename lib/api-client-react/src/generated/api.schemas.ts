@@ -206,6 +206,8 @@ export interface Product {
   /** @nullable */
   subtype?: ProductSubtype;
   /** @nullable */
+  publicSlug?: string | null;
+  /** @nullable */
   coverImageUrl?: string | null;
   type: ProductType;
   /** @minimum 0 */
@@ -355,6 +357,12 @@ export interface ProductInput {
   description?: string;
   shortSummary?: string;
   subtype?: ProductInputSubtype;
+  /**
+     * @minLength 3
+     * @maxLength 80
+     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+     */
+  publicSlug?: string;
   coverImageUrl?: string;
   type?: ProductInputType;
   /** @minimum 0 */

@@ -14,6 +14,12 @@ export interface ProductInput {
   description?: string;
   shortSummary?: string;
   subtype?: ProductInputSubtype;
+  /**
+     * @minLength 3
+     * @maxLength 80
+     * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+     */
+  publicSlug?: string;
   coverImageUrl?: string;
   type?: ProductInputType;
   /** @minimum 0 */

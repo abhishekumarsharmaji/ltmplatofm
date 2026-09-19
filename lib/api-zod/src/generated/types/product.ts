@@ -18,6 +18,8 @@ export interface Product {
   /** @nullable */
   subtype?: ProductSubtype;
   /** @nullable */
+  publicSlug?: string | null;
+  /** @nullable */
   coverImageUrl?: string | null;
   type: ProductType;
   /** @minimum 0 */

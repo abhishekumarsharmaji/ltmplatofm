@@ -6107,7 +6107,7 @@ export function useListDigitalProducts<TData = Awaited<ReturnType<typeof listDig
 
 
 
-export const getGetDigitalProductUrl = (id: number,) => {
+export const getGetDigitalProductUrl = (id: string,) => {
 
 
 
@@ -6115,7 +6115,7 @@ export const getGetDigitalProductUrl = (id: number,) => {
   return `/api/marketplace/digital-products/${id}`
 }
 
-export const getDigitalProduct = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<DigitalProductDetail> => {
+export const getDigitalProduct = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<DigitalProductDetail> => {
 
   return customFetch<DigitalProductDetail>(getGetDigitalProductUrl(id),
   {
@@ -6130,14 +6130,14 @@ export const getDigitalProduct = async (id: number, options?: Parameters<typeof 
 
 
 
-export const getGetDigitalProductQueryKey = (id: number,) => {
+export const getGetDigitalProductQueryKey = (id: string,) => {
     return [
     `/api/marketplace/digital-products/${id}`
     ] as const;
     }
 
 
-export const getGetDigitalProductQueryOptions = <TData = Awaited<ReturnType<typeof getDigitalProduct>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDigitalProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetDigitalProductQueryOptions = <TData = Awaited<ReturnType<typeof getDigitalProduct>>, TError = ErrorType<void>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDigitalProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -6161,7 +6161,7 @@ export type GetDigitalProductQueryError = ErrorType<void>
 
 
 export function useGetDigitalProduct<TData = Awaited<ReturnType<typeof getDigitalProduct>>, TError = ErrorType<void>>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDigitalProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDigitalProduct>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

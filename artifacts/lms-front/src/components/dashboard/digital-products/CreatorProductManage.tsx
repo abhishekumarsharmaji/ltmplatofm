@@ -12,7 +12,7 @@ import {
   getGetDigitalProductReadinessQueryKey
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, FileText, Upload, CheckCircle2, AlertCircle, Trash2 } from "lucide-react";
+import { ArrowLeft, FileText, Upload, CheckCircle2, AlertCircle, Trash2, Share2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -123,6 +123,13 @@ export function CreatorProductManage({ productId }: { productId: number }) {
     }
   };
 
+  const sharePath = `/products/${product?.publicSlug || productId}`;
+  const copyShareLink = async () => {
+    const link = `${window.location.origin}${sharePath}`;
+    await navigator.clipboard.writeText(link);
+    toast({ title: "Share link copied.", description: link });
+  };
+
   if (!product) {
     return <div className="p-8 text-center text-[#9794AA]">Loading product...</div>;
   }
@@ -146,6 +153,16 @@ export function CreatorProductManage({ productId }: { productId: number }) {
           </div>
         </div>
         <div className="flex gap-3">
+          {product.status === "published" && (
+            <>
+              <Button asChild variant="outline" className="border-[#DADADA] text-[#394649]">
+                <a href={sharePath} target="_blank" rel="noreferrer"><Share2 className="mr-2 h-4 w-4" />View</a>
+              </Button>
+              <Button onClick={copyShareLink} variant="outline" className="border-[#DADADA] text-[#394649]">
+                <Copy className="mr-2 h-4 w-4" />Copy Link
+              </Button>
+            </>
+          )}
           <ProductFormDialog type="digital" product={product as any}>
             <Button variant="outline" className="border-[#DADADA] text-[#394649]">Edit Metadata</Button>
           </ProductFormDialog>

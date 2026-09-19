@@ -24,7 +24,7 @@ export function formatBytes(bytes: number, decimals = 2) {
 export default function ProductDetail() {
   const params = useParams();
   const [, setLocation] = useLocation();
-  const productId = params.productId ? parseInt(params.productId) : 0;
+  const productKey = params.productId || "";
   const queryClient = useQueryClient();
   const { data: session } = useGetSession();
   const isAuthenticated = session?.authenticated;
@@ -32,17 +32,18 @@ export default function ProductDetail() {
     query: { enabled: Boolean(isAuthenticated), queryKey: getListStudentDigitalProductsQueryKey() },
   });
   
-  const { data: product, isLoading, isError } = useGetDigitalProduct(productId, { 
-    query: { enabled: !!productId, queryKey: getGetDigitalProductQueryKey(productId) } 
+  const { data: product, isLoading, isError } = useGetDigitalProduct(productKey, { 
+    query: { enabled: !!productKey, queryKey: getGetDigitalProductQueryKey(productKey) } 
   });
   
   const acquireProduct = useAcquireDigitalProduct();
+  const productId = product?.id || 0;
   const isOwned = ownedProducts?.some((item) => item.id === productId) ?? false;
 
   const handleAcquire = () => {
     acquireProduct.mutate({ productId } as any, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetDigitalProductQueryKey(productId) });
+        queryClient.invalidateQueries({ queryKey: getGetDigitalProductQueryKey(productKey) });
         queryClient.invalidateQueries({ queryKey: getListStudentDigitalProductsQueryKey() });
         setLocation(`/dashboard/student/products/${productId}`);
       }

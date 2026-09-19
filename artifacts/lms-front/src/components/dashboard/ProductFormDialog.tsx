@@ -33,6 +33,7 @@ const schema = z.object({
   shortSummary: z.string().max(180, "Keep the summary under 180 characters").optional(),
   coverImageUrl: z.union([z.literal(""), z.string().url("Enter a valid image URL")]).optional(),
   subtype: z.string().optional(),
+  publicSlug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens only").min(3, "Use at least 3 characters").max(80).optional().or(z.literal("")),
 });
 
 export function ProductFormDialog({ 
@@ -41,7 +42,7 @@ export function ProductFormDialog({
   children 
 }: { 
   type: "course" | "digital"; 
-  product?: { id: number; title: string; description: string; shortSummary?: string | null; coverImageUrl?: string | null; subtype?: string | null };
+  product?: { id: number; title: string; description: string; shortSummary?: string | null; coverImageUrl?: string | null; subtype?: string | null; publicSlug?: string | null };
   children: React.ReactNode 
 }) {
   const [open, setOpen] = useState(false);
@@ -58,6 +59,7 @@ export function ProductFormDialog({
       shortSummary: product?.shortSummary || "",
       coverImageUrl: product?.coverImageUrl || "",
       subtype: product?.subtype || "",
+      publicSlug: product?.publicSlug || "",
     },
   });
 
@@ -69,6 +71,7 @@ export function ProductFormDialog({
         shortSummary: product.shortSummary || "",
         coverImageUrl: product.coverImageUrl || "",
         subtype: product.subtype || "",
+        publicSlug: product.publicSlug || "",
       });
     }
   }, [product, form, open]);
@@ -142,6 +145,14 @@ export function ProductFormDialog({
                 <Label htmlFor="shortSummary" className="text-[14px] font-bold text-[#394649]">Short Summary</Label>
                 <Input id="shortSummary" placeholder="A quick description for marketplace cards" {...form.register("shortSummary")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
                 {form.formState.errors.shortSummary && <p className="text-[13px] font-medium text-[#E53E3E]">{form.formState.errors.shortSummary.message as string}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="publicSlug" className="text-[14px] font-bold text-[#394649]">Custom Share Link</Label>
+                <div className="flex h-11 overflow-hidden rounded-md border border-[#E5E5E5]">
+                  <span className="flex items-center bg-[#FAFAFA] px-3 text-[13px] text-[#737373]">/products/</span>
+                  <Input id="publicSlug" placeholder="my-digital-product" {...form.register("publicSlug")} className="h-11 flex-1 border-0 rounded-none text-[14px] focus-visible:ring-0" />
+                </div>
+                {form.formState.errors.publicSlug && <p className="text-[13px] font-medium text-[#E53E3E]">{form.formState.errors.publicSlug.message as string}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="coverImageUrl" className="text-[14px] font-bold text-[#394649]">Cover Image URL (optional)</Label>

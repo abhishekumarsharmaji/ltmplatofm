@@ -74,13 +74,16 @@ router.get("/marketplace/digital-products", async (req, res): Promise<void> => {
 });
 router.get("/marketplace/digital-products/:id", async (req, res): Promise<void> => {
   const productId = numericId(req.params.id);
-  if (!productId) { res.status(400).json({ error: "Invalid product id" }); return; }
   const [product] = await db.select({ product: productsTable, creatorName: usersTable.name })
     .from(productsTable).innerJoin(usersTable, eq(usersTable.id, productsTable.creatorId))
-    .where(and(eq(productsTable.id, productId), eq(productsTable.type, "digital"), eq(productsTable.status, "published")));
+    .where(and(
+      productId ? eq(productsTable.id, productId) : eq(productsTable.publicSlug, String(req.params.id).toLowerCase()),
+      eq(productsTable.type, "digital"), eq(productsTable.status, "published"),
+    ));
   if (!product) { res.status(404).json({ error: "Digital product not found" }); return; }
+  const resolvedProductId = product.product.id;
   const files = await db.select({ id: digitalFilesTable.id, filename: digitalFilesTable.filename, mimeType: digitalFilesTable.mimeType, sizeBytes: digitalFilesTable.sizeBytes, kind: digitalFilesTable.kind, position: digitalFilesTable.position })
-    .from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, productId), eq(digitalFilesTable.status, "uploaded"))).orderBy(asc(digitalFilesTable.position));
+    .from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, resolvedProductId), eq(digitalFilesTable.status, "uploaded"))).orderBy(asc(digitalFilesTable.position));
   res.json({ ...safeProduct(product.product), creatorName: product.creatorName, priceMinor: 0, isFree: true, files });
 });
 

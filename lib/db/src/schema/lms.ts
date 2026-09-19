@@ -102,6 +102,7 @@ export const productsTable = pgTable("products", {
   description: text("description").notNull().default(""),
   shortSummary: text("short_summary"),
   subtype: text("subtype"),
+  publicSlug: text("public_slug"),
   coverImageUrl: text("cover_image_url"),
   coverImageObjectPath: text("cover_image_object_path"),
   priceMinor: integer("price_minor").notNull().default(0),
@@ -109,7 +110,11 @@ export const productsTable = pgTable("products", {
   status: courseStatusEnum("status").notNull().default("draft"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-}, (t) => [index("products_creator_idx").on(t.creatorId), check("products_price_nonnegative", sql`${t.priceMinor} >= 0`)]);
+}, (t) => [
+  index("products_creator_idx").on(t.creatorId),
+  uniqueIndex("products_public_slug_unique").on(t.publicSlug),
+  check("products_price_nonnegative", sql`${t.priceMinor} >= 0`),
+]);
 
 export const digitalFilesTable = pgTable("digital_files", {
   id: serial("id").primaryKey(),

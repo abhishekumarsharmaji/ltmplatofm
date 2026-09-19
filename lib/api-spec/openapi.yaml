@@ -564,7 +564,7 @@ paths:
   /marketplace/digital-products/{id}:
     get:
       operationId: getDigitalProduct
-      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { "200": { description: Product detail, content: { application/json: { schema: { $ref: "#/components/schemas/DigitalProductDetail" } } } }, "404": { description: Not found } }
   /creator/digital-products/{productId}/files:
     get:
@@ -900,6 +900,7 @@ components:
         description: { type: string }
         shortSummary: { type: ["string", "null"] }
         subtype: { type: ["string", "null"], enum: [ebook, guide, workbook, checklist, planner, template, spreadsheet, presentation, design_asset, photo_preset, audio, video, code, plugin, prompt_pack, toolkit, document, bundle, other, null] }
+        publicSlug: { type: ["string", "null"] }
         coverImageUrl: { type: ["string", "null"] }
         type: { type: string, enum: [course, digital] }
         priceMinor: { type: integer, minimum: 0 }
@@ -913,6 +914,7 @@ components:
         description: { type: string }
         shortSummary: { type: string }
         subtype: { type: string, enum: [ebook, guide, workbook, checklist, planner, template, spreadsheet, presentation, design_asset, photo_preset, audio, video, code, plugin, prompt_pack, toolkit, document, bundle, other] }
+        publicSlug: { type: string, minLength: 3, maxLength: 80, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }
         coverImageUrl: { type: string }
         type: { type: string, enum: [course, digital] }
         priceMinor: { type: integer, minimum: 0 }
