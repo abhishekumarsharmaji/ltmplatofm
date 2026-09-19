@@ -66,7 +66,7 @@ export function ProductFormDialog({
       title: product?.title || "",
       description: product?.description || "",
       shortSummary: product?.shortSummary || "",
-      coverImageUrl: product?.coverImageUrl || "",
+      coverImageUrl: product?.coverImageUrl?.startsWith("http") ? product.coverImageUrl : "",
       subtype: product?.subtype || "",
       publicSlug: product?.publicSlug || "",
     },
@@ -78,7 +78,7 @@ export function ProductFormDialog({
         title: product.title,
         description: product.description,
         shortSummary: product.shortSummary || "",
-        coverImageUrl: product.coverImageUrl || "",
+        coverImageUrl: product.coverImageUrl?.startsWith("http") ? product.coverImageUrl : "",
         subtype: product.subtype || "",
         publicSlug: product.publicSlug || "",
       });
@@ -106,7 +106,7 @@ export function ProductFormDialog({
   const uploadCover = async (productId: number, file: File) => {
     const { uploadURL, objectPath } = await requestThumbnailUpload.mutateAsync({
       productId,
-      data: { mimeType: file.type, sizeBytes: file.size },
+      data: { filename: file.name, mimeType: file.type, sizeBytes: file.size },
     });
     const upload = await fetch(uploadURL, {
       method: "PUT",
