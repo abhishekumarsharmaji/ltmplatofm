@@ -8,3 +8,4 @@
 - [Public product links](public-product-links.md) — share links use the active origin plus creator-owned unique slugs; only published/custom domains are stable.
 - [Abort signal propagation](abort-signal-propagation.md) — when forwarding an abort with no reason, call abort() rather than abort(undefined) to preserve a standard AbortError.
 - [Digital product sales pages](digital-product-sales-pages.md) — keep creator sales copy structured and server-sanitized; render only populated sections and preserve free acquisition.
+- [Public digital-product model](public-digital-product-model.md) — present free learning and paid toolkits separately; never publish unsupported pricing or imply checkout works before verified payments.
