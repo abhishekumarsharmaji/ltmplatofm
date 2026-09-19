@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { uploadDigitalFile } from "@/lib/digital-upload";
 import { ProductFormDialog } from "../ProductFormDialog";
+import { SalesPageEditor } from "./SalesPageEditor";
 
 export function formatBytes(bytes: number, decimals = 2) {
   if (!+bytes) return '0 Bytes';
@@ -246,6 +247,8 @@ export function CreatorProductManage({ productId }: { productId: number }) {
               )}
             </div>
           </div>
+          
+          <SalesPageEditor product={product} />
         </div>
 
         <div className="space-y-6">
