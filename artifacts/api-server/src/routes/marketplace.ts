@@ -29,9 +29,9 @@ const normalizeSalesPage = (value: unknown) => {
     benefits: cleanList(page.benefits, 12, 180),
     targetAudience: cleanList(page.targetAudience, 12, 180),
     includedItems: cleanList(page.includedItems, 20, 180),
-    sections: pairs("sections", "heading", "body", 12, 4000),
-    testimonials: pairs("testimonials", "name", "quote", 10, 500),
-    faqs: pairs("faqs", "question", "answer", 15, 1000),
+    sections: pairs("sections", "heading", "body", 12, 4000).map((item) => ({ heading: item.heading, body: item.body })),
+    testimonials: pairs("testimonials", "name", "quote", 10, 500).map((item) => ({ name: item.name, quote: item.quote })),
+    faqs: pairs("faqs", "question", "answer", 15, 1000).map((item) => ({ question: item.question, answer: item.answer })),
     supportEmail: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail) ? supportEmail : "",
     terms: cleanText(page.terms, 5000),
   };
