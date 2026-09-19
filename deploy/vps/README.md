@@ -29,7 +29,7 @@ apt install -y git curl nginx postgresql postgresql-contrib certbot python3-cert
 curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 apt install -y nodejs
 corepack enable
-corepack prepare pnpm@latest --activate
+corepack prepare pnpm@10.26.1 --activate
 ```
 
 ## 4. Create a restricted app user
