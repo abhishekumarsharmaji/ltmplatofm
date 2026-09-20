@@ -136,7 +136,11 @@ export default function CourseDetail() {
                   </h1>
                   {course.creatorName && (
                     <p className="text-[16px] text-[#394649]">
-                      Created by <span className="font-medium text-black">{course.creatorName}</span>
+                      Created by {course.creatorUsername ? (
+                        <Link href={`/creators/${course.creatorUsername}`} className="font-medium text-black underline decoration-primary/40 underline-offset-4 hover:text-primary">
+                          {course.creatorName}
+                        </Link>
+                      ) : <span className="font-medium text-black">{course.creatorName}</span>}
                     </p>
                   )}
                 </div>

@@ -32,6 +32,10 @@ export interface Course {
   modules?: Module[];
   /** @nullable */
   creatorName?: string | null;
+  /** @nullable */
+  creatorUsername?: string | null;
+  /** @nullable */
+  creatorAvatarUrl?: string | null;
   enrolled?: boolean;
   level: string;
   lessons: number;

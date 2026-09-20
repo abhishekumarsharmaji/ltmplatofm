@@ -285,6 +285,12 @@ export interface Product {
   publicSlug?: string | null;
   /** @nullable */
   coverImageUrl?: string | null;
+  /** @nullable */
+  creatorName?: string | null;
+  /** @nullable */
+  creatorUsername?: string | null;
+  /** @nullable */
+  creatorAvatarUrl?: string | null;
   salesPage?: DigitalProductSalesPage;
   type: ProductType;
   /** @minimum 0 */
@@ -401,18 +407,17 @@ export interface CreatorProfile {
   updatedAt: string;
 }
 
-export interface RejectCreatorApplicationInput {
-  /** @minLength 1 */
-  reason: string;
-}
-
-export interface AdminCreatorRoleInput {
-  enabled: boolean;
-}
-
-export interface AdminEnrollmentInput {
-  courseId: number;
-}
+export type PublicCreatorProfileProfile = {
+  displayName: string;
+  username: string;
+  headline: string;
+  /** @nullable */
+  bio?: string | null;
+  /** @nullable */
+  avatarUrl?: string | null;
+  /** @nullable */
+  websiteUrl?: string | null;
+};
 
 export type CourseAccessPlan = typeof CourseAccessPlan[keyof typeof CourseAccessPlan];
 
@@ -447,10 +452,33 @@ export interface Course {
   modules?: Module[];
   /** @nullable */
   creatorName?: string | null;
+  /** @nullable */
+  creatorUsername?: string | null;
+  /** @nullable */
+  creatorAvatarUrl?: string | null;
   enrolled?: boolean;
   level: string;
   lessons: number;
   productId?: number | null;
+}
+
+export interface PublicCreatorProfile {
+  profile: PublicCreatorProfileProfile;
+  courses: Course[];
+  products: Product[];
+}
+
+export interface RejectCreatorApplicationInput {
+  /** @minLength 1 */
+  reason: string;
+}
+
+export interface AdminCreatorRoleInput {
+  enabled: boolean;
+}
+
+export interface AdminEnrollmentInput {
+  courseId: number;
 }
 
 export interface EnrollmentResult {

@@ -19,6 +19,7 @@ const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
 const Courses = lazy(() => import('./pages/Courses'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
+const CreatorProfile = lazy(() => import('./pages/CreatorProfile'));
 const About = lazy(() => import('./pages/About'));
 const TermsPage = lazy(() => import('./pages/CompliancePages').then((module) => ({ default: module.TermsPage })));
 const PrivacyPage = lazy(() => import('./pages/CompliancePages').then((module) => ({ default: module.PrivacyPage })));
@@ -78,6 +79,7 @@ function Router() {
         <Route path="/courses/:id" component={CourseDetail} />
         <Route path="/products" component={Products} />
         <Route path="/products/:productId" component={ProductDetail} />
+        <Route path="/creators/:username" component={CreatorProfile} />
         <Route path="/pricing"><Redirect to="/products" /></Route>
         <Route path="/platform-pricing"><Redirect to="/products" /></Route>
         <Route path="/about" component={About} />

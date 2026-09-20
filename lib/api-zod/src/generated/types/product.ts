@@ -23,6 +23,12 @@ export interface Product {
   publicSlug?: string | null;
   /** @nullable */
   coverImageUrl?: string | null;
+  /** @nullable */
+  creatorName?: string | null;
+  /** @nullable */
+  creatorUsername?: string | null;
+  /** @nullable */
+  creatorAvatarUrl?: string | null;
   salesPage?: DigitalProductSalesPage;
   type: ProductType;
   /** @minimum 0 */

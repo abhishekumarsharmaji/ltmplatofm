@@ -83,6 +83,7 @@ import type {
   MultipartPartInput,
   Product,
   ProductInput,
+  PublicCreatorProfile,
   PublishCreatorCourse200,
   PurchasedProducts200Item,
   RejectCreatorApplicationInput,
@@ -1349,6 +1350,77 @@ export function useMarketplaceCourses<TData = Awaited<ReturnType<typeof marketpl
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getMarketplaceCoursesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetPublicCreatorProfileUrl = (username: string,) => {
+
+
+
+
+  return `/api/marketplace/creators/${username}`
+}
+
+export const getPublicCreatorProfile = async (username: string, options?: Parameters<typeof customFetch>[1]): Promise<PublicCreatorProfile> => {
+
+  return customFetch<PublicCreatorProfile>(getGetPublicCreatorProfileUrl(username),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicCreatorProfileQueryKey = (username: string,) => {
+    return [
+    `/api/marketplace/creators/${username}`
+    ] as const;
+    }
+
+
+export const getGetPublicCreatorProfileQueryOptions = <TData = Awaited<ReturnType<typeof getPublicCreatorProfile>>, TError = ErrorType<void>>(username: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicCreatorProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicCreatorProfileQueryKey(username);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicCreatorProfile>>> = ({ signal }) => getPublicCreatorProfile(username, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: username !== null && username !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicCreatorProfile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicCreatorProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicCreatorProfile>>>
+export type GetPublicCreatorProfileQueryError = ErrorType<void>
+
+
+
+export function useGetPublicCreatorProfile<TData = Awaited<ReturnType<typeof getPublicCreatorProfile>>, TError = ErrorType<void>>(
+ username: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicCreatorProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicCreatorProfileQueryOptions(username,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

@@ -97,6 +97,8 @@ export * from './productInputType';
 export * from './productStatus';
 export * from './productSubtype';
 export * from './productType';
+export * from './publicCreatorProfile';
+export * from './publicCreatorProfileProfile';
 export * from './publishCreatorCourse200';
 export * from './purchasedProducts200Item';
 export * from './rejectCreatorApplicationInput';

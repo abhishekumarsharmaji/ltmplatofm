@@ -45,7 +45,7 @@ router.get("/sitemap.xml", async (_req, res) => {
   ]);
   const rows = [
     ["/", undefined], ["/courses", undefined], ["/products", undefined],
-    ...courses.map((x) => [`/courses/${x.slug}`, x.updatedAt]), ...products.filter((x) => x.slug).map((x) => [`/products/${x.slug}`, x.updatedAt]),
+    ...courses.filter((x) => x.slug).map((x) => [`/courses/${x.slug}`, x.updatedAt]), ...products.filter((x) => x.slug).map((x) => [`/products/${x.slug}`, x.updatedAt]),
     ...creators.filter((x) => x.username).map((x) => [`/creators/${x.username}`, x.updatedAt]),
   ];
   res.type("application/xml").send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${rows.map(([path, lastmod]) => `<url><loc>${esc(url(String(path)))}</loc>${lastmod ? `<lastmod>${new Date(lastmod as Date).toISOString()}</lastmod>` : ""}</url>`).join("")}</urlset>`);
@@ -60,7 +60,7 @@ router.get(["/", "/courses", "/products"], async (req, res) => {
       .where(eq(coursesTable.status, "published")).orderBy(desc(coursesTable.updatedAt)).limit(50),
     db.select({ title: productsTable.title, description: productsTable.description, publicSlug: productsTable.publicSlug }).from(productsTable).where(eq(productsTable.status, "published")).orderBy(desc(productsTable.updatedAt)).limit(50),
   ]);
-  const items = catalogue === "courses" ? courses.map((x) => ({ ...x, href: `/courses/${x.slug}` })) : products.filter((x) => x.publicSlug).map((x) => ({ title: x.title, description: x.description, href: `/products/${x.publicSlug}` }));
+  const items = catalogue === "courses" ? courses.filter((x) => x.slug).map((x) => ({ ...x, href: `/courses/${x.slug}` })) : products.filter((x) => x.publicSlug).map((x) => ({ title: x.title, description: x.description, href: `/products/${x.publicSlug}` }));
   const title = catalogue === "home" ? "CoreSkils — Learn and build practical skills" : catalogue === "courses" ? "Online courses | CoreSkils" : "Digital products | CoreSkils";
   const description = catalogue === "home" ? "Practical online courses and digital products from CoreSkils creators." : `Explore published ${catalogue} from CoreSkils.`;
   const graph = catalogue === "home" ? { "@context": "https://schema.org", "@graph": [{ "@type": "Organization", name: "CoreSkils", url: SITE }, { "@type": "WebSite", name: "CoreSkils", url: SITE }] } : { "@context": "https://schema.org", "@type": "CollectionPage", name: title, url: url(req.path), mainEntity: { "@type": "ItemList", itemListElement: items.map((x, i) => ({ "@type": "ListItem", position: i + 1, url: url(x.href), name: x.title })) } };
@@ -106,6 +106,7 @@ router.get("/creators/:username", async (req, res) => {
   const products = await db.select({ title: productsTable.title, publicSlug: productsTable.publicSlug, description: productsTable.description }).from(productsTable).where(and(eq(productsTable.creatorId, row.profile.userId), eq(productsTable.status, "published")));
   const path = `/creators/${row.profile.username}`, name = row.profile.displayName || row.name;
   const avatar = row.profile.avatarObjectPath ? url(`/api/marketplace/creators/${row.profile.userId}/avatar?v=${row.profile.updatedAt.getTime()}`) : row.profile.avatarUrl || undefined;
-  await render(res, pageData(`${name} | CoreSkils`, text(row.profile.bio || row.profile.headline || `Explore courses and products by ${name}.`), url(path), { "@context": "https://schema.org", "@type": "ProfilePage", mainEntity: { "@type": "Person", name, url: url(path), image: avatar, description: text(row.profile.bio || row.profile.headline) }, hasPart: { "@type": "ItemList", itemListElement: [...courses.map((x) => ({ "@type": "ListItem", url: url(`/courses/${x.slug}`), name: x.title })), ...products.filter((x) => x.publicSlug).map((x) => ({ "@type": "ListItem", url: url(`/products/${x.publicSlug}`), name: x.title }))] } }, `<main><h1>${esc(name)}</h1><p>${esc(text(row.profile.bio || row.profile.headline))}</p><section>${courses.map((x) => card({ ...x, href: `/courses/${x.slug}` })).join("")}${products.filter((x) => x.publicSlug).map((x) => card({ ...x, href: `/products/${x.publicSlug}` })).join("")}</section></main>`, avatar, "profile"));
+  const publicCourses = courses.filter((course) => course.slug);
+  await render(res, pageData(`${name} | CoreSkils`, text(row.profile.bio || row.profile.headline || `Explore courses and products by ${name}.`), url(path), { "@context": "https://schema.org", "@type": "ProfilePage", mainEntity: { "@type": "Person", name, url: url(path), image: avatar, description: text(row.profile.bio || row.profile.headline) }, hasPart: { "@type": "ItemList", itemListElement: [...publicCourses.map((x) => ({ "@type": "ListItem", url: url(`/courses/${x.slug}`), name: x.title })), ...products.filter((x) => x.publicSlug).map((x) => ({ "@type": "ListItem", url: url(`/products/${x.publicSlug}`), name: x.title }))] } }, `<main><h1>${esc(name)}</h1><p>${esc(text(row.profile.bio || row.profile.headline))}</p><section>${publicCourses.map((x) => card({ ...x, href: `/courses/${x.slug}` })).join("")}${products.filter((x) => x.publicSlug).map((x) => card({ ...x, href: `/products/${x.publicSlug}` })).join("")}</section></main>`, avatar, "profile"));
 });
 export default router;
