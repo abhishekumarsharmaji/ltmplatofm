@@ -52,6 +52,24 @@ function recordingStorage() {
   if (!accessKey || !secret || !endpoint || !bucket) throw new Error("Recording storage is not configured; set R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT, and R2_BUCKET_NAME");
   return { accessKey, secret, endpoint: endpoint.replace(/\/$/, ""), bucket };
 }
+const sleep = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+async function waitForEgressActive(client: EgressClient, egressId: string) {
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    const [current] = await client.listEgress({ egressId });
+    if (!current) {
+      await sleep(500);
+      continue;
+    }
+    if (current.status === EgressStatus.EGRESS_ACTIVE) return current;
+    if ([EgressStatus.EGRESS_FAILED, EgressStatus.EGRESS_ABORTED, EgressStatus.EGRESS_LIMIT_REACHED].includes(current.status)) {
+      throw new Error(current.error?.trim() || EgressStatus[current.status] || "LiveKit recording could not start");
+    }
+    await sleep(500);
+  }
+  throw new Error("LiveKit recording did not become active in time");
+}
+
 async function ensureRecordingStarted(classId: number, roomName: string, hostIdentity: string) {
   const [current] = await db.select().from(liveClassesTable).where(eq(liveClassesTable.id, classId));
   if (!current || current.recordingStatus === "recording" || current.recordingStatus === "processing" || current.recordingStatus === "ready") return current;
@@ -66,11 +84,21 @@ async function ensureRecordingStarted(classId: number, roomName: string, hostIde
       filepath: objectName,
       output: { case: "s3", value: new S3Upload({ accessKey: storage.accessKey, secret: storage.secret, endpoint: storage.endpoint, region: "auto", bucket: storage.bucket, forcePathStyle: true }) },
     });
-    const egress = await new EgressClient(
+    const client = new EgressClient(
       process.env.LIVEKIT_URL!,
       process.env.LIVEKIT_API_KEY!,
       process.env.LIVEKIT_API_SECRET!,
-    ).startParticipantEgress(roomName, hostIdentity, { file: output });
+    );
+    const egress = await client.startParticipantEgress(roomName, hostIdentity, { file: output });
+    await db.update(liveClassesTable).set({
+      recordingObjectPath: objectPath,
+      recordingFilename: `${current.title}.mp4`,
+      recordingError: null,
+      egressId: egress.egressId,
+      recordingStartedAt: new Date(),
+      updatedAt: new Date(),
+    }).where(eq(liveClassesTable.id, classId));
+    await waitForEgressActive(client, egress.egressId);
     const [updated] = await db.update(liveClassesTable).set({ recordingStatus: "recording", recordingObjectPath: objectPath, recordingFilename: `${current.title}.mp4`, recordingError: null, egressId: egress.egressId, recordingStartedAt: new Date(), updatedAt: new Date() }).where(eq(liveClassesTable.id, classId)).returning();
     return updated;
   } catch (error) {
