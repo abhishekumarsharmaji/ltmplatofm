@@ -584,6 +584,12 @@ paths:
       security: [{ cookieAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
       responses: { "200": { description: Recording stopped, content: { application/json: { schema: { $ref: "#/components/schemas/LiveClass" } } } } }
+  /creator/live-classes/{id}/recording/reconcile:
+    post:
+      operationId: reconcileLiveClassRecording
+      security: [{ cookieAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses: { "200": { description: Current recording state after reconciliation, content: { application/json: { schema: { $ref: "#/components/schemas/LiveClass" } } } } }
   /marketplace/digital-products:
     get:
       operationId: listDigitalProducts
@@ -1434,7 +1440,7 @@ components:
         moduleId: { type: ["integer", "null"] }
     LiveClass:
       type: object
-      required: [id, courseId, creatorId, title, description, startsAt, timezone, status, roomName, recordingStatus, recordingUrl, createdAt, updatedAt]
+      required: [id, courseId, productId, creatorId, title, description, startsAt, timezone, status, roomName, recordingStatus, createdAt, updatedAt]
       properties:
         id: { type: integer }
         courseId: { type: integer }
@@ -1450,7 +1456,14 @@ components:
         status: { type: string, enum: [scheduled, live, completed, cancelled] }
         roomName: { type: string }
         recordingStatus: { type: string, enum: [idle, recording, processing, ready, failed] }
-        recordingUrl: { type: string, nullable: true }
+        recordingUrl: { type: ["string", "null"] }
+        recordingObjectPath: { type: ["string", "null"] }
+        recordingLessonId: { type: ["integer", "null"] }
+        recordingFilename: { type: ["string", "null"] }
+        recordingSizeBytes: { type: ["integer", "null"] }
+        recordingError: { type: ["string", "null"] }
+        recordingStartedAt: { type: ["string", "null"], format: date-time }
+        recordingCompletedAt: { type: ["string", "null"], format: date-time }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
     LiveClassJoin:

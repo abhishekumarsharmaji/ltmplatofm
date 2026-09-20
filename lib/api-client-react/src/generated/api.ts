@@ -6427,6 +6427,74 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getStopLiveClassRecordingMutationOptions(options));
     }
 
+export const getReconcileLiveClassRecordingUrl = (id: number,) => {
+
+
+
+
+  return `/api/creator/live-classes/${id}/recording/reconcile`
+}
+
+export const reconcileLiveClassRecording = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LiveClass> => {
+
+  return customFetch<LiveClass>(getReconcileLiveClassRecordingUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getReconcileLiveClassRecordingMutationKey = () => ['reconcileLiveClassRecording'] as const;
+
+export const getReconcileLiveClassRecordingMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reconcileLiveClassRecording>>, TError,ReconcileLiveClassRecordingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reconcileLiveClassRecording>>, TError,ReconcileLiveClassRecordingMutationVariables, TContext> => {
+
+const mutationKey = getReconcileLiveClassRecordingMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reconcileLiveClassRecording>>, ReconcileLiveClassRecordingMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  reconcileLiveClassRecording(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReconcileLiveClassRecordingMutationResult = NonNullable<Awaited<ReturnType<typeof reconcileLiveClassRecording>>>
+
+    export type ReconcileLiveClassRecordingMutationError = ErrorType<unknown>
+    export type ReconcileLiveClassRecordingMutationVariables = {id: number}
+
+    export const useReconcileLiveClassRecording = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reconcileLiveClassRecording>>, TError,ReconcileLiveClassRecordingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reconcileLiveClassRecording>>,
+        TError,
+        ReconcileLiveClassRecordingMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReconcileLiveClassRecordingMutationOptions(options));
+    }
+
 export const getListDigitalProductsUrl = (params?: ListDigitalProductsParams,) => {
   const normalizedParams = new URLSearchParams();
 

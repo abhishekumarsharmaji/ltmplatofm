@@ -22,14 +22,16 @@ import { ArrowLeft, Video, Circle, Square, AlertCircle, Loader2, MonitorUp, Moni
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { RecordingUploadDialog } from "@/components/dashboard/LiveClassesTab";
 
 export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) {
   const { toast } = useToast();
   const joinClass = useJoinLiveClass();
   const recordJoin = useRecordLiveClassJoin();
   const recordLeave = useRecordLiveClassLeave();
+  const autoStartRecording = useStartLiveClassRecording();
   
-  const [tokenInfo, setTokenInfo] = useState<{ token: string, serverUrl: string, isHost: boolean, classTitle: string, status: string } | null>(null);
+  const [tokenInfo, setTokenInfo] = useState<{ token: string, serverUrl: string, isHost: boolean, liveClass: any } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [disconnected, setDisconnected] = useState(false);
   const [disconnectReason, setDisconnectReason] = useState<string | null>(null);
@@ -50,8 +52,7 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
           token: data.token,
           serverUrl: data.serverUrl,
           isHost: data.participantRole === 'host',
-          classTitle: data.class.title,
-          status: data.class.status
+          liveClass: data.class
         });
       },
       onError: (err) => {
@@ -70,6 +71,34 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
     recordJoin.mutate({ id }, {
       onError: (err) => console.error("Failed to record join:", err)
     });
+    if (
+      tokenInfo?.isHost &&
+      !["recording", "processing", "ready"].includes(tokenInfo.liveClass.recordingStatus ?? "idle")
+    ) {
+      autoStartRecording.mutate({ id }, {
+        onSuccess: (liveClass) => {
+          setTokenInfo((current) => current ? { ...current, liveClass } : current);
+          if (liveClass.recordingStatus === "failed") {
+            toast({
+              title: "Automatic recording unavailable",
+              description: liveClass.recordingError || "You can retry or upload the completed recording directly.",
+              variant: "destructive",
+            });
+          }
+        },
+        onError: (recordingError) => {
+          setTokenInfo((current) => current ? {
+            ...current,
+            liveClass: { ...current.liveClass, recordingStatus: "failed", recordingError: recordingError.message },
+          } : current);
+          toast({
+            title: "Automatic recording unavailable",
+            description: "The class is still live. You can retry recording or upload the completed recording directly.",
+            variant: "destructive",
+          });
+        },
+      });
+    }
   };
 
   const retryConnection = () => {
@@ -158,18 +187,24 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
             <Video className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="font-bold text-lg leading-tight">{tokenInfo.classTitle}</h1>
+            <h1 className="font-bold text-lg leading-tight">{tokenInfo.liveClass.title}</h1>
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground font-medium">Secure LMS classroom</span>
               <Badge variant="outline" className="text-[10px] h-4 py-0 uppercase bg-primary/10 text-primary border-primary/20">
-                {tokenInfo.status === 'live' ? 'Live' : tokenInfo.status}
+                {tokenInfo.liveClass.status === 'live' ? 'Live' : tokenInfo.liveClass.status}
               </Badge>
             </div>
           </div>
         </div>
         
         <div className="flex items-center gap-3">
-          {tokenInfo.isHost && <HostControls classId={id} backUrl={backUrl} />}
+          {tokenInfo.isHost && (
+            <HostControls
+              classId={id}
+              backUrl={backUrl}
+              liveClass={tokenInfo.liveClass}
+            />
+          )}
         </div>
       </div>
 
@@ -286,18 +321,22 @@ function StudentBroadcastView() {
   );
 }
 
-function HostControls({ classId, backUrl }: { classId: number; backUrl: string }) {
+function HostControls({ classId, backUrl, liveClass }: { classId: number; backUrl: string; liveClass: any }) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const startRecording = useStartLiveClassRecording();
   const stopRecording = useStopLiveClassRecording();
   const completeClass = useCompleteLiveClass();
-  const [isRecording, setIsRecording] = useState(false);
+  const [recordingStatus, setRecordingStatus] = useState<string>(liveClass.recordingStatus ?? "idle");
+
+  useEffect(() => {
+    setRecordingStatus(liveClass.recordingStatus ?? "idle");
+  }, [liveClass.recordingStatus]);
 
   const handleStartRecording = () => {
     startRecording.mutate({ id: classId }, {
       onSuccess: () => {
-        setIsRecording(true);
+        setRecordingStatus("recording");
         toast({ title: "Recording Started", description: "This session is now being recorded." });
       },
       onError: (err) => {
@@ -309,7 +348,7 @@ function HostControls({ classId, backUrl }: { classId: number; backUrl: string }
   const handleStopRecording = () => {
     stopRecording.mutate({ id: classId }, {
       onSuccess: () => {
-        setIsRecording(false);
+        setRecordingStatus("processing");
         toast({ title: "Recording Stopped", description: "The recording will be processed and available soon." });
       },
       onError: (err) => {
@@ -330,12 +369,16 @@ function HostControls({ classId, backUrl }: { classId: number; backUrl: string }
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      <Badge variant="outline" className={recordingStatus === "recording" ? "border-red-400/40 bg-red-500/10 text-red-600" : ""}>
+        {recordingStatus === "recording" ? "● Recording automatically" : recordingStatus === "processing" ? "Recording processing" : recordingStatus === "ready" ? "Recording saved" : recordingStatus === "failed" ? "Auto-recording failed" : "Recording preparing"}
+      </Badge>
+      <RecordingUploadDialog liveClass={liveClass} productId={liveClass.productId} compact />
       <Button variant="destructive" size="sm" onClick={handleEndClass} disabled={completeClass.isPending}>
         <Square className="mr-2 h-4 w-4 fill-current" />
         {completeClass.isPending ? "Ending..." : "End Live Class"}
       </Button>
-      {isRecording ? (
+      {recordingStatus === "recording" ? (
         <Button variant="destructive" size="sm" onClick={handleStopRecording} disabled={stopRecording.isPending}>
           <Square className="w-4 h-4 mr-2 fill-current" />
           {stopRecording.isPending ? "Stopping..." : "Stop Recording"}

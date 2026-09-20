@@ -957,7 +957,7 @@ export const LiveClassRecordingStatus = {
 export interface LiveClass {
   id: number;
   courseId: number;
-  productId?: number;
+  productId: number;
   /** @nullable */
   moduleId?: number | null;
   /** @nullable */
@@ -972,7 +972,22 @@ export interface LiveClass {
   status: LiveClassStatus;
   roomName: string;
   recordingStatus: LiveClassRecordingStatus;
-  recordingUrl: string | null;
+  /** @nullable */
+  recordingUrl?: string | null;
+  /** @nullable */
+  recordingObjectPath?: string | null;
+  /** @nullable */
+  recordingLessonId?: number | null;
+  /** @nullable */
+  recordingFilename?: string | null;
+  /** @nullable */
+  recordingSizeBytes?: number | null;
+  /** @nullable */
+  recordingError?: string | null;
+  /** @nullable */
+  recordingStartedAt?: string | null;
+  /** @nullable */
+  recordingCompletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }

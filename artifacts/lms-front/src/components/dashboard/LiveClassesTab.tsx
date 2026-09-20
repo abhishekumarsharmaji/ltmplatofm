@@ -254,7 +254,7 @@ function AttendanceDialog({ liveClass }: { liveClass: LiveClass }) {
   );
 }
 
-function RecordingUploadDialog({ liveClass, productId }: { liveClass: LiveClass; productId: number }) {
+export function RecordingUploadDialog({ liveClass, productId, compact = false }: { liveClass: LiveClass; productId: number; compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const [lessonId, setLessonId] = useState("");
   const { data: builder } = useGetCreatorCourseBuilder(productId);
@@ -266,7 +266,7 @@ function RecordingUploadDialog({ liveClass, productId }: { liveClass: LiveClass;
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm"><Upload className="w-4 h-4 mr-2" />Add recording</Button>
+        <Button variant="outline" size="sm"><Upload className="w-4 h-4 mr-2" />{compact ? "Upload recording" : "Add recording"}</Button>
       </DialogTrigger>
       <DialogContent className="w-[calc(100vw-2rem)] max-w-xl overflow-x-hidden">
         <DialogHeader>
@@ -283,7 +283,9 @@ function RecordingUploadDialog({ liveClass, productId }: { liveClass: LiveClass;
                 <SelectValue placeholder="Choose a lesson" />
               </SelectTrigger>
               <SelectContent>
-                {lessons.map(({ lesson, moduleTitle }) => (
+                {lessons
+                  .filter(({ lesson }) => !liveClass.recordingLessonId || lesson.id === liveClass.recordingLessonId || lesson.moduleId === liveClass.moduleId)
+                  .map(({ lesson, moduleTitle }) => (
                   <SelectItem key={lesson.id} value={String(lesson.id)}>
                     {moduleTitle} — {lesson.title}
                   </SelectItem>

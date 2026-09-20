@@ -1958,7 +1958,7 @@ export const ListCreatorLiveClassesParams = zod.object({
 export const ListCreatorLiveClassesResponseItem = zod.object({
   "id": zod.number().int(),
   "courseId": zod.number().int(),
-  "productId": zod.number().int().optional(),
+  "productId": zod.number().int(),
   "moduleId": zod.number().int().nullish(),
   "moduleTitle": zod.string().nullish(),
   "creatorId": zod.number().int(),
@@ -1970,7 +1970,14 @@ export const ListCreatorLiveClassesResponseItem = zod.object({
   "status": zod.enum(['scheduled', 'live', 'completed', 'cancelled']),
   "roomName": zod.string(),
   "recordingStatus": zod.enum(['idle', 'recording', 'processing', 'ready', 'failed']),
-  "recordingUrl": zod.string().nullable(),
+  "recordingUrl": zod.string().nullish(),
+  "recordingObjectPath": zod.string().nullish(),
+  "recordingLessonId": zod.number().int().nullish(),
+  "recordingFilename": zod.string().nullish(),
+  "recordingSizeBytes": zod.number().int().nullish(),
+  "recordingError": zod.string().nullish(),
+  "recordingStartedAt": zod.coerce.date().nullish(),
+  "recordingCompletedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -1997,7 +2004,7 @@ export const CreateLiveClassBody = zod.object({
 export const CreateLiveClassResponse = zod.object({
   "id": zod.number().int(),
   "courseId": zod.number().int(),
-  "productId": zod.number().int().optional(),
+  "productId": zod.number().int(),
   "moduleId": zod.number().int().nullish(),
   "moduleTitle": zod.string().nullish(),
   "creatorId": zod.number().int(),
@@ -2009,7 +2016,14 @@ export const CreateLiveClassResponse = zod.object({
   "status": zod.enum(['scheduled', 'live', 'completed', 'cancelled']),
   "roomName": zod.string(),
   "recordingStatus": zod.enum(['idle', 'recording', 'processing', 'ready', 'failed']),
-  "recordingUrl": zod.string().nullable(),
+  "recordingUrl": zod.string().nullish(),
+  "recordingObjectPath": zod.string().nullish(),
+  "recordingLessonId": zod.number().int().nullish(),
+  "recordingFilename": zod.string().nullish(),
+  "recordingSizeBytes": zod.number().int().nullish(),
+  "recordingError": zod.string().nullish(),
+  "recordingStartedAt": zod.coerce.date().nullish(),
+  "recordingCompletedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2022,7 +2036,7 @@ export const ListUpcomingLiveClassesQueryParams = zod.object({
 export const ListUpcomingLiveClassesResponseItem = zod.object({
   "id": zod.number().int(),
   "courseId": zod.number().int(),
-  "productId": zod.number().int().optional(),
+  "productId": zod.number().int(),
   "moduleId": zod.number().int().nullish(),
   "moduleTitle": zod.string().nullish(),
   "creatorId": zod.number().int(),
@@ -2034,7 +2048,14 @@ export const ListUpcomingLiveClassesResponseItem = zod.object({
   "status": zod.enum(['scheduled', 'live', 'completed', 'cancelled']),
   "roomName": zod.string(),
   "recordingStatus": zod.enum(['idle', 'recording', 'processing', 'ready', 'failed']),
-  "recordingUrl": zod.string().nullable(),
+  "recordingUrl": zod.string().nullish(),
+  "recordingObjectPath": zod.string().nullish(),
+  "recordingLessonId": zod.number().int().nullish(),
+  "recordingFilename": zod.string().nullish(),
+  "recordingSizeBytes": zod.number().int().nullish(),
+  "recordingError": zod.string().nullish(),
+  "recordingStartedAt": zod.coerce.date().nullish(),
+  "recordingCompletedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2061,7 +2082,7 @@ export const UpdateLiveClassBody = zod.object({
 export const UpdateLiveClassResponse = zod.object({
   "id": zod.number().int(),
   "courseId": zod.number().int(),
-  "productId": zod.number().int().optional(),
+  "productId": zod.number().int(),
   "moduleId": zod.number().int().nullish(),
   "moduleTitle": zod.string().nullish(),
   "creatorId": zod.number().int(),
@@ -2073,7 +2094,14 @@ export const UpdateLiveClassResponse = zod.object({
   "status": zod.enum(['scheduled', 'live', 'completed', 'cancelled']),
   "roomName": zod.string(),
   "recordingStatus": zod.enum(['idle', 'recording', 'processing', 'ready', 'failed']),
-  "recordingUrl": zod.string().nullable(),
+  "recordingUrl": zod.string().nullish(),
+  "recordingObjectPath": zod.string().nullish(),
+  "recordingLessonId": zod.number().int().nullish(),
+  "recordingFilename": zod.string().nullish(),
+  "recordingSizeBytes": zod.number().int().nullish(),
+  "recordingError": zod.string().nullish(),
+  "recordingStartedAt": zod.coerce.date().nullish(),
+  "recordingCompletedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2093,7 +2121,7 @@ export const CancelLiveClassParams = zod.object({
 export const CancelLiveClassResponse = zod.object({
   "id": zod.number().int(),
   "courseId": zod.number().int(),
-  "productId": zod.number().int().optional(),
+  "productId": zod.number().int(),
   "moduleId": zod.number().int().nullish(),
   "moduleTitle": zod.string().nullish(),
   "creatorId": zod.number().int(),
@@ -2105,7 +2133,14 @@ export const CancelLiveClassResponse = zod.object({
   "status": zod.enum(['scheduled', 'live', 'completed', 'cancelled']),
   "roomName": zod.string(),
   "recordingStatus": zod.enum(['idle', 'recording', 'processing', 'ready', 'failed']),
-  "recordingUrl": zod.string().nullable(),
+  "recordingUrl": zod.string().nullish(),
+  "recordingObjectPath": zod.string().nullish(),
+  "recordingLessonId": zod.number().int().nullish(),
+  "recordingFilename": zod.string().nullish(),
+  "recordingSizeBytes": zod.number().int().nullish(),
+  "recordingError": zod.string().nullish(),
+  "recordingStartedAt": zod.coerce.date().nullish(),
+  "recordingCompletedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2118,7 +2153,7 @@ export const CompleteLiveClassParams = zod.object({
 export const CompleteLiveClassResponse = zod.object({
   "id": zod.number().int(),
   "courseId": zod.number().int(),
-  "productId": zod.number().int().optional(),
+  "productId": zod.number().int(),
   "moduleId": zod.number().int().nullish(),
   "moduleTitle": zod.string().nullish(),
   "creatorId": zod.number().int(),
@@ -2130,7 +2165,14 @@ export const CompleteLiveClassResponse = zod.object({
   "status": zod.enum(['scheduled', 'live', 'completed', 'cancelled']),
   "roomName": zod.string(),
   "recordingStatus": zod.enum(['idle', 'recording', 'processing', 'ready', 'failed']),
-  "recordingUrl": zod.string().nullable(),
+  "recordingUrl": zod.string().nullish(),
+  "recordingObjectPath": zod.string().nullish(),
+  "recordingLessonId": zod.number().int().nullish(),
+  "recordingFilename": zod.string().nullish(),
+  "recordingSizeBytes": zod.number().int().nullish(),
+  "recordingError": zod.string().nullish(),
+  "recordingStartedAt": zod.coerce.date().nullish(),
+  "recordingCompletedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2165,7 +2207,7 @@ export const JoinLiveClassResponse = zod.object({
   "class": zod.object({
   "id": zod.number().int(),
   "courseId": zod.number().int(),
-  "productId": zod.number().int().optional(),
+  "productId": zod.number().int(),
   "moduleId": zod.number().int().nullish(),
   "moduleTitle": zod.string().nullish(),
   "creatorId": zod.number().int(),
@@ -2177,7 +2219,14 @@ export const JoinLiveClassResponse = zod.object({
   "status": zod.enum(['scheduled', 'live', 'completed', 'cancelled']),
   "roomName": zod.string(),
   "recordingStatus": zod.enum(['idle', 'recording', 'processing', 'ready', 'failed']),
-  "recordingUrl": zod.string().nullable(),
+  "recordingUrl": zod.string().nullish(),
+  "recordingObjectPath": zod.string().nullish(),
+  "recordingLessonId": zod.number().int().nullish(),
+  "recordingFilename": zod.string().nullish(),
+  "recordingSizeBytes": zod.number().int().nullish(),
+  "recordingError": zod.string().nullish(),
+  "recordingStartedAt": zod.coerce.date().nullish(),
+  "recordingCompletedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 }),
@@ -2206,7 +2255,7 @@ export const StartLiveClassRecordingParams = zod.object({
 export const StartLiveClassRecordingResponse = zod.object({
   "id": zod.number().int(),
   "courseId": zod.number().int(),
-  "productId": zod.number().int().optional(),
+  "productId": zod.number().int(),
   "moduleId": zod.number().int().nullish(),
   "moduleTitle": zod.string().nullish(),
   "creatorId": zod.number().int(),
@@ -2218,7 +2267,14 @@ export const StartLiveClassRecordingResponse = zod.object({
   "status": zod.enum(['scheduled', 'live', 'completed', 'cancelled']),
   "roomName": zod.string(),
   "recordingStatus": zod.enum(['idle', 'recording', 'processing', 'ready', 'failed']),
-  "recordingUrl": zod.string().nullable(),
+  "recordingUrl": zod.string().nullish(),
+  "recordingObjectPath": zod.string().nullish(),
+  "recordingLessonId": zod.number().int().nullish(),
+  "recordingFilename": zod.string().nullish(),
+  "recordingSizeBytes": zod.number().int().nullish(),
+  "recordingError": zod.string().nullish(),
+  "recordingStartedAt": zod.coerce.date().nullish(),
+  "recordingCompletedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })
@@ -2231,7 +2287,7 @@ export const StopLiveClassRecordingParams = zod.object({
 export const StopLiveClassRecordingResponse = zod.object({
   "id": zod.number().int(),
   "courseId": zod.number().int(),
-  "productId": zod.number().int().optional(),
+  "productId": zod.number().int(),
   "moduleId": zod.number().int().nullish(),
   "moduleTitle": zod.string().nullish(),
   "creatorId": zod.number().int(),
@@ -2243,7 +2299,46 @@ export const StopLiveClassRecordingResponse = zod.object({
   "status": zod.enum(['scheduled', 'live', 'completed', 'cancelled']),
   "roomName": zod.string(),
   "recordingStatus": zod.enum(['idle', 'recording', 'processing', 'ready', 'failed']),
-  "recordingUrl": zod.string().nullable(),
+  "recordingUrl": zod.string().nullish(),
+  "recordingObjectPath": zod.string().nullish(),
+  "recordingLessonId": zod.number().int().nullish(),
+  "recordingFilename": zod.string().nullish(),
+  "recordingSizeBytes": zod.number().int().nullish(),
+  "recordingError": zod.string().nullish(),
+  "recordingStartedAt": zod.coerce.date().nullish(),
+  "recordingCompletedAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+export const ReconcileLiveClassRecordingParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const ReconcileLiveClassRecordingResponse = zod.object({
+  "id": zod.number().int(),
+  "courseId": zod.number().int(),
+  "productId": zod.number().int(),
+  "moduleId": zod.number().int().nullish(),
+  "moduleTitle": zod.string().nullish(),
+  "creatorId": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "startsAt": zod.coerce.date(),
+  "endsAt": zod.coerce.date().nullish(),
+  "timezone": zod.string(),
+  "status": zod.enum(['scheduled', 'live', 'completed', 'cancelled']),
+  "roomName": zod.string(),
+  "recordingStatus": zod.enum(['idle', 'recording', 'processing', 'ready', 'failed']),
+  "recordingUrl": zod.string().nullish(),
+  "recordingObjectPath": zod.string().nullish(),
+  "recordingLessonId": zod.number().int().nullish(),
+  "recordingFilename": zod.string().nullish(),
+  "recordingSizeBytes": zod.number().int().nullish(),
+  "recordingError": zod.string().nullish(),
+  "recordingStartedAt": zod.coerce.date().nullish(),
+  "recordingCompletedAt": zod.coerce.date().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 })

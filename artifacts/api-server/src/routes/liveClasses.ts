@@ -121,10 +121,14 @@ router.get("/creator/products/:productId/live-classes", requireAuth, requireRole
   const [product] = await db.select().from(productsTable).where(and(eq(productsTable.id, productId), user.canonicalRole === "admin" ? undefined : eq(productsTable.creatorId, user.canonicalUserId!)));
   if (!product || !product.courseId) { res.status(404).json({ error: "Course product not found" }); return; }
   const rows = await db.select({ liveClass: liveClassesTable, moduleTitle: courseModulesTable.title }).from(liveClassesTable).leftJoin(courseModulesTable, eq(courseModulesTable.id, liveClassesTable.moduleId)).where(eq(liveClassesTable.productId, productId)).orderBy(desc(liveClassesTable.startsAt));
+  const reconciled = new Map<number, typeof liveClassesTable.$inferSelect>();
   if (process.env.LIVEKIT_URL && process.env.LIVEKIT_API_KEY && process.env.LIVEKIT_API_SECRET) {
-    await Promise.all(rows.filter(({ liveClass }) => liveClass.recordingStatus === "processing" || liveClass.recordingStatus === "recording").map(({ liveClass }) => reconcileRecording(liveClass.id).catch(() => undefined)));
+    await Promise.all(rows.filter(({ liveClass }) => liveClass.recordingStatus === "processing" || liveClass.recordingStatus === "recording").map(async ({ liveClass }) => {
+      const current = await reconcileRecording(liveClass.id).catch(() => undefined);
+      if (current) reconciled.set(liveClass.id, current);
+    }));
   }
-  res.json(rows.map(({ liveClass, moduleTitle }) => ({ ...liveClass, moduleTitle: moduleTitle ?? null })));
+  res.json(rows.map(({ liveClass, moduleTitle }) => ({ ...(reconciled.get(liveClass.id) ?? liveClass), moduleTitle: moduleTitle ?? null })));
 });
 
 router.post("/creator/products/:productId/live-classes", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
@@ -170,10 +174,12 @@ for (const [path, status] of [["cancel", "cancelled"], ["complete", "completed"]
   router.post(`/creator/live-classes/:id/${path}`, requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
     const classId = id(req.params.id), found = classId ? await ownedClass(classId, auth(req)) : undefined;
     if (!classId || !found) { res.status(404).json({ error: "Live class not found" }); return; }
-    const [item] = await db.update(liveClassesTable).set({ status, updatedAt: new Date() }).where(eq(liveClassesTable.id, classId)).returning();
+    let [item] = await db.update(liveClassesTable).set({ status, updatedAt: new Date() }).where(eq(liveClassesTable.id, classId)).returning();
     if (status === "completed" && process.env.LIVEKIT_URL && process.env.LIVEKIT_API_KEY && process.env.LIVEKIT_API_SECRET) {
-      if (found.liveClass.egressId) await new EgressClient(process.env.LIVEKIT_URL, process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET).stopEgress(found.liveClass.egressId).catch(() => undefined);
-      await db.update(liveClassesTable).set({ recordingStatus: "processing", updatedAt: new Date() }).where(eq(liveClassesTable.id, classId));
+      if (found.liveClass.egressId) {
+        await new EgressClient(process.env.LIVEKIT_URL, process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET).stopEgress(found.liveClass.egressId).catch(() => undefined);
+        [item] = await db.update(liveClassesTable).set({ recordingStatus: "processing", updatedAt: new Date() }).where(eq(liveClassesTable.id, classId)).returning();
+      }
       const rooms = new RoomServiceClient(process.env.LIVEKIT_URL, process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET);
       await rooms.deleteRoom(found.liveClass.roomName).catch(() => undefined);
     }
@@ -221,10 +227,6 @@ router.post("/live-classes/:id/join", requireAuth, async (req, res): Promise<voi
   if (host && item.status === "scheduled") {
     item.status = "live";
     await db.update(liveClassesTable).set({ status: "live", updatedAt: new Date() }).where(eq(liveClassesTable.id, item.id));
-  }
-  if (host && item.status === "live" && !item.egressId) {
-    // Recording is best effort: the host must still receive classroom credentials.
-    await ensureRecordingStarted(item.id, item.roomName);
   }
   res.json({ serverUrl, token: await token.toJwt(), class: item, participantRole: host ? "host" : "student" });
 });
