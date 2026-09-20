@@ -6,6 +6,7 @@ import {
 } from "@workspace/db";
 import { requireAuth, requireRole, requireSuperAdmin, effectiveRole, isSuperAdminEmail, type AuthenticatedRequest } from "../middlewares/auth";
 import { objectFile } from "../lib/objectStorage";
+import { accessExpiry, validAccessPlan } from "../lib/accessPlans";
 
 const router: IRouter = Router();
 const auth = requireAuth;
@@ -96,17 +97,26 @@ router.get("/marketplace/courses/:id/thumbnail", async (req, res) => {
 router.post("/student/courses/:courseId/enroll", auth, async (req, res) => {
   const courseId = id(req.params.courseId), userId = await userOf(req as AuthenticatedRequest);
   if (!courseId || !userId) { res.status(400).json({ error: "Invalid course" }); return; }
-  const [course] = await db.select({ id: coursesTable.id }).from(coursesTable).where(and(eq(coursesTable.id, courseId), eq(coursesTable.status, "published")));
+  const [course] = await db.select({
+    id: coursesTable.id,
+    accessPlan: productsTable.accessPlan,
+    accessDays: productsTable.accessDays,
+    trialDays: productsTable.trialDays,
+  }).from(coursesTable)
+    .leftJoin(productsTable, and(eq(productsTable.courseId, coursesTable.id), eq(productsTable.type, "course")))
+    .where(and(eq(coursesTable.id, courseId), eq(coursesTable.status, "published")));
   if (!course) { res.status(404).json({ error: "Published course not found" }); return; }
-  const inserted = await db.insert(enrollmentsTable).values({ userId, courseId }).onConflictDoNothing().returning({ id: enrollmentsTable.id });
-  res.json({ enrolled: true, alreadyEnrolled: inserted.length === 0, courseId });
+  const expiresAt = accessExpiry(course.accessPlan ?? "lifetime", course.accessDays, course.trialDays ?? 0);
+  const inserted = await db.insert(enrollmentsTable).values({ userId, courseId, expiresAt }).onConflictDoNothing().returning({ id: enrollmentsTable.id });
+  res.json({ enrolled: true, alreadyEnrolled: inserted.length === 0, courseId, expiresAt });
 });
 router.get("/student/courses/:courseId", auth, requireRole("student", "creator", "admin"), async (req, res) => {
   const courseId = id(req.params.courseId), userId = await userOf(req as AuthenticatedRequest);
   if (!courseId || !userId) { res.status(400).json({ error: "Invalid course" }); return; }
-  const [enrollment] = await db.select({ id: enrollmentsTable.id }).from(enrollmentsTable)
+  const [enrollment] = await db.select({ id: enrollmentsTable.id, expiresAt: enrollmentsTable.expiresAt }).from(enrollmentsTable)
     .where(and(eq(enrollmentsTable.courseId, courseId), eq(enrollmentsTable.userId, userId)));
   if (!enrollment) { res.status(403).json({ error: "Enrollment required" }); return; }
+  if (enrollment.expiresAt && enrollment.expiresAt.getTime() <= Date.now()) { res.status(403).json({ error: "Course access has expired" }); return; }
   const [row] = await db.select({ course: coursesTable, productId: productsTable.id, creatorName: usersTable.name }).from(coursesTable)
     .leftJoin(productsTable, and(eq(productsTable.courseId, coursesTable.id), eq(productsTable.type, "course")))
     .innerJoin(usersTable, eq(usersTable.id, coursesTable.creatorId))
@@ -147,7 +157,7 @@ router.get("/student/courses/:courseId", auth, requireRole("student", "creator",
 router.post("/creator/products", auth, requireRole("creator", "admin"), async (req, res) => {
   const requestUser = req as AuthenticatedRequest;
   const creatorId = await userOf(requestUser); if (!creatorId) { res.status(409).json({ error: "Creator profile unavailable" }); return; }
-  const { title, description = "", shortSummary = null, subtype = "other", publicSlug: requestedSlug, coverImageUrl = null, salesPage, type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId } = req.body ?? {};
+  const { title, description = "", shortSummary = null, subtype = "other", publicSlug: requestedSlug, coverImageUrl = null, salesPage, type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId, accessPlan = "lifetime", accessDays = null, trialDays = 0 } = req.body ?? {};
   const digitalSubtypes = ["ebook", "guide", "workbook", "checklist", "planner", "template", "spreadsheet", "presentation", "design_asset", "photo_preset", "audio", "video", "code", "plugin", "prompt_pack", "toolkit", "document", "bundle", "other"];
   if (type === "digital" && requestedPrice !== undefined && requestedPrice !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
   const priceMinor = type === "course" ? 0 : requestedPrice;
@@ -155,6 +165,9 @@ router.post("/creator/products", auth, requireRole("creator", "admin"), async (r
     res.status(400).json({ error: "Invalid product payload" }); return;
   }
   if (type === "digital" && !digitalSubtypes.includes(subtype)) { res.status(400).json({ error: "Invalid digital product type" }); return; }
+  if (!validAccessPlan(accessPlan) || !Number.isInteger(trialDays) || trialDays < 0 || trialDays > 365 || (accessPlan === "fixed_days" && (!Number.isInteger(accessDays) || accessDays < 1 || accessDays > 3650))) {
+    res.status(400).json({ error: "Invalid access plan" }); return;
+  }
   if (requestedSlug !== undefined && requestedSlug !== "" && !validPublicSlug(requestedSlug)) { res.status(400).json({ error: "Custom link must be 3–80 characters using lowercase letters, numbers, and hyphens" }); return; }
   if (requestedSlug) {
     const [conflict] = await db.select({ id: productsTable.id }).from(productsTable).where(eq(productsTable.publicSlug, String(requestedSlug).toLowerCase()));
@@ -189,6 +202,7 @@ router.post("/creator/products", auth, requireRole("creator", "admin"), async (r
       publicSlug: requestedSlug ? String(requestedSlug).toLowerCase() : `${slugify(title)}-${Date.now().toString(36)}`,
       coverImageUrl: typeof coverImageUrl === "string" ? coverImageUrl : null,
       coverImageObjectPath: null, type, priceMinor,
+       accessPlan, accessDays: accessPlan === "fixed_days" ? accessDays : null, trialDays,
       salesPage: type === "digital" ? normalizeSalesPage(salesPage) : {},
       currency: String(currency).toUpperCase(), courseId: linkedCourseId, categoryId: id(categoryId) ?? undefined,
     }).returning();
@@ -205,9 +219,15 @@ router.patch("/creator/products/:id", auth, requireRole("creator", "admin"), asy
   const productId = id(req.params.id), creatorId = await userOf(req as AuthenticatedRequest); if (!productId || !creatorId) { res.status(400).json({ error: "Invalid id" }); return; }
   const [existing] = await db.select().from(productsTable).where(eq(productsTable.id, productId));
   if (!existing || ((req as AuthenticatedRequest).user!.role !== "admin" && existing.creatorId !== creatorId)) { res.status(404).json({ error: "Product not found" }); return; }
-    const allowed = ["title", "description", "shortSummary", "subtype", "publicSlug", "coverImageUrl", "salesPage", "priceMinor", "currency", "categoryId"] as const;
+    const allowed = ["title", "description", "shortSummary", "subtype", "publicSlug", "coverImageUrl", "salesPage", "priceMinor", "currency", "categoryId", "accessPlan", "accessDays", "trialDays"] as const;
    if (existing.type === "digital" && req.body?.priceMinor !== undefined && req.body.priceMinor !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
    if (existing.type === "digital" && req.body?.subtype !== undefined && !["ebook", "guide", "workbook", "checklist", "planner", "template", "spreadsheet", "presentation", "design_asset", "photo_preset", "audio", "video", "code", "plugin", "prompt_pack", "toolkit", "document", "bundle", "other"].includes(req.body.subtype)) { res.status(400).json({ error: "Invalid digital product type" }); return; }
+    const nextPlan = req.body?.accessPlan ?? existing.accessPlan;
+    const nextDays = req.body?.accessDays ?? existing.accessDays;
+    const nextTrial = req.body?.trialDays ?? existing.trialDays;
+    if (!validAccessPlan(nextPlan) || !Number.isInteger(nextTrial) || nextTrial < 0 || nextTrial > 365 || (nextPlan === "fixed_days" && (!Number.isInteger(nextDays) || nextDays < 1 || nextDays > 3650))) {
+      res.status(400).json({ error: "Invalid access plan" }); return;
+    }
     if (req.body?.publicSlug !== undefined) {
       if (req.body.publicSlug === "" || req.body.publicSlug === null) {
         req.body.publicSlug = null;
@@ -221,7 +241,7 @@ router.patch("/creator/products/:id", auth, requireRole("creator", "admin"), asy
     }
   const patch = Object.fromEntries(allowed.filter((key) => req.body?.[key] !== undefined).map((key) => [
     key,
-    key === "categoryId" ? id(req.body[key]) : key === "salesPage" ? normalizeSalesPage(req.body[key]) : req.body[key],
+     key === "categoryId" ? id(req.body[key]) : key === "salesPage" ? normalizeSalesPage(req.body[key]) : key === "accessDays" && nextPlan !== "fixed_days" ? null : req.body[key],
   ]));
   const [row] = await db.update(productsTable).set({ ...patch, updatedAt: new Date() }).where(eq(productsTable.id, productId)).returning(); res.json(safeProduct(row));
 });

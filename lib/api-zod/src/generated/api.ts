@@ -433,6 +433,11 @@ export const ListProductsQueryParams = zod.object({
 
 export const listProductsResponsePriceMinorMin = 0;
 
+export const listProductsResponseAccessDaysMax = 3650;
+
+export const listProductsResponseTrialDaysMin = 0;
+export const listProductsResponseTrialDaysMax = 365;
+
 
 
 export const ListProductsResponseItem = zod.object({
@@ -467,6 +472,9 @@ export const ListProductsResponseItem = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(listProductsResponsePriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(listProductsResponseAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(listProductsResponseTrialDaysMin).max(listProductsResponseTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 })
 export const ListProductsResponse = zod.array(ListProductsResponseItem)
@@ -477,6 +485,11 @@ export const GetProductParams = zod.object({
 })
 
 export const getProductResponsePriceMinorMin = 0;
+
+export const getProductResponseAccessDaysMax = 3650;
+
+export const getProductResponseTrialDaysMin = 0;
+export const getProductResponseTrialDaysMax = 365;
 
 
 
@@ -512,6 +525,9 @@ export const GetProductResponse = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(getProductResponsePriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(getProductResponseAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(getProductResponseTrialDaysMin).max(getProductResponseTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 })
 
@@ -630,6 +646,11 @@ export const GetStudentCourseResponse = zod.object({
 
 export const listCreatorProductsResponsePriceMinorMin = 0;
 
+export const listCreatorProductsResponseAccessDaysMax = 3650;
+
+export const listCreatorProductsResponseTrialDaysMin = 0;
+export const listCreatorProductsResponseTrialDaysMax = 365;
+
 
 
 export const ListCreatorProductsResponseItem = zod.object({
@@ -664,6 +685,9 @@ export const ListCreatorProductsResponseItem = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(listCreatorProductsResponsePriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(listCreatorProductsResponseAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(listCreatorProductsResponseTrialDaysMin).max(listCreatorProductsResponseTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 })
 export const ListCreatorProductsResponse = zod.array(ListCreatorProductsResponseItem)
@@ -677,6 +701,11 @@ export const createCreatorProductBodyPublicSlugMax = 80;
 
 export const createCreatorProductBodyPublicSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
 export const createCreatorProductBodyPriceMinorMin = 0;
+
+export const createCreatorProductBodyAccessDaysMax = 3650;
+
+export const createCreatorProductBodyTrialDaysMin = 0;
+export const createCreatorProductBodyTrialDaysMax = 365;
 
 
 
@@ -711,11 +740,19 @@ export const CreateCreatorProductBody = zod.object({
   "type": zod.enum(['course', 'digital']).optional(),
   "priceMinor": zod.number().int().min(createCreatorProductBodyPriceMinorMin).optional(),
   "currency": zod.string().optional(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']).optional(),
+  "accessDays": zod.number().int().min(1).max(createCreatorProductBodyAccessDaysMax).optional(),
+  "trialDays": zod.number().int().min(createCreatorProductBodyTrialDaysMin).max(createCreatorProductBodyTrialDaysMax).optional(),
   "courseId": zod.number().int().optional(),
   "categoryId": zod.number().int().optional()
 })
 
 export const createCreatorProductResponsePriceMinorMin = 0;
+
+export const createCreatorProductResponseAccessDaysMax = 3650;
+
+export const createCreatorProductResponseTrialDaysMin = 0;
+export const createCreatorProductResponseTrialDaysMax = 365;
 
 
 
@@ -751,6 +788,9 @@ export const CreateCreatorProductResponse = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(createCreatorProductResponsePriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(createCreatorProductResponseAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(createCreatorProductResponseTrialDaysMin).max(createCreatorProductResponseTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 })
 
@@ -767,6 +807,11 @@ export const updateCreatorProductBodyPublicSlugMax = 80;
 
 export const updateCreatorProductBodyPublicSlugRegExp = new RegExp('^[a-z0-9]+(?:-[a-z0-9]+)*$');
 export const updateCreatorProductBodyPriceMinorMin = 0;
+
+export const updateCreatorProductBodyAccessDaysMax = 3650;
+
+export const updateCreatorProductBodyTrialDaysMin = 0;
+export const updateCreatorProductBodyTrialDaysMax = 365;
 
 
 
@@ -801,11 +846,19 @@ export const UpdateCreatorProductBody = zod.object({
   "type": zod.enum(['course', 'digital']).optional(),
   "priceMinor": zod.number().int().min(updateCreatorProductBodyPriceMinorMin).optional(),
   "currency": zod.string().optional(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']).optional(),
+  "accessDays": zod.number().int().min(1).max(updateCreatorProductBodyAccessDaysMax).optional(),
+  "trialDays": zod.number().int().min(updateCreatorProductBodyTrialDaysMin).max(updateCreatorProductBodyTrialDaysMax).optional(),
   "courseId": zod.number().int().optional(),
   "categoryId": zod.number().int().optional()
 })
 
 export const updateCreatorProductResponsePriceMinorMin = 0;
+
+export const updateCreatorProductResponseAccessDaysMax = 3650;
+
+export const updateCreatorProductResponseTrialDaysMin = 0;
+export const updateCreatorProductResponseTrialDaysMax = 365;
 
 
 
@@ -841,6 +894,9 @@ export const UpdateCreatorProductResponse = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(updateCreatorProductResponsePriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(updateCreatorProductResponseAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(updateCreatorProductResponseTrialDaysMin).max(updateCreatorProductResponseTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 })
 
@@ -850,6 +906,11 @@ export const PublishCreatorProductParams = zod.object({
 })
 
 export const publishCreatorProductResponsePriceMinorMin = 0;
+
+export const publishCreatorProductResponseAccessDaysMax = 3650;
+
+export const publishCreatorProductResponseTrialDaysMin = 0;
+export const publishCreatorProductResponseTrialDaysMax = 365;
 
 
 
@@ -885,6 +946,9 @@ export const PublishCreatorProductResponse = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(publishCreatorProductResponsePriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(publishCreatorProductResponseAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(publishCreatorProductResponseTrialDaysMin).max(publishCreatorProductResponseTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 })
 
@@ -894,6 +958,11 @@ export const GetCreatorCourseBuilderParams = zod.object({
 })
 
 export const getCreatorCourseBuilderResponseProductPriceMinorMin = 0;
+
+export const getCreatorCourseBuilderResponseProductAccessDaysMax = 3650;
+
+export const getCreatorCourseBuilderResponseProductTrialDaysMin = 0;
+export const getCreatorCourseBuilderResponseProductTrialDaysMax = 365;
 
 
 
@@ -930,6 +999,9 @@ export const GetCreatorCourseBuilderResponse = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(getCreatorCourseBuilderResponseProductPriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(getCreatorCourseBuilderResponseProductAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(getCreatorCourseBuilderResponseProductTrialDaysMin).max(getCreatorCourseBuilderResponseProductTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 }),
   "course": zod.object({
@@ -1504,6 +1576,11 @@ export const RemoveLessonAssetResponse = zod.void()
 
 export const adminProductsResponsePriceMinorMin = 0;
 
+export const adminProductsResponseAccessDaysMax = 3650;
+
+export const adminProductsResponseTrialDaysMin = 0;
+export const adminProductsResponseTrialDaysMax = 365;
+
 
 
 export const AdminProductsResponseItem = zod.object({
@@ -1538,6 +1615,9 @@ export const AdminProductsResponseItem = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(adminProductsResponsePriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(adminProductsResponseAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(adminProductsResponseTrialDaysMin).max(adminProductsResponseTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 })
 export const AdminProductsResponse = zod.array(AdminProductsResponseItem)
@@ -1905,6 +1985,11 @@ export const ListDigitalProductsQueryParams = zod.object({
 
 export const listDigitalProductsResponseOnePriceMinorMin = 0;
 
+export const listDigitalProductsResponseOneAccessDaysMax = 3650;
+
+export const listDigitalProductsResponseOneTrialDaysMin = 0;
+export const listDigitalProductsResponseOneTrialDaysMax = 365;
+
 
 
 export const ListDigitalProductsResponseItem = zod.object({
@@ -1939,6 +2024,9 @@ export const ListDigitalProductsResponseItem = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(listDigitalProductsResponseOnePriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(listDigitalProductsResponseOneAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(listDigitalProductsResponseOneTrialDaysMin).max(listDigitalProductsResponseOneTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 }).and(zod.object({
   "isFree": zod.boolean(),
@@ -1952,6 +2040,11 @@ export const GetDigitalProductParams = zod.object({
 })
 
 export const getDigitalProductResponseOneOnePriceMinorMin = 0;
+
+export const getDigitalProductResponseOneOneAccessDaysMax = 3650;
+
+export const getDigitalProductResponseOneOneTrialDaysMin = 0;
+export const getDigitalProductResponseOneOneTrialDaysMax = 365;
 
 
 
@@ -1987,6 +2080,9 @@ export const GetDigitalProductResponse = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(getDigitalProductResponseOneOnePriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(getDigitalProductResponseOneOneAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(getDigitalProductResponseOneOneTrialDaysMin).max(getDigitalProductResponseOneOneTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 }).and(zod.object({
   "isFree": zod.boolean(),
@@ -2110,6 +2206,11 @@ export const UnpublishDigitalProductParams = zod.object({
 
 export const unpublishDigitalProductResponsePriceMinorMin = 0;
 
+export const unpublishDigitalProductResponseAccessDaysMax = 3650;
+
+export const unpublishDigitalProductResponseTrialDaysMin = 0;
+export const unpublishDigitalProductResponseTrialDaysMax = 365;
+
 
 
 export const UnpublishDigitalProductResponse = zod.object({
@@ -2144,6 +2245,9 @@ export const UnpublishDigitalProductResponse = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(unpublishDigitalProductResponsePriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(unpublishDigitalProductResponseAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(unpublishDigitalProductResponseTrialDaysMin).max(unpublishDigitalProductResponseTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 })
 
@@ -2264,6 +2368,11 @@ export const AcquireDigitalProductResponse = zod.object({
 
 export const listStudentDigitalProductsResponseOnePriceMinorMin = 0;
 
+export const listStudentDigitalProductsResponseOneAccessDaysMax = 3650;
+
+export const listStudentDigitalProductsResponseOneTrialDaysMin = 0;
+export const listStudentDigitalProductsResponseOneTrialDaysMax = 365;
+
 
 
 export const ListStudentDigitalProductsResponseItem = zod.object({
@@ -2298,6 +2407,9 @@ export const ListStudentDigitalProductsResponseItem = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(listStudentDigitalProductsResponseOnePriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(listStudentDigitalProductsResponseOneAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(listStudentDigitalProductsResponseOneTrialDaysMin).max(listStudentDigitalProductsResponseOneTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 }).and(zod.object({
   "isFree": zod.boolean(),
@@ -2311,6 +2423,11 @@ export const GetStudentDigitalProductParams = zod.object({
 })
 
 export const getStudentDigitalProductResponseOneOnePriceMinorMin = 0;
+
+export const getStudentDigitalProductResponseOneOneAccessDaysMax = 3650;
+
+export const getStudentDigitalProductResponseOneOneTrialDaysMin = 0;
+export const getStudentDigitalProductResponseOneOneTrialDaysMax = 365;
 
 
 
@@ -2346,6 +2463,9 @@ export const GetStudentDigitalProductResponse = zod.object({
   "type": zod.enum(['course', 'digital']),
   "priceMinor": zod.number().int().min(getStudentDigitalProductResponseOneOnePriceMinorMin),
   "currency": zod.string(),
+  "accessPlan": zod.enum(['lifetime', 'fixed_days', 'monthly', 'yearly']),
+  "accessDays": zod.number().int().min(1).max(getStudentDigitalProductResponseOneOneAccessDaysMax).nullish(),
+  "trialDays": zod.number().int().min(getStudentDigitalProductResponseOneOneTrialDaysMin).max(getStudentDigitalProductResponseOneOneTrialDaysMax),
   "status": zod.enum(['draft', 'published', 'archived'])
 }).and(zod.object({
   "isFree": zod.boolean(),

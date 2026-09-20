@@ -26,6 +26,7 @@ export const productTypeEnum = pgEnum("product_type", ["course", "digital"]);
 export const orderStatusEnum = pgEnum("order_status", ["pending", "paid", "cancelled", "refunded"]);
 export const paymentStatusEnum = pgEnum("payment_status", ["pending", "succeeded", "failed", "refunded"]);
 export const fileKindEnum = pgEnum("file_kind", ["video", "document", "audio", "image", "other"]);
+export const accessPlanEnum = pgEnum("access_plan", ["lifetime", "fixed_days", "monthly", "yearly"]);
 
 /** Normalized application identity. lms_users remains for backwards-compatible auth data. */
 export const usersTable = pgTable("users", {
@@ -125,6 +126,9 @@ export const productsTable = pgTable("products", {
   }>().notNull().default(sql`'{}'::jsonb`),
   priceMinor: integer("price_minor").notNull().default(0),
   currency: text("currency").notNull().default("USD"),
+  accessPlan: accessPlanEnum("access_plan").notNull().default("lifetime"),
+  accessDays: integer("access_days"),
+  trialDays: integer("trial_days").notNull().default(0),
   status: courseStatusEnum("status").notNull().default("draft"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
@@ -133,6 +137,8 @@ export const productsTable = pgTable("products", {
   index("products_status_created_idx").on(t.status, t.createdAt),
   uniqueIndex("products_public_slug_unique").on(t.publicSlug),
   check("products_price_nonnegative", sql`${t.priceMinor} >= 0`),
+  check("products_access_days_positive", sql`${t.accessDays} IS NULL OR ${t.accessDays} > 0`),
+  check("products_trial_days_nonnegative", sql`${t.trialDays} >= 0`),
 ]);
 
 export const digitalFilesTable = pgTable("digital_files", {
@@ -155,9 +161,22 @@ export const digitalProductEntitlementsTable = pgTable("digital_product_entitlem
   userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   productId: integer("product_id").notNull().references(() => productsTable.id, { onDelete: "cascade" }),
   acquiredAt: timestamp("acquired_at", { withTimezone: true }).defaultNow().notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
 }, (t) => [
   uniqueIndex("digital_entitlements_user_product_unique").on(t.userId, t.productId),
   index("digital_entitlements_user_idx").on(t.userId),
+]);
+
+export const guestDigitalEntitlementsTable = pgTable("guest_digital_entitlements", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().references(() => productsTable.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  acquiredAt: timestamp("acquired_at", { withTimezone: true }).defaultNow().notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+}, (t) => [
+  uniqueIndex("guest_digital_entitlements_product_email_unique").on(t.productId, t.email),
+  index("guest_digital_entitlements_product_idx").on(t.productId),
 ]);
 
 export const lessonAssetStatusEnum = pgEnum("lesson_asset_status", ["pending", "uploaded", "failed"]);
@@ -197,6 +216,7 @@ export const enrollmentsTable = pgTable("enrollments", {
   userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   courseId: integer("course_id").notNull().references(() => coursesTable.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
 }, (t) => [uniqueIndex("enrollments_user_course_unique").on(t.userId, t.courseId)]);
 
 export const paymentsTable = pgTable("payments", {

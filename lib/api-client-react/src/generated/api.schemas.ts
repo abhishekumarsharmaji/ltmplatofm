@@ -216,6 +216,16 @@ export const ProductType = {
   digital: 'digital',
 } as const;
 
+export type ProductAccessPlan = typeof ProductAccessPlan[keyof typeof ProductAccessPlan];
+
+
+export const ProductAccessPlan = {
+  lifetime: 'lifetime',
+  fixed_days: 'fixed_days',
+  monthly: 'monthly',
+  yearly: 'yearly',
+} as const;
+
 export type ProductStatus = typeof ProductStatus[keyof typeof ProductStatus];
 
 
@@ -242,6 +252,18 @@ export interface Product {
   /** @minimum 0 */
   priceMinor: number;
   currency: string;
+  accessPlan: ProductAccessPlan;
+  /**
+     * @minimum 1
+     * @maximum 3650
+     * @nullable
+     */
+  accessDays?: number | null;
+  /**
+     * @minimum 0
+     * @maximum 365
+     */
+  trialDays: number;
   status: ProductStatus;
 }
 
@@ -382,6 +404,16 @@ export const ProductInputType = {
   digital: 'digital',
 } as const;
 
+export type ProductInputAccessPlan = typeof ProductInputAccessPlan[keyof typeof ProductInputAccessPlan];
+
+
+export const ProductInputAccessPlan = {
+  lifetime: 'lifetime',
+  fixed_days: 'fixed_days',
+  monthly: 'monthly',
+  yearly: 'yearly',
+} as const;
+
 export type DigitalProductSalesPageInput = DigitalProductSalesPage;
 
 export interface ProductInput {
@@ -402,6 +434,17 @@ export interface ProductInput {
   /** @minimum 0 */
   priceMinor?: number;
   currency?: string;
+  accessPlan?: ProductInputAccessPlan;
+  /**
+     * @minimum 1
+     * @maximum 3650
+     */
+  accessDays?: number;
+  /**
+     * @minimum 0
+     * @maximum 365
+     */
+  trialDays?: number;
   courseId?: number;
   categoryId?: number;
 }

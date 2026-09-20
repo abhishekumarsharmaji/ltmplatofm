@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { DigitalProductSalesPage } from './digitalProductSalesPage';
+import type { ProductAccessPlan } from './productAccessPlan';
 import type { ProductStatus } from './productStatus';
 import type { ProductSubtype } from './productSubtype';
 import type { ProductType } from './productType';
@@ -27,5 +28,17 @@ export interface Product {
   /** @minimum 0 */
   priceMinor: number;
   currency: string;
+  accessPlan: ProductAccessPlan;
+  /**
+     * @minimum 1
+     * @maximum 3650
+     * @nullable
+     */
+  accessDays?: number | null;
+  /**
+     * @minimum 0
+     * @maximum 365
+     */
+  trialDays: number;
   status: ProductStatus;
 }

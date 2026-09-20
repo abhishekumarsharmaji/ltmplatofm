@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { DigitalProductSalesPageInput } from './digitalProductSalesPageInput';
+import type { ProductInputAccessPlan } from './productInputAccessPlan';
 import type { ProductInputSubtype } from './productInputSubtype';
 import type { ProductInputType } from './productInputType';
 
@@ -27,6 +28,17 @@ export interface ProductInput {
   /** @minimum 0 */
   priceMinor?: number;
   currency?: string;
+  accessPlan?: ProductInputAccessPlan;
+  /**
+     * @minimum 1
+     * @maximum 3650
+     */
+  accessDays?: number;
+  /**
+     * @minimum 0
+     * @maximum 365
+     */
+  trialDays?: number;
   courseId?: number;
   categoryId?: number;
 }

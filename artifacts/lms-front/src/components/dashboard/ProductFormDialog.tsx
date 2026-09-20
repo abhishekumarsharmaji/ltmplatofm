@@ -38,6 +38,13 @@ const schema = z.object({
   coverImageUrl: z.union([z.literal(""), z.string().url("Enter a valid image URL")]).optional(),
   subtype: z.string().optional(),
   publicSlug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens only").min(3, "Use at least 3 characters").max(80).optional().or(z.literal("")),
+  accessPlan: z.enum(["lifetime", "fixed_days", "monthly", "yearly"]),
+  accessDays: z.coerce.number().int().min(1).max(3650).optional(),
+  trialDays: z.coerce.number().int().min(0).max(365),
+}).superRefine((value, context) => {
+  if (value.accessPlan === "fixed_days" && !value.accessDays) {
+    context.addIssue({ code: "custom", path: ["accessDays"], message: "Enter the number of access days" });
+  }
 });
 
 export function ProductFormDialog({ 
@@ -46,7 +53,7 @@ export function ProductFormDialog({
   children 
 }: { 
   type: "course" | "digital"; 
-  product?: { id: number; title: string; description: string; shortSummary?: string | null; coverImageUrl?: string | null; subtype?: string | null; publicSlug?: string | null };
+  product?: { id: number; title: string; description: string; shortSummary?: string | null; coverImageUrl?: string | null; subtype?: string | null; publicSlug?: string | null; accessPlan?: "lifetime" | "fixed_days" | "monthly" | "yearly"; accessDays?: number | null; trialDays?: number };
   children: React.ReactNode 
 }) {
   const [open, setOpen] = useState(false);
@@ -69,6 +76,9 @@ export function ProductFormDialog({
       coverImageUrl: product?.coverImageUrl?.startsWith("http") ? product.coverImageUrl : "",
       subtype: product?.subtype || "",
       publicSlug: product?.publicSlug || "",
+      accessPlan: product?.accessPlan || "lifetime",
+      accessDays: product?.accessDays || undefined,
+      trialDays: product?.trialDays || 0,
     },
   });
 
@@ -81,6 +91,9 @@ export function ProductFormDialog({
         coverImageUrl: product.coverImageUrl?.startsWith("http") ? product.coverImageUrl : "",
         subtype: product.subtype || "",
         publicSlug: product.publicSlug || "",
+        accessPlan: product.accessPlan || "lifetime",
+        accessDays: product.accessDays || undefined,
+        trialDays: product.trialDays || 0,
       });
     }
     setCoverFile(null);
@@ -247,6 +260,30 @@ export function ProductFormDialog({
               </div>
             </>
           )}
+          <div className="space-y-2">
+            <Label className="text-[14px] font-bold text-[#394649]">Access Duration</Label>
+            <Select value={form.watch("accessPlan")} onValueChange={(value) => form.setValue("accessPlan", value as "lifetime" | "fixed_days" | "monthly" | "yearly", { shouldDirty: true })}>
+              <SelectTrigger className="h-11 border-[#E5E5E5] rounded-md text-[14px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="lifetime">Lifetime / one-time access</SelectItem>
+                <SelectItem value="fixed_days">Fixed number of days</SelectItem>
+                <SelectItem value="monthly">Monthly access</SelectItem>
+                <SelectItem value="yearly">Yearly access</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {form.watch("accessPlan") === "fixed_days" && (
+            <div className="space-y-2">
+              <Label htmlFor="accessDays" className="text-[14px] font-bold text-[#394649]">Access Days</Label>
+              <Input id="accessDays" type="number" min={1} max={3650} {...form.register("accessDays")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
+              {form.formState.errors.accessDays && <p className="text-[13px] font-medium text-[#E53E3E]">{form.formState.errors.accessDays.message as string}</p>}
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="trialDays" className="text-[14px] font-bold text-[#394649]">Free Trial Days</Label>
+            <Input id="trialDays" type="number" min={0} max={365} {...form.register("trialDays")} className="h-11 border-[#E5E5E5] rounded-md text-[14px]" />
+            <p className="text-[12px] text-[#737373]">Use 0 for no free trial. Trial access cannot be reset by the same buyer.</p>
+          </div>
           {type === "digital" && (
             <div className="space-y-2">
               <Label htmlFor="subtype" className="text-[14px] font-bold text-[#394649]">Product Type</Label>

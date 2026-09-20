@@ -924,7 +924,7 @@ components:
         description: { type: string, nullable: true }
     Product:
       type: object
-      required: [id, title, description, type, priceMinor, currency, status]
+      required: [id, title, description, type, priceMinor, currency, accessPlan, trialDays, status]
       properties:
         id: { type: integer }
         title: { type: string }
@@ -937,6 +937,9 @@ components:
         type: { type: string, enum: [course, digital] }
         priceMinor: { type: integer, minimum: 0 }
         currency: { type: string }
+        accessPlan: { type: string, enum: [lifetime, fixed_days, monthly, yearly] }
+        accessDays: { type: ["integer", "null"], minimum: 1, maximum: 3650 }
+        trialDays: { type: integer, minimum: 0, maximum: 365 }
         status: { type: string, enum: [draft, published, archived] }
     ProductInput:
       type: object
@@ -952,6 +955,9 @@ components:
         type: { type: string, enum: [course, digital] }
         priceMinor: { type: integer, minimum: 0 }
         currency: { type: string }
+        accessPlan: { type: string, enum: [lifetime, fixed_days, monthly, yearly] }
+        accessDays: { type: integer, minimum: 1, maximum: 3650 }
+        trialDays: { type: integer, minimum: 0, maximum: 365 }
         courseId: { type: integer }
         categoryId: { type: integer }
     DigitalProductSalesPage:

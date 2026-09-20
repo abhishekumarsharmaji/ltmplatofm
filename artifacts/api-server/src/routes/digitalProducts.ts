@@ -2,7 +2,7 @@ import { raw, Router, type IRouter } from "express";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm";
 import {
-  db, digitalFilesTable, digitalProductEntitlementsTable, productsTable, usersTable,
+  db, digitalFilesTable, digitalProductEntitlementsTable, guestDigitalEntitlementsTable, productsTable, usersTable,
 } from "@workspace/db";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewares/auth";
 import {
@@ -10,6 +10,7 @@ import {
   createDigitalFileMultipartUpload, createDigitalFilePartUploadUrl,
   createObjectDownloadUrl, objectFile, saveLocalDigitalFile,
 } from "../lib/objectStorage";
+import { accessExpiry, activeUntil } from "../lib/accessPlans";
 
 const router: IRouter = Router();
 const MAX_FILE_BYTES = 250 * 1024 * 1024;
@@ -53,22 +54,23 @@ const validFile = (filename: unknown, mime: unknown, size: unknown) => {
 const numericId = (value: unknown) => /^\d+$/.test(String(value)) && Number(value) > 0 ? Number(value) : null;
 const validEmail = (value: unknown) => typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) && value.trim().length <= 254;
 const normalizedPhone = (value: unknown) => typeof value === "string" ? value.replace(/[^\d+]/g, "") : "";
-function guestAccessToken(productId: number) {
+function guestAccessToken(productId: number, entitlementId: number) {
   const expiresAt = Math.floor(Date.now() / 1000) + GUEST_ACCESS_TTL_SECONDS;
-  const payload = Buffer.from(JSON.stringify({ productId, expiresAt })).toString("base64url");
+  const payload = Buffer.from(JSON.stringify({ productId, entitlementId, expiresAt })).toString("base64url");
   const signature = createHmac("sha256", process.env.SESSION_SECRET!).update(payload).digest("base64url");
   return { token: `${payload}.${signature}`, expiresAt };
 }
-function guestProductId(token: unknown) {
+function guestAccess(token: unknown) {
   if (typeof token !== "string") return null;
   const [payload, signature] = token.split(".");
   if (!payload || !signature) return null;
   const expected = createHmac("sha256", process.env.SESSION_SECRET!).update(payload).digest("base64url");
   if (signature.length !== expected.length || !timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return null;
   try {
-    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { productId?: unknown; expiresAt?: unknown };
+    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { productId?: unknown; entitlementId?: unknown; expiresAt?: unknown };
     return Number.isInteger(parsed.productId) && Number(parsed.productId) > 0 && Number(parsed.expiresAt) > Math.floor(Date.now() / 1000)
-      ? Number(parsed.productId)
+      && Number.isInteger(parsed.entitlementId) && Number(parsed.entitlementId) > 0
+      ? { productId: Number(parsed.productId), entitlementId: Number(parsed.entitlementId) }
       : null;
   } catch {
     return null;
@@ -124,12 +126,26 @@ router.post("/marketplace/digital-products/:id/guest-access", async (req, res): 
     res.status(400).json({ error: "Enter a valid email address and mobile number" }); return;
   }
   if (product.priceMinor > 0) {
-    res.status(402).json({ error: "Secure online payment is not available yet for this product" }); return;
+    if (product.trialDays <= 0) { res.status(402).json({ error: "Secure online payment is not available yet for this product" }); return; }
   }
   const files = await db.select({ id: digitalFilesTable.id, filename: digitalFilesTable.filename, mimeType: digitalFilesTable.mimeType, sizeBytes: digitalFilesTable.sizeBytes, kind: digitalFilesTable.kind, position: digitalFilesTable.position })
     .from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, product.id), eq(digitalFilesTable.status, "uploaded"))).orderBy(asc(digitalFilesTable.position));
   if (!files.length) { res.status(409).json({ error: "This product does not have an available download yet" }); return; }
-  const access = guestAccessToken(product.id);
+  const email = String(req.body.email).trim().toLowerCase();
+  let [entitlement] = await db.select().from(guestDigitalEntitlementsTable).where(and(
+    eq(guestDigitalEntitlementsTable.productId, product.id),
+    eq(guestDigitalEntitlementsTable.email, email),
+  ));
+  if (!entitlement) {
+    [entitlement] = await db.insert(guestDigitalEntitlementsTable).values({
+      productId: product.id,
+      email,
+      phone,
+      expiresAt: accessExpiry(product.accessPlan, product.accessDays, product.trialDays),
+    }).returning();
+  }
+  if (!activeUntil(entitlement.expiresAt)) { res.status(403).json({ error: "Your access period has expired" }); return; }
+  const access = guestAccessToken(product.id, entitlement.id);
   res.cookie("guest_digital_access", access.token, {
     httpOnly: true,
     sameSite: "lax",
@@ -138,16 +154,19 @@ router.post("/marketplace/digital-products/:id/guest-access", async (req, res): 
     path: "/api/marketplace/digital-products",
   });
   res.setHeader("Cache-Control", "private, no-store");
-  res.status(201).json({ productId: product.id, expiresAt: new Date(access.expiresAt * 1000).toISOString(), files });
+  res.status(201).json({ productId: product.id, sessionExpiresAt: new Date(access.expiresAt * 1000).toISOString(), accessExpiresAt: entitlement.expiresAt?.toISOString() ?? null, files });
 });
 
 router.get("/marketplace/digital-products/:productId/files/:fileId/guest-download", async (req, res): Promise<void> => {
   const productId = numericId(req.params.productId), fileId = numericId(req.params.fileId);
-  if (!productId || !fileId || guestProductId(req.cookies?.guest_digital_access) !== productId) {
+  const access = guestAccess(req.cookies?.guest_digital_access);
+  if (!productId || !fileId || access?.productId !== productId) {
     res.status(403).json({ error: "Guest download access is invalid or has expired" }); return;
   }
+  const [entitlement] = await db.select().from(guestDigitalEntitlementsTable).where(eq(guestDigitalEntitlementsTable.id, access.entitlementId));
+  if (!entitlement || entitlement.productId !== productId || !activeUntil(entitlement.expiresAt)) { res.status(403).json({ error: "Product access has expired" }); return; }
   const [product] = await db.select().from(productsTable).where(and(
-    eq(productsTable.id, productId), eq(productsTable.type, "digital"), eq(productsTable.status, "published"), eq(productsTable.priceMinor, 0),
+    eq(productsTable.id, productId), eq(productsTable.type, "digital"), eq(productsTable.status, "published"),
   ));
   if (!product) { res.status(403).json({ error: "Guest download access is unavailable" }); return; }
   const [file] = await db.select().from(digitalFilesTable).where(and(
@@ -283,8 +302,9 @@ router.post("/student/digital-products/:productId/acquire", requireAuth, require
   if (!productId || !userId) { res.status(400).json({ error: "Invalid product" }); return; }
   const [product] = await db.select().from(productsTable).where(and(eq(productsTable.id, productId), eq(productsTable.type, "digital"), eq(productsTable.status, "published"), eq(productsTable.priceMinor, 0)));
   if (!product) { res.status(404).json({ error: "Published digital product not found" }); return; }
-  const [entitlement] = await db.insert(digitalProductEntitlementsTable).values({ userId, productId }).onConflictDoNothing().returning();
-  res.status(entitlement ? 201 : 200).json({ productId, acquired: true, alreadyOwned: !entitlement });
+  const expiresAt = accessExpiry(product.accessPlan, product.accessDays, product.trialDays);
+  const [entitlement] = await db.insert(digitalProductEntitlementsTable).values({ userId, productId, expiresAt }).onConflictDoNothing().returning();
+  res.status(entitlement ? 201 : 200).json({ productId, acquired: true, alreadyOwned: !entitlement, expiresAt: entitlement?.expiresAt ?? undefined });
 });
 router.get("/student/digital-products", requireAuth, requireRole("student", "creator", "admin"), async (req, res): Promise<void> => {
   const userId = (req as AuthenticatedRequest).canonicalUserId;
@@ -299,7 +319,7 @@ router.get("/student/digital-products/:productId", requireAuth, requireRole("stu
   const [entitlement] = await db.select().from(digitalProductEntitlementsTable).where(and(eq(digitalProductEntitlementsTable.userId, user.canonicalUserId), eq(digitalProductEntitlementsTable.productId, productId)));
   const product = await ownedProduct(productId, user);
   const [published] = await db.select().from(productsTable).where(and(eq(productsTable.id, productId), eq(productsTable.type, "digital")));
-  if (!entitlement && !product && user.canonicalRole !== "admin") { res.status(403).json({ error: "Acquire this product before downloading" }); return; }
+  if ((!entitlement || !activeUntil(entitlement.expiresAt)) && !product && user.canonicalRole !== "admin") { res.status(403).json({ error: entitlement ? "Product access has expired" : "Acquire this product before downloading" }); return; }
   if (!published) { res.status(404).json({ error: "Digital product not found" }); return; }
   const files = await db.select({ id: digitalFilesTable.id, filename: digitalFilesTable.filename, mimeType: digitalFilesTable.mimeType, sizeBytes: digitalFilesTable.sizeBytes, kind: digitalFilesTable.kind, position: digitalFilesTable.position })
     .from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, productId), eq(digitalFilesTable.status, "uploaded"))).orderBy(asc(digitalFilesTable.position));
@@ -310,7 +330,7 @@ router.get("/student/digital-products/:productId/files/:fileId/download", requir
   if (!productId || !fileId || !user.canonicalUserId) { res.status(400).json({ error: "Invalid file" }); return; }
   const [entitlement] = await db.select().from(digitalProductEntitlementsTable).where(and(eq(digitalProductEntitlementsTable.userId, user.canonicalUserId), eq(digitalProductEntitlementsTable.productId, productId)));
   const owner = await ownedProduct(productId, user);
-  if (!entitlement && !owner && user.canonicalRole !== "admin") { res.status(403).json({ error: "Product access required" }); return; }
+  if ((!entitlement || !activeUntil(entitlement.expiresAt)) && !owner && user.canonicalRole !== "admin") { res.status(403).json({ error: entitlement ? "Product access has expired" : "Product access required" }); return; }
   const [file] = await db.select().from(digitalFilesTable).where(and(eq(digitalFilesTable.id, fileId), eq(digitalFilesTable.productId, productId), eq(digitalFilesTable.status, "uploaded")));
   if (!file) { res.status(404).json({ error: "File not found" }); return; }
   const path = file.objectPath ?? file.storageKey;
