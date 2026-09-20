@@ -42,3 +42,17 @@ mtime_ms = 1789923211995
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:8374545a-039d-455a-8203-cca588963f72/c7b8bced-68e3-4fb0-bc29-de3b77b4b9d3/e2dd4d59-225a-466d-81d8-bb810b02f65d"
 storage_version_token = "1789923216186078"
 content_type = "text/markdown"
+
+[[outputs]]
+id = "gVADzELroLpV2Tc-8ugi0"
+uri = "file://research/hosting-report.md"
+type = "text"
+title = "Cheapest LMS Hosting Research"
+description = "Price, renewal, latency, backup and reliability comparison with a final recommendation."
+logical_id = "2d763606-1461-4121-bf23-9f00e6731b59"
+content_hash = "sha256:7f82bc04982d7b9b2a924a72183ec25bfa02885ae7471044191542cd1d23e2b7"
+size = 5298
+mtime_ms = 1789923397058
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:8374545a-039d-455a-8203-cca588963f72/2d763606-1461-4121-bf23-9f00e6731b59/5da254a7-fb9c-4568-84e3-4476511bc06e"
+storage_version_token = "1789923401467210"
+content_type = "text/markdown"
