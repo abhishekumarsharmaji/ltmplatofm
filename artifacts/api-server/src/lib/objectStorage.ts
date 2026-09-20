@@ -1,5 +1,8 @@
 import { Storage } from "@google-cloud/storage";
 import { randomUUID } from "node:crypto";
+import { createReadStream as createFsReadStream } from "node:fs";
+import { stat, unlink } from "node:fs/promises";
+import { resolve } from "node:path";
 import { PassThrough } from "node:stream";
 import {
   AbortMultipartUploadCommand,
@@ -15,6 +18,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const REPLIT_SIDECAR_ENDPOINT = "http://127.0.0.1:1106";
+const LOCAL_STORAGE_ROOT = resolve(process.env.LOCAL_STORAGE_ROOT || "/opt/coreskils/uploads");
 const storage = new Storage({
   credentials: { audience: "replit", subject_token_type: "access_token", token_url: `${REPLIT_SIDECAR_ENDPOINT}/token`, type: "external_account", credential_source: { url: `${REPLIT_SIDECAR_ENDPOINT}/credential`, format: { type: "json", subject_token_field_name: "access_token" } }, universe_domain: "googleapis.com" },
   projectId: "",
@@ -45,6 +49,14 @@ function parse(path: string) {
   const slash = clean.indexOf("/");
   if (slash < 1) throw new Error("Invalid object path");
   return { bucket: clean.slice(0, slash), name: clean.slice(slash + 1) };
+}
+function parseLocal(path: string) {
+  const relativePath = path.slice("local://".length).replace(/^\/+/, "");
+  const fullPath = resolve(LOCAL_STORAGE_ROOT, relativePath);
+  if (!relativePath || (fullPath !== LOCAL_STORAGE_ROOT && !fullPath.startsWith(`${LOCAL_STORAGE_ROOT}/`))) {
+    throw new Error("Invalid local object path");
+  }
+  return fullPath;
 }
 async function createUploadUrl(folder: string): Promise<{ url: string; objectPath: string }> {
   const { client, bucket } = r2Config();
@@ -128,6 +140,27 @@ export async function createObjectDownloadUrl(objectPath: string, filename: stri
   }), { expiresIn: expiresInSeconds });
 }
 export function objectFile(objectPath: string) {
+  if (objectPath.startsWith("local://")) {
+    const filePath = parseLocal(objectPath);
+    return {
+      async getMetadata() {
+        const metadata = await stat(filePath);
+        return [{ size: metadata.size, contentType: undefined }];
+      },
+      createReadStream(options?: { start?: number; end?: number }) {
+        return createFsReadStream(filePath, options?.start !== undefined
+          ? { start: options.start, end: options.end }
+          : undefined);
+      },
+      async delete(_options?: { ignoreNotFound?: boolean }) {
+        await unlink(filePath).catch((error: NodeJS.ErrnoException) => {
+          if (_options?.ignoreNotFound && error.code === "ENOENT") return;
+          throw error;
+        });
+        return [{}];
+      },
+    };
+  }
   if (objectPath.startsWith("r2://")) {
     const { client } = r2Config();
     const { bucket, name } = parseR2(objectPath);
