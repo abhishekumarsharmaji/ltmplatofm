@@ -11,5 +11,5 @@ export type DigitalProductReadinessChecks = {
   description: boolean;
   subtype: boolean;
   files: boolean;
-  free: boolean;
+  pricing: boolean;
 };

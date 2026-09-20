@@ -41,6 +41,7 @@ const schema = z.object({
   accessPlan: z.enum(["lifetime", "fixed_days", "monthly", "yearly"]),
   accessDays: z.coerce.number().int().min(1).max(3650).optional(),
   trialDays: z.coerce.number().int().min(0).max(365),
+  priceRupees: z.coerce.number().min(0, "Price cannot be negative").max(10_000_000, "Price is too high"),
 }).superRefine((value, context) => {
   if (value.accessPlan === "fixed_days" && !value.accessDays) {
     context.addIssue({ code: "custom", path: ["accessDays"], message: "Enter the number of access days" });
@@ -53,7 +54,7 @@ export function ProductFormDialog({
   children 
 }: { 
   type: "course" | "digital"; 
-  product?: { id: number; title: string; description: string; shortSummary?: string | null; coverImageUrl?: string | null; subtype?: string | null; publicSlug?: string | null; accessPlan?: "lifetime" | "fixed_days" | "monthly" | "yearly"; accessDays?: number | null; trialDays?: number };
+  product?: { id: number; title: string; description: string; shortSummary?: string | null; coverImageUrl?: string | null; subtype?: string | null; publicSlug?: string | null; accessPlan?: "lifetime" | "fixed_days" | "monthly" | "yearly"; accessDays?: number | null; trialDays?: number; priceMinor?: number; currency?: string };
   children: React.ReactNode 
 }) {
   const [open, setOpen] = useState(false);
@@ -79,6 +80,7 @@ export function ProductFormDialog({
       accessPlan: product?.accessPlan || "lifetime",
       accessDays: product?.accessDays || undefined,
       trialDays: product?.trialDays || 0,
+      priceRupees: (product?.priceMinor || 0) / 100,
     },
   });
 
@@ -94,6 +96,7 @@ export function ProductFormDialog({
         accessPlan: product.accessPlan || "lifetime",
         accessDays: product.accessDays || undefined,
         trialDays: product.trialDays || 0,
+        priceRupees: (product.priceMinor || 0) / 100,
       });
     }
     setCoverFile(null);
@@ -131,11 +134,12 @@ export function ProductFormDialog({
   };
 
   const onSubmit = form.handleSubmit((data) => {
+    const { priceRupees, ...productData } = data;
     const submitData = {
-      ...data,
-      priceMinor: 0,
+      ...productData,
+      priceMinor: type === "digital" ? Math.round(priceRupees * 100) : 0,
       type,
-      currency: "usd",
+      currency: type === "digital" ? "INR" : "USD",
     };
 
     if (product) {
@@ -260,6 +264,25 @@ export function ProductFormDialog({
               </div>
             </>
           )}
+          {type === "digital" && (
+            <div className="space-y-2">
+              <Label htmlFor="priceRupees" className="text-[14px] font-bold text-[#394649]">Price (INR)</Label>
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center font-semibold text-[#52635B]">₹</span>
+                <Input
+                  id="priceRupees"
+                  type="number"
+                  min={0}
+                  max={10_000_000}
+                  step="0.01"
+                  {...form.register("priceRupees")}
+                  className="h-11 rounded-md border-[#E5E5E5] pl-8 text-[14px]"
+                />
+              </div>
+              {form.formState.errors.priceRupees && <p className="text-[13px] font-medium text-[#E53E3E]">{form.formState.errors.priceRupees.message as string}</p>}
+              <p className="text-[12px] text-[#737373]">Use ₹0 for a free product. Paid products are collected securely through ZapUPI.</p>
+            </div>
+          )}
           <div className="space-y-2">
             <Label className="text-[14px] font-bold text-[#394649]">Access Duration</Label>
             <Select value={form.watch("accessPlan")} onValueChange={(value) => form.setValue("accessPlan", value as "lifetime" | "fixed_days" | "monthly" | "yearly", { shouldDirty: true })}>
@@ -315,9 +338,11 @@ export function ProductFormDialog({
               </Select>
             </div>
           )}
-          <div className="rounded-lg border border-[#E5E5E5] bg-[#FAFAFA] p-4 text-[13px] text-[#4D4D4D] leading-relaxed">
-            Digital products are free to acquire in this version of CoreSkils.
-          </div>
+          {type === "digital" && (
+            <div className="rounded-lg border border-[#CDE7D9] bg-[#F2FBF6] p-4 text-[13px] leading-relaxed text-[#315B49]">
+              Free products unlock instantly. Paid products unlock only after ZapUPI confirms the payment on the server.
+            </div>
+          )}
           <div className="sticky bottom-0 -mx-4 sm:-mx-6 -mb-4 sm:-mb-6 border-t border-[#E5E5E5] bg-white px-4 sm:px-6 py-4">
             <Button type="submit" disabled={isPending} className="w-full h-11 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[14px] shadow-[0_4px_14px_rgba(21,207,116,0.25)]">
               {isPending ? "Saving..." : "Save"}

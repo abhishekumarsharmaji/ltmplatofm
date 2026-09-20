@@ -433,7 +433,8 @@ router.get("/creator/digital-products/:productId/readiness", requireAuth, requir
   const [count] = await db.select({ count: sql<number>`count(*)::int` }).from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, product.id), eq(digitalFilesTable.status, "uploaded")));
   const checks = {
     title: product.title.trim().length > 1, description: product.description.trim().length > 0,
-    subtype: !!product.subtype, files: Number(count.count) > 0, free: product.priceMinor === 0,
+    subtype: !!product.subtype, files: Number(count.count) > 0,
+    pricing: product.priceMinor >= 0 && product.currency.toUpperCase() === "INR",
   };
   res.json({ ready: Object.values(checks).every(Boolean), checks });
 });

@@ -2245,7 +2245,7 @@ export const GetDigitalProductReadinessResponse = zod.object({
   "description": zod.boolean(),
   "subtype": zod.boolean(),
   "files": zod.boolean(),
-  "free": zod.boolean()
+  "pricing": zod.boolean()
 })
 })
 

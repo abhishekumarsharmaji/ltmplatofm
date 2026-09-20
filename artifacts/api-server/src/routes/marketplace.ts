@@ -159,7 +159,6 @@ router.post("/creator/products", auth, requireRole("creator", "admin"), async (r
   const creatorId = await userOf(requestUser); if (!creatorId) { res.status(409).json({ error: "Creator profile unavailable" }); return; }
   const { title, description = "", shortSummary = null, subtype = "other", publicSlug: requestedSlug, coverImageUrl = null, salesPage, type = "digital", priceMinor: requestedPrice = 0, currency = "USD", courseId, categoryId, accessPlan = "lifetime", accessDays = null, trialDays = 0 } = req.body ?? {};
   const digitalSubtypes = ["ebook", "guide", "workbook", "checklist", "planner", "template", "spreadsheet", "presentation", "design_asset", "photo_preset", "audio", "video", "code", "plugin", "prompt_pack", "toolkit", "document", "bundle", "other"];
-  if (type === "digital" && requestedPrice !== undefined && requestedPrice !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
   const priceMinor = type === "course" ? 0 : requestedPrice;
   if (typeof title !== "string" || title.length < 2 || !["course", "digital"].includes(type) || !Number.isInteger(priceMinor) || priceMinor < 0) {
     res.status(400).json({ error: "Invalid product payload" }); return;
@@ -204,7 +203,7 @@ router.post("/creator/products", auth, requireRole("creator", "admin"), async (r
       coverImageObjectPath: null, type, priceMinor,
        accessPlan, accessDays: accessPlan === "fixed_days" ? accessDays : null, trialDays,
       salesPage: type === "digital" ? normalizeSalesPage(salesPage) : {},
-      currency: String(currency).toUpperCase(), courseId: linkedCourseId, categoryId: id(categoryId) ?? undefined,
+      currency: type === "digital" ? "INR" : String(currency).toUpperCase(), courseId: linkedCourseId, categoryId: id(categoryId) ?? undefined,
     }).returning();
     return created;
   });
@@ -220,7 +219,8 @@ router.patch("/creator/products/:id", auth, requireRole("creator", "admin"), asy
   const [existing] = await db.select().from(productsTable).where(eq(productsTable.id, productId));
   if (!existing || ((req as AuthenticatedRequest).user!.role !== "admin" && existing.creatorId !== creatorId)) { res.status(404).json({ error: "Product not found" }); return; }
     const allowed = ["title", "description", "shortSummary", "subtype", "publicSlug", "coverImageUrl", "salesPage", "priceMinor", "currency", "categoryId", "accessPlan", "accessDays", "trialDays"] as const;
-   if (existing.type === "digital" && req.body?.priceMinor !== undefined && req.body.priceMinor !== 0) { res.status(400).json({ error: "Digital products are free in this phase" }); return; }
+   if (req.body?.priceMinor !== undefined && (!Number.isInteger(req.body.priceMinor) || req.body.priceMinor < 0)) { res.status(400).json({ error: "Price must be a valid non-negative amount" }); return; }
+   if (existing.type === "digital" && req.body?.currency !== undefined && String(req.body.currency).toUpperCase() !== "INR") { res.status(400).json({ error: "Digital-product payments currently support INR only" }); return; }
    if (existing.type === "digital" && req.body?.subtype !== undefined && !["ebook", "guide", "workbook", "checklist", "planner", "template", "spreadsheet", "presentation", "design_asset", "photo_preset", "audio", "video", "code", "plugin", "prompt_pack", "toolkit", "document", "bundle", "other"].includes(req.body.subtype)) { res.status(400).json({ error: "Invalid digital product type" }); return; }
     const nextPlan = req.body?.accessPlan ?? existing.accessPlan;
     const nextDays = req.body?.accessDays ?? existing.accessDays;
@@ -241,7 +241,7 @@ router.patch("/creator/products/:id", auth, requireRole("creator", "admin"), asy
     }
   const patch = Object.fromEntries(allowed.filter((key) => req.body?.[key] !== undefined).map((key) => [
     key,
-     key === "categoryId" ? id(req.body[key]) : key === "salesPage" ? normalizeSalesPage(req.body[key]) : key === "accessDays" && nextPlan !== "fixed_days" ? null : req.body[key],
+      key === "categoryId" ? id(req.body[key]) : key === "salesPage" ? normalizeSalesPage(req.body[key]) : key === "accessDays" && nextPlan !== "fixed_days" ? null : key === "currency" && existing.type === "digital" ? "INR" : req.body[key],
   ]));
   const [row] = await db.update(productsTable).set({ ...patch, updatedAt: new Date() }).where(eq(productsTable.id, productId)).returning(); res.json(safeProduct(row));
 });
@@ -251,7 +251,7 @@ router.post("/creator/products/:id/publish", auth, requireRole("creator", "admin
   const [candidate] = await db.select().from(productsTable).where(where);
   if (!candidate) { res.status(404).json({ error: "Product not found" }); return; }
   if (candidate.type === "digital") {
-    if (!candidate.title.trim() || !candidate.description.trim() || !candidate.subtype || candidate.priceMinor !== 0) { res.status(422).json({ error: "Digital product needs a title, description, subtype, and free price" }); return; }
+    if (!candidate.title.trim() || !candidate.description.trim() || !candidate.subtype || candidate.priceMinor < 0 || candidate.currency !== "INR") { res.status(422).json({ error: "Digital product needs a title, description, subtype, and a valid INR price" }); return; }
     const [file] = await db.select({ id: digitalFilesTable.id }).from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, productId), eq(digitalFilesTable.status, "uploaded"))).limit(1);
     if (!file) { res.status(422).json({ error: "Add at least one uploaded digital file before publishing" }); return; }
   }

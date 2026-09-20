@@ -1131,13 +1131,13 @@ components:
         ready: { type: boolean }
         checks:
           type: object
-          required: [title, description, subtype, files, free]
+          required: [title, description, subtype, files, pricing]
           properties:
             title: { type: boolean }
             description: { type: boolean }
             subtype: { type: boolean }
             files: { type: boolean }
-            free: { type: boolean }
+            pricing: { type: boolean }
     AdminCourseInput:
       type: object
       required: [creatorId, title, description, priceMinor, currency]
