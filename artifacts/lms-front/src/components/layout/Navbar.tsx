@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTranslations } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
-import { LayoutDashboard, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, X, ChevronRight } from "lucide-react";
 import { getGetSessionQueryKey, logout, useGetSession } from "@workspace/api-client-react";
 
 export function Navbar() {
@@ -21,6 +21,15 @@ export function Navbar() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const user = session?.authenticated ? session.user : null;
   const dashboardHref = `/dashboard/${user?.role || "student"}`;
@@ -40,48 +49,50 @@ export function Navbar() {
 
   const NavLinks = ({ onClick }: { onClick?: () => void }) => (
     <>
-      <Link href="/" onClick={onClick} className="block py-3 text-[16px] font-semibold text-[#394649] transition-colors hover:text-primary lg:py-0">
+      <Link href="/" onClick={onClick} className="block py-3 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 lg:py-0">
         {t("home")}
       </Link>
-      <Link href="/products" onClick={onClick} className="block py-3 text-[16px] font-semibold text-[#394649] transition-colors hover:text-primary lg:py-0">
+      <Link href="/products" onClick={onClick} className="block py-3 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 lg:py-0">
         Digital products
       </Link>
-      <Link href="/about" onClick={onClick} className="block py-3 text-[16px] font-semibold text-[#394649] transition-colors hover:text-primary lg:py-0">
+      <Link href="/about" onClick={onClick} className="block py-3 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 lg:py-0">
         {t("about")}
       </Link>
-      <Link href="/contact" onClick={onClick} className="block py-3 text-[16px] font-semibold text-[#394649] transition-colors hover:text-primary lg:py-0">
+      <Link href="/contact" onClick={onClick} className="block py-3 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 lg:py-0">
         Contact
       </Link>
     </>
   );
 
   return (
-    <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-100">
-      <div className="container mx-auto flex h-20 items-center justify-between px-4 lg:px-8">
+    <nav className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-md border-b border-slate-200/50 shadow-sm' : 'bg-white/0 border-b border-transparent'}`}>
+      <div className="container mx-auto flex h-20 items-center justify-between px-4 lg:px-8 max-w-7xl">
         
         {/* Brand */}
         <div className="flex items-center">
-          <Link href="/" className="flex items-center space-x-2 shrink-0">
-            <img src={`${import.meta.env.BASE_URL}brand/logo-mark.svg`} alt="CoreSkils" className="w-8 h-8" />
-            <span className="font-bold text-xl text-black tracking-tight hidden sm:block">
+          <Link href="/" className="flex items-center space-x-2 shrink-0 group">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+              <img src={`${import.meta.env.BASE_URL}brand/logo-mark.svg`} alt="CoreSkils" className="w-5 h-5 brightness-0 invert" />
+            </div>
+            <span className="font-heading font-bold text-xl text-slate-900 tracking-tight hidden sm:block">
               CoreSkils
             </span>
           </Link>
         </div>
 
-        {/* Center/Right Links - Desktop */}
-        <div className="hidden items-center space-x-9 lg:flex">
+        {/* Center Links - Desktop */}
+        <div className="hidden lg:flex items-center justify-center absolute left-1/2 -translate-x-1/2 space-x-8">
           <NavLinks />
         </div>
 
         {/* Right Actions */}
-        <div className="ml-6 flex shrink-0 items-center space-x-4 lg:ml-8">
+        <div className="flex shrink-0 items-center space-x-4">
           {isPending ? (
-            <div className="h-9 w-24 rounded-full bg-muted animate-pulse" aria-hidden="true" />
+            <div className="h-9 w-24 rounded-full bg-slate-100 animate-pulse" aria-hidden="true" />
           ) : user ? (
             <>
               <Link href={dashboardHref}>
-                <span className="hidden text-[14px] font-medium text-[#4D4D4D] hover:text-primary transition-colors cursor-pointer sm:inline-block" data-testid="link-dashboard">
+                <span className="hidden text-sm font-medium text-slate-600 hover:text-primary transition-colors cursor-pointer sm:inline-block" data-testid="link-dashboard">
                   {t("dashboard")}
                 </span>
               </Link>
@@ -89,25 +100,25 @@ export function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm ring-2 ring-white hover:bg-[#10A364] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm ring-2 ring-white hover:bg-slate-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     aria-label={t("accountMenu")}
                     data-testid="button-account-menu"
                   >
                     {userInitial}
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 mt-2">
-                  <DropdownMenuLabel className="font-normal">
-                    <p className="text-sm font-medium text-foreground truncate">{userName}</p>
-                    {user.email && <p className="text-xs text-muted-foreground truncate">{user.email}</p>}
+                <DropdownMenuContent align="end" className="w-56 mt-2 rounded-xl">
+                  <DropdownMenuLabel className="font-normal p-3">
+                    <p className="text-sm font-bold text-slate-900 truncate">{userName}</p>
+                    {user.email && <p className="text-xs text-slate-500 truncate mt-0.5">{user.email}</p>}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={() => setLocation(dashboardHref)} data-testid="menu-dashboard" className="cursor-pointer">
+                  <DropdownMenuItem onSelect={() => setLocation(dashboardHref)} data-testid="menu-dashboard" className="cursor-pointer py-2.5">
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     {t("dashboard")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={() => void handleLogout()} data-testid="menu-logout" className="cursor-pointer text-red-600 focus:text-red-600">
+                  <DropdownMenuItem onSelect={() => void handleLogout()} data-testid="menu-logout" className="cursor-pointer py-2.5 text-red-600 focus:text-red-600">
                     <LogOut className="w-4 h-4 mr-2" />
                     {t("logout")}
                   </DropdownMenuItem>
@@ -116,18 +127,18 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/auth/login" className="hidden text-[16px] font-semibold text-[#394649] transition-colors hover:text-primary lg:block">
+              <Link href="/auth/login" className="hidden text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 lg:block">
                 {t("login")}
               </Link>
-              <Link href="/auth/sign-up" data-testid="link-start-free" className="hidden h-12 items-center justify-center rounded-md bg-primary px-8 text-[16px] font-semibold text-white shadow-[0_10px_24px_rgba(21,207,116,0.35)] transition-all hover:bg-[#10A364] sm:inline-flex">
-                  {t("join")}
+              <Link href="/auth/sign-up" data-testid="link-start-free" className="hidden h-10 items-center justify-center rounded-lg bg-[#0F1C16] px-5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-slate-800 hover:-translate-y-0.5 sm:inline-flex group">
+                  {t("join")} <ChevronRight className="w-3.5 h-3.5 ml-1 opacity-70 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </>
           )}
 
           {/* Mobile Menu Toggle */}
           <button 
-            className="lg:hidden p-2 text-[#4D4D4D]" 
+            className="lg:hidden p-2 text-slate-600 hover:text-slate-900 transition-colors" 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
@@ -139,16 +150,16 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-100 bg-white p-4 space-y-4 shadow-lg absolute w-full left-0">
-          <div className="flex flex-col pb-4">
+        <div className="lg:hidden border-t border-slate-100 bg-white p-4 shadow-lg absolute w-full left-0 animate-fade-in-up">
+          <div className="flex flex-col pb-4 max-w-sm mx-auto">
             <NavLinks onClick={() => setIsMobileMenuOpen(false)} />
             {!user && (
               <>
-                <div className="h-px bg-gray-100 w-full my-2"></div>
-                <Link href="/auth/login" className="py-3 text-[16px] font-semibold text-[#394649]" onClick={() => setIsMobileMenuOpen(false)}>
+                <div className="h-px bg-slate-100 w-full my-4"></div>
+                <Link href="/auth/login" className="py-3 text-sm font-semibold text-slate-600" onClick={() => setIsMobileMenuOpen(false)}>
                   {t("login")}
                 </Link>
-                <Link href="/auth/sign-up" onClick={() => setIsMobileMenuOpen(false)} className="inline-flex h-12 w-full items-center justify-center rounded-md bg-primary text-[16px] font-semibold text-white shadow-[0_10px_24px_rgba(21,207,116,0.35)] hover:bg-[#10A364]">
+                <Link href="/auth/sign-up" onClick={() => setIsMobileMenuOpen(false)} className="mt-2 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#0F1C16] text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
                     {t("join")}
                 </Link>
               </>
