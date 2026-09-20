@@ -40,7 +40,7 @@ export default function Home() {
                 </h1>
                 
                 <p className="text-lg sm:text-xl text-slate-600 mb-10 leading-relaxed animate-fade-in-up delay-200">
-                  CoreSkils provides the infrastructure for experts to publish practical courses, downloadable files, and live learning experiences. No technical headache. Just your expertise, monetized.
+                  CoreSkils provides the infrastructure for experts to publish practical courses, downloadable files, and live learning experiences. No technical headache. Just your expertise, organized and delivered.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up delay-300">
@@ -79,8 +79,8 @@ export default function Home() {
                        <CheckCircle2 className="w-5 h-5 text-primary" />
                      </div>
                      <div>
-                       <div className="text-sm font-bold text-slate-900">Zero Setup</div>
-                       <div className="text-xs text-slate-500">Ready in minutes</div>
+                        <div className="text-sm font-bold text-slate-900">One Workspace</div>
+                        <div className="text-xs text-slate-500">Create and deliver</div>
                      </div>
                    </div>
                  </div>
@@ -127,8 +127,8 @@ export default function Home() {
                       <FileArchive className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">Sell Digital Toolkits</h3>
-                      <p className="text-slate-600 leading-relaxed">Upload templates, guides, checklists, and ebooks. We handle the secure digital delivery, licensing clarity, and seamless access for your buyers.</p>
+                      <h3 className="text-xl font-bold text-slate-900 mb-2">Publish Digital Toolkits</h3>
+                      <p className="text-slate-600 leading-relaxed">Upload templates, guides, checklists, and ebooks with protected delivery, clear access durations, and controlled downloads.</p>
                     </div>
                   </div>
                   
@@ -138,7 +138,7 @@ export default function Home() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-slate-900 mb-2">Host Live Classes</h3>
-                      <p className="text-slate-600 leading-relaxed">Schedule live sessions, integrate with your favorite streaming tools, and build a premium library of recorded masterclasses.</p>
+                      <p className="text-slate-600 leading-relaxed">Schedule live sessions, teach inside the CoreSkils classroom, and organize course resources alongside every learning experience.</p>
                     </div>
                   </div>
                 </div>
