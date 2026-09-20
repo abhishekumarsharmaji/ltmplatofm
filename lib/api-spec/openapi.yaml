@@ -1358,10 +1358,11 @@ components:
         value: { type: string }
     SalesSummary:
       type: object
-      required: [orderCount, grossMinor, orders]
+      required: [orderCount, grossMinor, currency, orders]
       properties:
         orderCount: { type: integer }
         grossMinor: { type: integer }
+        currency: { type: string }
         orders: { type: array, items: { type: object } }
     LiveClassInput:
       type: object

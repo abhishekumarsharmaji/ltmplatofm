@@ -10,5 +10,6 @@ import type { SalesSummaryOrdersItem } from './salesSummaryOrdersItem';
 export interface SalesSummary {
   orderCount: number;
   grossMinor: number;
+  currency: string;
   orders: SalesSummaryOrdersItem[];
 }

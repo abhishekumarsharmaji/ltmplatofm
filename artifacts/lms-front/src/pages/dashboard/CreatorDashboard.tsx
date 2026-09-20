@@ -19,6 +19,14 @@ const CreatorLiveClassesStandalone = lazy(() => import("@/components/dashboard/L
 const LiveClassroom = lazy(() => import("@/components/dashboard/LiveClassroom").then((module) => ({ default: module.LiveClassroom })));
 const CreatorProductManage = lazy(() => import("@/components/dashboard/digital-products/CreatorProductManage").then((module) => ({ default: module.CreatorProductManage })));
 
+function formatMoney(amountMinor: number, currency = "INR") {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  }).format(amountMinor / 100);
+}
+
 function SectionFallback() {
   return <div className="flex min-h-[40vh] items-center justify-center text-sm text-[#737373]">Loading workspace…</div>;
 }
@@ -107,7 +115,7 @@ function Overview() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Total Revenue", value: salesLoading ? "..." : `$${((sales?.grossMinor || 0) / 100).toFixed(2)}`, icon: DollarSign, color: "text-[#15CF74]", bg: "bg-[#E3F9EF]" },
+          { label: "Total Revenue", value: salesLoading ? "..." : formatMoney(sales?.grossMinor || 0, sales?.currency), icon: DollarSign, color: "text-[#15CF74]", bg: "bg-[#E3F9EF]" },
           { label: "Total Orders", value: salesLoading ? "..." : (sales?.orderCount || 0).toString(), icon: Package, color: "text-[#224EA1]", bg: "bg-[#EAEFF8]" },
           { label: "Active Courses", value: productsLoading ? "..." : courseCount.toString(), icon: BookOpen, color: "text-[#704FE6]", bg: "bg-[#F1EEFC]" },
           { label: "Products", value: productsLoading ? "..." : (products?.length || 0).toString(), icon: Package, color: "text-[#FE543D]", bg: "bg-[#FFEFEB]" },
@@ -148,7 +156,7 @@ function Overview() {
                       <p className="text-[13px] text-[#4D4D4D]">{order.productName}</p>
                     </div>
                   </div>
-                  <span className="text-[14px] font-bold text-primary">+${((order.amountMinor || 0) / 100).toFixed(2)}</span>
+                  <span className="text-[14px] font-bold text-primary">+{formatMoney(order.amountMinor || 0, order.currency || sales.currency)}</span>
                 </div>
               ))
             )}
@@ -332,7 +340,7 @@ function Sales() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-[#515151] border-none p-8 rounded-xl shadow-sm flex flex-col justify-center">
               <p className="text-white text-[16px] font-bold mb-2">Total Revenue</p>
-              <h3 className="text-[40px] font-bold text-primary leading-none">${((sales.grossMinor || 0) / 100).toFixed(2)}</h3>
+              <h3 className="text-[40px] font-bold text-primary leading-none">{formatMoney(sales.grossMinor || 0, sales.currency)}</h3>
             </div>
             <div className="bg-white border border-[#E5E5E5] p-8 rounded-xl shadow-sm flex flex-col justify-center">
               <p className="text-[#394649] text-[16px] font-bold mb-2">Total Orders</p>
@@ -341,7 +349,7 @@ function Sales() {
             <div className="bg-white border border-[#E5E5E5] p-8 rounded-xl shadow-sm flex flex-col justify-center">
               <p className="text-[#394649] text-[16px] font-bold mb-2">Avg. Order Value</p>
               <h3 className="text-[40px] font-bold text-black leading-none">
-                ${sales.orderCount ? ((sales.grossMinor || 0) / 100 / sales.orderCount).toFixed(2) : "0.00"}
+                {formatMoney(sales.orderCount ? Math.round((sales.grossMinor || 0) / sales.orderCount) : 0, sales.currency)}
               </h3>
             </div>
           </div>
@@ -366,7 +374,7 @@ function Sales() {
                           <td className="p-4 text-[14px] text-[#4D4D4D]">{order.createdAt ? new Date(String(order.createdAt)).toLocaleDateString() : '-'}</td>
                           <td className="p-4 font-bold text-[14px]">{order.userName}</td>
                           <td className="p-4 text-[14px] text-[#4D4D4D]">{order.productName}</td>
-                          <td className="p-4 font-bold text-[14px] text-right text-primary">+${((order.amountMinor || 0) / 100).toFixed(2)}</td>
+                           <td className="p-4 font-bold text-[14px] text-right text-primary">+{formatMoney(order.amountMinor || 0, order.currency || sales.currency)}</td>
                         </tr>
                       ))
                     ) : (

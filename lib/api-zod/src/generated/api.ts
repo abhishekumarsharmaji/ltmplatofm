@@ -1358,6 +1358,7 @@ export const DeleteCreatorCourseLessonResponse = zod.void()
 export const CreatorSalesSummaryResponse = zod.object({
   "orderCount": zod.number().int(),
   "grossMinor": zod.number().int(),
+  "currency": zod.string(),
   "orders": zod.array(zod.object({
 
 }).passthrough())

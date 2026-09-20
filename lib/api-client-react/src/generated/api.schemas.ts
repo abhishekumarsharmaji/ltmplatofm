@@ -819,6 +819,7 @@ export type SalesSummaryOrdersItem = { [key: string]: unknown };
 export interface SalesSummary {
   orderCount: number;
   grossMinor: number;
+  currency: string;
   orders: SalesSummaryOrdersItem[];
 }
 

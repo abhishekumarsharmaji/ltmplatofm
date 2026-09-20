@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { and, eq, ilike, desc, inArray, sql } from "drizzle-orm";
 import {
   db, categoriesTable, coursesTable, courseModulesTable, lessonsTable, lessonAssetsTable, productsTable, usersTable, enrollmentsTable, lmsUsersTable, creatorProfilesTable,
-  ordersTable, orderItemsTable, wishlistTable, platformSettingsTable, digitalFilesTable,
+  ordersTable, orderItemsTable, wishlistTable, platformSettingsTable, digitalFilesTable, digitalProductPaymentsTable,
 } from "@workspace/db";
 import { requireAuth, requireRole, requireSuperAdmin, effectiveRole, isSuperAdminEmail, type AuthenticatedRequest } from "../middlewares/auth";
 import { createCreatorAvatarUploadUrl, objectFile } from "../lib/objectStorage";
@@ -368,33 +368,37 @@ router.post("/creator/products/:id/publish", auth, requireRole("creator", "admin
 });
 router.get("/creator/sales-summary", auth, requireRole("creator", "admin"), async (req, res) => {
   const creatorId = await userOf(req as AuthenticatedRequest);
-  if (!creatorId) { res.json({ orderCount: 0, grossMinor: 0, orders: [] }); return; }
-  const creatorProducts = and(eq(productsTable.id, orderItemsTable.productId), eq(productsTable.creatorId, creatorId));
+  if (!creatorId) { res.json({ orderCount: 0, grossMinor: 0, currency: "INR", orders: [] }); return; }
   const [summary] = await db.select({
-    orderCount: sql<string>`count(distinct ${ordersTable.id})::bigint`,
-    grossMinor: sql<string>`coalesce(sum(${orderItemsTable.unitPriceMinor}::bigint * ${orderItemsTable.quantity}::bigint), 0)::bigint`,
-  }).from(ordersTable)
-    .innerJoin(orderItemsTable, eq(orderItemsTable.orderId, ordersTable.id))
-    .innerJoin(productsTable, creatorProducts)
-    .where(eq(ordersTable.status, "paid"));
+    orderCount: sql<string>`count(${digitalProductPaymentsTable.id})::bigint`,
+    grossMinor: sql<string>`coalesce(sum(${digitalProductPaymentsTable.amountMinor}::bigint), 0)::bigint`,
+  }).from(digitalProductPaymentsTable)
+    .innerJoin(productsTable, and(
+      eq(productsTable.id, digitalProductPaymentsTable.productId),
+      eq(productsTable.creatorId, creatorId),
+    ))
+    .where(eq(digitalProductPaymentsTable.status, "succeeded"));
   const orders = await db.select({
-    orderId: ordersTable.id,
-    amountMinor: sql<string>`(${orderItemsTable.unitPriceMinor}::bigint * ${orderItemsTable.quantity}::bigint)::bigint`,
-    status: ordersTable.status,
-    userName: usersTable.name,
+    orderId: digitalProductPaymentsTable.orderId,
+    amountMinor: digitalProductPaymentsTable.amountMinor,
+    currency: digitalProductPaymentsTable.currency,
+    status: digitalProductPaymentsTable.status,
+    userName: digitalProductPaymentsTable.email,
     productName: productsTable.title,
-    createdAt: ordersTable.createdAt,
-  }).from(ordersTable)
-    .innerJoin(usersTable, eq(usersTable.id, ordersTable.userId))
-    .innerJoin(orderItemsTable, eq(orderItemsTable.orderId, ordersTable.id))
-    .innerJoin(productsTable, creatorProducts)
-    .where(eq(ordersTable.status, "paid"))
-    .orderBy(desc(ordersTable.createdAt))
+    createdAt: sql<Date>`coalesce(${digitalProductPaymentsTable.completedAt}, ${digitalProductPaymentsTable.createdAt})`,
+  }).from(digitalProductPaymentsTable)
+    .innerJoin(productsTable, and(
+      eq(productsTable.id, digitalProductPaymentsTable.productId),
+      eq(productsTable.creatorId, creatorId),
+    ))
+    .where(eq(digitalProductPaymentsTable.status, "succeeded"))
+    .orderBy(desc(sql`coalesce(${digitalProductPaymentsTable.completedAt}, ${digitalProductPaymentsTable.createdAt})`))
     .limit(100);
   res.json({
     orderCount: Number(summary?.orderCount ?? 0),
     grossMinor: Number(summary?.grossMinor ?? 0),
-    orders: orders.map((order) => ({ ...order, amountMinor: Number(order.amountMinor) })),
+    currency: "INR",
+    orders,
   });
 });
 
