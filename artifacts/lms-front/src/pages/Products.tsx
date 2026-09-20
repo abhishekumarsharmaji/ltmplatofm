@@ -1,8 +1,20 @@
 import { Link } from "wouter";
-import { CheckCircle2, Download } from "lucide-react";
+import { FileBox, Package } from "lucide-react";
+import { useListDigitalProducts } from "@workspace/api-client-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 
+function productPrice(priceMinor: number, currency: string) {
+  if (priceMinor === 0) return "Free";
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: currency || "INR",
+    maximumFractionDigits: 2,
+  }).format(priceMinor / 100);
+}
+
 export default function Products() {
+  const { data: products, isLoading, isError } = useListDigitalProducts();
+
   return (
     <PublicLayout>
       <main className="min-h-screen bg-[#F7FAF8] pb-24 pt-28 sm:pt-36">
@@ -15,40 +27,64 @@ export default function Products() {
             </p>
           </header>
 
-          <section className="mx-auto mt-14 grid max-w-5xl overflow-hidden rounded-2xl border border-[#C9DED3] bg-white shadow-[0_20px_60px_rgba(20,80,55,.1)] md:grid-cols-[.82fr_1.18fr]">
-            <img src={`${import.meta.env.BASE_URL}products/freelancing-toolkit-cover.svg`} alt="Freelancing Client Acquisition Toolkit" className="h-full w-full bg-[#0B3027] object-cover" />
-            <div className="flex flex-col p-7 sm:p-10">
-              <span className="w-fit rounded-full bg-[#E4F8EE] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[#087B46]">Digital toolkit</span>
-              <h2 className="mt-5 text-3xl font-bold leading-tight text-black">Freelancing Client Acquisition Toolkit</h2>
-              <p className="mt-4 leading-7 text-[#52635C]">Practical outreach scripts, proposal guidance, discovery questions, follow-up sequences, pricing worksheets, and an onboarding checklist.</p>
-              <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-                {["PDF guide and templates", "Single-user licence", "Electronic delivery", "Email support"].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm font-semibold text-[#31443D]"><CheckCircle2 className="h-4 w-4 text-[#0B9E59]" />{item}</li>
-                ))}
-              </ul>
-              <div className="mt-8 border-t border-[#E1E9E5] pt-6">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div>
-                    <span className="block text-3xl font-bold text-black">₹299 INR</span>
-                    <span className="mt-1 block text-xs font-bold uppercase tracking-wide text-amber-700">Payment activation in progress</span>
-                  </div>
-                  <Link href="/products/freelancing-client-acquisition-toolkit" className="inline-flex h-12 items-center justify-center rounded-md bg-[#123D32] px-6 font-semibold text-white hover:bg-[#0B3027]">
-                    View product
-                  </Link>
-                </div>
-              </div>
+          {isLoading && (
+            <div className="mx-auto mt-16 flex max-w-5xl items-center justify-center py-20">
+              <div className="h-9 w-9 animate-spin rounded-full border-4 border-[#0B9E59] border-t-transparent" />
             </div>
-          </section>
+          )}
 
-          <div className="mx-auto mt-10 flex max-w-5xl flex-col items-center justify-between gap-5 rounded-xl border border-[#DDE7E2] bg-white p-6 text-center sm:flex-row sm:text-left">
-            <div>
-              <h2 className="font-bold text-black">Evaluate before purchase</h2>
-              <p className="mt-1 text-sm text-[#596963]">Download the free sample to review the content style and practical approach.</p>
+          {isError && (
+            <div className="mx-auto mt-16 max-w-3xl rounded-xl border border-red-200 bg-white p-8 text-center text-red-700">
+              Products could not be loaded. Please refresh the page.
             </div>
-            <a href={`${import.meta.env.BASE_URL}products/freelancing-client-acquisition-toolkit-sample.pdf`} download className="inline-flex h-11 shrink-0 items-center gap-2 rounded-md border border-[#0B9E59] px-5 font-semibold text-[#087B46] hover:bg-[#F1FAF5]">
-              <Download className="h-4 w-4" /> Download sample PDF
-            </a>
-          </div>
+          )}
+
+          {!isLoading && !isError && products?.length === 0 && (
+            <div className="mx-auto mt-16 max-w-3xl rounded-xl border border-[#DDE7E2] bg-white p-10 text-center">
+              <FileBox className="mx-auto h-10 w-10 text-[#7B9188]" />
+              <h2 className="mt-4 text-xl font-bold text-black">No products available yet</h2>
+              <p className="mt-2 text-[#596963]">Published digital products will appear here automatically.</p>
+            </div>
+          )}
+
+          {!isLoading && !isError && products && products.length > 0 && (
+            <section className="mx-auto mt-14 grid max-w-6xl gap-7 md:grid-cols-2">
+              {products.map((product) => (
+                <article key={product.id} className="overflow-hidden rounded-2xl border border-[#C9DED3] bg-white shadow-[0_15px_45px_rgba(20,80,55,.08)]">
+                  <div className="aspect-[16/9] overflow-hidden bg-[#0B3027]">
+                    {product.coverImageUrl ? (
+                      <img src={product.coverImageUrl} alt={product.title} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#0B3027] to-[#146047]">
+                        <Package className="h-20 w-20 text-white/30" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex min-h-72 flex-col p-7">
+                    <span className="w-fit rounded-full bg-[#E4F8EE] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[#087B46]">
+                      {product.subtype || "Digital product"}
+                    </span>
+                    <h2 className="mt-5 text-2xl font-bold leading-tight text-black">{product.title}</h2>
+                    <p className="mt-3 line-clamp-3 leading-7 text-[#52635C]">{product.shortSummary || product.description}</p>
+                    <div className="mt-auto flex flex-wrap items-end justify-between gap-4 border-t border-[#E1E9E5] pt-6">
+                      <div>
+                        <span className="block text-2xl font-bold text-black">{productPrice(product.priceMinor, product.currency)}</span>
+                        <span className="mt-1 block text-xs font-semibold uppercase tracking-wide text-[#628076]">
+                          {product.priceMinor === 0 ? "Instant access" : "Secure payment required"}
+                        </span>
+                      </div>
+                      <Link
+                        href={`/products/${product.publicSlug || product.id}`}
+                        className="inline-flex h-11 items-center justify-center rounded-md bg-[#123D32] px-6 font-semibold text-white hover:bg-[#0B3027]"
+                      >
+                        View product
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </section>
+          )}
         </div>
       </main>
     </PublicLayout>
