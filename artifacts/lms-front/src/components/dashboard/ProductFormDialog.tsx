@@ -21,8 +21,6 @@ import {
 } from "@/components/ui/select";
 import { 
   useCreateCreatorProduct, 
-  useFinalizeCourseThumbnailUpload,
-  useRequestCourseThumbnailUpload,
   useUpdateCreatorProduct,
   getListCreatorProductsQueryKey 
 } from "@workspace/api-client-react";
@@ -65,8 +63,6 @@ export function ProductFormDialog({
   const queryClient = useQueryClient();
   const createProduct = useCreateCreatorProduct();
   const updateProduct = useUpdateCreatorProduct();
-  const requestThumbnailUpload = useRequestCourseThumbnailUpload();
-  const finalizeThumbnailUpload = useFinalizeCourseThumbnailUpload();
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -107,7 +103,7 @@ export function ProductFormDialog({
     if (coverPreview?.startsWith("blob:")) URL.revokeObjectURL(coverPreview);
   }, [coverPreview]);
 
-  const isPending = createProduct.isPending || updateProduct.isPending || requestThumbnailUpload.isPending || finalizeThumbnailUpload.isPending;
+  const isPending = createProduct.isPending || updateProduct.isPending;
 
   const handleCoverSelection = (file?: File) => {
     if (!file) return;
@@ -120,17 +116,18 @@ export function ProductFormDialog({
   };
 
   const uploadCover = async (productId: number, file: File) => {
-    const { uploadURL, objectPath } = await requestThumbnailUpload.mutateAsync({
-      productId,
-      data: { filename: file.name, mimeType: file.type, sizeBytes: file.size },
-    });
-    const upload = await fetch(uploadURL, {
+    const upload = await fetch(`/api/creator/products/${productId}/thumbnail/direct-upload`, {
       method: "PUT",
-      headers: { "Content-Type": file.type },
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "X-File-Type": file.type,
+      },
       body: file,
     });
-    if (!upload.ok) throw new Error("Thumbnail upload failed");
-    await finalizeThumbnailUpload.mutateAsync({ productId, data: { objectPath } });
+    if (!upload.ok) {
+      const body = await upload.json().catch(() => ({}));
+      throw new Error(body.error || "Thumbnail upload failed");
+    }
   };
 
   const onSubmit = form.handleSubmit((data) => {

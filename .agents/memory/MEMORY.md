@@ -10,3 +10,4 @@
 - [Digital product sales pages](digital-product-sales-pages.md) — keep creator sales copy structured and server-sanitized; render only populated sections and preserve free acquisition.
 - [Public digital-product model](public-digital-product-model.md) — present free learning and paid toolkits separately; never publish unsupported pricing or imply checkout works before verified payments.
 - [Public SEO rendering](public-seo-rendering.md) — keep dashboards as SPA, but serve DB-backed HTML for public marketplace routes through Express and nginx.
+- [R2 browser uploads](r2-browser-uploads.md) — use same-origin API proxy uploads for small files; direct browser PUTs to signed R2 URLs can fail under production CORS.

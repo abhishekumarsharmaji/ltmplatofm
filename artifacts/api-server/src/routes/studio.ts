@@ -14,6 +14,7 @@ import {
   uploadLessonMultipartPart,
   createObjectDownloadUrl,
   objectFile,
+  uploadObjectBuffer,
 } from "../lib/objectStorage";
 import { isCoursePlayerMediaRequest } from "../lib/mediaRequestGuard";
 
@@ -168,6 +169,47 @@ router.post("/creator/products/:productId/thumbnail/finalize", requireAuth, requ
   const [course] = await db.update(coursesTable).set({ thumbnailObjectPath: objectPath, thumbnailUrl, updatedAt: new Date() }).where(eq(coursesTable.id, found.course.id)).returning();
   res.json(course);
 });
+router.put(
+  "/creator/products/:productId/thumbnail/direct-upload",
+  requireAuth,
+  requireRole("creator", "admin"),
+  raw({ type: "application/octet-stream", limit: MAX_IMAGE_BYTES }),
+  async (req, res): Promise<void> => {
+    const productId = id(req.params.productId), auth = req as AuthenticatedRequest;
+    const mimeType = (req.header("x-file-type") || "").toLowerCase();
+    if (!productId || !Buffer.isBuffer(req.body) || req.body.length < 1 || req.body.length > MAX_IMAGE_BYTES || !/^image\/(jpeg|png|webp)$/i.test(mimeType)) {
+      res.status(400).json({ error: "A JPG, PNG or WebP image up to 10MB is required" }); return;
+    }
+    const product = await ownedAnyProduct(productId, auth);
+    if (!product) { res.status(404).json({ error: "Product not found" }); return; }
+
+    const folder = product.type === "course" ? "course-thumbnails" : "product-covers";
+    const objectPath = await uploadObjectBuffer(folder, req.body, mimeType);
+
+    if (product.type === "digital") {
+      if (product.coverImageObjectPath && product.coverImageObjectPath !== objectPath) {
+        await objectFile(product.coverImageObjectPath).delete({ ignoreNotFound: true }).catch(() => undefined);
+      }
+      const coverImageUrl = `/api/marketplace/products/${product.id}/cover`;
+      const [updated] = await db.update(productsTable).set({ coverImageObjectPath: objectPath, coverImageUrl, updatedAt: new Date() }).where(eq(productsTable.id, product.id)).returning();
+      const { coverImageObjectPath: _coverImageObjectPath, ...safeProduct } = updated;
+      res.json(safeProduct);
+      return;
+    }
+
+    const found = await ownedProduct(productId, auth);
+    if (!found) {
+      await objectFile(objectPath).delete({ ignoreNotFound: true }).catch(() => undefined);
+      res.status(404).json({ error: "Course product not found" }); return;
+    }
+    if (found.course.thumbnailObjectPath && found.course.thumbnailObjectPath !== objectPath) {
+      await objectFile(found.course.thumbnailObjectPath).delete({ ignoreNotFound: true }).catch(() => undefined);
+    }
+    const thumbnailUrl = `/api/marketplace/courses/${found.course.id}/thumbnail`;
+    const [course] = await db.update(coursesTable).set({ thumbnailObjectPath: objectPath, thumbnailUrl, updatedAt: new Date() }).where(eq(coursesTable.id, found.course.id)).returning();
+    res.json(course);
+  },
+);
 
 router.post("/creator/lessons/:lessonId/assets/request-upload", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const lessonId = id(req.params.lessonId), auth = req as AuthenticatedRequest;

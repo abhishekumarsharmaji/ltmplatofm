@@ -71,6 +71,17 @@ async function createUploadUrl(folder: string): Promise<{ url: string; objectPat
   const url = await getSignedUrl(client, new PutObjectCommand({ Bucket: bucket, Key: name }), { expiresIn: 15 * 60 });
   return { url, objectPath: `r2://${bucket}/${name}` };
 }
+export async function uploadObjectBuffer(folder: string, contents: Buffer, contentType: string) {
+  const { client, bucket } = r2Config();
+  const name = `${folder}/${randomUUID()}`;
+  await client.send(new PutObjectCommand({
+    Bucket: bucket,
+    Key: name,
+    Body: contents,
+    ContentType: contentType,
+  }));
+  return `r2://${bucket}/${name}`;
+}
 export const createLessonUploadUrl = () => createUploadUrl("lesson-videos");
 export const createCourseThumbnailUploadUrl = () => createUploadUrl("course-thumbnails");
 export const createProductCoverUploadUrl = () => createUploadUrl("product-covers");
