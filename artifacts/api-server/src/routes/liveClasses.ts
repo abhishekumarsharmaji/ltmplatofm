@@ -52,7 +52,7 @@ function recordingStorage() {
   if (!accessKey || !secret || !endpoint || !bucket) throw new Error("Recording storage is not configured; set R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT, and R2_BUCKET_NAME");
   return { accessKey, secret, endpoint: endpoint.replace(/\/$/, ""), bucket };
 }
-async function ensureRecordingStarted(classId: number, roomName: string) {
+async function ensureRecordingStarted(classId: number, roomName: string, hostIdentity: string) {
   const [current] = await db.select().from(liveClassesTable).where(eq(liveClassesTable.id, classId));
   if (!current || current.recordingStatus === "recording" || current.recordingStatus === "processing" || current.recordingStatus === "ready") return current;
   try {
@@ -66,7 +66,11 @@ async function ensureRecordingStarted(classId: number, roomName: string) {
       filepath: objectName,
       output: { case: "s3", value: new S3Upload({ accessKey: storage.accessKey, secret: storage.secret, endpoint: storage.endpoint, region: "auto", bucket: storage.bucket, forcePathStyle: true }) },
     });
-    const egress = await new EgressClient(process.env.LIVEKIT_URL!, process.env.LIVEKIT_API_KEY!, process.env.LIVEKIT_API_SECRET!).startRoomCompositeEgress(roomName, output, { layout: "grid" });
+    const egress = await new EgressClient(
+      process.env.LIVEKIT_URL!,
+      process.env.LIVEKIT_API_KEY!,
+      process.env.LIVEKIT_API_SECRET!,
+    ).startParticipantEgress(roomName, hostIdentity, { file: output });
     const [updated] = await db.update(liveClassesTable).set({ recordingStatus: "recording", recordingObjectPath: objectPath, recordingFilename: `${current.title}.mp4`, recordingError: null, egressId: egress.egressId, recordingStartedAt: new Date(), updatedAt: new Date() }).where(eq(liveClassesTable.id, classId)).returning();
     return updated;
   } catch (error) {
@@ -82,8 +86,9 @@ async function reconcileRecording(classId: number) {
   const client = new EgressClient(process.env.LIVEKIT_URL!, process.env.LIVEKIT_API_KEY!, process.env.LIVEKIT_API_SECRET!);
   const [egress] = (await client.listEgress({ egressId: current.egressId } as any));
   if (!egress) return current;
-  if (egress.status === EgressStatus.EGRESS_FAILED) {
-    const [failed] = await db.update(liveClassesTable).set({ recordingStatus: "failed", recordingError: "LiveKit egress failed", updatedAt: new Date() }).where(eq(liveClassesTable.id, classId)).returning();
+  if ([EgressStatus.EGRESS_FAILED, EgressStatus.EGRESS_ABORTED, EgressStatus.EGRESS_LIMIT_REACHED].includes(egress.status)) {
+    const reason = egress.error?.trim() || EgressStatus[egress.status] || "LiveKit egress failed";
+    const [failed] = await db.update(liveClassesTable).set({ recordingStatus: "failed", recordingError: reason.slice(0, 1000), updatedAt: new Date() }).where(eq(liveClassesTable.id, classId)).returning();
     return failed;
   }
   if (egress.status !== EgressStatus.EGRESS_COMPLETE) return current;
@@ -254,7 +259,7 @@ router.post("/creator/live-classes/:id/recording/start", requireAuth, requireRol
   const classId = id(req.params.id), found = classId ? await ownedClass(classId, auth(req)) : null;
   if (!found) { res.status(404).json({ error: "Live class not found" }); return; }
   if (!process.env.LIVEKIT_URL || !process.env.LIVEKIT_API_KEY || !process.env.LIVEKIT_API_SECRET) { res.status(422).json({ error: "LiveKit recording is not configured" }); return; }
-  const item = await ensureRecordingStarted(classId!, found.liveClass.roomName);
+  const item = await ensureRecordingStarted(classId!, found.liveClass.roomName, String(auth(req).canonicalUserId));
   res.status(item?.recordingStatus === "failed" ? 502 : 200).json(item);
 });
 
