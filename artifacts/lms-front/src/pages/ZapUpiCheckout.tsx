@@ -95,7 +95,7 @@ export default function ZapUpiCheckout() {
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#E2F5EB] to-[#C9ECD9] shadow-[inset_0_2px_10px_rgba(255,255,255,0.6)]">
             <CheckCircle2 className="h-12 w-12 text-[#0EAF63]" strokeWidth={2.5} />
           </div>
-          
+
           <h1 data-testid="status-title" className="mt-8 text-3xl font-extrabold tracking-tight text-[#10231B] sm:text-4xl">
             Payment verified
           </h1>
@@ -103,7 +103,7 @@ export default function ZapUpiCheckout() {
             Your secure transaction is complete. Access to <strong className="font-bold text-[#173D30]">{order.productTitle}</strong> is ready.
           </p>
 
-          <div className="mx-auto mt-8 max-w-md text-left">
+          <div className="mx-auto mt-8 max-w-xl text-left">
             <div className="rounded-2xl border border-[#D9E8E0] bg-gradient-to-b from-[#F8FCFA] to-[#F4F9F6] p-5 shadow-sm">
               <div className="flex gap-4">
                 <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E2F5EB] bg-white shadow-sm">
@@ -112,7 +112,7 @@ export default function ZapUpiCheckout() {
                 <div>
                   <h3 className="text-base font-bold text-[#173D30]">Access your purchases anytime</h3>
                   <p data-testid="text-account-info" className="mt-1.5 text-sm leading-relaxed text-[#557066]">
-                    Create an account using the email address provided at checkout to safely revisit your files and courses later.
+                    Create your CoreSkils account with the same email address (Gmail) used at checkout. You can sign in later to revisit your purchases and access them again.
                   </p>
                 </div>
               </div>
@@ -121,29 +121,31 @@ export default function ZapUpiCheckout() {
 
           {order.files && order.files.length > 0 && (
             <div className="mt-10 border-t border-[#E7EEE9] pt-8">
-              <h2 className="mb-5 text-sm font-bold uppercase tracking-widest text-[#557066]">Your Digital Files</h2>
+              <h2 className="mb-2 text-xl font-extrabold text-[#173D30]">Download your purchase</h2>
+              <p className="mb-6 text-sm leading-6 text-[#607269]">Your file is ready. Use the button below to download it securely.</p>
               <div className="space-y-4 text-left">
                 {order.files.map((file) => (
                   <a
                     key={file.id}
                     href={`/api/marketplace/digital-products/${order.productId}/files/${file.id}/guest-download`}
                     data-testid={`link-download-${file.id}`}
-                    className="group flex items-center justify-between gap-4 rounded-2xl border border-[#DCE9E2] bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#0EAF63] hover:shadow-[0_12px_24px_-8px_rgba(14,175,99,0.2)] focus:outline-none focus:ring-2 focus:ring-[#0EAF63] focus:ring-offset-2"
+                    className="group flex flex-col items-stretch justify-between gap-5 rounded-2xl border border-[#BFE3D0] bg-gradient-to-r from-white to-[#F4FBF7] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#0EAF63] hover:shadow-[0_16px_32px_-10px_rgba(14,175,99,0.24)] focus:outline-none focus:ring-2 focus:ring-[#0EAF63] focus:ring-offset-2 sm:flex-row sm:items-center"
                   >
                     <div className="flex min-w-0 items-center gap-4">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#F4F9F6] text-[#0EAF63] transition-colors group-hover:bg-[#0EAF63] group-hover:text-white">
                         <FileText className="h-6 w-6" />
                       </div>
                       <div className="min-w-0">
-                        <h4 className="truncate text-base font-bold text-[#173D30] transition-colors group-hover:text-[#0EAF63]">{file.filename}</h4>
+                        <h4 data-testid={`text-filename-${file.id}`} className="break-words text-base font-bold text-[#173D30] transition-colors group-hover:text-[#0EAF63]">{file.filename}</h4>
                         <p className="mt-0.5 text-sm font-medium text-[#718078]">
                           {file.sizeBytes ? formatBytes(file.sizeBytes) : 'Secure download'}
                         </p>
                       </div>
                     </div>
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F4F9F6] text-[#0EAF63] transition-transform group-hover:scale-110 group-hover:bg-[#E2F5EB]">
+                    <span className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#0EAF63] px-6 text-sm font-extrabold text-white shadow-[0_8px_20px_-8px_rgba(14,175,99,0.8)] transition-all group-hover:bg-[#078D4D] sm:min-w-40">
                       <Download className="h-5 w-5" />
-                    </div>
+                      Download file
+                    </span>
                   </a>
                 ))}
               </div>
@@ -172,11 +174,11 @@ export default function ZapUpiCheckout() {
               </Link>
             </div>
           )}
-          
+
           {(!order.productType || (order.productType === 'digital' && (!order.files || order.files.length === 0))) && order.productId && (
             <div className="mt-10">
-              <Link 
-                href={`/products/${order.productId}`} 
+              <Link
+                href={`/products/${order.productId}`}
                 className="inline-flex h-12 items-center justify-center rounded-xl bg-[#F4F9F6] px-8 text-sm font-bold text-[#0EAF63] transition-colors hover:bg-[#E2F5EB]"
                 data-testid="link-return"
               >
@@ -187,8 +189,8 @@ export default function ZapUpiCheckout() {
 
           {order.productType !== "course" && order.productId && order.files && order.files.length > 0 && (
             <div className="mt-8 pt-4">
-              <Link 
-                href={`/products/${order.productId}`} 
+              <Link
+                href={`/products/${order.productId}`}
                 className="inline-flex h-10 items-center justify-center rounded-xl px-6 text-sm font-bold text-[#557066] transition-colors hover:bg-[#F4F9F6] hover:text-[#173D30]"
                 data-testid="link-return"
               >
@@ -199,7 +201,7 @@ export default function ZapUpiCheckout() {
         </div>
       );
     }
-    
+
     if (invalidLink) {
       return (
         <div className="animate-fade-in-up">
@@ -230,8 +232,8 @@ export default function ZapUpiCheckout() {
           </p>
           {order?.productId && (
             <div className="mt-10">
-              <Link 
-                href={`/products/${order.productId}`} 
+              <Link
+                href={`/products/${order.productId}`}
                 className="inline-flex h-14 items-center justify-center rounded-xl bg-[#123D32] px-8 text-base font-bold text-white transition-all hover:-translate-y-1 hover:bg-[#0B3027] hover:shadow-[0_12px_24px_-8px_rgba(18,61,50,0.4)]"
                 data-testid="link-return"
               >
@@ -279,7 +281,7 @@ export default function ZapUpiCheckout() {
   return (
     <PublicLayout>
       <main className="min-h-screen bg-gradient-to-b from-[#F3FBF7] via-white to-white px-4 pb-20 pt-28 sm:pt-36">
-        <div className="mx-auto max-w-xl">
+        <div className="mx-auto max-w-3xl">
           <div className="overflow-hidden rounded-[32px] border border-[#DCE9E2] bg-white shadow-[0_32px_64px_-12px_rgba(17,71,48,0.08)]">
             <div className="border-b border-[#E7EEE9] bg-[#F8FCFA] px-6 py-5 sm:px-10">
               <div className="flex items-center justify-between gap-4">
