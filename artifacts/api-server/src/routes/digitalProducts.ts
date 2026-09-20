@@ -111,7 +111,8 @@ router.get("/marketplace/digital-products/:id", async (req, res): Promise<void> 
   const resolvedProductId = product.product.id;
   const files = await db.select({ id: digitalFilesTable.id, filename: digitalFilesTable.filename, mimeType: digitalFilesTable.mimeType, sizeBytes: digitalFilesTable.sizeBytes, kind: digitalFilesTable.kind, position: digitalFilesTable.position })
     .from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, resolvedProductId), eq(digitalFilesTable.status, "uploaded"))).orderBy(asc(digitalFilesTable.position));
-  res.json({ ...safeProduct(product.product), creatorName: product.creatorName, isFree: product.product.priceMinor === 0, files });
+  // Public sales pages must not reveal filenames or file metadata before access is granted.
+  res.json({ ...safeProduct(product.product), creatorName: product.creatorName, isFree: product.product.priceMinor === 0, files: [] });
 });
 
 router.post("/marketplace/digital-products/:id/guest-access", async (req, res): Promise<void> => {

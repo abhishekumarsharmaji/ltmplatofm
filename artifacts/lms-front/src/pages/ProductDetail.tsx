@@ -13,7 +13,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { 
   AlertCircle, 
   Download, 
-  FileText, 
   Package, 
   ShieldCheck,
   CheckCircle2,
@@ -21,21 +20,11 @@ import {
   Box,
   MessageSquareQuote,
   HelpCircle,
-  Mail,
-  FileBox
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-
-export function formatBytes(bytes: number, decimals = 2) {
-  if (!+bytes) return '0 Bytes';
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-}
 
 export default function ProductDetail() {
   const params = useParams();
@@ -320,28 +309,6 @@ export default function ProductDetail() {
                       ) : null}
                     </div>
                   </div>
-
-                  {/* Included Files (Actual File Meta) */}
-                  {product.files && product.files.length > 0 && (
-                    <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-sm p-6">
-                      <h4 className="font-bold text-black mb-4 flex items-center gap-2 text-[15px]">
-                        <FileBox className="w-4 h-4 text-primary" /> Included Files ({product.files.length})
-                      </h4>
-                      <div className="space-y-3">
-                        {product.files.map(file => (
-                          <div key={file.id} className="flex items-center gap-3 p-3 rounded-lg bg-[#FAFAFA] border border-[#E5E5E5]">
-                            <div className="w-10 h-10 bg-white rounded border border-[#E5E5E5] flex items-center justify-center shrink-0">
-                              <FileText className="w-5 h-5 text-[#9794AA]" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h5 className="font-bold text-[13px] text-black truncate">{file.filename}</h5>
-                              <p className="text-[12px] text-[#737373]">{formatBytes(file.sizeBytes || 0)}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Support Info */}
                   {(salesPage?.supportEmail || salesPage?.terms) && (
