@@ -14,3 +14,17 @@ mtime_ms = 1789760392068
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:8374545a-039d-455a-8203-cca588963f72/a4635734-eba9-4964-a163-3ab0d332e062/0f4da281-73ff-4d93-b2bc-48342b9e40b5"
 storage_version_token = "1789760423397279"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "yZ_u6UX6WGRBvnIrAIVS5"
+uri = "file://artifacts/lms-front/public/brand/icon-512.png"
+type = "image"
+title = "CoreSkils LinkedIn Logo"
+description = "Upload this square PNG in the LinkedIn company page Logo field."
+logical_id = "62d1fa22-b763-4b7b-a592-fa77e092da1e"
+content_hash = "sha256:6a8c406d479385f01a9e64d54e9b1879a84d92c6a3af3148c829f4bc643b4254"
+size = 83742
+mtime_ms = 1789760316857
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:8374545a-039d-455a-8203-cca588963f72/62d1fa22-b763-4b7b-a592-fa77e092da1e/463b6004-69bb-4474-8170-407dfc2ea349"
+storage_version_token = "1789892334820667"
+content_type = "image/png"
