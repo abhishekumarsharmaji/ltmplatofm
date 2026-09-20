@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { 
@@ -24,6 +25,7 @@ import {
   FileBox
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 export function formatBytes(bytes: number, decimals = 2) {
@@ -54,6 +56,15 @@ export default function ProductDetail() {
   const productId = product?.id || 0;
   const isOwned = ownedProducts?.some((item) => item.id === productId) ?? false;
   const salesPage = product?.salesPage;
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [guestPending, setGuestPending] = useState(false);
+  const [guestError, setGuestError] = useState("");
+  const [guestAccess, setGuestAccess] = useState<null | {
+    accessToken: string;
+    expiresAt: string;
+    files: Array<{ id: number; filename: string; sizeBytes?: number | null }>;
+  }>(null);
 
   const handleAcquire = () => {
     acquireProduct.mutate({ productId } as any, {
@@ -63,6 +74,26 @@ export default function ProductDetail() {
         setLocation(`/dashboard/student/products/${productId}`);
       }
     });
+  };
+
+  const handleGuestAccess = async () => {
+    if (!product || product.priceMinor > 0) return;
+    setGuestPending(true);
+    setGuestError("");
+    try {
+      const response = await fetch(`/api/marketplace/digital-products/${encodeURIComponent(productKey)}/guest-access`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: guestEmail, phone: guestPhone }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || "Access could not be created");
+      setGuestAccess(body);
+    } catch (error) {
+      setGuestError(error instanceof Error ? error.message : "Access could not be created");
+    } finally {
+      setGuestPending(false);
+    }
   };
 
   if (isLoading) {
@@ -87,9 +118,31 @@ export default function ProductDetail() {
     );
   }
 
-  const ctaText = salesPage?.ctaLabel || "Acquire for Free";
+  const isFree = product.priceMinor === 0;
+  const ctaText = salesPage?.ctaLabel || "Get instant access";
+  const priceLabel = isFree
+    ? "Free"
+    : new Intl.NumberFormat("en-IN", { style: "currency", currency: product.currency || "INR", maximumFractionDigits: 2 }).format(product.priceMinor / 100);
 
   const renderCTA = () => {
+    if (guestAccess) {
+      return (
+        <div className="space-y-3">
+          <div className="rounded-lg border border-[#A9E6C8] bg-[#EFFBF5] p-4 text-sm text-[#176B45]">
+            Access ready. Download links expire in one hour.
+          </div>
+          {guestAccess.files.map((file) => (
+            <a
+              key={file.id}
+              href={`/api/marketplace/digital-products/${product.id}/files/${file.id}/guest-download?token=${encodeURIComponent(guestAccess.accessToken)}`}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 font-bold text-white hover:bg-[#10A364]"
+            >
+              <Download className="h-4 w-4" /> Download {file.filename}
+            </a>
+          ))}
+        </div>
+      );
+    }
     if (isOwned) {
       return (
         <Button 
@@ -100,7 +153,7 @@ export default function ProductDetail() {
         </Button>
       );
     }
-    if (isAuthenticated) {
+    if (isAuthenticated && isFree) {
       return (
         <Button 
           onClick={handleAcquire}
@@ -112,12 +165,21 @@ export default function ProductDetail() {
       );
     }
     return (
-      <Button 
-        onClick={() => setLocation("/auth/login")}
-        className="w-full h-14 bg-primary hover:bg-[#10A364] text-white font-medium rounded-lg text-[16px] shadow-[0_8px_24px_rgba(21,207,116,0.25)] transition-transform hover:-translate-y-0.5"
-      >
-        Login to Acquire
-      </Button>
+      <div className="space-y-3">
+        <Input type="email" value={guestEmail} onChange={(event) => setGuestEmail(event.target.value)} placeholder="Email address" autoComplete="email" />
+        <Input type="tel" value={guestPhone} onChange={(event) => setGuestPhone(event.target.value)} placeholder="+91 mobile number" autoComplete="tel" />
+        {guestError && <p className="text-sm text-red-600">{guestError}</p>}
+        <Button
+          onClick={() => void handleGuestAccess()}
+          disabled={guestPending || !isFree}
+          className="h-14 w-full rounded-lg bg-primary text-[16px] font-medium text-white hover:bg-[#10A364] disabled:cursor-not-allowed disabled:bg-[#BFC8C4]"
+        >
+          {isFree ? (guestPending ? "Preparing access..." : ctaText) : "Payments unavailable"}
+        </Button>
+        <p className="text-center text-xs leading-5 text-[#737373]">
+          No account required. By continuing, you agree to the Terms and Privacy Policy.
+        </p>
+      </div>
     );
   };
 
@@ -198,9 +260,9 @@ export default function ProductDetail() {
                   <div className="bg-white rounded-2xl border border-[#E5E5E5] shadow-[0_20px_40px_rgba(0,0,0,0.04)] overflow-hidden">
                     <div className="p-6 sm:p-8 sm:pb-6 border-b border-[#E5E5E5]">
                       <div className="flex items-center justify-between mb-6">
-                        <span className="text-[32px] sm:text-[40px] font-bold text-black leading-none">Free</span>
+                        <span className="text-[32px] sm:text-[40px] font-bold text-black leading-none">{priceLabel}</span>
                         <span className="bg-[#E3F9EF] text-[#10A364] px-3 py-1 rounded-full text-[12px] sm:text-[13px] font-bold">
-                          Digital Access
+                          {isFree ? "Instant digital access" : "Secure payment required"}
                         </span>
                       </div>
                       
@@ -208,7 +270,7 @@ export default function ProductDetail() {
                         {renderCTA()}
                       </div>
                       <p className="text-center text-[#737373] text-[13px] mt-4 flex items-center justify-center gap-1.5">
-                        <ShieldCheck className="w-4 h-4" /> Secure, instant access
+                        <ShieldCheck className="w-4 h-4" /> {isFree ? "No account required" : "Access only after verified payment"}
                       </p>
                     </div>
 

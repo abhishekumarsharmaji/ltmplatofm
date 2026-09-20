@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm";
 import {
   db, digitalFilesTable, digitalProductEntitlementsTable, productsTable, usersTable,
@@ -13,6 +14,7 @@ import {
 const router: IRouter = Router();
 const MAX_FILE_BYTES = 250 * 1024 * 1024;
 const MAX_FILES = 25;
+const GUEST_ACCESS_TTL_SECONDS = 60 * 60;
 const MIME_BY_EXT: Record<string, string[]> = {
   pdf: ["application/pdf"], epub: ["application/epub+zip"], mobi: ["application/x-mobipocket-ebook", "application/octet-stream"],
   azw: ["application/vnd.amazon.ebook", "application/octet-stream"], azw3: ["application/vnd.amazon.ebook", "application/octet-stream"],
@@ -49,6 +51,29 @@ const validFile = (filename: unknown, mime: unknown, size: unknown) => {
   return !!MIME_BY_EXT[ext] && MIME_BY_EXT[ext].some((allowed) => allowed === mime.toLowerCase());
 };
 const numericId = (value: unknown) => /^\d+$/.test(String(value)) && Number(value) > 0 ? Number(value) : null;
+const validEmail = (value: unknown) => typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) && value.trim().length <= 254;
+const normalizedPhone = (value: unknown) => typeof value === "string" ? value.replace(/[^\d+]/g, "") : "";
+function guestAccessToken(productId: number) {
+  const expiresAt = Math.floor(Date.now() / 1000) + GUEST_ACCESS_TTL_SECONDS;
+  const payload = Buffer.from(JSON.stringify({ productId, expiresAt })).toString("base64url");
+  const signature = createHmac("sha256", process.env.SESSION_SECRET!).update(payload).digest("base64url");
+  return { token: `${payload}.${signature}`, expiresAt };
+}
+function guestProductId(token: unknown) {
+  if (typeof token !== "string") return null;
+  const [payload, signature] = token.split(".");
+  if (!payload || !signature) return null;
+  const expected = createHmac("sha256", process.env.SESSION_SECRET!).update(payload).digest("base64url");
+  if (signature.length !== expected.length || !timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return null;
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { productId?: unknown; expiresAt?: unknown };
+    return Number.isInteger(parsed.productId) && Number(parsed.productId) > 0 && Number(parsed.expiresAt) > Math.floor(Date.now() / 1000)
+      ? Number(parsed.productId)
+      : null;
+  } catch {
+    return null;
+  }
+}
 const safeFile = (file: typeof digitalFilesTable.$inferSelect) => {
   const { storageKey: _storageKey, objectPath: _objectPath, ...rest } = file;
   return rest;
@@ -70,7 +95,7 @@ router.get("/marketplace/digital-products", async (req, res): Promise<void> => {
     eq(productsTable.type, "digital"), eq(productsTable.status, "published"),
     q ? or(ilike(productsTable.title, `%${q}%`), ilike(productsTable.description, `%${q}%`)) : undefined,
   )).orderBy(desc(productsTable.createdAt));
-  res.json(rows.map((row) => ({ ...safeProduct(row), priceMinor: 0, isFree: true })));
+  res.json(rows.map((row) => ({ ...safeProduct(row), isFree: row.priceMinor === 0 })));
 });
 router.get("/marketplace/digital-products/:id", async (req, res): Promise<void> => {
   const productId = numericId(req.params.id);
@@ -84,7 +109,52 @@ router.get("/marketplace/digital-products/:id", async (req, res): Promise<void> 
   const resolvedProductId = product.product.id;
   const files = await db.select({ id: digitalFilesTable.id, filename: digitalFilesTable.filename, mimeType: digitalFilesTable.mimeType, sizeBytes: digitalFilesTable.sizeBytes, kind: digitalFilesTable.kind, position: digitalFilesTable.position })
     .from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, resolvedProductId), eq(digitalFilesTable.status, "uploaded"))).orderBy(asc(digitalFilesTable.position));
-  res.json({ ...safeProduct(product.product), creatorName: product.creatorName, priceMinor: 0, isFree: true, files });
+  res.json({ ...safeProduct(product.product), creatorName: product.creatorName, isFree: product.product.priceMinor === 0, files });
+});
+
+router.post("/marketplace/digital-products/:id/guest-access", async (req, res): Promise<void> => {
+  const productId = numericId(req.params.id);
+  const [product] = await db.select().from(productsTable).where(and(
+    productId ? eq(productsTable.id, productId) : eq(productsTable.publicSlug, String(req.params.id).toLowerCase()),
+    eq(productsTable.type, "digital"), eq(productsTable.status, "published"),
+  ));
+  if (!product) { res.status(404).json({ error: "Digital product not found" }); return; }
+  const phone = normalizedPhone(req.body?.phone);
+  if (!validEmail(req.body?.email) || !/^\+?\d{8,15}$/.test(phone)) {
+    res.status(400).json({ error: "Enter a valid email address and mobile number" }); return;
+  }
+  if (product.priceMinor > 0) {
+    res.status(402).json({ error: "Secure online payment is not available yet for this product" }); return;
+  }
+  const files = await db.select({ id: digitalFilesTable.id, filename: digitalFilesTable.filename, mimeType: digitalFilesTable.mimeType, sizeBytes: digitalFilesTable.sizeBytes, kind: digitalFilesTable.kind, position: digitalFilesTable.position })
+    .from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, product.id), eq(digitalFilesTable.status, "uploaded"))).orderBy(asc(digitalFilesTable.position));
+  if (!files.length) { res.status(409).json({ error: "This product does not have an available download yet" }); return; }
+  const access = guestAccessToken(product.id);
+  res.setHeader("Cache-Control", "private, no-store");
+  res.status(201).json({ productId: product.id, accessToken: access.token, expiresAt: new Date(access.expiresAt * 1000).toISOString(), files });
+});
+
+router.get("/marketplace/digital-products/:productId/files/:fileId/guest-download", async (req, res): Promise<void> => {
+  const productId = numericId(req.params.productId), fileId = numericId(req.params.fileId);
+  if (!productId || !fileId || guestProductId(req.query.token) !== productId) {
+    res.status(403).json({ error: "Guest download access is invalid or has expired" }); return;
+  }
+  const [product] = await db.select().from(productsTable).where(and(
+    eq(productsTable.id, productId), eq(productsTable.type, "digital"), eq(productsTable.status, "published"), eq(productsTable.priceMinor, 0),
+  ));
+  if (!product) { res.status(403).json({ error: "Guest download access is unavailable" }); return; }
+  const [file] = await db.select().from(digitalFilesTable).where(and(
+    eq(digitalFilesTable.id, fileId), eq(digitalFilesTable.productId, productId), eq(digitalFilesTable.status, "uploaded"),
+  ));
+  if (!file) { res.status(404).json({ error: "File not found" }); return; }
+  const path = file.objectPath ?? file.storageKey;
+  const signedUrl = await createObjectDownloadUrl(path, file.filename, file.mimeType ?? "application/octet-stream", 5 * 60, true);
+  res.setHeader("Cache-Control", "private, no-store");
+  if (signedUrl) { res.redirect(307, signedUrl); return; }
+  const object = objectFile(path); const [metadata] = await object.getMetadata();
+  res.setHeader("Content-Type", metadata.contentType ?? file.mimeType ?? "application/octet-stream");
+  res.setHeader("Content-Disposition", `attachment; filename="${file.filename.replace(/["\\\r\n]/g, "_")}"`);
+  object.createReadStream().pipe(res);
 });
 
 router.get("/creator/digital-products/:productId/files", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
@@ -166,7 +236,7 @@ router.delete("/creator/digital-products/:productId/files/:fileId", requireAuth,
 router.post("/student/digital-products/:productId/acquire", requireAuth, requireRole("student", "creator", "admin"), async (req, res): Promise<void> => {
   const productId = numericId(req.params.productId), userId = (req as AuthenticatedRequest).canonicalUserId;
   if (!productId || !userId) { res.status(400).json({ error: "Invalid product" }); return; }
-  const [product] = await db.select().from(productsTable).where(and(eq(productsTable.id, productId), eq(productsTable.type, "digital"), eq(productsTable.status, "published")));
+  const [product] = await db.select().from(productsTable).where(and(eq(productsTable.id, productId), eq(productsTable.type, "digital"), eq(productsTable.status, "published"), eq(productsTable.priceMinor, 0)));
   if (!product) { res.status(404).json({ error: "Published digital product not found" }); return; }
   const [entitlement] = await db.insert(digitalProductEntitlementsTable).values({ userId, productId }).onConflictDoNothing().returning();
   res.status(entitlement ? 201 : 200).json({ productId, acquired: true, alreadyOwned: !entitlement });
@@ -176,7 +246,7 @@ router.get("/student/digital-products", requireAuth, requireRole("student", "cre
   if (!userId) { res.json([]); return; }
   const rows = await db.select({ product: productsTable, acquiredAt: digitalProductEntitlementsTable.acquiredAt }).from(digitalProductEntitlementsTable)
     .innerJoin(productsTable, eq(productsTable.id, digitalProductEntitlementsTable.productId)).where(eq(digitalProductEntitlementsTable.userId, userId)).orderBy(desc(digitalProductEntitlementsTable.acquiredAt));
-  res.json(rows.map((row) => ({ ...safeProduct(row.product), acquiredAt: row.acquiredAt, isFree: true, priceMinor: 0 })));
+  res.json(rows.map((row) => ({ ...safeProduct(row.product), acquiredAt: row.acquiredAt, isFree: row.product.priceMinor === 0 })));
 });
 router.get("/student/digital-products/:productId", requireAuth, requireRole("student", "creator", "admin"), async (req, res): Promise<void> => {
   const productId = numericId(req.params.productId), user = req as AuthenticatedRequest;
@@ -188,7 +258,7 @@ router.get("/student/digital-products/:productId", requireAuth, requireRole("stu
   if (!published) { res.status(404).json({ error: "Digital product not found" }); return; }
   const files = await db.select({ id: digitalFilesTable.id, filename: digitalFilesTable.filename, mimeType: digitalFilesTable.mimeType, sizeBytes: digitalFilesTable.sizeBytes, kind: digitalFilesTable.kind, position: digitalFilesTable.position })
     .from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, productId), eq(digitalFilesTable.status, "uploaded"))).orderBy(asc(digitalFilesTable.position));
-  res.json({ ...safeProduct(published), isFree: true, priceMinor: 0, files });
+  res.json({ ...safeProduct(published), isFree: published.priceMinor === 0, files });
 });
 router.get("/student/digital-products/:productId/files/:fileId/download", requireAuth, requireRole("student", "creator", "admin"), async (req, res): Promise<void> => {
   const productId = numericId(req.params.productId), fileId = numericId(req.params.fileId), user = req as AuthenticatedRequest;
