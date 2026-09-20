@@ -21,6 +21,16 @@ server {
         proxy_read_timeout 120s;
     }
 
+    # Crawlable public pages are rendered by the Express SEO shell.
+    location = /sitemap.xml { proxy_pass http://127.0.0.1:4000; }
+    location = /robots.txt { proxy_pass http://127.0.0.1:4000; }
+    location = / { proxy_pass http://127.0.0.1:4000; }
+    location = /courses { proxy_pass http://127.0.0.1:4000; }
+    location ~ ^/courses/(?:[0-9]+|[a-z0-9]+(?:-[a-z0-9]+)*)$ { proxy_pass http://127.0.0.1:4000; }
+    location = /products { proxy_pass http://127.0.0.1:4000; }
+    location ~ ^/products/(?:[0-9]+|[a-z0-9]+(?:-[a-z0-9]+)*)$ { proxy_pass http://127.0.0.1:4000; }
+    location ~ ^/creators/[a-z0-9_]{3,30}$ { proxy_pass http://127.0.0.1:4000; }
+
     location /assets/ {
         try_files $uri =404;
         expires 1y;

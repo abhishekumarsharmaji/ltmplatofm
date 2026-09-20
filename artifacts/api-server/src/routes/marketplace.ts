@@ -143,6 +143,29 @@ router.get("/marketplace/creators/:id/avatar", async (req, res) => {
   file.createReadStream().on("error", () => { if (!res.headersSent) res.status(404); res.end(); }).pipe(res);
 });
 
+router.get("/marketplace/creators/:username", async (req, res) => {
+  const username = String(req.params.username).toLowerCase();
+  const [profile] = await db.select({
+    profile: creatorProfilesTable,
+    name: usersTable.name,
+  }).from(creatorProfilesTable)
+    .innerJoin(usersTable, eq(usersTable.id, creatorProfilesTable.userId))
+    .where(and(eq(creatorProfilesTable.username, username), eq(usersTable.role, "creator")));
+  if (!profile) { res.status(404).json({ error: "Creator not found" }); return; }
+  const [courses, products] = await Promise.all([
+    db.select().from(coursesTable).where(and(eq(coursesTable.creatorId, profile.profile.userId), eq(coursesTable.status, "published"))).orderBy(desc(coursesTable.updatedAt)),
+    db.select().from(productsTable).where(and(eq(productsTable.creatorId, profile.profile.userId), eq(productsTable.status, "published"))).orderBy(desc(productsTable.updatedAt)),
+  ]);
+  res.json({
+    profile: {
+      displayName: profile.profile.displayName, username: profile.profile.username,
+      headline: profile.profile.headline, bio: profile.profile.bio, websiteUrl: profile.profile.websiteUrl,
+      avatarUrl: profile.profile.avatarObjectPath ? `/api/marketplace/creators/${profile.profile.userId}/avatar?v=${profile.profile.updatedAt.getTime()}` : profile.profile.avatarUrl,
+    },
+    courses, products: products.map(safeProduct),
+  });
+});
+
 router.get("/categories", async (_req, res) => res.json(await db.select().from(categoriesTable).orderBy(categoriesTable.name)));
 router.get("/marketplace/products", async (req, res) => {
   const q = typeof req.query.q === "string" ? req.query.q : "";
@@ -184,6 +207,10 @@ router.get("/marketplace/courses/:id", async (req, res) => {
     accessDays: productsTable.accessDays,
     trialDays: productsTable.trialDays,
     creatorName: sql<string>`coalesce(${creatorProfilesTable.displayName}, ${usersTable.name})`,
+     creatorUsername: creatorProfilesTable.username,
+     creatorAvatarUrl: creatorProfilesTable.avatarUrl,
+     creatorAvatarObjectPath: creatorProfilesTable.avatarObjectPath,
+     creatorProfileUpdatedAt: creatorProfilesTable.updatedAt,
     categoryName: categoriesTable.name,
   }).from(coursesTable)
     .leftJoin(productsTable, and(eq(productsTable.courseId, coursesTable.id), eq(productsTable.type, "course")))
@@ -199,7 +226,7 @@ router.get("/marketplace/courses/:id", async (req, res) => {
   const modules = await db.select().from(courseModulesTable).where(eq(courseModulesTable.courseId, resolvedCourseId)).orderBy(courseModulesTable.position);
   const moduleIds = modules.map((module) => module.id);
   const lessons = moduleIds.length ? await db.select().from(lessonsTable).where(inArray(lessonsTable.moduleId, moduleIds)).orderBy(lessonsTable.position) : [];
-  res.json({ ...row.course, productId: row.productId, publicSlug: row.publicSlug, priceMinor: row.priceMinor, currency: row.currency, accessPlan: row.accessPlan, accessDays: row.accessDays, trialDays: row.trialDays, creatorName: row.creatorName, categoryName: row.categoryName, lessons: lessons.length, modules: modules.map((module) => ({ ...module, lessons: lessons.filter((lesson) => lesson.moduleId === module.id) })) });
+  res.json({ ...row.course, productId: row.productId, publicSlug: row.publicSlug, priceMinor: row.priceMinor, currency: row.currency, accessPlan: row.accessPlan, accessDays: row.accessDays, trialDays: row.trialDays, creatorName: row.creatorName, creatorUsername: row.creatorUsername, creatorAvatarUrl: row.creatorAvatarObjectPath ? `/api/marketplace/creators/${row.course.creatorId}/avatar?v=${row.creatorProfileUpdatedAt?.getTime() ?? 0}` : row.creatorAvatarUrl, categoryName: row.categoryName, lessons: lessons.length, modules: modules.map((module) => ({ ...module, lessons: lessons.filter((lesson) => lesson.moduleId === module.id) })) });
 });
 router.get("/marketplace/courses/:id/thumbnail", async (req, res) => {
   const courseId = id(req.params.id);

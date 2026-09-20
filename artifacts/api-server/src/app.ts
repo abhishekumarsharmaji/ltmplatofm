@@ -3,6 +3,7 @@ import pinoHttp from "pino-http";
 import cookieParser from "cookie-parser";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import seoRouter from "./routes/seo";
 
 const app: Express = express();
 
@@ -32,5 +33,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+// Public pages are rendered here for crawlers; nginx sends private SPA routes directly to Vite.
+app.use("/", seoRouter);
 
 export default app;

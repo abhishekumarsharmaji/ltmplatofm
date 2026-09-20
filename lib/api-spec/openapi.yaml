@@ -162,6 +162,13 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/Course" }
+  /marketplace/creators/{username}:
+    get:
+      operationId: getPublicCreatorProfile
+      parameters: [{ name: username, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200": { description: Public creator profile and published catalogue, content: { application/json: { schema: { $ref: "#/components/schemas/PublicCreatorProfile" } } } }
+        "404": { description: Creator not found }
   /categories:
     get:
       operationId: listCategories
@@ -908,6 +915,26 @@ components:
         websiteUrl: { type: ["string", "null"] }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
+    PublicCreatorProfile:
+      type: object
+      required: [profile, courses, products]
+      properties:
+        profile:
+          type: object
+          required: [displayName, username, headline]
+          properties:
+            displayName: { type: string }
+            username: { type: string }
+            headline: { type: string }
+            bio: { type: ["string", "null"] }
+            avatarUrl: { type: ["string", "null"] }
+            websiteUrl: { type: ["string", "null"] }
+        courses:
+          type: array
+          items: { $ref: "#/components/schemas/Course" }
+        products:
+          type: array
+          items: { $ref: "#/components/schemas/Product" }
     RejectCreatorApplicationInput:
       type: object
       required: [reason]
@@ -981,6 +1008,10 @@ components:
           items: { $ref: "#/components/schemas/Module" }
         creatorName:
           type: ["string", "null"]
+        creatorUsername:
+          type: ["string", "null"]
+        creatorAvatarUrl:
+          type: ["string", "null"]
         enrolled:
           type: boolean
         level:
@@ -1022,6 +1053,9 @@ components:
         subtype: { type: ["string", "null"], enum: [ebook, guide, workbook, checklist, planner, template, spreadsheet, presentation, design_asset, photo_preset, audio, video, code, plugin, prompt_pack, toolkit, document, bundle, other, null] }
         publicSlug: { type: ["string", "null"] }
         coverImageUrl: { type: ["string", "null"] }
+        creatorName: { type: ["string", "null"] }
+        creatorUsername: { type: ["string", "null"] }
+        creatorAvatarUrl: { type: ["string", "null"] }
         salesPage: { $ref: "#/components/schemas/DigitalProductSalesPage" }
         type: { type: string, enum: [course, digital] }
         priceMinor: { type: integer, minimum: 0 }
