@@ -133,8 +133,8 @@ function Overview() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white border border-[#E5E5E5] rounded-xl p-8 shadow-sm min-h-[400px]">
-          <div className="flex items-center justify-between mb-8">
+        <div className="min-h-[400px] rounded-xl border border-[#E5E5E5] bg-white p-4 shadow-sm sm:p-8">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-2 sm:mb-8">
             <h3 className="text-[20px] font-bold text-black">Recent Orders</h3>
             <Link href="/dashboard/creator/sales" className="text-primary hover:bg-[#E3F9EF] hover:text-primary h-10 px-4 py-2 inline-flex items-center justify-center rounded-md font-medium">View All</Link>
           </div>
@@ -146,14 +146,14 @@ function Overview() {
               <p className="text-[#9794AA] text-center py-10">No orders yet.</p>
             ) : (
               sales.orders.slice(0, 5).map((order: any, i) => (
-                <div key={i} className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors border border-transparent hover:border-[#E5E5E5]">
-                  <div className="flex items-center gap-4">
+                <div key={i} className="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-lg border border-transparent p-3 transition-colors hover:border-[#E5E5E5] hover:bg-gray-50 sm:p-4">
+                  <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                     <div className="w-10 h-10 bg-[#FAFAFA] border border-[#E5E5E5] rounded-full flex items-center justify-center font-bold text-[#394649]">
                       {order.userName?.charAt(0) || "U"}
                     </div>
-                    <div>
-                      <p className="font-bold text-[14px] text-black">{order.userName}</p>
-                      <p className="text-[13px] text-[#4D4D4D]">{order.productName}</p>
+                    <div className="min-w-0">
+                      <p className="truncate font-bold text-[14px] text-black">{order.userName}</p>
+                      <p className="line-clamp-2 break-words text-[13px] text-[#4D4D4D]">{order.productName}</p>
                     </div>
                   </div>
                   <span className="text-[14px] font-bold text-primary">+{formatMoney(order.amountMinor || 0, order.currency || sales.currency)}</span>
@@ -163,7 +163,7 @@ function Overview() {
           </div>
         </div>
         
-        <div className="bg-[#515151] rounded-xl p-8 shadow-sm min-h-[400px] flex flex-col">
+        <div className="flex min-h-[360px] flex-col rounded-xl bg-[#515151] p-5 shadow-sm sm:min-h-[400px] sm:p-8">
           <h3 className="text-[20px] font-bold text-white mb-8">Quick Actions</h3>
           <div className="space-y-4 flex-1 flex flex-col justify-center">
             <Link href="/dashboard/creator/courses" className="w-full justify-start h-14 bg-white/10 hover:bg-white/20 text-white border-none rounded-lg text-[15px] transition-colors inline-flex items-center px-4">
@@ -282,8 +282,24 @@ function Products() {
           </ProductFormDialog>
         </div>
       ) : (
-        <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+        <div className="overflow-hidden rounded-lg border border-[#E5E5E5] bg-white shadow-sm">
+          <div className="grid gap-3 p-3 sm:hidden">
+            {products.map((item: any) => (
+              <div key={item.id} className="min-w-0 rounded-lg border border-[#E5E5E5] p-4">
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="break-words text-[15px] font-bold text-black">{item.title}</p>
+                    <p className="mt-1 text-xs uppercase tracking-wide text-[#607269]">{item.subtype || item.type}</p>
+                  </div>
+                  <Badge className={item.status === 'published' ? 'shrink-0 bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'shrink-0 bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
+                    {item.status}
+                  </Badge>
+                </div>
+                <Link href={`/dashboard/creator/products/${item.id}/manage`} className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-[13px] font-medium text-white hover:bg-[#10A364]">Manage</Link>
+              </div>
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto sm:block">
             <table className="w-full min-w-[700px] text-left">
               <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
                 <tr>
@@ -356,8 +372,22 @@ function Sales() {
           
           <div className="pt-4">
             <h3 className="text-[24px] font-bold text-black mb-6">Transaction History</h3>
-            <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-              <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <div className="overflow-hidden rounded-lg border border-[#E5E5E5] bg-white shadow-sm">
+              <div className="grid gap-3 p-3 sm:hidden">
+                {sales.orders && sales.orders.length > 0 ? sales.orders.map((order: any, i) => (
+                  <div key={i} className="min-w-0 rounded-lg border border-[#E5E5E5] p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-bold text-black">{order.userName}</p>
+                        <p className="mt-1 break-words text-sm text-[#4D4D4D]">{order.productName}</p>
+                        <p className="mt-2 text-xs text-[#607269]">{order.createdAt ? new Date(String(order.createdAt)).toLocaleDateString() : '-'}</p>
+                      </div>
+                      <span className="shrink-0 font-bold text-primary">+{formatMoney(order.amountMinor || 0, order.currency || sales.currency)}</span>
+                    </div>
+                  </div>
+                )) : <p className="p-5 text-center text-[#9794AA]">No transactions found.</p>}
+              </div>
+              <div className="hidden overflow-x-auto sm:block">
                 <table className="w-full min-w-[600px] text-left">
                   <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
                     <tr>
