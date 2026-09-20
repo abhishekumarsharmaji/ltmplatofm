@@ -586,14 +586,13 @@ paths:
   /payments/zapupi/webhook:
     post:
       operationId: receiveZapUpiWebhook
-      requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ZapUpiWebhookPayload" } } } }
       responses: { "200": { description: Webhook accepted } }
-  /payments/zapupi/orders/{orderId}:
-    get:
+  /payments/zapupi/orders/{orderId}/status:
+    post:
       operationId: getZapUpiPaymentOrder
-      parameters:
-        - { name: orderId, in: path, required: true, schema: { type: string } }
-        - { name: token, in: query, required: true, schema: { type: string } }
+      parameters: [{ name: orderId, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ZapUpiPaymentStatusInput" } } } }
       responses:
         "200": { description: Current verified payment status, content: { application/json: { schema: { $ref: "#/components/schemas/ZapUpiPaymentOrder" } } } }
         "404": { description: Payment order not found }
@@ -1099,6 +1098,14 @@ components:
         orderId: { type: string }
         paymentUrl: { type: string, format: uri }
         checkoutToken: { type: string }
+    ZapUpiWebhookPayload:
+      type: object
+      additionalProperties: true
+    ZapUpiPaymentStatusInput:
+      type: object
+      required: [token]
+      properties:
+        token: { type: string }
     ZapUpiPaymentOrder:
       type: object
       required: [orderId, status, productId, productTitle]

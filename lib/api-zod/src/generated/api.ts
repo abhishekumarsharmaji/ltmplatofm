@@ -2136,6 +2136,56 @@ export const CreateGuestDigitalProductAccessResponse = zod.object({
 })
 
 
+export const CreateZapUpiDigitalProductCheckoutParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const createZapUpiDigitalProductCheckoutBodyEmailMax = 254;
+
+export const createZapUpiDigitalProductCheckoutBodyPhoneMin = 8;
+export const createZapUpiDigitalProductCheckoutBodyPhoneMax = 20;
+
+
+
+export const CreateZapUpiDigitalProductCheckoutBody = zod.object({
+  "email": zod.string().email().max(createZapUpiDigitalProductCheckoutBodyEmailMax),
+  "phone": zod.string().min(createZapUpiDigitalProductCheckoutBodyPhoneMin).max(createZapUpiDigitalProductCheckoutBodyPhoneMax)
+})
+
+export const CreateZapUpiDigitalProductCheckoutResponse = zod.object({
+  "orderId": zod.string(),
+  "paymentUrl": zod.string().url(),
+  "checkoutToken": zod.string()
+})
+
+
+export const ReceiveZapUpiWebhookBody = zod.record(zod.string(), zod.unknown())
+
+export const ReceiveZapUpiWebhookResponse = zod.unknown()
+
+
+export const GetZapUpiPaymentOrderParams = zod.object({
+  "orderId": zod.coerce.string()
+})
+
+export const GetZapUpiPaymentOrderBody = zod.object({
+  "token": zod.string()
+})
+
+export const GetZapUpiPaymentOrderResponse = zod.object({
+  "orderId": zod.string(),
+  "status": zod.enum(['pending', 'succeeded', 'failed', 'refunded']),
+  "productId": zod.number().int(),
+  "productTitle": zod.string(),
+  "accessExpiresAt": zod.coerce.date().nullish(),
+  "files": zod.array(zod.object({
+  "id": zod.number().int(),
+  "filename": zod.string(),
+  "sizeBytes": zod.number().int().nullish()
+})).optional()
+})
+
+
 export const DownloadGuestDigitalProductFileParams = zod.object({
   "productId": zod.coerce.number().int(),
   "fileId": zod.coerce.number().int()

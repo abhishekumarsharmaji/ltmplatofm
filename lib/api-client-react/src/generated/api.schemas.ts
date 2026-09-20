@@ -524,6 +524,55 @@ export interface GuestDigitalAccess {
   files: DigitalFile[];
 }
 
+export interface ZapUpiCheckoutInput {
+  /** @maxLength 254 */
+  email: string;
+  /**
+     * @minLength 8
+     * @maxLength 20
+     */
+  phone: string;
+}
+
+export interface ZapUpiCheckout {
+  orderId: string;
+  paymentUrl: string;
+  checkoutToken: string;
+}
+
+export interface ZapUpiWebhookPayload { [key: string]: unknown }
+
+export interface ZapUpiPaymentStatusInput {
+  token: string;
+}
+
+export type ZapUpiPaymentOrderStatus = typeof ZapUpiPaymentOrderStatus[keyof typeof ZapUpiPaymentOrderStatus];
+
+
+export const ZapUpiPaymentOrderStatus = {
+  pending: 'pending',
+  succeeded: 'succeeded',
+  failed: 'failed',
+  refunded: 'refunded',
+} as const;
+
+export type ZapUpiPaymentOrderFilesItem = {
+  id: number;
+  filename: string;
+  /** @nullable */
+  sizeBytes?: number | null;
+};
+
+export interface ZapUpiPaymentOrder {
+  orderId: string;
+  status: ZapUpiPaymentOrderStatus;
+  productId: number;
+  productTitle: string;
+  /** @nullable */
+  accessExpiresAt?: string | null;
+  files?: ZapUpiPaymentOrderFilesItem[];
+}
+
 export type DigitalProductReadinessChecks = {
   title: boolean;
   description: boolean;

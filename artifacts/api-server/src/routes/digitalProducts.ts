@@ -342,9 +342,9 @@ router.post("/payments/zapupi/webhook", async (req, res): Promise<void> => {
   res.status(200).json({ status: "ok" });
 });
 
-router.get("/payments/zapupi/orders/:orderId", async (req, res): Promise<void> => {
+router.post("/payments/zapupi/orders/:orderId/status", async (req, res): Promise<void> => {
   const orderId = String(req.params.orderId || "");
-  if (!/^CS\d{13}[A-F0-9]{10}$/.test(orderId) || !validCheckoutToken(orderId, req.query.token)) {
+  if (!/^CS\d{13}[A-F0-9]{10}$/.test(orderId) || !validCheckoutToken(orderId, req.body?.token)) {
     res.status(404).json({ error: "Payment order not found" }); return;
   }
   let [payment] = await db.select().from(digitalProductPaymentsTable)

@@ -48,6 +48,7 @@ export default function ProductDetail() {
   const [guestEmail, setGuestEmail] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [guestPending, setGuestPending] = useState(false);
+  const [checkoutPending, setCheckoutPending] = useState(false);
   const [guestError, setGuestError] = useState("");
   const [guestAccess, setGuestAccess] = useState<null | {
     expiresAt: string;
@@ -81,6 +82,26 @@ export default function ProductDetail() {
       setGuestError(error instanceof Error ? error.message : "Access could not be created");
     } finally {
       setGuestPending(false);
+    }
+  };
+
+  const handleCheckout = async () => {
+    if (!product || product.priceMinor <= 0) return;
+    setCheckoutPending(true);
+    setGuestError("");
+    try {
+      const response = await fetch(`/api/marketplace/digital-products/${encodeURIComponent(productKey)}/checkout/zapupi`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: guestEmail, phone: guestPhone }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || "Secure checkout could not be started");
+      if (typeof body.paymentUrl !== "string") throw new Error("Payment page is unavailable");
+      window.location.assign(body.paymentUrl);
+    } catch (error) {
+      setGuestError(error instanceof Error ? error.message : "Secure checkout could not be started");
+      setCheckoutPending(false);
     }
   };
 
@@ -120,8 +141,6 @@ export default function ProductDetail() {
         : product.accessPlan === "yearly"
           ? "Yearly access"
           : "Lifetime access";
-  const canStartGuestAccess = isFree || product.trialDays > 0;
-
   const renderCTA = () => {
     if (guestAccess) {
       return (
@@ -168,14 +187,26 @@ export default function ProductDetail() {
         <Input type="tel" value={guestPhone} onChange={(event) => setGuestPhone(event.target.value)} placeholder="+91 mobile number" autoComplete="tel" />
         {guestError && <p className="text-sm text-red-600">{guestError}</p>}
         <Button
-          onClick={() => void handleGuestAccess()}
-          disabled={guestPending || !canStartGuestAccess}
+          onClick={() => void (isFree ? handleGuestAccess() : handleCheckout())}
+          disabled={guestPending || checkoutPending}
           className="h-14 w-full rounded-lg bg-primary text-[16px] font-medium text-white hover:bg-[#10A364] disabled:cursor-not-allowed disabled:bg-[#BFC8C4]"
         >
-          {canStartGuestAccess ? (guestPending ? "Preparing access..." : product.trialDays > 0 && !isFree ? "Start free trial" : ctaText) : "Payments unavailable"}
+          {isFree
+            ? (guestPending ? "Preparing access..." : ctaText)
+            : (checkoutPending ? "Opening secure payment..." : `Pay ${priceLabel} with UPI`)}
         </Button>
+        {!isFree && product.trialDays > 0 && (
+          <Button
+            variant="outline"
+            onClick={() => void handleGuestAccess()}
+            disabled={guestPending || checkoutPending}
+            className="h-12 w-full rounded-lg border-[#B9CCC3] bg-white font-semibold text-[#234238] hover:bg-[#F4FAF7]"
+          >
+            {guestPending ? "Preparing trial..." : `Start ${product.trialDays}-day free trial`}
+          </Button>
+        )}
         <p className="text-center text-xs leading-5 text-[#737373]">
-          No account required. By continuing, you agree to the Terms and Privacy Policy.
+          {isFree ? "No account required." : "Verified secure payment by ZapUPI."} By continuing, you agree to the Terms and Privacy Policy.
         </p>
       </div>
     );

@@ -95,7 +95,12 @@ import type {
   UpdateCreatorCourseBasics200,
   User,
   VideoUploadInput,
-  VideoUploadResponse
+  VideoUploadResponse,
+  ZapUpiCheckout,
+  ZapUpiCheckoutInput,
+  ZapUpiPaymentOrder,
+  ZapUpiPaymentStatusInput,
+  ZapUpiWebhookPayload
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -6261,6 +6266,254 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getCreateGuestDigitalProductAccessMutationOptions(options));
+    }
+
+export const getCreateZapUpiDigitalProductCheckoutUrl = (id: string,) => {
+
+
+
+
+  return `/api/marketplace/digital-products/${id}/checkout/zapupi`
+}
+
+export const createZapUpiDigitalProductCheckout = async (id: string,
+    zapUpiCheckoutInput: ZapUpiCheckoutInput, options?: Parameters<typeof customFetch>[1]): Promise<ZapUpiCheckout> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ZapUpiCheckout>(getCreateZapUpiDigitalProductCheckoutUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(zapUpiCheckoutInput)
+  }
+);}
+
+
+
+
+
+export const getCreateZapUpiDigitalProductCheckoutMutationKey = () => ['createZapUpiDigitalProductCheckout'] as const;
+
+export const getCreateZapUpiDigitalProductCheckoutMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createZapUpiDigitalProductCheckout>>, TError,CreateZapUpiDigitalProductCheckoutMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createZapUpiDigitalProductCheckout>>, TError,CreateZapUpiDigitalProductCheckoutMutationVariables, TContext> => {
+
+const mutationKey = getCreateZapUpiDigitalProductCheckoutMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createZapUpiDigitalProductCheckout>>, CreateZapUpiDigitalProductCheckoutMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createZapUpiDigitalProductCheckout(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateZapUpiDigitalProductCheckoutMutationResult = NonNullable<Awaited<ReturnType<typeof createZapUpiDigitalProductCheckout>>>
+    export type CreateZapUpiDigitalProductCheckoutMutationBody = BodyType<ZapUpiCheckoutInput>
+    export type CreateZapUpiDigitalProductCheckoutMutationError = ErrorType<void>
+    export type CreateZapUpiDigitalProductCheckoutMutationVariables = {id: string;data: BodyType<ZapUpiCheckoutInput>}
+
+    export const useCreateZapUpiDigitalProductCheckout = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createZapUpiDigitalProductCheckout>>, TError,CreateZapUpiDigitalProductCheckoutMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createZapUpiDigitalProductCheckout>>,
+        TError,
+        CreateZapUpiDigitalProductCheckoutMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateZapUpiDigitalProductCheckoutMutationOptions(options));
+    }
+
+export const getReceiveZapUpiWebhookUrl = () => {
+
+
+
+
+  return `/api/payments/zapupi/webhook`
+}
+
+export const receiveZapUpiWebhook = async (zapUpiWebhookPayload: ZapUpiWebhookPayload, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<void>(getReceiveZapUpiWebhookUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(zapUpiWebhookPayload)
+  }
+);}
+
+
+
+
+
+export const getReceiveZapUpiWebhookMutationKey = () => ['receiveZapUpiWebhook'] as const;
+
+export const getReceiveZapUpiWebhookMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveZapUpiWebhook>>, TError,ReceiveZapUpiWebhookMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof receiveZapUpiWebhook>>, TError,ReceiveZapUpiWebhookMutationVariables, TContext> => {
+
+const mutationKey = getReceiveZapUpiWebhookMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof receiveZapUpiWebhook>>, ReceiveZapUpiWebhookMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  receiveZapUpiWebhook(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReceiveZapUpiWebhookMutationResult = NonNullable<Awaited<ReturnType<typeof receiveZapUpiWebhook>>>
+    export type ReceiveZapUpiWebhookMutationBody = BodyType<ZapUpiWebhookPayload>
+    export type ReceiveZapUpiWebhookMutationError = ErrorType<unknown>
+    export type ReceiveZapUpiWebhookMutationVariables = {data: BodyType<ZapUpiWebhookPayload>}
+
+    export const useReceiveZapUpiWebhook = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveZapUpiWebhook>>, TError,ReceiveZapUpiWebhookMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof receiveZapUpiWebhook>>,
+        TError,
+        ReceiveZapUpiWebhookMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReceiveZapUpiWebhookMutationOptions(options));
+    }
+
+export const getGetZapUpiPaymentOrderUrl = (orderId: string,) => {
+
+
+
+
+  return `/api/payments/zapupi/orders/${orderId}/status`
+}
+
+export const getZapUpiPaymentOrder = async (orderId: string,
+    zapUpiPaymentStatusInput: ZapUpiPaymentStatusInput, options?: Parameters<typeof customFetch>[1]): Promise<ZapUpiPaymentOrder> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ZapUpiPaymentOrder>(getGetZapUpiPaymentOrderUrl(orderId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(zapUpiPaymentStatusInput)
+  }
+);}
+
+
+
+
+
+export const getGetZapUpiPaymentOrderMutationKey = () => ['getZapUpiPaymentOrder'] as const;
+
+export const getGetZapUpiPaymentOrderMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getZapUpiPaymentOrder>>, TError,GetZapUpiPaymentOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof getZapUpiPaymentOrder>>, TError,GetZapUpiPaymentOrderMutationVariables, TContext> => {
+
+const mutationKey = getGetZapUpiPaymentOrderMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof getZapUpiPaymentOrder>>, GetZapUpiPaymentOrderMutationVariables> = (props) => {
+          const {orderId,data} = props ?? {};
+
+          return  getZapUpiPaymentOrder(orderId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GetZapUpiPaymentOrderMutationResult = NonNullable<Awaited<ReturnType<typeof getZapUpiPaymentOrder>>>
+    export type GetZapUpiPaymentOrderMutationBody = BodyType<ZapUpiPaymentStatusInput>
+    export type GetZapUpiPaymentOrderMutationError = ErrorType<void>
+    export type GetZapUpiPaymentOrderMutationVariables = {orderId: string;data: BodyType<ZapUpiPaymentStatusInput>}
+
+    export const useGetZapUpiPaymentOrder = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getZapUpiPaymentOrder>>, TError,GetZapUpiPaymentOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof getZapUpiPaymentOrder>>,
+        TError,
+        GetZapUpiPaymentOrderMutationVariables,
+        TContext
+      > => {
+      return useMutation(getGetZapUpiPaymentOrderMutationOptions(options));
     }
 
 export const getDownloadGuestDigitalProductFileUrl = (productId: number,

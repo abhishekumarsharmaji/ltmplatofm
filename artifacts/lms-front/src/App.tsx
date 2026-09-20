@@ -27,6 +27,7 @@ const ContactPage = lazy(() => import('./pages/CompliancePages').then((module) =
 const Login = lazy(() => import('./pages/auth/Login'));
 const SignUp = lazy(() => import('./pages/auth/SignUp'));
 const CreatorApplication = lazy(() => import('./pages/CreatorApplication'));
+const ZapUpiCheckout = lazy(() => import('./pages/ZapUpiCheckout'));
 const UnavailablePage = lazy(() => import('./pages/UnavailablePage'));
 const NotFound = lazy(() => import('./pages/not-found'));
 const StudentDashboard = lazy(() => import('./pages/dashboard/StudentDashboard'));
@@ -87,7 +88,9 @@ function Router() {
         <Route path="/shipping-delivery" component={DeliveryPage} />
         <Route path="/contact" component={ContactPage} />
         
-        {/* Unavailable features */}
+        <Route path="/checkout/zapupi" component={ZapUpiCheckout} />
+
+        {/* Unavailable legacy features */}
         <Route path="/checkout" component={UnavailablePage} />
         <Route path="/checkout/success" component={UnavailablePage} />
         
