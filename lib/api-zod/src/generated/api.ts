@@ -250,6 +250,91 @@ export const SubmitCreatorApplicationResponse = zod.object({
 }))
 
 
+export const GetCreatorProfileResponse = zod.object({
+  "id": zod.number().int(),
+  "userId": zod.number().int(),
+  "displayName": zod.string(),
+  "username": zod.string().nullish(),
+  "headline": zod.string(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "websiteUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+export const updateCreatorProfileBodyDisplayNameMin = 2;
+export const updateCreatorProfileBodyDisplayNameMax = 80;
+
+export const updateCreatorProfileBodyUsernameMin = 3;
+export const updateCreatorProfileBodyUsernameMax = 30;
+
+
+export const updateCreatorProfileBodyUsernameRegExp = new RegExp('^[a-z0-9_]+$');
+export const updateCreatorProfileBodyHeadlineMax = 140;
+
+export const updateCreatorProfileBodyBioMax = 1500;
+
+export const updateCreatorProfileBodyWebsiteUrlMax = 500;
+
+
+
+export const UpdateCreatorProfileBody = zod.object({
+  "displayName": zod.string().min(updateCreatorProfileBodyDisplayNameMin).max(updateCreatorProfileBodyDisplayNameMax),
+  "username": zod.string().min(updateCreatorProfileBodyUsernameMin).max(updateCreatorProfileBodyUsernameMax).regex(updateCreatorProfileBodyUsernameRegExp),
+  "headline": zod.string().max(updateCreatorProfileBodyHeadlineMax).optional(),
+  "bio": zod.string().max(updateCreatorProfileBodyBioMax).optional(),
+  "websiteUrl": zod.string().max(updateCreatorProfileBodyWebsiteUrlMax).optional()
+})
+
+export const UpdateCreatorProfileResponse = zod.object({
+  "id": zod.number().int(),
+  "userId": zod.number().int(),
+  "displayName": zod.string(),
+  "username": zod.string().nullish(),
+  "headline": zod.string(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "websiteUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+
+
+
+export const RequestCreatorAvatarUploadBody = zod.object({
+  "filename": zod.string(),
+  "mimeType": zod.string(),
+  "sizeBytes": zod.number().int().min(1)
+})
+
+export const RequestCreatorAvatarUploadResponse = zod.object({
+  "uploadURL": zod.string(),
+  "objectPath": zod.string()
+})
+
+
+export const FinalizeCreatorAvatarUploadBody = zod.object({
+  "objectPath": zod.string()
+})
+
+export const FinalizeCreatorAvatarUploadResponse = zod.object({
+  "id": zod.number().int(),
+  "userId": zod.number().int(),
+  "displayName": zod.string(),
+  "username": zod.string().nullish(),
+  "headline": zod.string(),
+  "bio": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish(),
+  "websiteUrl": zod.string().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
 export const AdminCreatorApplicationsQueryParams = zod.object({
   "status": zod.enum(['pending', 'approved', 'rejected']).optional()
 })
@@ -2089,6 +2174,9 @@ export const GetDigitalProductResponse = zod.object({
   "acquiredAt": zod.coerce.date().nullish()
 })).and(zod.object({
   "creatorName": zod.string().nullish(),
+  "creatorUsername": zod.string().nullish(),
+  "creatorHeadline": zod.string().nullish(),
+  "creatorAvatarUrl": zod.string().nullish(),
   "files": zod.array(zod.object({
   "id": zod.number().int(),
   "productId": zod.number().int(),
@@ -2522,6 +2610,9 @@ export const GetStudentDigitalProductResponse = zod.object({
   "acquiredAt": zod.coerce.date().nullish()
 })).and(zod.object({
   "creatorName": zod.string().nullish(),
+  "creatorUsername": zod.string().nullish(),
+  "creatorHeadline": zod.string().nullish(),
+  "creatorAvatarUrl": zod.string().nullish(),
   "files": zod.array(zod.object({
   "id": zod.number().int(),
   "productId": zod.number().int(),

@@ -11,5 +11,11 @@ import type { DigitalProduct } from './digitalProduct';
 export type DigitalProductDetail = DigitalProduct & ({
   /** @nullable */
   creatorName?: string | null;
+  /** @nullable */
+  creatorUsername?: string | null;
+  /** @nullable */
+  creatorHeadline?: string | null;
+  /** @nullable */
+  creatorAvatarUrl?: string | null;
   files: DigitalFile[];
 });

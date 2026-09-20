@@ -44,6 +44,8 @@ import type {
   CourseReadiness,
   CreatorApplication,
   CreatorApplicationInput,
+  CreatorProfile,
+  CreatorProfileInput,
   DigitalAcquisition,
   DigitalFile,
   DigitalFileUploadInput,
@@ -733,6 +735,323 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getSubmitCreatorApplicationMutationOptions(options));
+    }
+
+export const getGetCreatorProfileUrl = () => {
+
+
+
+
+  return `/api/creator/profile`
+}
+
+export const getCreatorProfile = async ( options?: Parameters<typeof customFetch>[1]): Promise<CreatorProfile> => {
+
+  return customFetch<CreatorProfile>(getGetCreatorProfileUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCreatorProfileQueryKey = () => {
+    return [
+    `/api/creator/profile`
+    ] as const;
+    }
+
+
+export const getGetCreatorProfileQueryOptions = <TData = Awaited<ReturnType<typeof getCreatorProfile>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCreatorProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCreatorProfileQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCreatorProfile>>> = ({ signal }) => getCreatorProfile({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCreatorProfile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCreatorProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getCreatorProfile>>>
+export type GetCreatorProfileQueryError = ErrorType<unknown>
+
+
+
+export function useGetCreatorProfile<TData = Awaited<ReturnType<typeof getCreatorProfile>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCreatorProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCreatorProfileQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateCreatorProfileUrl = () => {
+
+
+
+
+  return `/api/creator/profile`
+}
+
+export const updateCreatorProfile = async (creatorProfileInput: CreatorProfileInput, options?: Parameters<typeof customFetch>[1]): Promise<CreatorProfile> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<CreatorProfile>(getUpdateCreatorProfileUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(creatorProfileInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateCreatorProfileMutationKey = () => ['updateCreatorProfile'] as const;
+
+export const getUpdateCreatorProfileMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCreatorProfile>>, TError,UpdateCreatorProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateCreatorProfile>>, TError,UpdateCreatorProfileMutationVariables, TContext> => {
+
+const mutationKey = getUpdateCreatorProfileMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateCreatorProfile>>, UpdateCreatorProfileMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateCreatorProfile(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateCreatorProfileMutationResult = NonNullable<Awaited<ReturnType<typeof updateCreatorProfile>>>
+    export type UpdateCreatorProfileMutationBody = BodyType<CreatorProfileInput>
+    export type UpdateCreatorProfileMutationError = ErrorType<unknown>
+    export type UpdateCreatorProfileMutationVariables = {data: BodyType<CreatorProfileInput>}
+
+    export const useUpdateCreatorProfile = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCreatorProfile>>, TError,UpdateCreatorProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateCreatorProfile>>,
+        TError,
+        UpdateCreatorProfileMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateCreatorProfileMutationOptions(options));
+    }
+
+export const getRequestCreatorAvatarUploadUrl = () => {
+
+
+
+
+  return `/api/creator/profile/avatar/request-upload`
+}
+
+export const requestCreatorAvatarUpload = async (imageUploadInput: ImageUploadInput, options?: Parameters<typeof customFetch>[1]): Promise<ImageUploadResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ImageUploadResponse>(getRequestCreatorAvatarUploadUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(imageUploadInput)
+  }
+);}
+
+
+
+
+
+export const getRequestCreatorAvatarUploadMutationKey = () => ['requestCreatorAvatarUpload'] as const;
+
+export const getRequestCreatorAvatarUploadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestCreatorAvatarUpload>>, TError,RequestCreatorAvatarUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestCreatorAvatarUpload>>, TError,RequestCreatorAvatarUploadMutationVariables, TContext> => {
+
+const mutationKey = getRequestCreatorAvatarUploadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestCreatorAvatarUpload>>, RequestCreatorAvatarUploadMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestCreatorAvatarUpload(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestCreatorAvatarUploadMutationResult = NonNullable<Awaited<ReturnType<typeof requestCreatorAvatarUpload>>>
+    export type RequestCreatorAvatarUploadMutationBody = BodyType<ImageUploadInput>
+    export type RequestCreatorAvatarUploadMutationError = ErrorType<unknown>
+    export type RequestCreatorAvatarUploadMutationVariables = {data: BodyType<ImageUploadInput>}
+
+    export const useRequestCreatorAvatarUpload = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestCreatorAvatarUpload>>, TError,RequestCreatorAvatarUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestCreatorAvatarUpload>>,
+        TError,
+        RequestCreatorAvatarUploadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestCreatorAvatarUploadMutationOptions(options));
+    }
+
+export const getFinalizeCreatorAvatarUploadUrl = () => {
+
+
+
+
+  return `/api/creator/profile/avatar/finalize`
+}
+
+export const finalizeCreatorAvatarUpload = async (imageFinalizeInput: ImageFinalizeInput, options?: Parameters<typeof customFetch>[1]): Promise<CreatorProfile> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<CreatorProfile>(getFinalizeCreatorAvatarUploadUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(imageFinalizeInput)
+  }
+);}
+
+
+
+
+
+export const getFinalizeCreatorAvatarUploadMutationKey = () => ['finalizeCreatorAvatarUpload'] as const;
+
+export const getFinalizeCreatorAvatarUploadMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof finalizeCreatorAvatarUpload>>, TError,FinalizeCreatorAvatarUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof finalizeCreatorAvatarUpload>>, TError,FinalizeCreatorAvatarUploadMutationVariables, TContext> => {
+
+const mutationKey = getFinalizeCreatorAvatarUploadMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof finalizeCreatorAvatarUpload>>, FinalizeCreatorAvatarUploadMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  finalizeCreatorAvatarUpload(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type FinalizeCreatorAvatarUploadMutationResult = NonNullable<Awaited<ReturnType<typeof finalizeCreatorAvatarUpload>>>
+    export type FinalizeCreatorAvatarUploadMutationBody = BodyType<ImageFinalizeInput>
+    export type FinalizeCreatorAvatarUploadMutationError = ErrorType<unknown>
+    export type FinalizeCreatorAvatarUploadMutationVariables = {data: BodyType<ImageFinalizeInput>}
+
+    export const useFinalizeCreatorAvatarUpload = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof finalizeCreatorAvatarUpload>>, TError,FinalizeCreatorAvatarUploadMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof finalizeCreatorAvatarUpload>>,
+        TError,
+        FinalizeCreatorAvatarUploadMutationVariables,
+        TContext
+      > => {
+      return useMutation(getFinalizeCreatorAvatarUploadMutationOptions(options));
     }
 
 export const getAdminCreatorApplicationsUrl = (params?: AdminCreatorApplicationsParams,) => {

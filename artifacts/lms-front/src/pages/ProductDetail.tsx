@@ -253,10 +253,16 @@ export default function ProductDetail() {
                 
                 {product.creatorName && (
                   <div className="flex items-center justify-center lg:justify-start gap-3 pt-2">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#123D32] text-[14px] font-bold text-white shadow-sm">
-                      {product.creatorName.charAt(0).toUpperCase()}
+                    <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-[#123D32] text-[14px] font-bold text-white shadow-sm">
+                      {product.creatorAvatarUrl ? (
+                        <img src={product.creatorAvatarUrl} alt={product.creatorName} className="h-full w-full object-cover" />
+                      ) : product.creatorName.charAt(0).toUpperCase()}
                     </div>
-                    <p className="text-[15px] font-semibold text-[#344B41]">By {product.creatorName}</p>
+                    <div>
+                      <p className="text-[15px] font-semibold text-[#344B41]">By {product.creatorName}</p>
+                      {product.creatorUsername && <p className="text-xs text-[#6A7D74]">@{product.creatorUsername}</p>}
+                      {product.creatorHeadline && <p className="mt-1 text-xs text-[#6A7D74]">{product.creatorHeadline}</p>}
+                    </div>
                   </div>
                 )}
                 

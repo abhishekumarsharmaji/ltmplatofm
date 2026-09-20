@@ -326,6 +326,43 @@ export type CreatorApplication = CreatorApplicationInput & ({
   updatedAt: string;
 });
 
+export interface CreatorProfileInput {
+  /**
+     * @minLength 2
+     * @maxLength 80
+     */
+  displayName: string;
+  /**
+     * @minLength 3
+     * @maxLength 30
+     * @pattern ^[a-z0-9_]+$
+     */
+  username: string;
+  /** @maxLength 140 */
+  headline?: string;
+  /** @maxLength 1500 */
+  bio?: string;
+  /** @maxLength 500 */
+  websiteUrl?: string;
+}
+
+export interface CreatorProfile {
+  id: number;
+  userId: number;
+  displayName: string;
+  /** @nullable */
+  username?: string | null;
+  headline: string;
+  /** @nullable */
+  bio?: string | null;
+  /** @nullable */
+  avatarUrl?: string | null;
+  /** @nullable */
+  websiteUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface RejectCreatorApplicationInput {
   /** @minLength 1 */
   reason: string;
@@ -481,6 +518,12 @@ export type DigitalProduct = Product & ({
 export type DigitalProductDetail = DigitalProduct & ({
   /** @nullable */
   creatorName?: string | null;
+  /** @nullable */
+  creatorUsername?: string | null;
+  /** @nullable */
+  creatorHeadline?: string | null;
+  /** @nullable */
+  creatorAvatarUrl?: string | null;
   files: DigitalFile[];
 });
 

@@ -37,6 +37,8 @@ export * from './courseReadinessChecks';
 export * from './creatorApplication';
 export * from './creatorApplicationInput';
 export * from './creatorApplicationStatus';
+export * from './creatorProfile';
+export * from './creatorProfileInput';
 export * from './digitalAcquisition';
 export * from './digitalFile';
 export * from './digitalFileStatus';

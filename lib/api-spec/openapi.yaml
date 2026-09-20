@@ -105,6 +105,28 @@ paths:
       security: [{ cookieAuth: [] }]
       requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CreatorApplicationInput" } } } }
       responses: { "200": { description: Updated application, content: { application/json: { schema: { $ref: "#/components/schemas/CreatorApplication" } } } }, "201": { description: Submitted, content: { application/json: { schema: { $ref: "#/components/schemas/CreatorApplication" } } } } }
+  /creator/profile:
+    get:
+      operationId: getCreatorProfile
+      security: [{ cookieAuth: [] }]
+      responses: { "200": { description: Creator profile, content: { application/json: { schema: { $ref: "#/components/schemas/CreatorProfile" } } } } }
+    patch:
+      operationId: updateCreatorProfile
+      security: [{ cookieAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CreatorProfileInput" } } } }
+      responses: { "200": { description: Updated creator profile, content: { application/json: { schema: { $ref: "#/components/schemas/CreatorProfile" } } } } }
+  /creator/profile/avatar/request-upload:
+    post:
+      operationId: requestCreatorAvatarUpload
+      security: [{ cookieAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ImageUploadInput" } } } }
+      responses: { "201": { description: Presigned avatar upload, content: { application/json: { schema: { $ref: "#/components/schemas/ImageUploadResponse" } } } } }
+  /creator/profile/avatar/finalize:
+    post:
+      operationId: finalizeCreatorAvatarUpload
+      security: [{ cookieAuth: [] }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ImageFinalizeInput" } } } }
+      responses: { "200": { description: Saved creator avatar, content: { application/json: { schema: { $ref: "#/components/schemas/CreatorProfile" } } } } }
   /admin/creator-applications:
     get:
       operationId: adminCreatorApplications
@@ -856,6 +878,29 @@ components:
             reviewedBy: { type: integer, nullable: true }
             createdAt: { type: string, format: date-time }
             updatedAt: { type: string, format: date-time }
+    CreatorProfileInput:
+      type: object
+      required: [displayName, username]
+      properties:
+        displayName: { type: string, minLength: 2, maxLength: 80 }
+        username: { type: string, minLength: 3, maxLength: 30, pattern: "^[a-z0-9_]+$" }
+        headline: { type: string, maxLength: 140 }
+        bio: { type: string, maxLength: 1500 }
+        websiteUrl: { type: string, maxLength: 500 }
+    CreatorProfile:
+      type: object
+      required: [id, userId, displayName, headline, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        displayName: { type: string }
+        username: { type: ["string", "null"] }
+        headline: { type: string }
+        bio: { type: ["string", "null"] }
+        avatarUrl: { type: ["string", "null"] }
+        websiteUrl: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
     RejectCreatorApplicationInput:
       type: object
       required: [reason]
@@ -1050,6 +1095,9 @@ components:
           required: [files]
           properties:
             creatorName: { type: ["string", "null"] }
+            creatorUsername: { type: ["string", "null"] }
+            creatorHeadline: { type: ["string", "null"] }
+            creatorAvatarUrl: { type: ["string", "null"] }
             files: { type: array, items: { $ref: "#/components/schemas/DigitalFile" } }
     DigitalFileUploadInput:
       type: object

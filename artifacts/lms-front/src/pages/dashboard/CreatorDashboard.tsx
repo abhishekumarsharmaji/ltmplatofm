@@ -12,6 +12,7 @@ import { BookOpen, Package, DollarSign, Users, TrendingUp, BarChart3, Plus } fro
 import { Badge } from "@/components/ui/badge";
 import { ProductFormDialog } from "@/components/dashboard/ProductFormDialog";
 import { CourseThumbnail } from "@/components/courses/CourseThumbnail";
+import { CreatorProfileSettings } from "@/components/dashboard/CreatorProfileSettings";
 
 const CourseBuilder = lazy(() => import("./creator/CourseBuilder").then((module) => ({ default: module.CourseBuilder })));
 const CreatorLiveClassesStandalone = lazy(() => import("@/components/dashboard/LiveClassesStandalone").then((module) => ({ default: module.CreatorLiveClassesStandalone })));
@@ -55,6 +56,7 @@ export default function CreatorDashboard() {
       {section === "products" && !id && <Products />}
       {section === "live-classes" && !id && <Suspense fallback={<SectionFallback />}><CreatorLiveClassesStandalone /></Suspense>}
       {section === "sales" && <Sales />}
+      {section === "profile" && <CreatorProfileSettings />}
     </DashboardLayout>
   );
 }
