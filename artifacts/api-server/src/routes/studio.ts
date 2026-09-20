@@ -1,4 +1,4 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, raw, type IRouter, type Request, type Response } from "express";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import OpenAI from "openai";
 import { db, coursesTable, courseModulesTable, enrollmentsTable, lessonAssetsTable, lessonsTable, productsTable, usersTable } from "@workspace/db";
@@ -11,6 +11,7 @@ import {
   createLessonMultipartUpload,
   createLessonAssetMultipartUpload,
   createLessonPartUploadUrl,
+  uploadLessonMultipartPart,
   createObjectDownloadUrl,
   objectFile,
 } from "../lib/objectStorage";
@@ -192,6 +193,25 @@ router.post("/creator/lessons/:lessonId/assets/:assetId/part-url", requireAuth, 
   const uploadURL = await createLessonPartUploadUrl(asset.objectPath, uploadId, partNumber);
   res.json({ uploadURL });
 });
+router.put(
+  "/creator/lessons/:lessonId/assets/:assetId/part",
+  requireAuth,
+  requireRole("creator", "admin"),
+  raw({ type: "application/octet-stream", limit: "105mb" }),
+  async (req, res): Promise<void> => {
+    const lessonId = id(req.params.lessonId), assetId = id(req.params.assetId), auth = req as AuthenticatedRequest;
+    if (!lessonId || !assetId || !await ownedLesson(lessonId, auth)) { res.status(404).json({ error: "Asset not found" }); return; }
+    const [asset] = await db.select().from(lessonAssetsTable).where(and(eq(lessonAssetsTable.id, assetId), eq(lessonAssetsTable.lessonId, lessonId)));
+    if (!asset) { res.status(404).json({ error: "Asset not found" }); return; }
+    const uploadId = req.header("x-upload-id");
+    const partNumber = Number(req.header("x-part-number"));
+    if (!uploadId || !Number.isInteger(partNumber) || partNumber < 1 || partNumber > 10_000 || !Buffer.isBuffer(req.body) || req.body.length < 1) {
+      res.status(400).json({ error: "Valid upload part data is required" }); return;
+    }
+    const eTag = await uploadLessonMultipartPart(asset.objectPath, uploadId, partNumber, req.body);
+    res.json({ eTag });
+  },
+);
 router.post("/creator/lessons/:lessonId/assets/:assetId/finalize", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const lessonId = id(req.params.lessonId), assetId = id(req.params.assetId), auth = req as AuthenticatedRequest;
   if (!lessonId || !assetId || !await ownedLesson(lessonId, auth)) { res.status(404).json({ error: "Asset not found" }); return; }

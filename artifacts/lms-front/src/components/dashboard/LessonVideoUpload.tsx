@@ -68,24 +68,32 @@ export function LessonVideoUpload({ lesson, productId, initialFile, onUploadComp
       const parts: Array<{ partNumber: number; eTag: string }> = [];
       let nextPart = 1;
       const uploadPart = async (partNumber: number) => {
-        const { uploadURL } = await apiJson<{ uploadURL: string }>(
-          `/api/creator/lessons/${lesson.id}/assets/${asset.id}/part-url`,
-          { method: "POST", body: JSON.stringify({ uploadId, partNumber }) },
-        );
         const start = (partNumber - 1) * partSize;
         const chunk = file.slice(start, Math.min(start + partSize, file.size));
         const eTag = await new Promise<string>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
-          xhr.open("PUT", uploadURL, true);
+          xhr.open("PUT", `/api/creator/lessons/${lesson.id}/assets/${asset.id}/part`, true);
+          xhr.withCredentials = true;
+          xhr.setRequestHeader("Content-Type", "application/octet-stream");
+          xhr.setRequestHeader("X-Upload-Id", uploadId);
+          xhr.setRequestHeader("X-Part-Number", String(partNumber));
           xhr.upload.onprogress = (event) => {
             loadedByPart.set(partNumber, event.loaded);
             const uploaded = Array.from(loadedByPart.values()).reduce((sum, value) => sum + value, 0);
             setProgress(Math.min(94, Math.round((uploaded / file.size) * 94)));
           };
           xhr.onload = () => {
-            const tag = xhr.getResponseHeader("ETag");
-            if (xhr.status >= 200 && xhr.status < 300 && tag) resolve(tag);
-            else reject(new Error(`Part ${partNumber} upload failed with status ${xhr.status}`));
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                const data = JSON.parse(xhr.responseText) as { eTag?: string };
+                if (data.eTag) resolve(data.eTag);
+                else reject(new Error(`Part ${partNumber} upload returned no ETag`));
+              } catch {
+                reject(new Error(`Part ${partNumber} upload returned an invalid response`));
+              }
+            } else {
+              reject(new Error(`Part ${partNumber} upload failed with status ${xhr.status}`));
+            }
           };
           xhr.onerror = () => reject(new Error(`Network error uploading part ${partNumber}`));
           xhr.send(chunk);

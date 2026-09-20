@@ -108,6 +108,24 @@ export async function createLessonPartUploadUrl(objectPath: string, uploadId: st
     PartNumber: partNumber,
   }), { expiresIn: 15 * 60 });
 }
+export async function uploadLessonMultipartPart(
+  objectPath: string,
+  uploadId: string,
+  partNumber: number,
+  contents: Buffer,
+) {
+  const { client } = r2Config();
+  const { bucket, name } = parseR2(objectPath);
+  const result = await client.send(new UploadPartCommand({
+    Bucket: bucket,
+    Key: name,
+    UploadId: uploadId,
+    PartNumber: partNumber,
+    Body: contents,
+  }));
+  if (!result.ETag) throw new Error("R2 did not return an ETag for the uploaded part");
+  return result.ETag;
+}
 export async function completeLessonMultipartUpload(
   objectPath: string,
   uploadId: string,
