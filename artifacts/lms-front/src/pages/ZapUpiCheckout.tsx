@@ -73,6 +73,7 @@ export default function ZapUpiCheckout() {
   const pending = !order || order.status === "pending";
   const succeeded = order?.status === "succeeded";
   const failed = order?.status === "failed" || order?.status === "refunded";
+  const invalidLink = !orderId || !token;
   const expiry = order?.accessExpiresAt
     ? new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(order.accessExpiresAt))
     : null;
@@ -97,7 +98,7 @@ export default function ZapUpiCheckout() {
             <div className="px-6 py-9 text-center sm:px-10 sm:py-12">
               {succeeded ? (
                 <CheckCircle2 className="mx-auto h-16 w-16 text-[#0EAF63]" />
-              ) : failed ? (
+              ) : failed || invalidLink ? (
                 <XCircle className="mx-auto h-16 w-16 text-[#D84242]" />
               ) : checking ? (
                 <LoaderCircle className="mx-auto h-16 w-16 animate-spin text-[#0EAF63]" />
@@ -108,7 +109,9 @@ export default function ZapUpiCheckout() {
               <h1 className="mt-6 text-2xl font-bold tracking-tight text-[#10231B] sm:text-3xl">
                 {succeeded
                   ? "Payment verified"
-                  : failed
+                  : invalidLink
+                    ? "Payment link unavailable"
+                    : failed
                     ? "Payment was not completed"
                     : checking
                       ? "Confirming your payment"
@@ -117,7 +120,9 @@ export default function ZapUpiCheckout() {
               <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[#607269] sm:text-base">
                 {succeeded
                   ? `Your access to ${order.productTitle} is ready.`
-                  : failed
+                  : invalidLink
+                    ? "Return to the product page and start a new secure checkout."
+                    : failed
                     ? "No access was granted and you can safely try the payment again."
                     : "We are checking ZapUPI directly. Keep this page open; access is granted only after server verification."}
               </p>
@@ -146,7 +151,7 @@ export default function ZapUpiCheckout() {
                 </div>
               )}
 
-              {!succeeded && !checking && (
+              {!succeeded && !checking && !invalidLink && (
                 <Button
                   onClick={() => {
                     attempts.current = 0;

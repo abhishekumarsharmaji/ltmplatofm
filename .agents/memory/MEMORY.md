@@ -4,7 +4,7 @@
 - [Lesson video protection](lesson-video-protection.md) — keep 307→presigned R2; Fetch-Metadata gate + short TTL + SecureVideoPlayer are deterrents, not auth; dev test video is HEVC (undecodable in headless Chromium).
 - [Design system](design-system.md) — app is pinned light-only (hex-heavy pages); real data only; pricing pages and /checkout are known static/unavailable.
 - [Visual verification](visual-verification.md) — screenshot logged-in pages with scripts/dev-screenshot.mjs + curl cookie jar (strip #HttpOnly_); dev accounts live in dev DB only.
-- [Digital-product payments](digital-product-payments.md) — remain free for now; later Razorpay/ZapUPI must grant entitlements only after verified server-side payment success.
+- [Digital-product payments](digital-product-payments.md) — ZapUPI unlocks paid downloads only after server-side order-status verification; redirects and webhook claims never grant access.
 - [Public product links](public-product-links.md) — share links use the active origin plus creator-owned unique slugs; only published/custom domains are stable.
 - [Abort signal propagation](abort-signal-propagation.md) — when forwarding an abort with no reason, call abort() rather than abort(undefined) to preserve a standard AbortError.
 - [Digital product sales pages](digital-product-sales-pages.md) — keep creator sales copy structured and server-sanitized; render only populated sections and preserve free acquisition.

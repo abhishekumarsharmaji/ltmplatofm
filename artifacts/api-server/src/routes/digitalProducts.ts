@@ -139,6 +139,9 @@ async function verifyAndFinalizeZapUpiPayment(orderId: string) {
 
   const providerResponse = await zapUpiRequest("order-status", { order_id: orderId });
   const provider = zapUpiPayload(providerResponse);
+  if (provider.order_id && String(provider.order_id) !== orderId) {
+    throw new Error("ZapUPI returned a different order");
+  }
   const providerStatus = provider.payment_status ?? provider.order_status ?? provider.status;
   if (!successfulZapUpiStatus(providerStatus)) {
     const failed = ["failed", "failure", "timeout", "cancelled", "canceled"].includes(String(providerStatus ?? "").toLowerCase());
@@ -329,15 +332,11 @@ router.post("/payments/zapupi/webhook", async (req, res): Promise<void> => {
   const orderId = typeof req.body?.order_id === "string" ? req.body.order_id : "";
   if (!orderId) { res.status(200).json({ status: "ok" }); return; }
   try {
-    if (successfulZapUpiStatus(req.body?.status)) {
-      await verifyAndFinalizeZapUpiPayment(orderId);
-    } else if (["failed", "timeout", "cancelled", "canceled"].includes(String(req.body?.status ?? "").toLowerCase())) {
-      await db.update(digitalProductPaymentsTable).set({ status: "failed", updatedAt: new Date() })
-        .where(and(eq(digitalProductPaymentsTable.orderId, orderId), eq(digitalProductPaymentsTable.status, "pending")));
-    }
+    await verifyAndFinalizeZapUpiPayment(orderId);
   } catch {
-    res.status(503).json({ status: "retry" });
-    return;
+    setTimeout(() => {
+      void verifyAndFinalizeZapUpiPayment(orderId).catch(() => undefined);
+    }, 5_000);
   }
   res.status(200).json({ status: "ok" });
 });
