@@ -28,3 +28,17 @@ mtime_ms = 1789893950912
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:8374545a-039d-455a-8203-cca588963f72/62d1fa22-b763-4b7b-a592-fa77e092da1e/d1b0c53f-f394-493d-bc7f-dea808afd62e"
 storage_version_token = "1789893964233066"
 content_type = "image/png"
+
+[[outputs]]
+id = "G_cHQ5cvZWxLsS-gD8ycC"
+uri = "file://research/notes.md"
+type = "text"
+title = "Hosting Research Notes"
+description = "Live research plan and evidence log for the cheapest suitable LMS hosting."
+logical_id = "c7b8bced-68e3-4fb0-bc29-de3b77b4b9d3"
+content_hash = "sha256:d10cd6663525845246e4be2a7a9ede9adb1ada3cc5497a48590e2da3a9e2b6ab"
+size = 1700
+mtime_ms = 1789923211995
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:8374545a-039d-455a-8203-cca588963f72/c7b8bced-68e3-4fb0-bc29-de3b77b4b9d3/e2dd4d59-225a-466d-81d8-bb810b02f65d"
+storage_version_token = "1789923216186078"
+content_type = "text/markdown"
