@@ -85,7 +85,6 @@ nano /etc/coreskils/api.env
 
 Fill:
 
-- `PUBLIC_APP_URL`: keep this set to `https://coreskils.org`; payment return and webhook URLs are generated from it.
 - `DATABASE_URL`: use the database password created above.
 - `SESSION_SECRET`: generate with `openssl rand -hex 64`.
 - `R2_*`: use the existing Cloudflare R2 bucket/API credentials for uploads and digital files.
@@ -128,7 +127,6 @@ sudo -u coreskils env PORT=24567 BASE_PATH=/ pnpm --filter @workspace/lms-front 
 cp /opt/coreskils/app/deploy/vps/coreskils-api.service /etc/systemd/system/coreskils-api.service
 cp /opt/coreskils/app/deploy/vps/coreskils.org.nginx /etc/nginx/sites-available/coreskils.org
 ln -sf /etc/nginx/sites-available/coreskils.org /etc/nginx/sites-enabled/coreskils.org
-rm -f /etc/nginx/sites-enabled/coreskils.com
 rm -f /etc/nginx/sites-enabled/default
 systemctl daemon-reload
 systemctl enable --now coreskils-api

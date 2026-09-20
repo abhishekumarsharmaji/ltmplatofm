@@ -19,7 +19,7 @@ const MAX_FILE_BYTES = 250 * 1024 * 1024;
 const MAX_FILES = 25;
 const GUEST_ACCESS_TTL_SECONDS = 60 * 60;
 const ZAPUPI_API_URL = "https://pay.zapupi.com/api";
-const PUBLIC_APP_URL = (process.env.PUBLIC_APP_URL || "https://coreskils.org").replace(/\/+$/, "");
+const PUBLIC_APP_URL = "https://coreskils.org";
 const MIME_BY_EXT: Record<string, string[]> = {
   pdf: ["application/pdf"], epub: ["application/epub+zip"], mobi: ["application/x-mobipocket-ebook", "application/octet-stream"],
   azw: ["application/vnd.amazon.ebook", "application/octet-stream"], azw3: ["application/vnd.amazon.ebook", "application/octet-stream"],
