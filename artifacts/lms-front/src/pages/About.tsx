@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { BadgeCheck, Download, Mail, ShieldCheck } from "lucide-react";
+import { BadgeCheck, Download, ShieldCheck } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 
 export default function About() {
@@ -11,7 +11,7 @@ export default function About() {
             <span className="inline-block rounded-full bg-[#E7F7EF] px-4 py-1.5 text-[13px] font-bold uppercase tracking-wider text-[#087B46]">About CoreSkils</span>
             <h1 className="mt-6 text-5xl font-bold leading-[1.08] text-black sm:text-6xl">Practical digital products with transparent terms</h1>
             <p className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-[#4D5D57]">
-              CoreSkils is an India-based digital-products website operated by Abhishek Kumar from Vadodara, Gujarat. We create downloadable educational toolkits for independent professionals.
+              CoreSkils provides downloadable educational toolkits, courses, and practical learning resources for independent professionals.
             </p>
           </div>
 
@@ -19,7 +19,7 @@ export default function About() {
             {[
               [BadgeCheck, "Clear product information", "Every product states its contents, format, intended audience, price, licence, and delivery method."],
               [Download, "Electronic delivery", "Products are delivered digitally after verified payment confirmation. No physical shipment is involved."],
-              [Mail, "Accessible support", "Customers can contact growora.org@gmail.com for product, access, payment, refund, or privacy questions."],
+              [ShieldCheck, "Reliable support", "Customers can request help with product access, payments, refunds, and privacy questions through the platform."],
             ].map(([Icon, title, body]) => {
               const CardIcon = Icon as typeof BadgeCheck;
               return (

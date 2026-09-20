@@ -62,11 +62,6 @@ export function Footer() {
             <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
               The professional platform for digital knowledge. Practical downloadable digital toolkits, courses, and live classes with clear product details, electronic delivery terms, and dedicated customer support.
             </p>
-            <div className="mt-8 text-sm leading-relaxed text-slate-500 space-y-1">
-              <p className="font-semibold text-slate-400">Operated by Abhishek Kumar</p>
-              <p>Vadodara, Gujarat 391760, India</p>
-              <a href="mailto:growora.org@gmail.com" className="hover:text-white transition-colors">growora.org@gmail.com</a>
-            </div>
           </div>
 
           {/* Links Columns */}

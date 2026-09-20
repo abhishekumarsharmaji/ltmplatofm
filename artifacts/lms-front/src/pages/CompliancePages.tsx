@@ -3,9 +3,6 @@ import { Link } from "wouter";
 
 const BUSINESS = {
   platform: "CoreSkils",
-  legalName: "Abhishek Kumar",
-  email: "growora.org@gmail.com",
-  address: "Vadodara, Gujarat 391760, India",
   updated: "20 September 2026",
 };
 
@@ -41,12 +38,6 @@ function CompliancePage({ title, intro, sections }: { title: string; intro: stri
                   </div>
                 </section>
               ))}
-              <aside className="rounded-xl border border-[#CDEDDD] bg-[#F0FBF5] p-5 text-sm leading-6 text-[#23483C]">
-                Questions about this policy? Email{" "}
-                <a className="font-bold text-[#0B8F50] underline underline-offset-4" href={`mailto:${BUSINESS.email}`} data-testid="link-policy-email">
-                  {BUSINESS.email}
-                </a>.
-              </aside>
             </div>
           </div>
         </div>
@@ -57,7 +48,7 @@ function CompliancePage({ title, intro, sections }: { title: string; intro: stri
 
 export function TermsPage() {
   return <CompliancePage title="Terms and Conditions" intro="These terms govern access to and use of the CoreSkils website, downloadable digital products, and related services." sections={[
-    { title: "1. About CoreSkils", paragraphs: [`${BUSINESS.platform} is operated by ${BUSINESS.legalName} from ${BUSINESS.address}. CoreSkils creates and supplies downloadable educational toolkits for individual customers.`] },
+    { title: "1. About CoreSkils", paragraphs: [`${BUSINESS.platform} creates and supplies downloadable educational toolkits, courses, and related services for individual customers.`] },
     { title: "2. Acceptance of terms", paragraphs: ["By creating an account, purchasing or accessing content, or otherwise using CoreSkils, you agree to these Terms, our Privacy Policy, Refund and Cancellation Policy, and other policies linked on the website. If you do not agree, do not use the services."] },
     { title: "3. Accounts and eligibility", bullets: ["You must provide accurate and current information.", "You are responsible for maintaining the confidentiality of your login and for activity under your account.", "You must notify us promptly if you suspect unauthorised access.", "Users under 18 may use the service only with consent and supervision of a parent or lawful guardian."] },
     { title: "4. Digital products", paragraphs: ["Descriptions, included materials, access conditions and prices displayed on the relevant product page form part of the offer. Products are supplied electronically."], bullets: ["Content is licensed for the purchaser’s personal, non-transferable use.", "You may not resell, share, scrape, reproduce or redistribute files without written permission.", "Educational products do not guarantee clients, employment, income, qualifications, or business outcomes."] },
@@ -67,14 +58,14 @@ export function TermsPage() {
     { title: "8. Intellectual property", paragraphs: ["The CoreSkils brand, website design, software, and digital-product content are protected by applicable intellectual-property laws. No ownership transfers to a customer through access or purchase."] },
     { title: "9. Suspension and termination", paragraphs: ["We may restrict or terminate access for material breach, fraud, payment abuse, security risk, unlawful conduct or infringement. Where reasonably possible, we will provide notice and an opportunity to address the issue."] },
     { title: "10. Disclaimers and liability", paragraphs: ["Services are provided with reasonable care but may occasionally be unavailable for maintenance, network failure or events beyond our control. To the maximum extent permitted by law, indirect or consequential loss is excluded. Nothing in these Terms limits rights or liability that cannot lawfully be limited."] },
-    { title: "11. Governing law and disputes", paragraphs: ["These Terms are governed by the laws of India. The parties should first attempt to resolve concerns through written support. Subject to applicable consumer law, courts having jurisdiction in Vadodara, Gujarat will have jurisdiction over unresolved disputes."] },
+    { title: "11. Governing law and disputes", paragraphs: ["These Terms are governed by the laws of India. The parties should first attempt to resolve concerns through written support. Unresolved disputes will be handled by courts having jurisdiction under applicable law."] },
     { title: "12. Changes", paragraphs: ["We may update these Terms to reflect service or legal changes. The updated date will be shown above. Material changes will apply prospectively, and continued use after they take effect constitutes acceptance."] },
   ]} />;
 }
 
 export function PrivacyPage() {
   return <CompliancePage title="Privacy Policy" intro="This policy explains what personal information CoreSkils collects, why it is used, when it is shared, and the choices available to you." sections={[
-    { title: "1. Data controller and contact", paragraphs: [`CoreSkils is operated by ${BUSINESS.legalName}, ${BUSINESS.address}. Privacy requests can be sent to ${BUSINESS.email}.`] },
+    { title: "1. Data controller and contact", paragraphs: ["CoreSkils is responsible for the personal information processed through this platform. Privacy requests can be submitted through the support options available on the platform."] },
     { title: "2. Information we collect", bullets: ["Account details such as name, email address and authentication information.", "Product order, access, download, and entitlement records.", "Payment references, status, amount and provider identifiers; complete payment credentials are handled by the payment gateway.", "Device, browser, IP address, security logs and service-usage information.", "Messages and support information you voluntarily provide."] },
     { title: "3. Why we use information", bullets: ["Provide accounts, product access, downloads and customer support.", "Process and verify payments, refunds and entitlements.", "Operate the digital-product website.", "Prevent fraud, abuse and unauthorised access.", "Comply with accounting, tax, legal and regulatory obligations.", "Improve reliability and performance using aggregated or limited technical data.", "Send essential service messages and, only where permitted, marketing communications."] },
     { title: "4. Legal grounds", paragraphs: ["Depending on the activity, processing is necessary to perform our contract with you, comply with law, protect legitimate interests such as security and service improvement, or act on your consent. You may withdraw consent where consent is the applicable basis."] },
