@@ -93,6 +93,19 @@ Fill:
 
 Never copy Replit-only App Storage credentials to the VPS. Standalone hosting must use the configured R2 values.
 
+### Configure LiveKit safely
+
+After cloning or deploying the latest code, run:
+
+```bash
+cd /opt/coreskils/app
+sudo bash deploy/vps/configure-livekit.sh
+```
+
+Enter the WebSocket URL, API key, and API secret from the LiveKit Cloud project settings. The secret input is hidden and is written only to `/etc/coreskils/api.env` with mode `600`. The script restarts the API and verifies its health.
+
+The three LiveKit values enable real-time classroom audio/video. Recording is separate and remains disabled unless LiveKit Egress and `LIVEKIT_RECORDING_FILEPATH` are configured.
+
 ## 8. Build and initialise the database
 
 ```bash
