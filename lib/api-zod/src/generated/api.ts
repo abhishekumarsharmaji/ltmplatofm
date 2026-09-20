@@ -1941,7 +1941,7 @@ export const ListDigitalProductsResponseItem = zod.object({
   "currency": zod.string(),
   "status": zod.enum(['draft', 'published', 'archived'])
 }).and(zod.object({
-  "isFree": zod.literal(true),
+  "isFree": zod.boolean(),
   "acquiredAt": zod.coerce.date().nullish()
 }))
 export const ListDigitalProductsResponse = zod.array(ListDigitalProductsResponseItem)
@@ -1989,7 +1989,7 @@ export const GetDigitalProductResponse = zod.object({
   "currency": zod.string(),
   "status": zod.enum(['draft', 'published', 'archived'])
 }).and(zod.object({
-  "isFree": zod.literal(true),
+  "isFree": zod.boolean(),
   "acquiredAt": zod.coerce.date().nullish()
 })).and(zod.object({
   "creatorName": zod.string().nullish(),
@@ -2005,6 +2005,47 @@ export const GetDigitalProductResponse = zod.object({
   "createdAt": zod.coerce.date().optional()
 }))
 }))
+
+
+export const CreateGuestDigitalProductAccessParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const createGuestDigitalProductAccessBodyEmailMax = 254;
+
+export const createGuestDigitalProductAccessBodyPhoneMin = 8;
+export const createGuestDigitalProductAccessBodyPhoneMax = 20;
+
+
+
+export const CreateGuestDigitalProductAccessBody = zod.object({
+  "email": zod.string().email().max(createGuestDigitalProductAccessBodyEmailMax),
+  "phone": zod.string().min(createGuestDigitalProductAccessBodyPhoneMin).max(createGuestDigitalProductAccessBodyPhoneMax)
+})
+
+export const CreateGuestDigitalProductAccessResponse = zod.object({
+  "productId": zod.number().int(),
+  "expiresAt": zod.coerce.date(),
+  "files": zod.array(zod.object({
+  "id": zod.number().int(),
+  "productId": zod.number().int(),
+  "kind": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string().nullish(),
+  "sizeBytes": zod.number().int().nullish(),
+  "status": zod.enum(['pending', 'uploaded', 'failed']),
+  "position": zod.number().int(),
+  "createdAt": zod.coerce.date().optional()
+}))
+})
+
+
+export const DownloadGuestDigitalProductFileParams = zod.object({
+  "productId": zod.coerce.number().int(),
+  "fileId": zod.coerce.number().int()
+})
+
+export const DownloadGuestDigitalProductFileResponse = zod.unknown()
 
 
 export const ListDigitalProductFilesParams = zod.object({
@@ -2237,7 +2278,7 @@ export const ListStudentDigitalProductsResponseItem = zod.object({
   "currency": zod.string(),
   "status": zod.enum(['draft', 'published', 'archived'])
 }).and(zod.object({
-  "isFree": zod.literal(true),
+  "isFree": zod.boolean(),
   "acquiredAt": zod.coerce.date().nullish()
 }))
 export const ListStudentDigitalProductsResponse = zod.array(ListStudentDigitalProductsResponseItem)
@@ -2285,7 +2326,7 @@ export const GetStudentDigitalProductResponse = zod.object({
   "currency": zod.string(),
   "status": zod.enum(['draft', 'published', 'archived'])
 }).and(zod.object({
-  "isFree": zod.literal(true),
+  "isFree": zod.boolean(),
   "acquiredAt": zod.coerce.date().nullish()
 })).and(zod.object({
   "creatorName": zod.string().nullish(),

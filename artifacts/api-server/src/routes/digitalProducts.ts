@@ -130,13 +130,20 @@ router.post("/marketplace/digital-products/:id/guest-access", async (req, res): 
     .from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, product.id), eq(digitalFilesTable.status, "uploaded"))).orderBy(asc(digitalFilesTable.position));
   if (!files.length) { res.status(409).json({ error: "This product does not have an available download yet" }); return; }
   const access = guestAccessToken(product.id);
+  res.cookie("guest_digital_access", access.token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: GUEST_ACCESS_TTL_SECONDS * 1000,
+    path: "/api/marketplace/digital-products",
+  });
   res.setHeader("Cache-Control", "private, no-store");
-  res.status(201).json({ productId: product.id, accessToken: access.token, expiresAt: new Date(access.expiresAt * 1000).toISOString(), files });
+  res.status(201).json({ productId: product.id, expiresAt: new Date(access.expiresAt * 1000).toISOString(), files });
 });
 
 router.get("/marketplace/digital-products/:productId/files/:fileId/guest-download", async (req, res): Promise<void> => {
   const productId = numericId(req.params.productId), fileId = numericId(req.params.fileId);
-  if (!productId || !fileId || guestProductId(req.query.token) !== productId) {
+  if (!productId || !fileId || guestProductId(req.cookies?.guest_digital_access) !== productId) {
     res.status(403).json({ error: "Guest download access is invalid or has expired" }); return;
   }
   const [product] = await db.select().from(productsTable).where(and(

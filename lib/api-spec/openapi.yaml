@@ -566,6 +566,21 @@ paths:
       operationId: getDigitalProduct
       parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { "200": { description: Product detail, content: { application/json: { schema: { $ref: "#/components/schemas/DigitalProductDetail" } } } }, "404": { description: Not found } }
+  /marketplace/digital-products/{id}/guest-access:
+    post:
+      operationId: createGuestDigitalProductAccess
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/GuestDigitalAccessInput" } } } }
+      responses:
+        "201": { description: Temporary free-product access, content: { application/json: { schema: { $ref: "#/components/schemas/GuestDigitalAccess" } } } }
+        "402": { description: Verified payment is required }
+  /marketplace/digital-products/{productId}/files/{fileId}/guest-download:
+    get:
+      operationId: downloadGuestDigitalProductFile
+      parameters:
+        - { name: productId, in: path, required: true, schema: { type: integer } }
+        - { name: fileId, in: path, required: true, schema: { type: integer } }
+      responses: { "200": { description: Protected file stream }, "307": { description: Short-lived signed download redirect }, "403": { description: Invalid or expired access } }
   /creator/digital-products/{productId}/files:
     get:
       operationId: listDigitalProductFiles
@@ -984,7 +999,7 @@ components:
         - type: object
           required: [isFree]
           properties:
-            isFree: { type: boolean, const: true }
+            isFree: { type: boolean }
             acquiredAt: { type: ["string", "null"], format: date-time }
     DigitalProductDetail:
       allOf:
@@ -1015,6 +1030,19 @@ components:
         productId: { type: integer }
         acquired: { type: boolean }
         alreadyOwned: { type: boolean }
+    GuestDigitalAccessInput:
+      type: object
+      required: [email, phone]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        phone: { type: string, minLength: 8, maxLength: 20 }
+    GuestDigitalAccess:
+      type: object
+      required: [productId, expiresAt, files]
+      properties:
+        productId: { type: integer }
+        expiresAt: { type: string, format: date-time }
+        files: { type: array, items: { $ref: "#/components/schemas/DigitalFile" } }
     DigitalProductReadiness:
       type: object
       required: [ready, checks]

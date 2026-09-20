@@ -430,7 +430,7 @@ export interface DigitalFile {
 }
 
 export type DigitalProduct = Product & ({
-  isFree: true;
+  isFree: boolean;
   /** @nullable */
   acquiredAt?: string | null;
 });
@@ -463,6 +463,22 @@ export interface DigitalAcquisition {
   productId: number;
   acquired: boolean;
   alreadyOwned: boolean;
+}
+
+export interface GuestDigitalAccessInput {
+  /** @maxLength 254 */
+  email: string;
+  /**
+     * @minLength 8
+     * @maxLength 20
+     */
+  phone: string;
+}
+
+export interface GuestDigitalAccess {
+  productId: number;
+  expiresAt: string;
+  files: DigitalFile[];
 }
 
 export type DigitalProductReadinessChecks = {

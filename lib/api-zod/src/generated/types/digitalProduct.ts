@@ -8,7 +8,7 @@
 import type { Product } from './product';
 
 export type DigitalProduct = Product & ({
-  isFree: true;
+  isFree: boolean;
   /** @nullable */
   acquiredAt?: Date | null;
 });

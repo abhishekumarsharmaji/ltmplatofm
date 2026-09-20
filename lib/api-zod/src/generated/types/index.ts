@@ -50,6 +50,8 @@ export * from './digitalProductSalesPage';
 export * from './digitalProductSalesPageInput';
 export * from './enrollmentResult';
 export * from './finalizeCourseThumbnailUpload200';
+export * from './guestDigitalAccess';
+export * from './guestDigitalAccessInput';
 export * from './healthStatus';
 export * from './imageFinalizeInput';
 export * from './imageUploadInput';

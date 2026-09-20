@@ -61,7 +61,6 @@ export default function ProductDetail() {
   const [guestPending, setGuestPending] = useState(false);
   const [guestError, setGuestError] = useState("");
   const [guestAccess, setGuestAccess] = useState<null | {
-    accessToken: string;
     expiresAt: string;
     files: Array<{ id: number; filename: string; sizeBytes?: number | null }>;
   }>(null);
@@ -134,7 +133,7 @@ export default function ProductDetail() {
           {guestAccess.files.map((file) => (
             <a
               key={file.id}
-              href={`/api/marketplace/digital-products/${product.id}/files/${file.id}/guest-download?token=${encodeURIComponent(guestAccess.accessToken)}`}
+              href={`/api/marketplace/digital-products/${product.id}/files/${file.id}/guest-download`}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 font-bold text-white hover:bg-[#10A364]"
             >
               <Download className="h-4 w-4" /> Download {file.filename}
