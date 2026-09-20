@@ -283,7 +283,7 @@ function Products() {
         </div>
       ) : (
         <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
             <table className="w-full min-w-[700px] text-left">
               <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
                 <tr>
@@ -357,7 +357,7 @@ function Sales() {
           <div className="pt-4">
             <h3 className="text-[24px] font-bold text-black mb-6">Transaction History</h3>
             <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden shadow-sm">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
                 <table className="w-full min-w-[600px] text-left">
                   <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
                     <tr>

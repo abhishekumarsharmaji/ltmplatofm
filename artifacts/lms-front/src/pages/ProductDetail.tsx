@@ -225,9 +225,12 @@ export default function ProductDetail() {
               
               {/* On mobile, put image first (order-1), on desktop it's right (order-2) */}
               <div className="order-1 lg:order-2 lg:col-span-5 relative w-full max-w-lg mx-auto lg:max-w-none">
-                <div className="group flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[2rem] border border-[#D9E7E0] bg-white p-3 shadow-[0_24px_70px_rgba(20,72,51,0.13)] lg:aspect-square">
+                <div className="group flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[2rem] border border-[#D9E7E0] bg-[#FAFAFA] p-0 shadow-[0_24px_70px_rgba(20,72,51,0.13)] lg:aspect-square relative">
                   {product.coverImageUrl ? (
-                    <img src={product.coverImageUrl} alt={product.title} fetchPriority="high" decoding="async" className="h-full w-full rounded-[1.35rem] object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
+                    <>
+                      <img src={product.coverImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20 blur-xl scale-110 pointer-events-none" aria-hidden="true" />
+                      <img src={product.coverImageUrl} alt={product.title} fetchPriority="high" decoding="async" className="relative z-10 h-full w-full object-contain drop-shadow-sm transition-transform duration-700 group-hover:scale-[1.02]" />
+                    </>
                   ) : (
                     <Package className="h-24 w-24 text-[#C9DDD3] sm:h-32 sm:w-32" />
                   )}

@@ -59,9 +59,12 @@ export default function Products() {
             <section className="mx-auto mt-14 grid max-w-6xl gap-7 md:grid-cols-2">
               {products.map((product) => (
                 <article key={product.id} className="overflow-hidden rounded-2xl border border-[#C9DED3] bg-white shadow-[0_15px_45px_rgba(20,80,55,.08)]">
-                  <div className="aspect-[16/9] overflow-hidden bg-[#0B3027]">
+                  <div className="aspect-[16/9] overflow-hidden bg-[#FAFAFA] relative">
                     {product.coverImageUrl ? (
-                      <img src={product.coverImageUrl} alt={product.title} className="h-full w-full object-cover" />
+                      <>
+                        <img src={product.coverImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20 blur-xl scale-110 pointer-events-none" aria-hidden="true" />
+                        <img src={product.coverImageUrl} alt={product.title} className="relative z-10 h-full w-full object-contain drop-shadow-sm" loading="lazy" />
+                      </>
                     ) : (
                       <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#0B3027] to-[#146047]">
                         <Package className="h-20 w-20 text-white/30" />

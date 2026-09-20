@@ -42,11 +42,18 @@ export function StudentProductView({ productId }: { productId: number }) {
 
       <div className="bg-white border border-[#E5E5E5] rounded-xl p-8 shadow-sm">
         <div className="flex flex-col md:flex-row gap-8">
-          <div className="w-full md:w-1/3 aspect-square bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg flex items-center justify-center shrink-0">
-             <Package className="w-20 h-20 text-primary/30" />
+          <div className="w-full md:w-1/3 aspect-square bg-[#FAFAFA] border border-[#E5E5E5] rounded-lg overflow-hidden flex items-center justify-center shrink-0 relative">
+            {product.coverImageUrl ? (
+              <>
+                <img src={product.coverImageUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20 blur-xl scale-110 pointer-events-none" aria-hidden="true" />
+                <img src={product.coverImageUrl} alt={product.title} className="relative z-10 w-full h-full object-contain drop-shadow-sm" />
+              </>
+            ) : (
+               <Package className="w-20 h-20 text-primary/30" />
+            )}
           </div>
           
-          <div className="flex-1 space-y-6">
+          <div className="flex-1 min-w-0 space-y-6">
             <div>
               <div className="text-[12px] font-bold text-primary uppercase tracking-wider mb-2">{product.subtype || "Digital Product"}</div>
               <h1 className="text-[32px] font-bold text-black tracking-tight leading-tight mb-3">{product.title}</h1>

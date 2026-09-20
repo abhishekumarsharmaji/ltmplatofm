@@ -72,14 +72,14 @@ export function CourseBuilder({
   const { product, course, modules } = builder;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20 pt-4">
-      <div className="flex items-center gap-4 border-b border-[#E5E5E5] pb-6">
+    <div className="mx-auto max-w-6xl min-w-0 space-y-5 pb-20 pt-2 sm:space-y-8 sm:pt-4">
+      <div className="flex min-w-0 items-start gap-3 border-b border-[#E5E5E5] pb-5 sm:items-center sm:gap-4 sm:pb-6">
         <Link href={backRoute} className="inline-flex items-center justify-center h-10 w-10 rounded-md border border-[#E5E5E5] bg-white hover:bg-gray-50 text-[#394649] transition-colors shadow-sm">
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <div>
-          <div className="flex items-center gap-4">
-            <h1 className="text-[28px] md:text-[32px] font-bold text-black tracking-tight leading-tight">{product.title}</h1>
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-4">
+            <h1 className="min-w-0 break-words text-[22px] font-bold leading-tight tracking-tight text-black sm:text-[28px] md:text-[32px]">{product.title}</h1>
             <Badge className={product.status === 'published' ? 'bg-[#E3F9EF] text-primary hover:bg-[#E3F9EF] border-none shadow-none font-medium' : 'bg-gray-100 text-[#9794AA] hover:bg-gray-100 border-none shadow-none font-medium'}>
               {product.status}
             </Badge>
@@ -88,8 +88,8 @@ export function CourseBuilder({
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8">
-        <div className="w-full md:w-64 space-y-1">
+      <div className="flex min-w-0 flex-col gap-4 md:flex-row md:gap-8">
+        <div className="-mx-1 flex w-auto gap-2 overflow-x-auto px-1 pb-2 md:mx-0 md:block md:w-64 md:space-y-1 md:overflow-visible md:px-0 md:pb-0">
           <TabButton
             active={activeTab === "basics"}
             onClick={() => setActiveTab("basics")}
@@ -117,7 +117,7 @@ export function CourseBuilder({
           />
         </div>
 
-        <div className="flex-1 bg-white border border-[#E5E5E5] rounded-xl p-6 md:p-8 shadow-sm min-h-[500px]">
+        <div className="min-h-[500px] min-w-0 flex-1 rounded-xl border border-[#E5E5E5] bg-white p-4 shadow-sm sm:p-6 md:p-8">
           {activeTab === "basics" && <BasicsTab productId={productId} product={product} course={course} />}
           {activeTab === "curriculum" && <CurriculumTab productId={productId} modules={modules || []} />}
           {activeTab === "live" && <LiveClassesTab productId={productId} role={role} />}
@@ -132,7 +132,7 @@ function TabButton({ active, onClick, icon: Icon, label, badge }: any) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center justify-between px-4 py-3 rounded-md text-[14px] font-medium transition-all ${
+      className={`flex min-w-max items-center justify-between rounded-md px-4 py-3 text-[14px] font-medium transition-all md:w-full ${
         active
           ? "bg-[#E3F9EF] text-primary shadow-sm"
           : "text-[#394649] hover:bg-gray-50 hover:text-primary"
@@ -321,9 +321,9 @@ function BasicsTab({ productId, product, course }: { productId: number, product:
           </div>
           <div className="space-y-2">
             <Label>Public course URL</Label>
-            <div className="flex overflow-hidden rounded-md border border-[#D8E2DD] bg-white">
-              <span className="flex items-center bg-[#EEF5F1] px-3 text-xs text-[#607269]">/courses/</span>
-              <Input value={publicSlug} onChange={(event) => setPublicSlug(event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-"))} className="border-0 focus-visible:ring-0" placeholder="course-name" />
+            <div className="flex min-w-0 overflow-hidden rounded-md border border-[#D8E2DD] bg-white">
+              <span className="hidden items-center bg-[#EEF5F1] px-3 text-xs text-[#607269] sm:flex">/courses/</span>
+              <Input value={publicSlug} onChange={(event) => setPublicSlug(event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-"))} className="min-w-0 border-0 focus-visible:ring-0" placeholder="course-name" />
             </div>
           </div>
           <div className="space-y-2">
@@ -381,10 +381,11 @@ function BasicsTab({ productId, product, course }: { productId: number, product:
           <div className="space-y-4">
             <Label className="text-[14px] font-bold text-[#394649]">Course Thumbnail</Label>
 
-            <div className="border-2 border-dashed border-[#E5E5E5] rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 bg-[#FAFAFA] relative overflow-hidden h-[200px]">
+            <div className="relative flex aspect-video w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-xl border-2 border-dashed border-[#E5E5E5] bg-[#FAFAFA] p-4 text-center">
               {thumbnailUrl && !uploadProgress ? (
                 <>
-                  <img src={thumbnailUrl} alt="Thumbnail preview" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+                  <img src={thumbnailUrl} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-20 blur-xl" />
+                  <img src={thumbnailUrl} alt="Thumbnail preview" className="absolute inset-0 h-full w-full object-contain" />
                   <div className="relative z-10 bg-white/90 backdrop-blur-sm p-4 rounded-lg border border-[#E5E5E5] shadow-sm">
                     <p className="text-[13px] font-bold text-black mb-3">Thumbnail is set</p>
                     <div className="flex justify-center">

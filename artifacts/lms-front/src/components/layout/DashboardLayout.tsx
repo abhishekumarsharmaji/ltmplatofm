@@ -131,25 +131,25 @@ export function DashboardLayout({ children, role }: { children: ReactNode, role:
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col md:pl-64 min-h-screen">
-        <header className="h-20 border-b border-[#E5E5E5] bg-white flex items-center justify-between px-4 md:px-8 sticky top-0 z-20">
-          <div className="flex items-center gap-4">
-            <button className="md:hidden text-[#394649] p-2" onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu" aria-expanded={isMobileMenuOpen}>
+      <div className="flex-1 flex flex-col md:pl-64 min-w-0 transition-all duration-300">
+        <header className="h-20 border-b border-[#E5E5E5] bg-white flex items-center justify-between px-4 md:px-8 sticky top-0 z-20 min-w-0">
+          <div className="flex items-center gap-4 min-w-0">
+            <button className="md:hidden text-[#394649] p-2 shrink-0" onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu" aria-expanded={isMobileMenuOpen}>
               <Menu className="w-6 h-6" />
             </button>
-            <h1 className="font-bold text-[20px] capitalize text-black hidden sm:block">{role} Portal</h1>
+            <h1 className="font-bold text-[20px] capitalize text-black hidden sm:block truncate">{role} Portal</h1>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden sm:block text-[14px] font-medium text-[#394649]">{userName}</span>
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="hidden sm:block text-[14px] font-medium text-[#394649] truncate max-w-[150px]">{userName}</span>
             <div
-              className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold text-[14px] shadow-[0_4px_10px_rgba(21,207,116,0.2)]"
+              className="w-10 h-10 shrink-0 bg-primary rounded-full flex items-center justify-center text-white font-bold text-[14px] shadow-[0_4px_10px_rgba(21,207,116,0.2)]"
               aria-hidden="true"
             >
               {userInitial}
             </div>
           </div>
         </header>
-        <main className="flex-1 p-4 md:p-8">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 min-w-0 overflow-x-hidden">
           {children}
         </main>
       </div>
