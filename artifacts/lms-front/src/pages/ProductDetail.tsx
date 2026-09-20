@@ -185,54 +185,54 @@ export default function ProductDetail() {
     <PublicLayout>
       <div className="bg-[#FAFAFA] min-h-screen text-black">
         {/* Hero Section */}
-        <section className="bg-[#002333] pt-24 pb-16 lg:pt-40 lg:pb-32 text-white relative overflow-hidden">
-          {/* Subtle noise/texture overlay for premium feel */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')" }}></div>
+        <section className="relative overflow-hidden border-b border-[#E1EBE6] bg-gradient-to-br from-white via-[#F7FBF9] to-[#EAF7F0] pb-16 pt-24 text-[#101C17] lg:pb-28 lg:pt-40">
+          <div className="pointer-events-none absolute -left-40 top-24 h-96 w-96 rounded-full bg-[#CFF5E0]/60 blur-3xl" />
+          <div className="pointer-events-none absolute -right-32 top-0 h-[30rem] w-[30rem] rounded-full bg-[#E0F1FF]/60 blur-3xl" />
           
           <div className="container mx-auto px-4 md:px-8 relative z-10">
             <div className="grid lg:grid-cols-12 gap-8 lg:gap-20 items-center">
               
               {/* On mobile, put image first (order-1), on desktop it's right (order-2) */}
               <div className="order-1 lg:order-2 lg:col-span-5 relative w-full max-w-lg mx-auto lg:max-w-none">
-                <div className="aspect-[4/3] lg:aspect-square rounded-2xl overflow-hidden bg-[#222222] border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.4)] flex items-center justify-center group">
+                <div className="group flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[2rem] border border-[#D9E7E0] bg-white p-3 shadow-[0_24px_70px_rgba(20,72,51,0.13)] lg:aspect-square">
                   {product.coverImageUrl ? (
-                    <img src={product.coverImageUrl} alt={product.title} fetchPriority="high" decoding="async" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <img src={product.coverImageUrl} alt={product.title} fetchPriority="high" decoding="async" className="h-full w-full rounded-[1.35rem] object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
                   ) : (
-                    <Package className="w-24 h-24 sm:w-32 sm:h-32 text-white/10" />
+                    <Package className="h-24 w-24 text-[#C9DDD3] sm:h-32 sm:w-32" />
                   )}
                 </div>
               </div>
 
               <div className="order-2 lg:order-1 lg:col-span-7 space-y-6 lg:space-y-8 text-center lg:text-left">
                 {product.subtype && (
-                  <span className="inline-block bg-[#10A364]/20 text-[#00FF84] font-bold uppercase tracking-wider text-[12px] px-3 py-1 rounded">
+                  <span className="inline-block rounded-full border border-[#BDE8D1] bg-[#E8F8EF] px-3 py-1 text-[12px] font-bold uppercase tracking-wider text-[#087B46]">
                     {product.subtype}
                   </span>
                 )}
                 
-                <h1 className="text-[32px] sm:text-[40px] lg:text-[56px] font-bold tracking-tight leading-[1.15] lg:leading-[1.1]">
+                <h1 className="text-[32px] font-bold leading-[1.15] tracking-tight text-[#0F1C16] sm:text-[40px] lg:text-[56px] lg:leading-[1.1]">
                   {product.title}
                 </h1>
                 
                 {salesPage?.tagline && (
-                  <p className="text-[18px] sm:text-[20px] lg:text-[24px] text-[#A0B0C0] font-medium leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                  <p className="mx-auto max-w-2xl text-[18px] font-medium leading-relaxed text-[#5A6C64] sm:text-[20px] lg:mx-0 lg:text-[24px]">
                     {salesPage.tagline}
                   </p>
                 )}
                 
                 {product.creatorName && (
                   <div className="flex items-center justify-center lg:justify-start gap-3 pt-2">
-                    <div className="w-10 h-10 rounded-full bg-[#224EA1] flex items-center justify-center font-bold text-white shadow-inner text-[14px]">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#123D32] text-[14px] font-bold text-white shadow-sm">
                       {product.creatorName.charAt(0).toUpperCase()}
                     </div>
-                    <p className="text-[15px] font-medium">By {product.creatorName}</p>
+                    <p className="text-[15px] font-semibold text-[#344B41]">By {product.creatorName}</p>
                   </div>
                 )}
                 
                 {salesPage?.benefits && salesPage.benefits.length > 0 && (
                   <ul className="space-y-3 pt-4 inline-block text-left w-full max-w-lg mx-auto lg:max-w-none">
                     {salesPage.benefits.map((benefit, i) => (
-                      <li key={i} className="flex items-start gap-3 text-[15px] sm:text-[16px] text-[#E4E4E4]">
+                      <li key={i} className="flex items-start gap-3 text-[15px] text-[#344B41] sm:text-[16px]">
                         <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-[#10A364] shrink-0" />
                         <span className="mt-0 lg:mt-0.5">{benefit}</span>
                       </li>
