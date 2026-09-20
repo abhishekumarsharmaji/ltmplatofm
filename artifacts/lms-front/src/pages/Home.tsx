@@ -66,7 +66,7 @@ export default function Home() {
               
               <div className="relative lg:h-[500px] flex items-center justify-center animate-slide-in-right delay-300">
                  <img 
-                   src="/attached_assets/generated_images/hero-abstract.png" 
+                   src={`${import.meta.env.BASE_URL}images/hero-abstract.png`}
                    alt="CoreSkils platform abstract" 
                    className="w-full h-auto object-cover rounded-2xl shadow-2xl ring-1 ring-black/5" 
                    fetchPriority="high" 
@@ -147,7 +147,7 @@ export default function Home() {
               <div className="relative">
                 <div className="aspect-[4/5] sm:aspect-square lg:aspect-auto lg:h-[700px] rounded-3xl overflow-hidden shadow-2xl ring-1 ring-black/5">
                   <img 
-                    src="/attached_assets/generated_images/creator-workspace.png" 
+                    src={`${import.meta.env.BASE_URL}images/creator-workspace.png`}
                     alt="Professional creator workspace" 
                     className="w-full h-full object-cover"
                     loading="lazy"
