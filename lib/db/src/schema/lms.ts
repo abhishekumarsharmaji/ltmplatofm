@@ -333,9 +333,15 @@ export const liveClassesTable = pgTable("live_classes", {
   recordingUrl: text("recording_url"),
   recordingObjectPath: text("recording_object_path"),
   egressId: text("egress_id"),
+  recordingLessonId: integer("recording_lesson_id").references(() => lessonsTable.id, { onDelete: "set null" }),
+  recordingFilename: text("recording_filename"),
+  recordingSizeBytes: integer("recording_size_bytes"),
+  recordingError: text("recording_error"),
+  recordingStartedAt: timestamp("recording_started_at", { withTimezone: true }),
+  recordingCompletedAt: timestamp("recording_completed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-}, (t) => [index("live_classes_product_idx").on(t.productId), index("live_classes_course_start_idx").on(t.courseId, t.startsAt), index("live_classes_module_idx").on(t.moduleId)]);
+}, (t) => [index("live_classes_product_idx").on(t.productId), index("live_classes_course_start_idx").on(t.courseId, t.startsAt), index("live_classes_module_idx").on(t.moduleId), index("live_classes_recording_lesson_idx").on(t.recordingLessonId)]);
 
 export const liveClassAttendanceTable = pgTable("live_class_attendance", {
   id: serial("id").primaryKey(),
