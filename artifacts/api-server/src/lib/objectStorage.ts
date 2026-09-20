@@ -18,7 +18,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const REPLIT_SIDECAR_ENDPOINT = "http://127.0.0.1:1106";
-const LOCAL_STORAGE_ROOT = resolve(process.env.LOCAL_STORAGE_ROOT || (process.env.NODE_ENV === "production" ? "/opt/coreskils/uploads" : ".local/uploads"));
+const LOCAL_STORAGE_ROOT = resolve(process.env.LOCAL_STORAGE_ROOT || (process.env.NODE_ENV === "production" ? "/opt/coreskils/app/uploads" : ".local/uploads"));
 const storage = new Storage({
   credentials: { audience: "replit", subject_token_type: "access_token", token_url: `${REPLIT_SIDECAR_ENDPOINT}/token`, type: "external_account", credential_source: { url: `${REPLIT_SIDECAR_ENDPOINT}/credential`, format: { type: "json", subject_token_field_name: "access_token" } }, universe_domain: "googleapis.com" },
   projectId: "",
