@@ -12,6 +12,7 @@ import {
   createObjectDownloadUrl, objectFile, saveLocalDigitalFile,
 } from "../lib/objectStorage";
 import { accessExpiry, activeUntil } from "../lib/accessPlans";
+import { claimGuestPurchasesByEmail } from "../lib/claimGuestPurchases";
 
 const router: IRouter = Router();
 const MAX_FILE_BYTES = 250 * 1024 * 1024;
@@ -550,8 +551,10 @@ router.post("/student/digital-products/:productId/acquire", requireAuth, require
   res.status(entitlement ? 201 : 200).json({ productId, acquired: true, alreadyOwned: !entitlement, expiresAt: entitlement?.expiresAt ?? undefined });
 });
 router.get("/student/digital-products", requireAuth, requireRole("student", "creator", "admin"), async (req, res): Promise<void> => {
-  const userId = (req as AuthenticatedRequest).canonicalUserId;
-  if (!userId) { res.json([]); return; }
+  const auth = req as AuthenticatedRequest;
+  const userId = auth.canonicalUserId;
+  if (!userId || !auth.user) { res.json([]); return; }
+  await claimGuestPurchasesByEmail(userId, auth.user.email);
   const rows = await db.select({ product: productsTable, acquiredAt: digitalProductEntitlementsTable.acquiredAt }).from(digitalProductEntitlementsTable)
     .innerJoin(productsTable, eq(productsTable.id, digitalProductEntitlementsTable.productId)).where(eq(digitalProductEntitlementsTable.userId, userId)).orderBy(desc(digitalProductEntitlementsTable.acquiredAt));
   res.json(rows.map((row) => ({ ...safeProduct(row.product), acquiredAt: row.acquiredAt, isFree: row.product.priceMinor === 0 })));

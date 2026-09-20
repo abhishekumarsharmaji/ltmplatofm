@@ -61,7 +61,8 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     maxAge: sessionTtlSeconds * 1000,
     path: "/",
   });
-  const { role } = await reconcileEffectiveRole(user);
+  const { canonicalUserId, role } = await reconcileEffectiveRole(user);
+  await claimGuestPurchasesByEmail(canonicalUserId, user.email);
   res.json(LoginResponse.parse({ authenticated: true, user: { id: user.id, email: user.email, name: user.name, role } }));
 });
 
