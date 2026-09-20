@@ -17,6 +17,8 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 const Home = lazy(() => import('./pages/Home'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Courses = lazy(() => import('./pages/Courses'));
+const CourseDetail = lazy(() => import('./pages/CourseDetail'));
 const About = lazy(() => import('./pages/About'));
 const TermsPage = lazy(() => import('./pages/CompliancePages').then((module) => ({ default: module.TermsPage })));
 const PrivacyPage = lazy(() => import('./pages/CompliancePages').then((module) => ({ default: module.PrivacyPage })));
@@ -72,8 +74,8 @@ function Router() {
         <Switch>
         {/* Public Routes */}
         <Route path="/" component={Home} />
-        <Route path="/courses"><Redirect to="/products" /></Route>
-        <Route path="/courses/:id"><Redirect to="/products" /></Route>
+        <Route path="/courses" component={Courses} />
+        <Route path="/courses/:id" component={CourseDetail} />
         <Route path="/products" component={Products} />
         <Route path="/products/:productId" component={ProductDetail} />
         <Route path="/pricing"><Redirect to="/products" /></Route>
