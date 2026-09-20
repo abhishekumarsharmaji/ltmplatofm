@@ -103,24 +103,8 @@ export default function ZapUpiCheckout() {
             Your secure transaction is complete. Access to <strong className="font-bold text-[#173D30]">{order.productTitle}</strong> is ready.
           </p>
 
-          <div className="mx-auto mt-8 max-w-xl text-left">
-            <div className="rounded-2xl border border-[#D9E8E0] bg-gradient-to-b from-[#F8FCFA] to-[#F4F9F6] p-5 shadow-sm">
-              <div className="flex gap-4">
-                <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E2F5EB] bg-white shadow-sm">
-                   <UserPlus className="h-5 w-5 text-[#0F9F5A]" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-[#173D30]">Access your purchases anytime</h3>
-                  <p data-testid="text-account-info" className="mt-1.5 text-sm leading-relaxed text-[#557066]">
-                    Create your CoreSkils account with the same email address (Gmail) used at checkout. You can sign in later to revisit your purchases and access them again.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {order.files && order.files.length > 0 && (
-            <div className="mt-10 border-t border-[#E7EEE9] pt-8">
+            <div className="mt-10">
               <h2 className="mb-2 text-xl font-extrabold text-[#173D30]">Download your purchase</h2>
               <p className="mb-6 text-sm leading-6 text-[#607269]">Your file is ready. Use the button below to download it securely.</p>
               <div className="space-y-4 text-left">
@@ -154,6 +138,22 @@ export default function ZapUpiCheckout() {
               </p>
             </div>
           )}
+
+          <div className="mx-auto mt-10 max-w-xl border-t border-[#E7EEE9] pt-8 text-left">
+            <div className="rounded-2xl border border-[#D9E8E0] bg-gradient-to-b from-[#F8FCFA] to-[#F4F9F6] p-5 shadow-sm">
+              <div className="flex gap-4">
+                <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E2F5EB] bg-white shadow-sm">
+                  <UserPlus className="h-5 w-5 text-[#0F9F5A]" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#173D30]">Access your purchases anytime</h3>
+                  <p data-testid="text-account-info" className="mt-1.5 text-sm leading-relaxed text-[#557066]">
+                    Create your CoreSkils account with the same email address (Gmail) used at checkout. You can sign in later to revisit your purchases and access them again.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {order.productType === "course" && order.courseId && (
             <div className="mt-10 border-t border-[#E7EEE9] pt-8">
