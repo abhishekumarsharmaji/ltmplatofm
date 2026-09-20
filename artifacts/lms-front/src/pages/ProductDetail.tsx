@@ -76,7 +76,7 @@ export default function ProductDetail() {
   };
 
   const handleGuestAccess = async () => {
-    if (!product || product.priceMinor > 0) return;
+    if (!product || (product.priceMinor > 0 && product.trialDays <= 0)) return;
     setGuestPending(true);
     setGuestError("");
     try {
@@ -122,6 +122,16 @@ export default function ProductDetail() {
   const priceLabel = isFree
     ? "Free"
     : new Intl.NumberFormat("en-IN", { style: "currency", currency: product.currency || "INR", maximumFractionDigits: 2 }).format(product.priceMinor / 100);
+  const accessLabel = product.trialDays > 0
+    ? `${product.trialDays}-day free trial`
+    : product.accessPlan === "fixed_days"
+      ? `${product.accessDays} days access`
+      : product.accessPlan === "monthly"
+        ? "Monthly access"
+        : product.accessPlan === "yearly"
+          ? "Yearly access"
+          : "Lifetime access";
+  const canStartGuestAccess = isFree || product.trialDays > 0;
 
   const renderCTA = () => {
     if (guestAccess) {
@@ -170,10 +180,10 @@ export default function ProductDetail() {
         {guestError && <p className="text-sm text-red-600">{guestError}</p>}
         <Button
           onClick={() => void handleGuestAccess()}
-          disabled={guestPending || !isFree}
+          disabled={guestPending || !canStartGuestAccess}
           className="h-14 w-full rounded-lg bg-primary text-[16px] font-medium text-white hover:bg-[#10A364] disabled:cursor-not-allowed disabled:bg-[#BFC8C4]"
         >
-          {isFree ? (guestPending ? "Preparing access..." : ctaText) : "Payments unavailable"}
+          {canStartGuestAccess ? (guestPending ? "Preparing access..." : product.trialDays > 0 && !isFree ? "Start free trial" : ctaText) : "Payments unavailable"}
         </Button>
         <p className="text-center text-xs leading-5 text-[#737373]">
           No account required. By continuing, you agree to the Terms and Privacy Policy.
@@ -266,6 +276,7 @@ export default function ProductDetail() {
                       </div>
                       
                       <div className="pt-2">
+                        <p className="mb-4 text-sm font-semibold text-[#394649]">{accessLabel}</p>
                         {renderCTA()}
                       </div>
                       <p className="text-center text-[#737373] text-[13px] mt-4 flex items-center justify-center gap-1.5">

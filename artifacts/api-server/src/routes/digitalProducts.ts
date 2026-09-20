@@ -300,7 +300,12 @@ router.delete("/creator/digital-products/:productId/files/:fileId", requireAuth,
 router.post("/student/digital-products/:productId/acquire", requireAuth, requireRole("student", "creator", "admin"), async (req, res): Promise<void> => {
   const productId = numericId(req.params.productId), userId = (req as AuthenticatedRequest).canonicalUserId;
   if (!productId || !userId) { res.status(400).json({ error: "Invalid product" }); return; }
-  const [product] = await db.select().from(productsTable).where(and(eq(productsTable.id, productId), eq(productsTable.type, "digital"), eq(productsTable.status, "published"), eq(productsTable.priceMinor, 0)));
+  const [product] = await db.select().from(productsTable).where(and(
+    eq(productsTable.id, productId),
+    eq(productsTable.type, "digital"),
+    eq(productsTable.status, "published"),
+    or(eq(productsTable.priceMinor, 0), sql`${productsTable.trialDays} > 0`),
+  ));
   if (!product) { res.status(404).json({ error: "Published digital product not found" }); return; }
   const expiresAt = accessExpiry(product.accessPlan, product.accessDays, product.trialDays);
   const [entitlement] = await db.insert(digitalProductEntitlementsTable).values({ userId, productId, expiresAt }).onConflictDoNothing().returning();

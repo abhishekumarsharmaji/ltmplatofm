@@ -256,7 +256,12 @@ router.get("/student/courses/:courseId/assets/:assetId/stream", requireAuth, req
     .innerJoin(lessonsTable, eq(lessonsTable.id, lessonAssetsTable.lessonId))
     .innerJoin(courseModulesTable, eq(courseModulesTable.id, lessonsTable.moduleId))
     .innerJoin(enrollmentsTable, and(eq(enrollmentsTable.courseId, courseModulesTable.courseId), eq(enrollmentsTable.userId, user.canonicalUserId)))
-    .where(and(eq(courseModulesTable.courseId, courseId), eq(lessonAssetsTable.id, assetId), eq(lessonAssetsTable.status, "uploaded")));
+    .where(and(
+      eq(courseModulesTable.courseId, courseId),
+      eq(lessonAssetsTable.id, assetId),
+      eq(lessonAssetsTable.status, "uploaded"),
+      sql`${enrollmentsTable.expiresAt} IS NULL OR ${enrollmentsTable.expiresAt} > now()`,
+    ));
   if (!row) { res.status(404).json({ error: "Video not found or enrollment required" }); return; }
   await streamAsset(row.asset, req, res, STUDENT_STREAM_URL_TTL_SECONDS);
 });
@@ -267,7 +272,12 @@ router.get("/student/courses/:courseId/assets/:assetId/download", requireAuth, r
     .innerJoin(lessonsTable, eq(lessonsTable.id, lessonAssetsTable.lessonId))
     .innerJoin(courseModulesTable, eq(courseModulesTable.id, lessonsTable.moduleId))
     .innerJoin(enrollmentsTable, and(eq(enrollmentsTable.courseId, courseModulesTable.courseId), eq(enrollmentsTable.userId, user.canonicalUserId!)))
-    .where(and(eq(courseModulesTable.courseId, courseId), eq(lessonAssetsTable.id, assetId), eq(lessonAssetsTable.status, "uploaded")));
+    .where(and(
+      eq(courseModulesTable.courseId, courseId),
+      eq(lessonAssetsTable.id, assetId),
+      eq(lessonAssetsTable.status, "uploaded"),
+      sql`${enrollmentsTable.expiresAt} IS NULL OR ${enrollmentsTable.expiresAt} > now()`,
+    ));
   if (!row || row.asset.kind === "video") { res.status(404).json({ error: "Download not found or enrollment required" }); return; }
   await streamAsset(row.asset, req, res, STUDENT_STREAM_URL_TTL_SECONDS, true);
 });

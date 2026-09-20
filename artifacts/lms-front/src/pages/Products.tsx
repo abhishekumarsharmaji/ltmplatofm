@@ -12,6 +12,14 @@ function productPrice(priceMinor: number, currency: string) {
   }).format(priceMinor / 100);
 }
 
+function accessLabel(product: { accessPlan: string; accessDays?: number | null; trialDays: number }) {
+  if (product.trialDays > 0) return `${product.trialDays}-day free trial`;
+  if (product.accessPlan === "fixed_days") return `${product.accessDays} days access`;
+  if (product.accessPlan === "monthly") return "Monthly access";
+  if (product.accessPlan === "yearly") return "Yearly access";
+  return "Lifetime access";
+}
+
 export default function Products() {
   const { data: products, isLoading, isError } = useListDigitalProducts();
 
@@ -94,7 +102,7 @@ export default function Products() {
                       <div>
                         <span className="block text-2xl font-bold text-black">{productPrice(product.priceMinor, product.currency)}</span>
                         <span className="mt-1 block text-xs font-semibold uppercase tracking-wide text-[#628076]">
-                          {product.priceMinor === 0 ? "Instant access" : "Secure payment required"}
+                          {accessLabel(product)}
                         </span>
                       </div>
                       <Link
