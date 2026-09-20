@@ -173,16 +173,33 @@ router.get("/marketplace/products/:id/cover", async (req, res) => {
   file.createReadStream().on("error", () => { if (!res.headersSent) res.status(404); res.end(); }).pipe(res);
 });
 router.get("/marketplace/courses/:id", async (req, res) => {
-  const courseId = id(req.params.id); if (!courseId) { res.status(400).json({ error: "Invalid id" }); return; }
-  const [row] = await db.select({ course: coursesTable, productId: productsTable.id, creatorName: usersTable.name }).from(coursesTable)
+  const courseId = id(req.params.id);
+  const [row] = await db.select({
+    course: coursesTable,
+    productId: productsTable.id,
+    publicSlug: productsTable.publicSlug,
+    priceMinor: productsTable.priceMinor,
+    currency: productsTable.currency,
+    accessPlan: productsTable.accessPlan,
+    accessDays: productsTable.accessDays,
+    trialDays: productsTable.trialDays,
+    creatorName: sql<string>`coalesce(${creatorProfilesTable.displayName}, ${usersTable.name})`,
+    categoryName: categoriesTable.name,
+  }).from(coursesTable)
     .leftJoin(productsTable, and(eq(productsTable.courseId, coursesTable.id), eq(productsTable.type, "course")))
     .innerJoin(usersTable, eq(usersTable.id, coursesTable.creatorId))
-    .where(and(eq(coursesTable.id, courseId), eq(coursesTable.status, "published")));
+    .leftJoin(creatorProfilesTable, eq(creatorProfilesTable.userId, coursesTable.creatorId))
+    .leftJoin(categoriesTable, eq(categoriesTable.id, coursesTable.categoryId))
+    .where(and(
+      courseId ? eq(coursesTable.id, courseId) : eq(productsTable.publicSlug, String(req.params.id).toLowerCase()),
+      eq(coursesTable.status, "published"),
+    ));
   if (!row) { res.status(404).json({ error: "Course not found" }); return; }
-  const modules = await db.select().from(courseModulesTable).where(eq(courseModulesTable.courseId, courseId)).orderBy(courseModulesTable.position);
+  const resolvedCourseId = row.course.id;
+  const modules = await db.select().from(courseModulesTable).where(eq(courseModulesTable.courseId, resolvedCourseId)).orderBy(courseModulesTable.position);
   const moduleIds = modules.map((module) => module.id);
   const lessons = moduleIds.length ? await db.select().from(lessonsTable).where(inArray(lessonsTable.moduleId, moduleIds)).orderBy(lessonsTable.position) : [];
-  res.json({ ...row.course, productId: row.productId, creatorName: row.creatorName, lessons: lessons.length, modules: modules.map((module) => ({ ...module, lessons: lessons.filter((lesson) => lesson.moduleId === module.id) })) });
+  res.json({ ...row.course, productId: row.productId, publicSlug: row.publicSlug, priceMinor: row.priceMinor, currency: row.currency, accessPlan: row.accessPlan, accessDays: row.accessDays, trialDays: row.trialDays, creatorName: row.creatorName, categoryName: row.categoryName, lessons: lessons.length, modules: modules.map((module) => ({ ...module, lessons: lessons.filter((lesson) => lesson.moduleId === module.id) })) });
 });
 router.get("/marketplace/courses/:id/thumbnail", async (req, res) => {
   const courseId = id(req.params.id);
@@ -200,6 +217,7 @@ router.post("/student/courses/:courseId/enroll", auth, async (req, res) => {
   if (!courseId || !userId) { res.status(400).json({ error: "Invalid course" }); return; }
   const [course] = await db.select({
     id: coursesTable.id,
+    priceMinor: productsTable.priceMinor,
     accessPlan: productsTable.accessPlan,
     accessDays: productsTable.accessDays,
     trialDays: productsTable.trialDays,
@@ -207,6 +225,9 @@ router.post("/student/courses/:courseId/enroll", auth, async (req, res) => {
     .leftJoin(productsTable, and(eq(productsTable.courseId, coursesTable.id), eq(productsTable.type, "course")))
     .where(and(eq(coursesTable.id, courseId), eq(coursesTable.status, "published")));
   if (!course) { res.status(404).json({ error: "Published course not found" }); return; }
+  if (course.priceMinor > 0 && !(course.trialDays && course.trialDays > 0)) {
+    res.status(402).json({ error: "Payment is required to enroll in this course" }); return;
+  }
   const expiresAt = accessExpiry(course.accessPlan ?? "lifetime", course.accessDays, course.trialDays ?? 0);
   const inserted = await db.insert(enrollmentsTable).values({ userId, courseId, expiresAt }).onConflictDoNothing().returning({ id: enrollmentsTable.id });
   res.json({ enrolled: true, alreadyEnrolled: inserted.length === 0, courseId, expiresAt });

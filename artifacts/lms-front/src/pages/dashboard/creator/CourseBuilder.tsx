@@ -19,7 +19,8 @@ import {
   getListCreatorProductsQueryKey,
   useRequestCourseThumbnailUpload,
   useFinalizeCourseThumbnailUpload,
-  getMarketplaceCoursesQueryKey
+  getMarketplaceCoursesQueryKey,
+  useListCategories
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -152,6 +153,7 @@ function BasicsTab({ productId, product, course }: { productId: number, product:
   const updateBasics = useUpdateCreatorCourseBasics();
   const requestUpload = useRequestCourseThumbnailUpload();
   const finalizeUpload = useFinalizeCourseThumbnailUpload();
+  const { data: categories = [] } = useListCategories();
 
   const [title, setTitle] = useState(product.title || "");
   const [description, setDescription] = useState(product.description || "");
@@ -159,6 +161,12 @@ function BasicsTab({ productId, product, course }: { productId: number, product:
   const [level, setLevel] = useState(course?.level || "beginner");
   const [outcomes, setOutcomes] = useState<string[]>(course?.outcomes || []);
   const [faqs, setFaqs] = useState<{question: string, answer: string}[]>(course?.faqs || []);
+  const [categoryId, setCategoryId] = useState<string>(course?.categoryId ? String(course.categoryId) : "");
+  const [publicSlug, setPublicSlug] = useState(product.publicSlug || "");
+  const [priceRupees, setPriceRupees] = useState(product.priceMinor ? String(product.priceMinor / 100) : "0");
+  const [accessPlan, setAccessPlan] = useState(product.accessPlan || "lifetime");
+  const [accessDays, setAccessDays] = useState(product.accessDays ? String(product.accessDays) : "30");
+  const [trialDays, setTrialDays] = useState(product.trialDays ? String(product.trialDays) : "0");
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   useEffect(() => {
@@ -176,7 +184,14 @@ function BasicsTab({ productId, product, course }: { productId: number, product:
         thumbnailUrl: thumbnailUrl || null,
         level,
         outcomes,
-        faqs
+        faqs,
+        categoryId: categoryId ? Number(categoryId) : null,
+        publicSlug,
+        priceMinor: Math.round(Number(priceRupees || 0) * 100),
+        currency: "INR",
+        accessPlan,
+        accessDays: accessPlan === "fixed_days" ? Number(accessDays) : null,
+        trialDays: Number(trialDays || 0),
       }
     }, {
       onSuccess: () => {
@@ -291,11 +306,52 @@ function BasicsTab({ productId, product, course }: { productId: number, product:
         </Button>
       </div>
 
-      <div className="rounded-lg border border-[#E5E5E5] bg-[#FAFAFA] p-5">
-        <p className="font-bold text-[14px] text-black">Free enrollment</p>
-        <p className="mt-1 text-[13px] text-[#4D4D4D]">
-          Students can enroll in this course instantly. No price or payment is required.
-        </p>
+      <div className="space-y-5 rounded-xl border border-[#DCE8E1] bg-[#F8FCFA] p-5">
+        <div>
+          <p className="font-bold text-[16px] text-black">Pricing & public listing</p>
+          <p className="mt-1 text-[13px] text-[#4D4D4D]">Choose how students access this course and where it appears publicly.</p>
+        </div>
+        <div className="grid gap-5 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label>Category</Label>
+            <select value={categoryId} onChange={(event) => setCategoryId(event.target.value)} className="h-11 w-full rounded-md border border-[#D8E2DD] bg-white px-3 text-sm">
+              <option value="">Select category</option>
+              {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label>Public course URL</Label>
+            <div className="flex overflow-hidden rounded-md border border-[#D8E2DD] bg-white">
+              <span className="flex items-center bg-[#EEF5F1] px-3 text-xs text-[#607269]">/courses/</span>
+              <Input value={publicSlug} onChange={(event) => setPublicSlug(event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-"))} className="border-0 focus-visible:ring-0" placeholder="course-name" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Course price (₹)</Label>
+            <Input type="number" min="0" step="1" value={priceRupees} onChange={(event) => setPriceRupees(event.target.value)} />
+            <p className="text-xs text-[#607269]">Enter 0 for a free course.</p>
+          </div>
+          <div className="space-y-2">
+            <Label>Access plan</Label>
+            <select value={accessPlan} onChange={(event) => setAccessPlan(event.target.value)} className="h-11 w-full rounded-md border border-[#D8E2DD] bg-white px-3 text-sm">
+              <option value="lifetime">Lifetime access</option>
+              <option value="monthly">Monthly access (30 days)</option>
+              <option value="yearly">Yearly access</option>
+              <option value="fixed_days">Custom access period</option>
+            </select>
+          </div>
+          {accessPlan === "fixed_days" && (
+            <div className="space-y-2">
+              <Label>Access duration (days)</Label>
+              <Input type="number" min="1" value={accessDays} onChange={(event) => setAccessDays(event.target.value)} />
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label>Free trial (days)</Label>
+            <Input type="number" min="0" max="90" value={trialDays} onChange={(event) => setTrialDays(event.target.value)} />
+            <p className="text-xs text-[#607269]">Enter 0 to disable free trial.</p>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-6">

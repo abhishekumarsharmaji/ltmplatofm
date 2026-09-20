@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Link, useLocation } from "wouter";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import {
@@ -6,7 +7,8 @@ import {
   useGetSession,
   useStudentLibrary,
   getGetMarketplaceCourseQueryKey,
-  getStudentLibraryQueryKey
+  getStudentLibraryQueryKey,
+  useCreateZapUpiDigitalProductCheckout
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +16,7 @@ import { BookOpen, CheckCircle2, Clock, Play, AlertCircle, MonitorPlay, Infinity
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CourseThumbnail } from "@/components/courses/CourseThumbnail";
+import { Input } from "@/components/ui/input";
 import {
   Accordion,
   AccordionContent,
@@ -23,7 +26,7 @@ import {
 
 export default function CourseDetail() {
   const params = useParams();
-  const courseId = params.id ? parseInt(params.id) : 0;
+  const courseKey = params.id || "";
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -33,10 +36,13 @@ export default function CourseDetail() {
     query: { enabled: session?.authenticated === true, queryKey: getStudentLibraryQueryKey() }
   });
   const enroll = useEnrollInCourse();
+  const checkout = useCreateZapUpiDigitalProductCheckout();
+  const [phone, setPhone] = useState("");
 
-  const { data: course, isLoading, isError } = useGetMarketplaceCourse(courseId, {
-    query: { enabled: !!courseId, queryKey: getGetMarketplaceCourseQueryKey(courseId) }
+  const { data: course, isLoading, isError } = useGetMarketplaceCourse(courseKey, {
+    query: { enabled: !!courseKey, queryKey: getGetMarketplaceCourseQueryKey(courseKey) }
   });
+  const courseId = course?.id || 0;
   const isEnrolled = library?.some((item: any) => item.course?.id === courseId) ?? false;
 
   const handleEnroll = () => {
@@ -54,7 +60,7 @@ export default function CourseDetail() {
             title: "Enrollment successful",
             description: "You have successfully enrolled in this course for free."
           });
-          queryClient.invalidateQueries({ queryKey: getGetMarketplaceCourseQueryKey(courseId) });
+          queryClient.invalidateQueries({ queryKey: getGetMarketplaceCourseQueryKey(courseKey) });
           queryClient.invalidateQueries({ queryKey: getStudentLibraryQueryKey() });
           setLocation("/dashboard/student/library");
         }
@@ -62,6 +68,25 @@ export default function CourseDetail() {
       onError: (error: Error) => {
         toast({ title: "Enrollment failed", description: error.message, variant: "destructive" });
       }
+    });
+  };
+
+  const handleCheckout = () => {
+    if (!session?.authenticated || !session.user?.email) {
+      setLocation(`/auth/login`);
+      return;
+    }
+    const normalizedPhone = phone.replace(/[^\d+]/g, "");
+    if (!/^\+?\d{8,15}$/.test(normalizedPhone)) {
+      toast({ title: "Enter a valid mobile number", variant: "destructive" });
+      return;
+    }
+    checkout.mutate({
+      id: String(course.productId),
+      data: { email: session.user.email, phone: normalizedPhone },
+    }, {
+      onSuccess: (result) => { window.location.href = result.paymentUrl; },
+      onError: (error: any) => toast({ title: error?.response?.data?.error || "Checkout could not be started", variant: "destructive" }),
     });
   };
 
@@ -97,7 +122,10 @@ export default function CourseDetail() {
             <div className="grid lg:grid-cols-12 gap-12 items-center">
               <div className="space-y-8 lg:col-span-7">
                 <div className="flex flex-wrap gap-2">
-                  <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[13px] font-bold">Free Course</span>
+                  <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[13px] font-bold">
+                    {course.priceMinor > 0 ? new Intl.NumberFormat("en-IN", { style: "currency", currency: course.currency || "INR", maximumFractionDigits: 2 }).format(course.priceMinor / 100) : "Free Course"}
+                  </span>
+                  {course.categoryName && <span className="border border-[#BDE8D1] bg-[#E8F8EF] text-[#087B46] px-3 py-1 rounded-full text-[13px] font-medium">{course.categoryName}</span>}
                   <span className="border border-[#E5E5E5] text-[#394649] px-3 py-1 rounded-full text-[13px] font-medium capitalize">{course.level || "Beginner"}</span>
                 </div>
 
@@ -119,7 +147,7 @@ export default function CourseDetail() {
                 <div className="flex flex-wrap items-center gap-6 pt-2 text-[14px] font-medium text-[#394649]">
                   <div className="flex items-center gap-2">
                     <Infinity className="w-5 h-5 text-primary" />
-                    <span>Lifetime Access</span>
+                    <span>{course.accessPlan === "monthly" ? "30 days access" : course.accessPlan === "yearly" ? "1 year access" : course.accessPlan === "fixed_days" ? `${course.accessDays} days access` : "Lifetime Access"}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-5 h-5 text-primary" />
@@ -132,14 +160,21 @@ export default function CourseDetail() {
                     <Link href={`/dashboard/student/courses/${courseId}`} className="h-[54px] px-10 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)] w-full inline-flex items-center justify-center">
                         Resume Learning
                     </Link>
-                  ) : (
+                  ) : course.priceMinor === 0 || course.trialDays > 0 ? (
                     <Button
                       className="h-[54px] px-10 bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)] w-full"
                       onClick={handleEnroll}
                       disabled={enroll.isPending}
                     >
-                      {enroll.isPending ? "Enrolling..." : "Enroll for Free"}
+                      {enroll.isPending ? "Enrolling..." : course.trialDays > 0 && course.priceMinor > 0 ? `Start ${course.trialDays}-day free trial` : "Enroll for Free"}
                     </Button>
+                  ) : (
+                    <div className="w-full space-y-3">
+                      <Input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Mobile number for UPI checkout" />
+                      <Button className="h-[54px] w-full bg-primary text-white hover:bg-[#10A364]" onClick={handleCheckout} disabled={checkout.isPending}>
+                        {checkout.isPending ? "Opening checkout…" : `Buy course for ${new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(course.priceMinor / 100)}`}
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -281,14 +316,21 @@ export default function CourseDetail() {
                     <Link href={`/dashboard/student/courses/${courseId}`} className="w-full h-[54px] bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)] inline-flex items-center justify-center">
                         Resume Learning
                     </Link>
-                  ) : (
+                  ) : course.priceMinor === 0 || course.trialDays > 0 ? (
                     <Button
                       className="w-full h-[54px] bg-primary hover:bg-[#10A364] text-white font-medium rounded-md text-[16px] shadow-[0_10px_24px_rgba(21,207,116,0.35)]"
                       onClick={handleEnroll}
                       disabled={enroll.isPending}
                     >
-                      {enroll.isPending ? "Enrolling..." : "Enroll for Free"}
+                      {enroll.isPending ? "Enrolling..." : course.trialDays > 0 && course.priceMinor > 0 ? `Start ${course.trialDays}-day free trial` : "Enroll for Free"}
                     </Button>
+                  ) : (
+                    <div className="space-y-3">
+                      <Input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Mobile number for UPI checkout" />
+                      <Button className="h-[54px] w-full bg-primary text-white hover:bg-[#10A364]" onClick={handleCheckout} disabled={checkout.isPending}>
+                        {checkout.isPending ? "Opening checkout…" : `Buy for ${new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(course.priceMinor / 100)}`}
+                      </Button>
+                    </div>
                   )}
                   <p className="text-[13px] text-center text-[#9794AA] mt-4">
                     Instant access to all course materials

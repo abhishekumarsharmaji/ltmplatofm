@@ -8,10 +8,12 @@ import {
   FileArchive, 
   Video,
   ArrowRight,
-  Package
+  Package,
+  BookOpen
 } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { useListDigitalProducts } from "@workspace/api-client-react";
+import { useListDigitalProducts, useMarketplaceCourses } from "@workspace/api-client-react";
+import { CourseThumbnail } from "@/components/courses/CourseThumbnail";
 
 function productPrice(priceMinor: number, currency: string) {
   if (priceMinor === 0) return "Free";
@@ -24,6 +26,8 @@ function productPrice(priceMinor: number, currency: string) {
 
 export default function Home() {
   const { data: products } = useListDigitalProducts();
+  const { data: courses } = useMarketplaceCourses();
+  const courseCategories = Array.from(new Set((courses || []).map((course) => course.categoryName || "Other")));
 
   return (
     <PublicLayout>
@@ -168,6 +172,48 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {courses && courses.length > 0 && (
+          <section className="bg-[#F8FAF9] py-24 border-y border-[#E2EBE6]">
+            <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="mb-12 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[0.16em] text-primary">Published courses</p>
+                  <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">Learn by category</h2>
+                </div>
+                <Link href="/courses" className="inline-flex items-center gap-2 font-semibold text-[#087B46] hover:underline">View all courses <ArrowRight className="h-4 w-4" /></Link>
+              </div>
+              <div className="space-y-14">
+                {courseCategories.map((categoryName) => (
+                  <div key={categoryName}>
+                    <div className="mb-5 flex items-center gap-3">
+                      <BookOpen className="h-5 w-5 text-primary" />
+                      <h3 className="text-2xl font-bold text-slate-900">{categoryName}</h3>
+                    </div>
+                    <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+                      {courses.filter((course) => (course.categoryName || "Other") === categoryName).slice(0, 3).map((course) => (
+                        <article key={course.id} className="overflow-hidden rounded-2xl border border-[#DCE8E1] bg-white shadow-[0_14px_42px_rgba(20,80,55,.08)]">
+                          <div className="aspect-[16/9] overflow-hidden bg-[#EEF5F1]">
+                            <CourseThumbnail src={course.thumbnailUrl} title={course.title} />
+                          </div>
+                          <div className="p-6">
+                            <span className="text-xs font-bold uppercase tracking-wide text-[#087B46]">{course.level || "Beginner"} · {course.lessons || 0} lessons</span>
+                            <h4 className="mt-3 line-clamp-2 text-xl font-bold text-slate-900">{course.title}</h4>
+                            <p className="mt-3 line-clamp-2 leading-6 text-slate-600">{course.description}</p>
+                            <div className="mt-6 flex items-center justify-between gap-4 border-t border-[#E4ECE8] pt-5">
+                              <span className="text-xl font-bold text-slate-900">{productPrice(course.priceMinor || 0, course.currency || "INR")}</span>
+                              <Link href={`/courses/${course.publicSlug || course.id}`} className="font-semibold text-[#087B46] hover:underline">View course</Link>
+                            </div>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {products && products.length > 0 && (
           <section className="bg-white py-24">

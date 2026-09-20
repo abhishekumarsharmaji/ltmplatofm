@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { eq, ilike, and, inArray, sql } from "drizzle-orm";
-import { db, coursesTable, courseModulesTable, lessonsTable, lessonAssetsTable, productsTable, creatorProfilesTable, lmsCoursesTable, lmsUsersTable, usersTable, creatorApplicationsTable } from "@workspace/db";
+import { db, categoriesTable, coursesTable, courseModulesTable, lessonsTable, lessonAssetsTable, productsTable, creatorProfilesTable, lmsCoursesTable, lmsUsersTable, usersTable, creatorApplicationsTable } from "@workspace/db";
 import {
   GetSessionResponse,
   ListCoursesResponse,
@@ -125,6 +125,13 @@ router.get("/marketplace/courses", async (req, res): Promise<void> => {
     faqs: coursesTable.faqs,
     level: coursesTable.level,
     creatorName: usersTable.name,
+    categoryName: categoriesTable.name,
+    publicSlug: productsTable.publicSlug,
+    priceMinor: productsTable.priceMinor,
+    currency: productsTable.currency,
+    accessPlan: productsTable.accessPlan,
+    accessDays: productsTable.accessDays,
+    trialDays: productsTable.trialDays,
     lessons: sql<number>`(
       select count(*)::int
       from lessons
@@ -133,6 +140,8 @@ router.get("/marketplace/courses", async (req, res): Promise<void> => {
     )`,
   }).from(coursesTable)
     .innerJoin(usersTable, eq(usersTable.id, coursesTable.creatorId))
+    .leftJoin(productsTable, and(eq(productsTable.courseId, coursesTable.id), eq(productsTable.type, "course")))
+    .leftJoin(categoriesTable, eq(categoriesTable.id, coursesTable.categoryId))
     .where(and(...filters))
     .orderBy(coursesTable.id);
   res.json(ListCoursesResponse.parse(courses));
@@ -260,13 +269,24 @@ router.patch("/creator/products/:productId/builder", requireAuth, requireRole("c
   const level = body.level === undefined ? found.course.level : body.level;
   const outcomes = body.outcomes === undefined ? found.course.outcomes : body.outcomes;
   const faqs = body.faqs === undefined ? found.course.faqs : body.faqs;
+  const categoryId = body.categoryId === undefined ? found.course.categoryId : body.categoryId;
+  const priceMinor = body.priceMinor === undefined ? found.product.priceMinor : body.priceMinor;
+  const currency = body.currency === undefined ? found.product.currency : body.currency;
+  const accessPlan = body.accessPlan === undefined ? found.product.accessPlan : body.accessPlan;
+  const accessDays = body.accessDays === undefined ? found.product.accessDays : body.accessDays;
+  const trialDays = body.trialDays === undefined ? found.product.trialDays : body.trialDays;
+  const publicSlug = body.publicSlug === undefined ? found.product.publicSlug : String(body.publicSlug).toLowerCase().trim();
   const validFaqs = Array.isArray(faqs) && faqs.every((faq: unknown) => typeof faq === "object" && faq !== null && typeof (faq as any).question === "string" && typeof (faq as any).answer === "string");
-  if (typeof title !== "string" || title.trim().length < 2 || typeof description !== "string" || (thumbnailUrl !== null && typeof thumbnailUrl !== "string") || typeof level !== "string" || !Array.isArray(outcomes) || !outcomes.every((item: unknown) => typeof item === "string") || !validFaqs) {
-    res.status(400).json({ error: "Valid course title, description, thumbnail, level, outcomes and FAQs are required" }); return;
+  const validPlan = ["lifetime", "fixed_days", "monthly", "yearly"].includes(accessPlan);
+  const validSlug = typeof publicSlug === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(publicSlug) && publicSlug.length >= 3 && publicSlug.length <= 80;
+  if (typeof title !== "string" || title.trim().length < 2 || typeof description !== "string" || (thumbnailUrl !== null && typeof thumbnailUrl !== "string") || typeof level !== "string" || !Array.isArray(outcomes) || !outcomes.every((item: unknown) => typeof item === "string") || !validFaqs || (categoryId !== null && !Number.isInteger(categoryId)) || !Number.isInteger(priceMinor) || priceMinor < 0 || currency !== "INR" || !validPlan || (accessPlan === "fixed_days" && (!Number.isInteger(accessDays) || accessDays < 1)) || !Number.isInteger(trialDays) || trialDays < 0 || trialDays > 90 || !validSlug) {
+    res.status(400).json({ error: "Valid course details, category, public URL and INR pricing are required" }); return;
   }
+  const [slugConflict] = await db.select({ id: productsTable.id }).from(productsTable).where(eq(productsTable.publicSlug, publicSlug));
+  if (slugConflict && slugConflict.id !== productId) { res.status(409).json({ error: "This public URL is already in use" }); return; }
   const updated = await db.transaction(async (tx) => {
-    const [course] = await tx.update(coursesTable).set({ title: title.trim(), description, thumbnailUrl: thumbnailUrl?.trim() || null, level, outcomes: outcomes.map((item: string) => item.trim()).filter(Boolean), faqs: faqs.map((faq: any) => ({ question: faq.question.trim(), answer: faq.answer.trim() })).filter((faq: any) => faq.question && faq.answer), priceMinor: 0, currency: "USD", updatedAt: new Date() }).where(ownerFilter(coursesTable, found.course!.id, auth.canonicalUserId!, auth.canonicalRole === "admin")).returning();
-    await tx.update(productsTable).set({ title: title.trim(), description, priceMinor: 0, currency: "USD", updatedAt: new Date() }).where(eq(productsTable.id, productId));
+    const [course] = await tx.update(coursesTable).set({ title: title.trim(), description, thumbnailUrl: thumbnailUrl?.trim() || null, level, outcomes: outcomes.map((item: string) => item.trim()).filter(Boolean), faqs: faqs.map((faq: any) => ({ question: faq.question.trim(), answer: faq.answer.trim() })).filter((faq: any) => faq.question && faq.answer), categoryId, priceMinor, currency, updatedAt: new Date() }).where(ownerFilter(coursesTable, found.course!.id, auth.canonicalUserId!, auth.canonicalRole === "admin")).returning();
+    await tx.update(productsTable).set({ title: title.trim(), description, categoryId, publicSlug, priceMinor, currency, accessPlan, accessDays: accessPlan === "fixed_days" ? accessDays : null, trialDays, updatedAt: new Date() }).where(eq(productsTable.id, productId));
     return course;
   });
   res.json(updated);

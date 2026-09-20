@@ -183,7 +183,7 @@ paths:
   /marketplace/courses/{id}:
     get:
       operationId: getMarketplaceCourse
-      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
       responses: { "200": { description: Course, content: { application/json: { schema: { $ref: "#/components/schemas/Course" } } } }, "404": { description: Not found } }
   /student/courses/{courseId}/enroll:
     post:
@@ -771,6 +771,13 @@ components:
         level: { type: string }
         outcomes: { type: array, items: { type: string } }
         faqs: { type: array, items: { $ref: "#/components/schemas/CourseFaq" } }
+        categoryId: { type: ["integer", "null"] }
+        publicSlug: { type: string, minLength: 3, maxLength: 80 }
+        priceMinor: { type: integer, minimum: 0 }
+        currency: { type: string, enum: [INR] }
+        accessPlan: { type: string, enum: [lifetime, fixed_days, monthly, yearly] }
+        accessDays: { type: ["integer", "null"], minimum: 1 }
+        trialDays: { type: integer, minimum: 0, maximum: 90 }
     ImageUploadInput:
       type: object
       required: [filename, mimeType, sizeBytes]
@@ -946,6 +953,21 @@ components:
           type: string
         categoryId:
           type: ["integer", "null"]
+        categoryName:
+          type: ["string", "null"]
+        publicSlug:
+          type: ["string", "null"]
+        priceMinor:
+          type: integer
+        currency:
+          type: string
+        accessPlan:
+          type: string
+          enum: [lifetime, fixed_days, monthly, yearly]
+        accessDays:
+          type: ["integer", "null"]
+        trialDays:
+          type: integer
         thumbnailUrl:
           type: ["string", "null"]
         outcomes:

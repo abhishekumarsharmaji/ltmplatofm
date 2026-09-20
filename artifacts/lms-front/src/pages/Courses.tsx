@@ -160,23 +160,26 @@ export default function Courses() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {courses.map(course => (
-                <Link key={course.id} href={`/courses/${course.id}`}>
+                 <Link key={course.id} href={`/courses/${course.publicSlug || course.id}`}>
                   <div className="group rounded-lg border border-[#E5E5E5] bg-white hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-shadow duration-300 flex flex-col h-full cursor-pointer overflow-hidden">
                     <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
                       <CourseThumbnail src={course.thumbnailUrl} title={course.title} className="transition-transform duration-500 group-hover:scale-105" />
                     </div>
                     
                     <div className="p-4 sm:p-5 flex flex-col flex-1">
-                      <div className="flex justify-between items-center text-[13px] text-[#394649] mb-3">
+                       <div className="flex justify-between items-center text-[13px] text-[#394649] mb-3">
                         <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" />{course.lessons || 0} Lessons</span>
-                        <span className="capitalize">{course.level || "Beginner"}</span>
+                         <span>{course.categoryName || <span className="capitalize">{course.level || "Beginner"}</span>}</span>
                       </div>
                       <h3 className="text-[16px] font-bold text-black leading-snug mb-3 line-clamp-2">
                         {course.title}
                       </h3>
                       
                       <div className="mt-auto flex items-center justify-between text-[13px] text-[#394649]">
-                        <span>{course.creatorName || "Unknown Author"}</span>
+                         <span>{course.creatorName || "Unknown Author"}</span>
+                         <span className="font-bold text-[#087B46]">
+                           {course.priceMinor > 0 ? new Intl.NumberFormat("en-IN", { style: "currency", currency: course.currency || "INR", maximumFractionDigits: 2 }).format(course.priceMinor / 100) : "Free"}
+                         </span>
                       </div>
                     </div>
                   </div>

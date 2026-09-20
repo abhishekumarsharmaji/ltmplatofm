@@ -3,7 +3,7 @@ import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm";
 import {
   db, digitalFilesTable, digitalProductEntitlementsTable, digitalProductPaymentsTable,
-  creatorProfilesTable, guestDigitalEntitlementsTable, productsTable, usersTable,
+  coursesTable, creatorProfilesTable, enrollmentsTable, guestDigitalEntitlementsTable, productsTable, usersTable,
 } from "@workspace/db";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewares/auth";
 import {
@@ -164,10 +164,7 @@ async function verifyAndFinalizeZapUpiPayment(orderId: string) {
     throw new Error("ZapUPI payment amount does not match the order");
   }
 
-  const [product] = await db.select().from(productsTable).where(and(
-    eq(productsTable.id, payment.productId),
-    eq(productsTable.type, "digital"),
-  ));
+  const [product] = await db.select().from(productsTable).where(eq(productsTable.id, payment.productId));
   if (!product) throw new Error("Paid product no longer exists");
 
   await db.transaction(async (tx) => {
@@ -184,26 +181,26 @@ async function verifyAndFinalizeZapUpiPayment(orderId: string) {
     )).returning();
     if (!claimed) return;
 
-    const [existing] = await tx.select().from(guestDigitalEntitlementsTable).where(and(
-      eq(guestDigitalEntitlementsTable.productId, payment.productId),
-      eq(guestDigitalEntitlementsTable.email, payment.email),
-    ));
-    const from = existing?.expiresAt && existing.expiresAt.getTime() > Date.now()
-      ? existing.expiresAt
-      : new Date();
-    const expiresAt = accessExpiry(product.accessPlan, product.accessDays, 0, from);
-    if (existing) {
-      await tx.update(guestDigitalEntitlementsTable).set({
-        phone: payment.phone,
-        expiresAt,
-      }).where(eq(guestDigitalEntitlementsTable.id, existing.id));
+    if (product.type === "course" && product.courseId) {
+      const [buyer] = await tx.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, payment.email));
+      if (!buyer) throw new Error("Course buyer account no longer exists");
+      const [existing] = await tx.select().from(enrollmentsTable).where(and(eq(enrollmentsTable.courseId, product.courseId), eq(enrollmentsTable.userId, buyer.id)));
+      const from = existing?.expiresAt && existing.expiresAt.getTime() > Date.now() ? existing.expiresAt : new Date();
+      const expiresAt = accessExpiry(product.accessPlan, product.accessDays, 0, from);
+      if (existing) await tx.update(enrollmentsTable).set({ expiresAt }).where(eq(enrollmentsTable.id, existing.id));
+      else await tx.insert(enrollmentsTable).values({ userId: buyer.id, courseId: product.courseId, expiresAt });
     } else {
-      await tx.insert(guestDigitalEntitlementsTable).values({
-        productId: payment.productId,
-        email: payment.email,
-        phone: payment.phone,
-        expiresAt,
-      });
+      const [existing] = await tx.select().from(guestDigitalEntitlementsTable).where(and(
+        eq(guestDigitalEntitlementsTable.productId, payment.productId),
+        eq(guestDigitalEntitlementsTable.email, payment.email),
+      ));
+      const from = existing?.expiresAt && existing.expiresAt.getTime() > Date.now() ? existing.expiresAt : new Date();
+      const expiresAt = accessExpiry(product.accessPlan, product.accessDays, 0, from);
+      if (existing) {
+        await tx.update(guestDigitalEntitlementsTable).set({ phone: payment.phone, expiresAt }).where(eq(guestDigitalEntitlementsTable.id, existing.id));
+      } else {
+        await tx.insert(guestDigitalEntitlementsTable).values({ productId: payment.productId, email: payment.email, phone: payment.phone, expiresAt });
+      }
     }
   });
   return "succeeded";
@@ -299,21 +296,25 @@ router.post("/marketplace/digital-products/:id/checkout/zapupi", async (req, res
   const productId = numericId(req.params.id);
   const [product] = await db.select().from(productsTable).where(and(
     productId ? eq(productsTable.id, productId) : eq(productsTable.publicSlug, String(req.params.id).toLowerCase()),
-    eq(productsTable.type, "digital"),
     eq(productsTable.status, "published"),
   ));
-  if (!product) { res.status(404).json({ error: "Digital product not found" }); return; }
+  if (!product) { res.status(404).json({ error: "Product not found" }); return; }
   if (product.priceMinor <= 0) { res.status(400).json({ error: "This product does not require payment" }); return; }
   if (product.currency.toUpperCase() !== "INR") { res.status(400).json({ error: "ZapUPI checkout currently supports INR products only" }); return; }
   const phone = normalizedPhone(req.body?.phone);
   if (!validEmail(req.body?.email) || !/^\+?\d{8,15}$/.test(phone)) {
     res.status(400).json({ error: "Enter a valid email address and mobile number" }); return;
   }
-  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(digitalFilesTable).where(and(
-    eq(digitalFilesTable.productId, product.id),
-    eq(digitalFilesTable.status, "uploaded"),
-  ));
-  if (!Number(count)) { res.status(409).json({ error: "This product is not ready for purchase yet" }); return; }
+  if (product.type === "digital") {
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(digitalFilesTable).where(and(
+      eq(digitalFilesTable.productId, product.id),
+      eq(digitalFilesTable.status, "uploaded"),
+    ));
+    if (!Number(count)) { res.status(409).json({ error: "This product is not ready for purchase yet" }); return; }
+  } else {
+    const [buyer] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, String(req.body?.email ?? "").trim().toLowerCase()));
+    if (!buyer) { res.status(401).json({ error: "Sign in with this email before purchasing a course" }); return; }
+  }
   if (!process.env.ZAPUPI_ZAP_KEY) { res.status(503).json({ error: "UPI checkout is temporarily unavailable" }); return; }
 
   const email = String(req.body.email).trim().toLowerCase();
@@ -385,13 +386,16 @@ router.post("/payments/zapupi/orders/:orderId/status", async (req, res): Promise
     res.json({ orderId, status: payment.status, productId: payment.productId, productTitle: product?.title ?? "Digital product" });
     return;
   }
-  const [entitlement] = await db.select().from(guestDigitalEntitlementsTable).where(and(
-    eq(guestDigitalEntitlementsTable.productId, payment.productId),
-    eq(guestDigitalEntitlementsTable.email, payment.email),
-  ));
-  if (!entitlement || !activeUntil(entitlement.expiresAt)) {
-    res.status(409).json({ error: "Payment succeeded but access is not ready yet" }); return;
+  if (product?.type === "course" && product.courseId) {
+    const [buyer] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, payment.email));
+    const [enrollment] = buyer ? await db.select().from(enrollmentsTable).where(and(eq(enrollmentsTable.courseId, product.courseId), eq(enrollmentsTable.userId, buyer.id))) : [];
+    if (!enrollment || !activeUntil(enrollment.expiresAt)) { res.status(409).json({ error: "Payment succeeded but course access is not ready yet" }); return; }
+    res.setHeader("Cache-Control", "private, no-store");
+    res.json({ orderId, status: "succeeded", productId: payment.productId, productTitle: product.title, productType: "course", courseId: product.courseId, accessExpiresAt: enrollment.expiresAt?.toISOString() ?? null, files: [] });
+    return;
   }
+  const [entitlement] = await db.select().from(guestDigitalEntitlementsTable).where(and(eq(guestDigitalEntitlementsTable.productId, payment.productId), eq(guestDigitalEntitlementsTable.email, payment.email)));
+  if (!entitlement || !activeUntil(entitlement.expiresAt)) { res.status(409).json({ error: "Payment succeeded but access is not ready yet" }); return; }
   const files = await db.select({
     id: digitalFilesTable.id,
     filename: digitalFilesTable.filename,
