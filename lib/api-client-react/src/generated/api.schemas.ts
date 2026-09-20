@@ -925,7 +925,8 @@ export interface LiveClassInput {
   title: string;
   description?: string;
   startsAt: string;
-  endsAt: string;
+  /** @nullable */
+  endsAt?: string | null;
   /** @minLength 1 */
   timezone: string;
   /** @nullable */
@@ -965,7 +966,8 @@ export interface LiveClass {
   title: string;
   description: string;
   startsAt: string;
-  endsAt: string;
+  /** @nullable */
+  endsAt?: string | null;
   timezone: string;
   status: LiveClassStatus;
   roomName: string;

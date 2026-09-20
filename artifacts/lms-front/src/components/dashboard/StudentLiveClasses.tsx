@@ -105,7 +105,7 @@ function StudentLiveClassItem({ liveClass }: { liveClass: LiveClass }) {
           </div>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-[#9794AA]" />
-            {format(parseISO(liveClass.startsAt), "h:mm a")} - {format(parseISO(liveClass.endsAt), "h:mm a")} ({liveClass.timezone})
+            {format(parseISO(liveClass.startsAt), "h:mm a")}{liveClass.endsAt ? ` - ${format(parseISO(liveClass.endsAt), "h:mm a")}` : ""} ({liveClass.timezone})
           </div>
         </div>
         

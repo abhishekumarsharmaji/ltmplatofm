@@ -11,8 +11,10 @@ const auth = (req: Express.Request) => req as AuthenticatedRequest;
 
 function schedule(body: any) {
   if (typeof body?.title !== "string" || !body.title.trim() || typeof body?.timezone !== "string" || !body.timezone.trim()) return null;
-  const startsAt = new Date(body.startsAt), endsAt = new Date(body.endsAt);
-  if (!Number.isFinite(startsAt.getTime()) || !Number.isFinite(endsAt.getTime()) || endsAt <= startsAt) return null;
+  const startsAt = new Date(body.startsAt);
+  const hasEndsAt = Object.prototype.hasOwnProperty.call(body, "endsAt");
+  const endsAt = hasEndsAt && body.endsAt ? new Date(body.endsAt) : hasEndsAt ? null : undefined;
+  if (!Number.isFinite(startsAt.getTime()) || (endsAt instanceof Date && (!Number.isFinite(endsAt.getTime()) || endsAt <= startsAt))) return null;
   return { title: body.title.trim(), description: typeof body.description === "string" ? body.description : "", startsAt, endsAt, timezone: body.timezone.trim(), moduleId: body.moduleId == null ? null : id(String(body.moduleId)) };
 }
 async function validModule(moduleId: number | null, product: typeof productsTable.$inferSelect, req: AuthenticatedRequest) {
@@ -41,11 +43,11 @@ router.get("/creator/products/:productId/live-classes", requireAuth, requireRole
 
 router.post("/creator/products/:productId/live-classes", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const productId = id(req.params.productId), user = auth(req), values = schedule(req.body);
-  if (!productId || !values) { res.status(422).json({ error: "title, ISO startsAt/endsAt, timezone and endsAt > startsAt are required" }); return; }
+  if (!productId || !values) { res.status(422).json({ error: "title, ISO startsAt, and timezone are required; optional endsAt must be after startsAt" }); return; }
   const [product] = await db.select().from(productsTable).where(and(eq(productsTable.id, productId), user.canonicalRole === "admin" ? undefined : eq(productsTable.creatorId, user.canonicalUserId!)));
   if (!product?.courseId) { res.status(404).json({ error: "Course product not found" }); return; }
   if (!await validModule(values.moduleId, product, user)) { res.status(422).json({ error: "moduleId must belong to this course" }); return; }
-  const [item] = await db.insert(liveClassesTable).values({ ...values, productId, courseId: product.courseId, creatorId: product.creatorId, roomName: `course-${product.courseId}-class-${randomUUID()}` }).returning();
+  const [item] = await db.insert(liveClassesTable).values({ ...values, endsAt: values.endsAt ?? null, productId, courseId: product.courseId, creatorId: product.creatorId, roomName: `course-${product.courseId}-class-${randomUUID()}` }).returning();
   res.status(201).json({ ...item, moduleTitle: values.moduleId ? (await db.select({ title: courseModulesTable.title }).from(courseModulesTable).where(eq(courseModulesTable.id, values.moduleId)))[0]?.title ?? null : null });
 });
 

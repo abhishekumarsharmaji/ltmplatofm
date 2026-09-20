@@ -20,7 +20,8 @@ export interface LiveClass {
   title: string;
   description: string;
   startsAt: Date;
-  endsAt: Date;
+  /** @nullable */
+  endsAt?: Date | null;
   timezone: string;
   status: LiveClassStatus;
   roomName: string;

@@ -11,7 +11,8 @@ export interface LiveClassInput {
   title: string;
   description?: string;
   startsAt: Date;
-  endsAt: Date;
+  /** @nullable */
+  endsAt?: Date | null;
   /** @minLength 1 */
   timezone: string;
   /** @nullable */

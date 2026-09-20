@@ -153,7 +153,7 @@ function LiveClassItem({ liveClass, productId, role, modules }: { liveClass: Liv
           </div>
           <div className="flex items-center gap-1.5">
             <Clock className="w-4 h-4 text-[#9794AA]" />
-            {format(parseISO(liveClass.startsAt), "h:mm a")} - {format(parseISO(liveClass.endsAt), "h:mm a")} ({liveClass.timezone})
+            {format(parseISO(liveClass.startsAt), "h:mm a")}{liveClass.endsAt ? ` - ${format(parseISO(liveClass.endsAt), "h:mm a")}` : ""} ({liveClass.timezone})
           </div>
         </div>
       </div>
@@ -353,16 +353,16 @@ export function LiveClassFormDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !startsAt || !endsAt) {
-      toast({ title: "Missing fields", description: "Title, start time, and end time are required.", variant: "destructive" });
+    if (!title || !startsAt) {
+      toast({ title: "Missing fields", description: "Title and start time are required.", variant: "destructive" });
       return;
     }
 
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const startIso = new Date(startsAt).toISOString();
-    const endIso = new Date(endsAt).toISOString();
+    const endIso = endsAt ? new Date(endsAt).toISOString() : null;
 
-    if (new Date(endIso) <= new Date(startIso)) {
+    if (endIso && new Date(endIso) <= new Date(startIso)) {
       toast({ title: "Invalid times", description: "End time must be after start time.", variant: "destructive" });
       return;
     }
@@ -432,7 +432,7 @@ export function LiveClassFormDialog({
                 <Input id="startsAt" type="datetime-local" value={startsAt} onChange={e => setStartsAt(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="endsAt">End Time</Label>
+                <Label htmlFor="endsAt">End Time (Optional)</Label>
                 <Input id="endsAt" type="datetime-local" value={endsAt} onChange={e => setEndsAt(e.target.value)} />
               </div>
             </div>

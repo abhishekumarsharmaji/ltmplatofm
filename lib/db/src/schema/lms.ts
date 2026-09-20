@@ -325,7 +325,7 @@ export const liveClassesTable = pgTable("live_classes", {
   title: text("title").notNull(),
   description: text("description").notNull().default(""),
   startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
-  endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+  endsAt: timestamp("ends_at", { withTimezone: true }),
   timezone: text("timezone").notNull(),
   status: liveClassStatusEnum("status").notNull().default("scheduled"),
   roomName: text("room_name").notNull().unique(),
