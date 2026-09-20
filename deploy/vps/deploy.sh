@@ -35,7 +35,6 @@ pnpm --filter @workspace/api-server run build
 PORT=24567 BASE_PATH=/ pnpm --filter @workspace/lms-front run build
 
 systemctl restart coreskils-api
-install -m 644 deploy/vps/coreskils.com.nginx /etc/nginx/sites-available/coreskils.com
 nginx -t
 systemctl reload nginx
 
