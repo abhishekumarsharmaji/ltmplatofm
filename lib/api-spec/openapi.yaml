@@ -574,6 +574,29 @@ paths:
       responses:
         "201": { description: Temporary free-product access, content: { application/json: { schema: { $ref: "#/components/schemas/GuestDigitalAccess" } } } }
         "402": { description: Verified payment is required }
+  /marketplace/digital-products/{id}/checkout/zapupi:
+    post:
+      operationId: createZapUpiDigitalProductCheckout
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ZapUpiCheckoutInput" } } } }
+      responses:
+        "201": { description: ZapUPI checkout created, content: { application/json: { schema: { $ref: "#/components/schemas/ZapUpiCheckout" } } } }
+        "400": { description: Invalid checkout details }
+        "503": { description: UPI checkout unavailable }
+  /payments/zapupi/webhook:
+    post:
+      operationId: receiveZapUpiWebhook
+      requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: true } } } }
+      responses: { "200": { description: Webhook accepted } }
+  /payments/zapupi/orders/{orderId}:
+    get:
+      operationId: getZapUpiPaymentOrder
+      parameters:
+        - { name: orderId, in: path, required: true, schema: { type: string } }
+        - { name: token, in: query, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Current verified payment status, content: { application/json: { schema: { $ref: "#/components/schemas/ZapUpiPaymentOrder" } } } }
+        "404": { description: Payment order not found }
   /marketplace/digital-products/{productId}/files/{fileId}/guest-download:
     get:
       operationId: downloadGuestDigitalProductFile
@@ -1063,6 +1086,37 @@ components:
         productId: { type: integer }
         expiresAt: { type: string, format: date-time }
         files: { type: array, items: { $ref: "#/components/schemas/DigitalFile" } }
+    ZapUpiCheckoutInput:
+      type: object
+      required: [email, phone]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        phone: { type: string, minLength: 8, maxLength: 20 }
+    ZapUpiCheckout:
+      type: object
+      required: [orderId, paymentUrl, checkoutToken]
+      properties:
+        orderId: { type: string }
+        paymentUrl: { type: string, format: uri }
+        checkoutToken: { type: string }
+    ZapUpiPaymentOrder:
+      type: object
+      required: [orderId, status, productId, productTitle]
+      properties:
+        orderId: { type: string }
+        status: { type: string, enum: [pending, succeeded, failed, refunded] }
+        productId: { type: integer }
+        productTitle: { type: string }
+        accessExpiresAt: { type: ["string", "null"], format: date-time }
+        files:
+          type: array
+          items:
+            type: object
+            required: [id, filename]
+            properties:
+              id: { type: integer }
+              filename: { type: string }
+              sizeBytes: { type: ["integer", "null"] }
     DigitalProductReadiness:
       type: object
       required: [ready, checks]

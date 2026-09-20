@@ -1,8 +1,9 @@
 import { raw, Router, type IRouter } from "express";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm";
 import {
-  db, digitalFilesTable, digitalProductEntitlementsTable, guestDigitalEntitlementsTable, productsTable, usersTable,
+  db, digitalFilesTable, digitalProductEntitlementsTable, digitalProductPaymentsTable,
+  guestDigitalEntitlementsTable, productsTable, usersTable,
 } from "@workspace/db";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewares/auth";
 import {
@@ -16,6 +17,8 @@ const router: IRouter = Router();
 const MAX_FILE_BYTES = 250 * 1024 * 1024;
 const MAX_FILES = 25;
 const GUEST_ACCESS_TTL_SECONDS = 60 * 60;
+const ZAPUPI_API_URL = "https://pay.zapupi.com/api";
+const PUBLIC_APP_URL = (process.env.PUBLIC_APP_URL || "https://coreskils.com").replace(/\/+$/, "");
 const MIME_BY_EXT: Record<string, string[]> = {
   pdf: ["application/pdf"], epub: ["application/epub+zip"], mobi: ["application/x-mobipocket-ebook", "application/octet-stream"],
   azw: ["application/vnd.amazon.ebook", "application/octet-stream"], azw3: ["application/vnd.amazon.ebook", "application/octet-stream"],
@@ -91,6 +94,112 @@ async function ownedProduct(productId: number, req: AuthenticatedRequest) {
   )))[0];
 }
 
+type ZapUpiData = Record<string, unknown>;
+
+function checkoutToken(orderId: string) {
+  return createHmac("sha256", process.env.SESSION_SECRET!).update(`zapupi:${orderId}`).digest("base64url");
+}
+
+function validCheckoutToken(orderId: string, token: unknown) {
+  if (typeof token !== "string") return false;
+  const expected = checkoutToken(orderId);
+  return token.length === expected.length && timingSafeEqual(Buffer.from(token), Buffer.from(expected));
+}
+
+async function zapUpiRequest(endpoint: "create-order" | "order-status", body: ZapUpiData) {
+  const zapKey = process.env.ZAPUPI_ZAP_KEY;
+  if (!zapKey) throw new Error("ZapUPI is not configured");
+  const response = await fetch(`${ZAPUPI_API_URL}/${endpoint}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ zap_key: zapKey, ...body }),
+    signal: AbortSignal.timeout(15_000),
+  });
+  const data = await response.json().catch(() => ({})) as ZapUpiData;
+  if (!response.ok) throw new Error(`ZapUPI request failed with status ${response.status}`);
+  return data;
+}
+
+function zapUpiPayload(response: ZapUpiData) {
+  const nested = response.data;
+  return nested && typeof nested === "object" && !Array.isArray(nested)
+    ? nested as ZapUpiData
+    : response;
+}
+
+function successfulZapUpiStatus(value: unknown) {
+  return ["success", "succeeded", "paid", "completed"].includes(String(value ?? "").toLowerCase());
+}
+
+async function verifyAndFinalizeZapUpiPayment(orderId: string) {
+  const [payment] = await db.select().from(digitalProductPaymentsTable)
+    .where(eq(digitalProductPaymentsTable.orderId, orderId));
+  if (!payment || payment.status === "succeeded") return payment?.status ?? "missing";
+  if (payment.status !== "pending") return payment.status;
+
+  const providerResponse = await zapUpiRequest("order-status", { order_id: orderId });
+  const provider = zapUpiPayload(providerResponse);
+  const providerStatus = provider.payment_status ?? provider.order_status ?? provider.status;
+  if (!successfulZapUpiStatus(providerStatus)) {
+    const failed = ["failed", "failure", "timeout", "cancelled", "canceled"].includes(String(providerStatus ?? "").toLowerCase());
+    if (failed) {
+      await db.update(digitalProductPaymentsTable).set({ status: "failed", updatedAt: new Date() })
+        .where(and(eq(digitalProductPaymentsTable.orderId, orderId), eq(digitalProductPaymentsTable.status, "pending")));
+      return "failed";
+    }
+    return "pending";
+  }
+
+  const paidAmount = Number(provider.pay_amount ?? provider.amount);
+  if (!Number.isFinite(paidAmount) || Math.round(paidAmount * 100) !== payment.amountMinor) {
+    throw new Error("ZapUPI payment amount does not match the order");
+  }
+
+  const [product] = await db.select().from(productsTable).where(and(
+    eq(productsTable.id, payment.productId),
+    eq(productsTable.type, "digital"),
+  ));
+  if (!product) throw new Error("Paid product no longer exists");
+
+  await db.transaction(async (tx) => {
+    const [claimed] = await tx.update(digitalProductPaymentsTable).set({
+      status: "succeeded",
+      providerTransactionId: String(provider.txn_id ?? provider.transaction_id ?? "") || null,
+      providerUtr: String(provider.utr ?? "") || null,
+      providerEnvironment: String(provider.environment ?? "") || null,
+      completedAt: new Date(),
+      updatedAt: new Date(),
+    }).where(and(
+      eq(digitalProductPaymentsTable.orderId, orderId),
+      eq(digitalProductPaymentsTable.status, "pending"),
+    )).returning();
+    if (!claimed) return;
+
+    const [existing] = await tx.select().from(guestDigitalEntitlementsTable).where(and(
+      eq(guestDigitalEntitlementsTable.productId, payment.productId),
+      eq(guestDigitalEntitlementsTable.email, payment.email),
+    ));
+    const from = existing?.expiresAt && existing.expiresAt.getTime() > Date.now()
+      ? existing.expiresAt
+      : new Date();
+    const expiresAt = accessExpiry(product.accessPlan, product.accessDays, 0, from);
+    if (existing) {
+      await tx.update(guestDigitalEntitlementsTable).set({
+        phone: payment.phone,
+        expiresAt,
+      }).where(eq(guestDigitalEntitlementsTable.id, existing.id));
+    } else {
+      await tx.insert(guestDigitalEntitlementsTable).values({
+        productId: payment.productId,
+        email: payment.email,
+        phone: payment.phone,
+        expiresAt,
+      });
+    }
+  });
+  return "succeeded";
+}
+
 router.get("/marketplace/digital-products", async (req, res): Promise<void> => {
   const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
   const rows = await db.select().from(productsTable).where(and(
@@ -156,6 +265,134 @@ router.post("/marketplace/digital-products/:id/guest-access", async (req, res): 
   });
   res.setHeader("Cache-Control", "private, no-store");
   res.status(201).json({ productId: product.id, sessionExpiresAt: new Date(access.expiresAt * 1000).toISOString(), accessExpiresAt: entitlement.expiresAt?.toISOString() ?? null, files });
+});
+
+router.post("/marketplace/digital-products/:id/checkout/zapupi", async (req, res): Promise<void> => {
+  const productId = numericId(req.params.id);
+  const [product] = await db.select().from(productsTable).where(and(
+    productId ? eq(productsTable.id, productId) : eq(productsTable.publicSlug, String(req.params.id).toLowerCase()),
+    eq(productsTable.type, "digital"),
+    eq(productsTable.status, "published"),
+  ));
+  if (!product) { res.status(404).json({ error: "Digital product not found" }); return; }
+  if (product.priceMinor <= 0) { res.status(400).json({ error: "This product does not require payment" }); return; }
+  if (product.currency.toUpperCase() !== "INR") { res.status(400).json({ error: "ZapUPI checkout currently supports INR products only" }); return; }
+  const phone = normalizedPhone(req.body?.phone);
+  if (!validEmail(req.body?.email) || !/^\+?\d{8,15}$/.test(phone)) {
+    res.status(400).json({ error: "Enter a valid email address and mobile number" }); return;
+  }
+  const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(digitalFilesTable).where(and(
+    eq(digitalFilesTable.productId, product.id),
+    eq(digitalFilesTable.status, "uploaded"),
+  ));
+  if (!Number(count)) { res.status(409).json({ error: "This product is not ready for purchase yet" }); return; }
+  if (!process.env.ZAPUPI_ZAP_KEY) { res.status(503).json({ error: "UPI checkout is temporarily unavailable" }); return; }
+
+  const email = String(req.body.email).trim().toLowerCase();
+  const orderId = `CS${Date.now()}${randomBytes(5).toString("hex").toUpperCase()}`;
+  const token = checkoutToken(orderId);
+  await db.insert(digitalProductPaymentsTable).values({
+    orderId,
+    productId: product.id,
+    email,
+    phone,
+    amountMinor: product.priceMinor,
+    currency: "INR",
+  });
+
+  try {
+    const returnBase = `${PUBLIC_APP_URL}/checkout/zapupi?token=${encodeURIComponent(token)}`;
+    const providerResponse = await zapUpiRequest("create-order", {
+      order_id: orderId,
+      amount: (product.priceMinor / 100).toFixed(2),
+      customer_mobile: phone,
+      remark: `CoreSkils product ${product.id}`,
+      webhook_url: `${PUBLIC_APP_URL}/api/payments/zapupi/webhook`,
+      success_url: `${returnBase}&status=success`,
+      failed_url: `${returnBase}&status=failed`,
+      timeout_url: `${returnBase}&status=timeout`,
+    });
+    const provider = zapUpiPayload(providerResponse);
+    const paymentUrl = provider.payment_url ?? providerResponse.payment_url;
+    if (typeof paymentUrl !== "string" || !paymentUrl.startsWith("https://")) {
+      throw new Error("ZapUPI did not return a valid payment URL");
+    }
+    res.status(201).json({ orderId, paymentUrl, checkoutToken: token });
+  } catch {
+    await db.update(digitalProductPaymentsTable).set({ status: "failed", updatedAt: new Date() })
+      .where(eq(digitalProductPaymentsTable.orderId, orderId));
+    res.status(502).json({ error: "UPI checkout could not be started. Please try again." });
+  }
+});
+
+router.post("/payments/zapupi/webhook", async (req, res): Promise<void> => {
+  const orderId = typeof req.body?.order_id === "string" ? req.body.order_id : "";
+  if (!orderId) { res.status(200).json({ status: "ok" }); return; }
+  try {
+    if (successfulZapUpiStatus(req.body?.status)) {
+      await verifyAndFinalizeZapUpiPayment(orderId);
+    } else if (["failed", "timeout", "cancelled", "canceled"].includes(String(req.body?.status ?? "").toLowerCase())) {
+      await db.update(digitalProductPaymentsTable).set({ status: "failed", updatedAt: new Date() })
+        .where(and(eq(digitalProductPaymentsTable.orderId, orderId), eq(digitalProductPaymentsTable.status, "pending")));
+    }
+  } catch {
+    res.status(503).json({ status: "retry" });
+    return;
+  }
+  res.status(200).json({ status: "ok" });
+});
+
+router.get("/payments/zapupi/orders/:orderId", async (req, res): Promise<void> => {
+  const orderId = String(req.params.orderId || "");
+  if (!/^CS\d{13}[A-F0-9]{10}$/.test(orderId) || !validCheckoutToken(orderId, req.query.token)) {
+    res.status(404).json({ error: "Payment order not found" }); return;
+  }
+  let [payment] = await db.select().from(digitalProductPaymentsTable)
+    .where(eq(digitalProductPaymentsTable.orderId, orderId));
+  if (!payment) { res.status(404).json({ error: "Payment order not found" }); return; }
+  if (payment.status === "pending") {
+    try { await verifyAndFinalizeZapUpiPayment(orderId); } catch { /* keep pending while the provider settles */ }
+    [payment] = await db.select().from(digitalProductPaymentsTable)
+      .where(eq(digitalProductPaymentsTable.orderId, orderId));
+  }
+  const [product] = await db.select().from(productsTable).where(eq(productsTable.id, payment.productId));
+  if (payment.status !== "succeeded") {
+    res.setHeader("Cache-Control", "private, no-store");
+    res.json({ orderId, status: payment.status, productId: payment.productId, productTitle: product?.title ?? "Digital product" });
+    return;
+  }
+  const [entitlement] = await db.select().from(guestDigitalEntitlementsTable).where(and(
+    eq(guestDigitalEntitlementsTable.productId, payment.productId),
+    eq(guestDigitalEntitlementsTable.email, payment.email),
+  ));
+  if (!entitlement || !activeUntil(entitlement.expiresAt)) {
+    res.status(409).json({ error: "Payment succeeded but access is not ready yet" }); return;
+  }
+  const files = await db.select({
+    id: digitalFilesTable.id,
+    filename: digitalFilesTable.filename,
+    sizeBytes: digitalFilesTable.sizeBytes,
+  }).from(digitalFilesTable).where(and(
+    eq(digitalFilesTable.productId, payment.productId),
+    eq(digitalFilesTable.status, "uploaded"),
+  )).orderBy(asc(digitalFilesTable.position));
+  const access = guestAccessToken(payment.productId, entitlement.id);
+  res.cookie("guest_digital_access", access.token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: GUEST_ACCESS_TTL_SECONDS * 1000,
+    path: "/api/marketplace/digital-products",
+  });
+  res.setHeader("Cache-Control", "private, no-store");
+  res.json({
+    orderId,
+    status: "succeeded",
+    productId: payment.productId,
+    productTitle: product?.title ?? "Digital product",
+    accessExpiresAt: entitlement.expiresAt?.toISOString() ?? null,
+    files,
+  });
 });
 
 router.get("/marketplace/digital-products/:productId/files/:fileId/guest-download", async (req, res): Promise<void> => {

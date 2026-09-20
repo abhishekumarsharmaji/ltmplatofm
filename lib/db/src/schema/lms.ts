@@ -179,6 +179,29 @@ export const guestDigitalEntitlementsTable = pgTable("guest_digital_entitlements
   index("guest_digital_entitlements_product_idx").on(t.productId),
 ]);
 
+export const digitalProductPaymentsTable = pgTable("digital_product_payments", {
+  id: serial("id").primaryKey(),
+  orderId: text("order_id").notNull().unique(),
+  productId: integer("product_id").notNull().references(() => productsTable.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  amountMinor: integer("amount_minor").notNull(),
+  currency: text("currency").notNull().default("INR"),
+  status: paymentStatusEnum("status").notNull().default("pending"),
+  provider: text("provider").notNull().default("zapupi"),
+  providerTransactionId: text("provider_transaction_id"),
+  providerUtr: text("provider_utr"),
+  providerEnvironment: text("provider_environment"),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index("digital_product_payments_product_idx").on(t.productId),
+  index("digital_product_payments_email_idx").on(t.email),
+  index("digital_product_payments_status_idx").on(t.status),
+  check("digital_product_payments_amount_positive", sql`${t.amountMinor} > 0`),
+]);
+
 export const lessonAssetStatusEnum = pgEnum("lesson_asset_status", ["pending", "uploaded", "failed"]);
 export const lessonAssetsTable = pgTable("lesson_assets", {
   id: serial("id").primaryKey(),
