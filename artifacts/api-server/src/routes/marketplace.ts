@@ -5,7 +5,7 @@ import {
   ordersTable, orderItemsTable, wishlistTable, platformSettingsTable, digitalFilesTable,
 } from "@workspace/db";
 import { requireAuth, requireRole, requireSuperAdmin, effectiveRole, isSuperAdminEmail, type AuthenticatedRequest } from "../middlewares/auth";
-import { objectFile } from "../lib/objectStorage";
+import { createCreatorAvatarUploadUrl, objectFile } from "../lib/objectStorage";
 import { accessExpiry, validAccessPlan } from "../lib/accessPlans";
 
 const router: IRouter = Router();
@@ -16,6 +16,7 @@ const validPublicSlug = (value: unknown) => typeof value === "string" && /^[a-z0
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "product";
 const cleanText = (value: unknown, max: number) => typeof value === "string" ? value.trim().slice(0, max) : "";
 const cleanList = (value: unknown, maxItems: number, maxLength: number) => Array.isArray(value) ? value.map((item) => cleanText(item, maxLength)).filter(Boolean).slice(0, maxItems) : [];
+const validCreatorUsername = (value: unknown) => typeof value === "string" && /^[a-z0-9_]{3,30}$/.test(value);
 const normalizeSalesPage = (value: unknown) => {
   const page = value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
   const pairs = (key: string, first: string, second: string, maxItems: number, maxLength: number) =>
@@ -46,6 +47,101 @@ const safeProduct = (product: typeof productsTable.$inferSelect) => {
       : product.coverImageUrl,
   };
 };
+
+router.get("/creator/profile", auth, requireRole("creator", "admin"), async (req, res) => {
+  const userId = await userOf(req as AuthenticatedRequest);
+  if (!userId) { res.status(404).json({ error: "Creator profile unavailable" }); return; }
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+  if (!user) { res.status(404).json({ error: "Creator profile unavailable" }); return; }
+  let [profile] = await db.select().from(creatorProfilesTable).where(eq(creatorProfilesTable.userId, userId));
+  if (!profile) {
+    [profile] = await db.insert(creatorProfilesTable).values({ userId, displayName: user.name }).returning();
+  }
+  res.json({
+    ...profile,
+    avatarUrl: profile.avatarObjectPath
+      ? `/api/marketplace/creators/${userId}/avatar?v=${profile.updatedAt.getTime()}`
+      : profile.avatarUrl,
+  });
+});
+
+router.patch("/creator/profile", auth, requireRole("creator", "admin"), async (req, res) => {
+  const userId = await userOf(req as AuthenticatedRequest);
+  if (!userId) { res.status(404).json({ error: "Creator profile unavailable" }); return; }
+  const displayName = cleanText(req.body?.displayName, 80);
+  const username = cleanText(req.body?.username, 30).toLowerCase();
+  const headline = cleanText(req.body?.headline, 140);
+  const bio = cleanText(req.body?.bio, 1500);
+  const websiteUrl = cleanText(req.body?.websiteUrl, 500);
+  if (displayName.length < 2 || !validCreatorUsername(username)) {
+    res.status(400).json({ error: "Enter a display name and a 3–30 character username using lowercase letters, numbers, or underscores" }); return;
+  }
+  if (websiteUrl && !/^https?:\/\/[^\s]+$/i.test(websiteUrl)) {
+    res.status(400).json({ error: "Website URL must start with http:// or https://" }); return;
+  }
+  const [conflict] = await db.select({ userId: creatorProfilesTable.userId }).from(creatorProfilesTable)
+    .where(eq(creatorProfilesTable.username, username));
+  if (conflict && conflict.userId !== userId) { res.status(409).json({ error: "This username is already taken" }); return; }
+  const [profile] = await db.insert(creatorProfilesTable).values({
+    userId, displayName, username, headline, bio: bio || null, websiteUrl: websiteUrl || null,
+  }).onConflictDoUpdate({
+    target: creatorProfilesTable.userId,
+    set: { displayName, username, headline, bio: bio || null, websiteUrl: websiteUrl || null, updatedAt: new Date() },
+  }).returning();
+  res.json({
+    ...profile,
+    avatarUrl: profile.avatarObjectPath
+      ? `/api/marketplace/creators/${userId}/avatar?v=${profile.updatedAt.getTime()}`
+      : profile.avatarUrl,
+  });
+});
+
+router.post("/creator/profile/avatar/request-upload", auth, requireRole("creator", "admin"), async (req, res) => {
+  const { mimeType, sizeBytes } = req.body ?? {};
+  if (!/^image\/(jpeg|png|webp)$/i.test(mimeType ?? "") || !Number.isInteger(sizeBytes) || sizeBytes < 1 || sizeBytes > 5 * 1024 * 1024) {
+    res.status(400).json({ error: "A JPG, PNG or WebP image up to 5MB is required" }); return;
+  }
+  const upload = await createCreatorAvatarUploadUrl();
+  res.status(201).json({ uploadURL: upload.url, objectPath: upload.objectPath });
+});
+
+router.post("/creator/profile/avatar/finalize", auth, requireRole("creator", "admin"), async (req, res) => {
+  const userId = await userOf(req as AuthenticatedRequest);
+  const objectPath = req.body?.objectPath;
+  if (!userId || typeof objectPath !== "string" || !objectPath.includes("/creator-avatars/")) {
+    res.status(404).json({ error: "Avatar upload not found" }); return;
+  }
+  const [metadata] = await objectFile(objectPath).getMetadata();
+  const actualSize = Number(metadata.size ?? 0), contentType = String(metadata.contentType ?? "");
+  if (actualSize < 1 || actualSize > 5 * 1024 * 1024 || !/^image\/(jpeg|png|webp)$/i.test(contentType)) {
+    res.status(422).json({ error: "Uploaded object is not a valid profile image" }); return;
+  }
+  const [existing] = await db.select().from(creatorProfilesTable).where(eq(creatorProfilesTable.userId, userId));
+  if (existing?.avatarObjectPath && existing.avatarObjectPath !== objectPath) {
+    await objectFile(existing.avatarObjectPath).delete({ ignoreNotFound: true }).catch(() => undefined);
+  }
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+  const [profile] = await db.insert(creatorProfilesTable).values({
+    userId, displayName: user?.name || "Creator", avatarObjectPath: objectPath,
+  }).onConflictDoUpdate({
+    target: creatorProfilesTable.userId,
+    set: { avatarObjectPath: objectPath, updatedAt: new Date() },
+  }).returning();
+  res.json({ ...profile, avatarUrl: `/api/marketplace/creators/${userId}/avatar?v=${profile.updatedAt.getTime()}` });
+});
+
+router.get("/marketplace/creators/:id/avatar", async (req, res) => {
+  const creatorId = id(req.params.id);
+  if (!creatorId) { res.status(400).end(); return; }
+  const [profile] = await db.select({ objectPath: creatorProfilesTable.avatarObjectPath }).from(creatorProfilesTable)
+    .where(eq(creatorProfilesTable.userId, creatorId));
+  if (!profile?.objectPath) { res.status(404).end(); return; }
+  const file = objectFile(profile.objectPath);
+  const [metadata] = await file.getMetadata();
+  res.setHeader("Content-Type", metadata.contentType ?? "image/jpeg");
+  res.setHeader("Cache-Control", "public, max-age=86400, immutable");
+  file.createReadStream().on("error", () => { if (!res.headersSent) res.status(404); res.end(); }).pipe(res);
+});
 
 router.get("/categories", async (_req, res) => res.json(await db.select().from(categoriesTable).orderBy(categoriesTable.name)));
 router.get("/marketplace/products", async (req, res) => {

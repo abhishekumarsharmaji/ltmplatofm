@@ -43,11 +43,18 @@ export const creatorProfilesTable = pgTable("creator_profiles", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   displayName: text("display_name").notNull(),
+  username: text("username"),
+  headline: text("headline").notNull().default(""),
   bio: text("bio"),
   avatarUrl: text("avatar_url"),
+  avatarObjectPath: text("avatar_object_path"),
+  websiteUrl: text("website_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-}, (t) => [uniqueIndex("creator_profiles_user_unique").on(t.userId)]);
+}, (t) => [
+  uniqueIndex("creator_profiles_user_unique").on(t.userId),
+  uniqueIndex("creator_profiles_username_unique").on(t.username),
+]);
 
 export const categoriesTable = pgTable("categories", {
   id: serial("id").primaryKey(),

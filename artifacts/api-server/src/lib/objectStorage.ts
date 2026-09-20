@@ -74,6 +74,7 @@ async function createUploadUrl(folder: string): Promise<{ url: string; objectPat
 export const createLessonUploadUrl = () => createUploadUrl("lesson-videos");
 export const createCourseThumbnailUploadUrl = () => createUploadUrl("course-thumbnails");
 export const createProductCoverUploadUrl = () => createUploadUrl("product-covers");
+export const createCreatorAvatarUploadUrl = () => createUploadUrl("creator-avatars");
 export async function createLessonMultipartUpload(contentType: string) {
   return createLessonAssetMultipartUpload(contentType);
 }

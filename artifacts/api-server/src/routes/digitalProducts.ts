@@ -3,7 +3,7 @@ import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm";
 import {
   db, digitalFilesTable, digitalProductEntitlementsTable, digitalProductPaymentsTable,
-  guestDigitalEntitlementsTable, productsTable, usersTable,
+  creatorProfilesTable, guestDigitalEntitlementsTable, productsTable, usersTable,
 } from "@workspace/db";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewares/auth";
 import {
@@ -219,8 +219,17 @@ router.get("/marketplace/digital-products", async (req, res): Promise<void> => {
 });
 router.get("/marketplace/digital-products/:id", async (req, res): Promise<void> => {
   const productId = numericId(req.params.id);
-  const [product] = await db.select({ product: productsTable, creatorName: usersTable.name })
+  const [product] = await db.select({
+    product: productsTable,
+    creatorName: sql<string>`coalesce(${creatorProfilesTable.displayName}, ${usersTable.name})`,
+    creatorUsername: creatorProfilesTable.username,
+    creatorHeadline: creatorProfilesTable.headline,
+    creatorAvatarUrl: creatorProfilesTable.avatarUrl,
+    creatorAvatarObjectPath: creatorProfilesTable.avatarObjectPath,
+    creatorProfileUpdatedAt: creatorProfilesTable.updatedAt,
+  })
     .from(productsTable).innerJoin(usersTable, eq(usersTable.id, productsTable.creatorId))
+    .leftJoin(creatorProfilesTable, eq(creatorProfilesTable.userId, productsTable.creatorId))
     .where(and(
       productId ? eq(productsTable.id, productId) : eq(productsTable.publicSlug, String(req.params.id).toLowerCase()),
       eq(productsTable.type, "digital"), eq(productsTable.status, "published"),
@@ -230,7 +239,17 @@ router.get("/marketplace/digital-products/:id", async (req, res): Promise<void> 
   const files = await db.select({ id: digitalFilesTable.id, filename: digitalFilesTable.filename, mimeType: digitalFilesTable.mimeType, sizeBytes: digitalFilesTable.sizeBytes, kind: digitalFilesTable.kind, position: digitalFilesTable.position })
     .from(digitalFilesTable).where(and(eq(digitalFilesTable.productId, resolvedProductId), eq(digitalFilesTable.status, "uploaded"))).orderBy(asc(digitalFilesTable.position));
   // Public sales pages must not reveal filenames or file metadata before access is granted.
-  res.json({ ...safeProduct(product.product), creatorName: product.creatorName, isFree: product.product.priceMinor === 0, files: [] });
+  res.json({
+    ...safeProduct(product.product),
+    creatorName: product.creatorName,
+    creatorUsername: product.creatorUsername,
+    creatorHeadline: product.creatorHeadline,
+    creatorAvatarUrl: product.creatorAvatarObjectPath
+      ? `/api/marketplace/creators/${product.product.creatorId}/avatar?v=${product.creatorProfileUpdatedAt?.getTime() ?? 0}`
+      : product.creatorAvatarUrl,
+    isFree: product.product.priceMinor === 0,
+    files: [],
+  });
 });
 
 router.post("/marketplace/digital-products/:id/guest-access", async (req, res): Promise<void> => {
