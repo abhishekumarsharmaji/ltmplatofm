@@ -39,7 +39,12 @@ const normalizeSalesPage = (value: unknown) => {
 };
 const safeProduct = (product: typeof productsTable.$inferSelect) => {
   const { coverImageObjectPath: _coverImageObjectPath, ...publicProduct } = product;
-  return publicProduct;
+  return {
+    ...publicProduct,
+    coverImageUrl: product.coverImageObjectPath
+      ? `/api/marketplace/products/${product.id}/cover?v=${product.updatedAt.getTime()}`
+      : product.coverImageUrl,
+  };
 };
 
 router.get("/categories", async (_req, res) => res.json(await db.select().from(categoriesTable).orderBy(categoriesTable.name)));
@@ -68,7 +73,7 @@ router.get("/marketplace/products/:id/cover", async (req, res) => {
   const file = objectFile(product.objectPath);
   const [metadata] = await file.getMetadata();
   res.setHeader("Content-Type", metadata.contentType ?? "image/jpeg");
-  res.setHeader("Cache-Control", "public, max-age=3600");
+  res.setHeader("Cache-Control", "public, max-age=86400, immutable");
   file.createReadStream().on("error", () => { if (!res.headersSent) res.status(404); res.end(); }).pipe(res);
 });
 router.get("/marketplace/courses/:id", async (req, res) => {

@@ -86,7 +86,12 @@ const safeFile = (file: typeof digitalFilesTable.$inferSelect) => {
 };
 const safeProduct = (product: typeof productsTable.$inferSelect) => {
   const { coverImageObjectPath: _coverImageObjectPath, ...rest } = product;
-  return rest;
+  return {
+    ...rest,
+    coverImageUrl: product.coverImageObjectPath
+      ? `/api/marketplace/products/${product.id}/cover?v=${product.updatedAt.getTime()}`
+      : product.coverImageUrl,
+  };
 };
 async function ownedProduct(productId: number, req: AuthenticatedRequest) {
   return (await db.select().from(productsTable).where(and(

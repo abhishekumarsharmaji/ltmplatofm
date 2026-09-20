@@ -134,9 +134,10 @@ export function ProductFormDialog({
   };
 
   const onSubmit = form.handleSubmit((data) => {
-    const { priceRupees, ...productData } = data;
+    const { priceRupees, coverImageUrl, ...productData } = data;
     const submitData = {
       ...productData,
+      ...(coverImageUrl?.trim() ? { coverImageUrl: coverImageUrl.trim() } : {}),
       priceMinor: type === "digital" ? Math.round(priceRupees * 100) : 0,
       type,
       currency: type === "digital" ? "INR" : "USD",
