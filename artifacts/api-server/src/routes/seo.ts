@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { db, coursesTable, creatorProfilesTable, productsTable, usersTable, courseModulesTable, lessonsTable } from "@workspace/db";
 
 const router: IRouter = Router();
-const SITE = "https://coreskils.com";
+const SITE = "https://coreskils.org";
 const publicSlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 const text = (v: unknown, max = 300) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, max);

@@ -1,7 +1,7 @@
 server {
     listen 80;
     listen [::]:80;
-    server_name coreskils.com www.coreskils.com;
+    server_name coreskils.org www.coreskils.org;
 
     root /opt/coreskils/app/artifacts/lms-front/dist/public;
     index index.html;

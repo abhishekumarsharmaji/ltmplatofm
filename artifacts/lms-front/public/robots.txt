@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://coreskils.com/sitemap.xml
+Sitemap: https://coreskils.org/sitemap.xml
 User-agent: *
 Allow: /

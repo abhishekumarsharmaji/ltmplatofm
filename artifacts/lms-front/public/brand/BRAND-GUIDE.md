@@ -4,7 +4,7 @@
 
 Always write the name as **CoreSkils** (capital C and S, one “l”).
 
-Official domain: **coreskils.com**
+Official domain: **coreskils.org**
 
 ## Logo concept
 

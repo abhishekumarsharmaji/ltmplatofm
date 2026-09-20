@@ -1,15 +1,15 @@
 # CoreSkils Ubuntu 24.04 VPS deployment
 
-These commands deploy the existing monorepo to `coreskils.com` with Nginx serving the Vite frontend and proxying `/api` to a systemd-managed Node API.
+These commands deploy the existing monorepo to `coreskils.org` with Nginx serving the Vite frontend and proxying `/api` to a systemd-managed Node API.
 
 ## 1. Point the domain to the VPS
 
-In the DNS panel for `coreskils.com`, create:
+In the DNS panel for `coreskils.org`, create:
 
 - `A` record: host `@` → your VPS IPv4 address
 - `A` record: host `www` → your VPS IPv4 address
 
-Remove conflicting old `A`/`AAAA` records. DNS can take time to propagate. Do not enter the VPS dashboard URL in Razorpay; enter `https://coreskils.com` only after HTTPS works.
+Remove conflicting old `A`/`AAAA` records. DNS can take time to propagate. Do not enter the VPS dashboard URL in Razorpay; enter `https://coreskils.org` only after HTTPS works.
 
 ## 2. First SSH login
 
@@ -85,6 +85,7 @@ nano /etc/coreskils/api.env
 
 Fill:
 
+- `PUBLIC_APP_URL`: keep this set to `https://coreskils.org`; payment return and webhook URLs are generated from it.
 - `DATABASE_URL`: use the database password created above.
 - `SESSION_SECRET`: generate with `openssl rand -hex 64`.
 - `R2_*`: use the existing Cloudflare R2 bucket/API credentials for uploads and digital files.
@@ -125,8 +126,9 @@ sudo -u coreskils env PORT=24567 BASE_PATH=/ pnpm --filter @workspace/lms-front 
 
 ```bash
 cp /opt/coreskils/app/deploy/vps/coreskils-api.service /etc/systemd/system/coreskils-api.service
-cp /opt/coreskils/app/deploy/vps/coreskils.com.nginx /etc/nginx/sites-available/coreskils.com
-ln -sf /etc/nginx/sites-available/coreskils.com /etc/nginx/sites-enabled/coreskils.com
+cp /opt/coreskils/app/deploy/vps/coreskils.org.nginx /etc/nginx/sites-available/coreskils.org
+ln -sf /etc/nginx/sites-available/coreskils.org /etc/nginx/sites-enabled/coreskils.org
+rm -f /etc/nginx/sites-enabled/coreskils.com
 rm -f /etc/nginx/sites-enabled/default
 systemctl daemon-reload
 systemctl enable --now coreskils-api
@@ -139,7 +141,7 @@ Check:
 ```bash
 systemctl status coreskils-api --no-pager
 curl http://127.0.0.1:4000/api/healthz
-curl -I http://coreskils.com
+curl -I http://coreskils.org
 ```
 
 ## 10. Firewall and HTTPS
@@ -151,15 +153,15 @@ ufw allow OpenSSH
 ufw allow 'Nginx Full'
 ufw enable
 ufw status
-certbot --nginx -d coreskils.com -d www.coreskils.com
+certbot --nginx -d coreskils.org -d www.coreskils.org
 systemctl status certbot.timer --no-pager
 ```
 
 Choose the HTTPS redirect option in Certbot. Afterward verify:
 
 ```bash
-curl -I https://coreskils.com
-curl https://coreskils.com/api/healthz
+curl -I https://coreskils.org
+curl https://coreskils.org/api/healthz
 ```
 
 ## 11. Future GitHub deployments
@@ -205,7 +207,7 @@ journalctl -u coreskils-autodeploy.service -n 100 --no-pager
 
 Only submit the site after every URL works over HTTPS:
 
-- `https://coreskils.com/`
+- `https://coreskils.org/`
 - `/about`
 - `/contact`
 - `/terms`
@@ -219,7 +221,7 @@ Only submit the site after every URL works over HTTPS:
 In Razorpay’s **Add Your Website Link** field, enter:
 
 ```text
-https://coreskils.com
+https://coreskils.org
 ```
 
 Approval remains Razorpay’s decision. Do not claim guaranteed earnings, fake reviews, fake instructor credentials, or misleading discounts.

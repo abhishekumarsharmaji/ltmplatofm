@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://coreskils.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://coreskils.com/products</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://coreskils.com/about</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://coreskils.com/contact</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://coreskils.com/terms</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://coreskils.com/privacy</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://coreskils.com/refund-policy</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://coreskils.com/shipping-delivery</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://coreskils.org/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://coreskils.org/products</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://coreskils.org/about</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://coreskils.org/contact</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://coreskils.org/terms</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://coreskils.org/privacy</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://coreskils.org/refund-policy</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://coreskils.org/shipping-delivery</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>
