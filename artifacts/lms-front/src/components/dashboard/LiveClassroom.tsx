@@ -335,10 +335,9 @@ function BrowserClassRecorder({
           return;
         }
         recorder.onstop = () => {
-          const type = recorder?.mimeType || "video/webm";
           const safeTitle = classTitle.replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "") || "live-class";
           const file = chunks.length > 0
-            ? new File(chunks, `${safeTitle}-${new Date().toISOString().replace(/[:.]/g, "-")}.webm`, { type })
+            ? new File(chunks, `${safeTitle}-${new Date().toISOString().replace(/[:.]/g, "-")}.webm`, { type: "video/webm" })
             : null;
           chunks = [];
           resolve(file);
