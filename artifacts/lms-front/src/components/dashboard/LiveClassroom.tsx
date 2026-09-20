@@ -7,7 +7,7 @@ import {
   useLocalParticipant,
   useTracks
 } from "@livekit/components-react";
-import { Track } from "livekit-client";
+import { DisconnectReason, Track } from "livekit-client";
 import "@livekit/components-styles";
 import { 
   useJoinLiveClass, 
@@ -32,12 +32,17 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
   const [tokenInfo, setTokenInfo] = useState<{ token: string, serverUrl: string, isHost: boolean, classTitle: string, status: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [disconnected, setDisconnected] = useState(false);
+  const [disconnectReason, setDisconnectReason] = useState<string | null>(null);
+  const [joinAttempt, setJoinAttempt] = useState(0);
   
   const leaveRecordedRef = useRef(false);
+  const joinAttemptedRef = useRef(false);
+  const connectedRef = useRef(false);
+  const automaticRetriesRef = useRef(0);
 
   useEffect(() => {
-    // Only fetch once
-    if (tokenInfo || joinClass.isPending || error) return;
+    if (joinAttemptedRef.current) return;
+    joinAttemptedRef.current = true;
     
     joinClass.mutate({ id }, {
       onSuccess: (data) => {
@@ -50,25 +55,47 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
         });
       },
       onError: (err) => {
+        joinAttemptedRef.current = false;
         setError(err.message || "Failed to join classroom.");
       }
     });
-  }, [id, joinClass, tokenInfo, error]);
+  }, [id, joinAttempt]);
 
   const handleConnected = () => {
+    connectedRef.current = true;
+    automaticRetriesRef.current = 0;
+    leaveRecordedRef.current = false;
     setDisconnected(false);
+    setDisconnectReason(null);
     recordJoin.mutate({ id }, {
       onError: (err) => console.error("Failed to record join:", err)
     });
   };
 
-  const handleDisconnected = () => {
+  const retryConnection = () => {
+    connectedRef.current = false;
+    joinAttemptedRef.current = false;
+    leaveRecordedRef.current = false;
+    setError(null);
+    setDisconnected(false);
+    setDisconnectReason(null);
+    setTokenInfo(null);
+    setJoinAttempt((value) => value + 1);
+  };
+
+  const handleDisconnected = (reason?: DisconnectReason) => {
+    const reasonLabel = reason == null ? "Connection closed" : DisconnectReason[reason] || `Reason ${reason}`;
+    setDisconnectReason(reasonLabel);
     setDisconnected(true);
     if (!leaveRecordedRef.current) {
       leaveRecordedRef.current = true;
       recordLeave.mutate({ id }, {
         onError: (err) => console.error("Failed to record leave:", err)
       });
+    }
+    if (automaticRetriesRef.current < 2) {
+      automaticRetriesRef.current += 1;
+      window.setTimeout(retryConnection, 1200 * automaticRetriesRef.current);
     }
   };
 
@@ -112,6 +139,8 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
         </div>
         <h2 className="text-2xl font-bold">Live class disconnected</h2>
         <p className="max-w-md text-muted-foreground">The creator may have ended the live class, or your connection was interrupted.</p>
+        {disconnectReason && <p className="text-xs text-muted-foreground">Connection status: {disconnectReason}</p>}
+        <Button type="button" onClick={retryConnection}>Reconnect now</Button>
         <Link href={backUrl} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Back to live classes</Link>
       </div>
     );
@@ -153,6 +182,10 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
           serverUrl={tokenInfo.serverUrl}
           onConnected={handleConnected}
           onDisconnected={handleDisconnected}
+          onError={(roomError) => {
+            console.error("LiveKit room error", roomError);
+            setDisconnectReason(roomError.message || "Unable to connect to the classroom");
+          }}
           style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
         >
           <BroadcastRoomContent isHost={tokenInfo.isHost} />

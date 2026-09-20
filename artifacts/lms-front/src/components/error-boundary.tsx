@@ -21,6 +21,10 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
+function isStaleChunkError(error: Error): boolean {
+  return /ChunkLoadError|Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed|Unable to preload CSS/i.test(error.message);
+}
+
 function toError(value: unknown): Error {
   if (value instanceof Error) {
     return value;
@@ -75,11 +79,19 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: unknown, info: ErrorInfo): void {
+    const normalized = toError(error);
     console.error(
       'ErrorBoundary caught an error:',
-      toError(error),
+      normalized,
       info.componentStack,
     );
+    if (typeof window !== 'undefined' && isStaleChunkError(normalized)) {
+      const recoveryKey = `chunk-recovery:${window.location.pathname}:${normalized.message}`;
+      if (!window.sessionStorage.getItem(recoveryKey)) {
+        window.sessionStorage.setItem(recoveryKey, '1');
+        window.location.reload();
+      }
+    }
   }
 
   componentDidUpdate(prevProps: ErrorBoundaryProps): void {

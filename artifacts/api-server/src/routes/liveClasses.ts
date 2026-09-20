@@ -9,6 +9,20 @@ const router: IRouter = Router();
 const id = (value: string | string[]) => typeof value === "string" && Number.isInteger(Number(value)) && Number(value) > 0 ? Number(value) : null;
 const auth = (req: Express.Request) => req as AuthenticatedRequest;
 
+function browserLiveKitUrl(value: string | undefined) {
+  if (!value) return null;
+  try {
+    const parsed = new URL(value);
+    if (parsed.protocol === "https:") parsed.protocol = "wss:";
+    if (parsed.protocol === "http:") parsed.protocol = "ws:";
+    if (parsed.protocol !== "wss:" && parsed.protocol !== "ws:") return null;
+    parsed.pathname = parsed.pathname.replace(/\/+$/, "");
+    return parsed.toString().replace(/\/$/, "");
+  } catch {
+    return null;
+  }
+}
+
 function schedule(body: any) {
   if (typeof body?.title !== "string" || !body.title.trim() || typeof body?.timezone !== "string" || !body.timezone.trim()) return null;
   const startsAt = new Date(body.startsAt);
@@ -122,14 +136,15 @@ router.post("/live-classes/:id/join", requireAuth, async (req, res): Promise<voi
     if (now < item.startsAt.getTime() - 15 * 60_000) { res.status(403).json({ error: "The classroom opens 15 minutes before the scheduled start time" }); return; }
     if (item.status === "completed") { res.status(403).json({ error: "This live class has ended" }); return; }
   }
-  if (!process.env.LIVEKIT_API_KEY || !process.env.LIVEKIT_API_SECRET || !process.env.LIVEKIT_URL) { res.status(503).json({ error: "LiveKit is not configured" }); return; }
+  const serverUrl = browserLiveKitUrl(process.env.LIVEKIT_URL);
+  if (!process.env.LIVEKIT_API_KEY || !process.env.LIVEKIT_API_SECRET || !serverUrl) { res.status(503).json({ error: "LiveKit is not configured with a valid public WebSocket URL" }); return; }
   const token = new AccessToken(process.env.LIVEKIT_API_KEY, process.env.LIVEKIT_API_SECRET, { identity: String(user.canonicalUserId), name: user.user?.name, ttl: "2h" });
   token.addGrant({ roomJoin: true, room: item.roomName, canPublish: host, canSubscribe: true, canPublishData: host, roomAdmin: host });
   if (host && item.status === "scheduled") {
     item.status = "live";
     await db.update(liveClassesTable).set({ status: "live", updatedAt: new Date() }).where(eq(liveClassesTable.id, item.id));
   }
-  res.json({ serverUrl: process.env.LIVEKIT_URL, token: await token.toJwt(), class: item, participantRole: host ? "host" : "student" });
+  res.json({ serverUrl, token: await token.toJwt(), class: item, participantRole: host ? "host" : "student" });
 });
 
 async function attendance(req: Request, res: Response, joining: boolean) {
