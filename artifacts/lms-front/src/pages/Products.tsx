@@ -57,31 +57,7 @@ export default function Products() {
 
           {!isLoading && !isError && products && products.length > 0 && (
             <section className="mx-auto mt-14 grid max-w-6xl gap-7 md:grid-cols-2">
-              <article className="overflow-hidden rounded-2xl border border-[#C9DED3] bg-white shadow-[0_15px_45px_rgba(20,80,55,.08)]">
-                <div className="aspect-[16/9] overflow-hidden bg-[#0B3027]">
-                  <img
-                    src={`${import.meta.env.BASE_URL}products/freelancing-toolkit-cover.svg`}
-                    alt="Freelancing Client Acquisition Toolkit"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="flex min-h-72 flex-col p-7">
-                  <span className="w-fit rounded-full bg-[#E4F8EE] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[#087B46]">Digital toolkit</span>
-                  <h2 className="mt-5 text-2xl font-bold leading-tight text-black">Freelancing Client Acquisition Toolkit</h2>
-                  <p className="mt-3 line-clamp-3 leading-7 text-[#52635C]">Practical outreach scripts, proposal guidance, discovery questions, follow-up sequences, pricing worksheets, and onboarding support.</p>
-                  <div className="mt-auto flex flex-wrap items-end justify-between gap-4 border-t border-[#E1E9E5] pt-6">
-                    <div>
-                      <span className="block text-2xl font-bold text-black">₹299 INR</span>
-                      <span className="mt-1 block text-xs font-semibold uppercase tracking-wide text-amber-700">Payment activation in progress</span>
-                    </div>
-                    <Link href="/products/freelancing-client-acquisition-toolkit" className="inline-flex h-11 items-center justify-center rounded-md bg-[#123D32] px-6 font-semibold text-white hover:bg-[#0B3027]">
-                      View product
-                    </Link>
-                  </div>
-                </div>
-              </article>
-
-              {products.filter((product) => product.publicSlug !== "freelancing-client-acquisition-toolkit").map((product) => (
+              {products.map((product) => (
                 <article key={product.id} className="overflow-hidden rounded-2xl border border-[#C9DED3] bg-white shadow-[0_15px_45px_rgba(20,80,55,.08)]">
                   <div className="aspect-[16/9] overflow-hidden bg-[#0B3027]">
                     {product.coverImageUrl ? (

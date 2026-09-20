@@ -13,7 +13,6 @@ export function Footer() {
       title: t("explore"),
       links: [
         { href: "/products", label: t("links.products") },
-        { href: "/products/freelancing-client-acquisition-toolkit", label: "Featured toolkit" },
         { href: "/about", label: t("links.about") },
       ],
     },

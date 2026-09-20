@@ -1,7 +1,6 @@
 import { Link } from "wouter";
 import { 
   CheckCircle2, 
-  Download, 
   FileText, 
   Headphones, 
   ShieldCheck, 
@@ -9,11 +8,23 @@ import {
   FileArchive, 
   Video,
   ArrowRight,
-  Sparkles
+  Package
 } from "lucide-react";
 import { PublicLayout } from "@/components/layout/PublicLayout";
+import { useListDigitalProducts } from "@workspace/api-client-react";
+
+function productPrice(priceMinor: number, currency: string) {
+  if (priceMinor === 0) return "Free";
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: currency || "INR",
+    maximumFractionDigits: 2,
+  }).format(priceMinor / 100);
+}
 
 export default function Home() {
+  const { data: products } = useListDigitalProducts();
+
   return (
     <PublicLayout>
       <main className="min-h-screen bg-white overflow-hidden">
@@ -158,53 +169,45 @@ export default function Home() {
           </div>
         </section>
 
-        {/* FEATURED PRODUCT SECTION */}
-        <section className="py-24 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-            <div className="bg-[#0F1C16] rounded-3xl p-8 sm:p-12 lg:p-16 text-white overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[100px] pointer-events-none" />
-              
-              <div className="grid lg:grid-cols-[1fr_1.2fr] gap-12 items-center relative z-10">
-                <div className="order-2 lg:order-1">
-                  <img src={`${import.meta.env.BASE_URL}products/freelancing-toolkit-cover.svg`} alt="Freelancing Client Acquisition Toolkit cover" className="mx-auto w-full max-w-md rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/10" loading="lazy" />
+        {products && products.length > 0 && (
+          <section className="bg-white py-24">
+            <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="mb-12 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[0.16em] text-primary">Published catalogue</p>
+                  <h2 className="mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">Latest digital products</h2>
                 </div>
-                
-                <div className="order-1 lg:order-2">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-xs font-bold uppercase tracking-wider mb-6">
-                    <Sparkles className="w-3.5 h-3.5" /> Featured Example
-                  </div>
-                  <h2 className="text-3xl sm:text-4xl font-bold leading-tight mb-5">Freelancing Client Acquisition Toolkit</h2>
-                  <p className="text-lg text-slate-300 leading-relaxed mb-8">
-                    See how creators package their expertise. This practical collection includes outreach scripts, discovery questions, proposal guidance, pricing worksheets, and an onboarding checklist.
-                  </p>
-                  
-                  <ul className="grid sm:grid-cols-2 gap-4 mb-10">
-                    {["Client outreach scripts", "Proposal framework", "Discovery question bank", "Project onboarding checklist"].map((item) => (
-                      <li key={item} className="flex items-center gap-3 text-sm font-medium text-slate-200">
-                        <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <div className="flex flex-wrap items-center gap-4 mb-8">
-                    <span className="text-3xl font-bold text-white">₹299 INR</span>
-                    <span className="rounded-full bg-amber-500/20 border border-amber-500/30 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-amber-200">Payment activation in progress</span>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-4">
-                    <Link href="/products/freelancing-client-acquisition-toolkit" className="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-7 font-semibold text-white transition-colors hover:bg-emerald-600 hover:shadow-lg hover:shadow-primary/20">
-                      View product details
-                    </Link>
-                    <a href={`${import.meta.env.BASE_URL}products/freelancing-client-acquisition-toolkit-sample.pdf`} download className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-white/20 px-6 font-semibold text-white hover:bg-white/10 transition-colors">
-                      <Download className="h-4 w-4" /> Free sample
-                    </a>
-                  </div>
-                </div>
+                <Link href="/products" className="inline-flex items-center gap-2 font-semibold text-[#087B46] hover:underline">
+                  View all products <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+              <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+                {products.slice(0, 3).map((product) => (
+                  <article key={product.id} className="overflow-hidden rounded-2xl border border-[#DCE8E1] bg-white shadow-[0_14px_42px_rgba(20,80,55,.08)]">
+                    <div className="aspect-[16/9] overflow-hidden bg-[#0B3027]">
+                      {product.coverImageUrl ? (
+                        <img src={product.coverImageUrl} alt={product.title} className="h-full w-full object-cover" loading="lazy" />
+                      ) : (
+                        <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#0B3027] to-[#146047]">
+                          <Package className="h-16 w-16 text-white/30" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-6">
+                      <span className="text-xs font-bold uppercase tracking-wide text-[#087B46]">{product.subtype || "Digital product"}</span>
+                      <h3 className="mt-3 line-clamp-2 text-xl font-bold text-slate-900">{product.title}</h3>
+                      <p className="mt-3 line-clamp-2 leading-6 text-slate-600">{product.shortSummary || product.description}</p>
+                      <div className="mt-6 flex items-center justify-between gap-4 border-t border-[#E4ECE8] pt-5">
+                        <span className="text-xl font-bold text-slate-900">{productPrice(product.priceMinor, product.currency)}</span>
+                        <Link href={`/products/${product.publicSlug || product.id}`} className="font-semibold text-[#087B46] hover:underline">View product</Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* TRANSPARENT CUSTOMER EXPERIENCE */}
         <section className="py-24 bg-[#F8FAF9] border-t border-[#E2EBE6]">

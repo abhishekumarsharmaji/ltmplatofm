@@ -63,8 +63,8 @@ export default function About() {
         <section className="bg-[#123D32] px-4 py-16 text-center text-white">
           <ShieldCheck className="mx-auto h-9 w-9 text-[#6CE7A6]" />
           <h2 className="mt-5 text-3xl font-bold">Review the product before purchase</h2>
-          <p className="mx-auto mt-4 max-w-2xl leading-7 text-white/75">See the exact deliverables and download the free sample of our featured digital toolkit.</p>
-          <Link href="/products/freelancing-client-acquisition-toolkit" className="mt-7 inline-flex h-12 items-center justify-center rounded-md bg-primary px-7 font-semibold text-white hover:bg-[#10A364]">View featured product</Link>
+          <p className="mx-auto mt-4 max-w-2xl leading-7 text-white/75">Browse published products to review their exact deliverables, pricing, access duration, and delivery terms.</p>
+          <Link href="/products" className="mt-7 inline-flex h-12 items-center justify-center rounded-md bg-primary px-7 font-semibold text-white hover:bg-[#10A364]">Browse products</Link>
         </section>
       </main>
     </PublicLayout>
