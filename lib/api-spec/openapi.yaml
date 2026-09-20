@@ -1185,6 +1185,8 @@ components:
         productId: { type: integer }
         productTitle: { type: string }
         accessExpiresAt: { type: ["string", "null"], format: date-time }
+        productType: { type: string, enum: [course, digital] }
+        courseId: { type: ["integer", "null"] }
         files:
           type: array
           items:

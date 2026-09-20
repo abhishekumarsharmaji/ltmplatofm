@@ -9,6 +9,8 @@ type PaymentOrder = {
   status: "pending" | "succeeded" | "failed" | "refunded";
   productId: number;
   productTitle: string;
+  productType?: "course" | "digital";
+  courseId?: number | null;
   accessExpiresAt?: string | null;
   files?: Array<{ id: number; filename: string; sizeBytes?: number | null }>;
 };
@@ -166,8 +168,8 @@ export default function ZapUpiCheckout() {
 
               {order?.productId && (
                 <div className="mt-6">
-                  <Link href={`/products/${order.productId}`} className="text-sm font-semibold text-[#087B46] hover:underline">
-                    Return to product page
+                  <Link href={order.productType === "course" && order.courseId ? `/dashboard/student/courses/${order.courseId}` : `/products/${order.productId}`} className="text-sm font-semibold text-[#087B46] hover:underline">
+                    {order.productType === "course" && succeeded ? "Start learning" : "Return to product page"}
                   </Link>
                 </div>
               )}

@@ -178,7 +178,7 @@ export default function Courses() {
                       <div className="mt-auto flex items-center justify-between text-[13px] text-[#394649]">
                          <span>{course.creatorName || "Unknown Author"}</span>
                          <span className="font-bold text-[#087B46]">
-                           {course.priceMinor > 0 ? new Intl.NumberFormat("en-IN", { style: "currency", currency: course.currency || "INR", maximumFractionDigits: 2 }).format(course.priceMinor / 100) : "Free"}
+                           {(course.priceMinor ?? 0) > 0 ? new Intl.NumberFormat("en-IN", { style: "currency", currency: course.currency || "INR", maximumFractionDigits: 2 }).format((course.priceMinor ?? 0) / 100) : "Free"}
                          </span>
                       </div>
                     </div>

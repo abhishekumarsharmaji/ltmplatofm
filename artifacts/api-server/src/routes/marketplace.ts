@@ -225,7 +225,7 @@ router.post("/student/courses/:courseId/enroll", auth, async (req, res) => {
     .leftJoin(productsTable, and(eq(productsTable.courseId, coursesTable.id), eq(productsTable.type, "course")))
     .where(and(eq(coursesTable.id, courseId), eq(coursesTable.status, "published")));
   if (!course) { res.status(404).json({ error: "Published course not found" }); return; }
-  if (course.priceMinor > 0 && !(course.trialDays && course.trialDays > 0)) {
+  if ((course.priceMinor ?? 0) > 0 && !(course.trialDays && course.trialDays > 0)) {
     res.status(402).json({ error: "Payment is required to enroll in this course" }); return;
   }
   const expiresAt = accessExpiry(course.accessPlan ?? "lifetime", course.accessDays, course.trialDays ?? 0);
