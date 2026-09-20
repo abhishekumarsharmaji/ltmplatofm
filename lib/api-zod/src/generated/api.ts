@@ -2066,6 +2066,28 @@ export const ListDigitalProductFilesResponseItem = zod.object({
 export const ListDigitalProductFilesResponse = zod.array(ListDigitalProductFilesResponseItem)
 
 
+export const UploadDigitalProductFileDirectlyParams = zod.object({
+  "productId": zod.coerce.number().int()
+})
+
+export const UploadDigitalProductFileDirectlyHeader = zod.object({
+  "X-File-Name": zod.string(),
+  "X-File-Type": zod.string()
+})
+
+export const UploadDigitalProductFileDirectlyResponse = zod.object({
+  "id": zod.number().int(),
+  "productId": zod.number().int(),
+  "kind": zod.string(),
+  "filename": zod.string(),
+  "mimeType": zod.string().nullish(),
+  "sizeBytes": zod.number().int().nullish(),
+  "status": zod.enum(['pending', 'uploaded', 'failed']),
+  "position": zod.number().int(),
+  "createdAt": zod.coerce.date().optional()
+})
+
+
 export const GetDigitalProductReadinessParams = zod.object({
   "productId": zod.coerce.number().int()
 })

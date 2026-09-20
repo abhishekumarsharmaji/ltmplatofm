@@ -72,7 +72,7 @@ export function CreatorProductManage({ productId }: { productId: number }) {
         });
         toast({ title: `Uploaded ${file.name} successfully.` });
       } catch (err) {
-        toast({ title: `Failed to upload ${file.name}.`, variant: "destructive" });
+        toast({ title: `Failed to upload ${file.name}.`, description: err instanceof Error ? err.message : undefined, variant: "destructive" });
       } finally {
         setUploadProgress(prev => {
           const next = { ...prev };

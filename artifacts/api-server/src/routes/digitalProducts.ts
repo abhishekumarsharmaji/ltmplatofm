@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { raw, Router, type IRouter } from "express";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm";
 import {
@@ -8,7 +8,7 @@ import { requireAuth, requireRole, type AuthenticatedRequest } from "../middlewa
 import {
   abortDigitalFileMultipartUpload, completeDigitalFileMultipartUpload,
   createDigitalFileMultipartUpload, createDigitalFilePartUploadUrl,
-  createObjectDownloadUrl, objectFile,
+  createObjectDownloadUrl, objectFile, saveLocalDigitalFile,
 } from "../lib/objectStorage";
 
 const router: IRouter = Router();
@@ -181,6 +181,44 @@ router.get("/creator/digital-products/:productId/readiness", requireAuth, requir
   };
   res.json({ ready: Object.values(checks).every(Boolean), checks });
 });
+router.post(
+  "/creator/digital-products/:productId/files/direct-upload",
+  requireAuth,
+  requireRole("creator", "admin"),
+  raw({ type: "application/octet-stream", limit: MAX_FILE_BYTES }),
+  async (req, res): Promise<void> => {
+    const productId = numericId(req.params.productId);
+    if (!productId || !await ownedProduct(productId, req as AuthenticatedRequest)) {
+      res.status(404).json({ error: "Digital product not found" }); return;
+    }
+    let filename = "";
+    try { filename = decodeURIComponent(req.header("x-file-name") ?? ""); } catch { filename = ""; }
+    const mimeType = (req.header("x-file-type") || "application/octet-stream").toLowerCase();
+    if (!Buffer.isBuffer(req.body) || !validFile(filename, mimeType, req.body.length)) {
+      res.status(400).json({ error: "Unsupported file type or size. Files must be an approved format and no larger than 250MB." }); return;
+    }
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(digitalFilesTable).where(eq(digitalFilesTable.productId, productId));
+    if (Number(count) >= MAX_FILES) { res.status(409).json({ error: "A product can contain at most 25 files" }); return; }
+    const objectPath = await saveLocalDigitalFile(productId, req.body);
+    try {
+      const [file] = await db.insert(digitalFilesTable).values({
+        productId,
+        kind: fileKind(filename),
+        storageKey: objectPath,
+        objectPath,
+        filename: filename.replace(/["\\\r\n]/g, "_"),
+        mimeType,
+        sizeBytes: req.body.length,
+        status: "uploaded",
+        position: Number(count),
+      }).returning();
+      res.status(201).json(safeFile(file));
+    } catch (error) {
+      await objectFile(objectPath).delete({ ignoreNotFound: true }).catch(() => undefined);
+      throw error;
+    }
+  },
+);
 router.post("/creator/digital-products/:productId/unpublish", requireAuth, requireRole("creator", "admin"), async (req, res): Promise<void> => {
   const productId = numericId(req.params.productId), auth = req as AuthenticatedRequest;
   if (!productId || !await ownedProduct(productId, auth)) { res.status(404).json({ error: "Digital product not found" }); return; }

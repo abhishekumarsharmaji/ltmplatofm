@@ -1,8 +1,8 @@
 import { Storage } from "@google-cloud/storage";
 import { randomUUID } from "node:crypto";
 import { createReadStream as createFsReadStream } from "node:fs";
-import { stat, unlink } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdir, stat, unlink, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { PassThrough } from "node:stream";
 import {
   AbortMultipartUploadCommand,
@@ -18,7 +18,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const REPLIT_SIDECAR_ENDPOINT = "http://127.0.0.1:1106";
-const LOCAL_STORAGE_ROOT = resolve(process.env.LOCAL_STORAGE_ROOT || "/opt/coreskils/uploads");
+const LOCAL_STORAGE_ROOT = resolve(process.env.LOCAL_STORAGE_ROOT || (process.env.NODE_ENV === "production" ? "/opt/coreskils/uploads" : ".local/uploads"));
 const storage = new Storage({
   credentials: { audience: "replit", subject_token_type: "access_token", token_url: `${REPLIT_SIDECAR_ENDPOINT}/token`, type: "external_account", credential_source: { url: `${REPLIT_SIDECAR_ENDPOINT}/credential`, format: { type: "json", subject_token_field_name: "access_token" } }, universe_domain: "googleapis.com" },
   projectId: "",
@@ -57,6 +57,13 @@ function parseLocal(path: string) {
     throw new Error("Invalid local object path");
   }
   return fullPath;
+}
+export async function saveLocalDigitalFile(productId: number, contents: Buffer) {
+  const objectPath = `local://digital-files/${productId}/${randomUUID()}`;
+  const filePath = parseLocal(objectPath);
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, contents, { mode: 0o640 });
+  return objectPath;
 }
 async function createUploadUrl(folder: string): Promise<{ url: string; objectPath: string }> {
   const { client, bucket } = r2Config();

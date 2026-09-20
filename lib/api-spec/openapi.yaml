@@ -587,6 +587,20 @@ paths:
       security: [{ cookieAuth: [] }]
       parameters: [{ name: productId, in: path, required: true, schema: { type: integer } }]
       responses: { "200": { description: Product files, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/DigitalFile" } } } } } }
+  /creator/digital-products/{productId}/files/direct-upload:
+    post:
+      operationId: uploadDigitalProductFileDirectly
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - { name: productId, in: path, required: true, schema: { type: integer } }
+        - { name: X-File-Name, in: header, required: true, schema: { type: string } }
+        - { name: X-File-Type, in: header, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema: { type: string, format: binary }
+      responses: { "201": { description: Uploaded file, content: { application/json: { schema: { $ref: "#/components/schemas/DigitalFile" } } } } }
   /creator/digital-products/{productId}/readiness:
     get:
       operationId: getDigitalProductReadiness
