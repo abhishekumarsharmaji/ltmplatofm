@@ -491,22 +491,24 @@ function HostControls({
     if (!confirm("End this live class now? All connected students will be disconnected.")) return;
     const localRecording = await stopBrowserRecording();
     onEnding();
-    completeClass.mutate({ id: classId }, {
-      onSuccess: () => {
-        toast({ title: "Live class ended", description: "Students have been disconnected from this classroom." });
-        const shouldUpload = confirm(
-          localRecording
-            ? "Live class recording is ready. Upload it to this course lesson now?"
-            : "Automatic browser recording was unavailable. Would you like to select and upload a recording manually now?",
-        );
-        if (shouldUpload) onRecordingReady(localRecording);
-        else setLocation(backUrl);
-      },
-      onError: (err) => {
-        onEndFailed();
-        toast({ title: "Could not end class", description: err.message, variant: "destructive" });
-      },
-    });
+    try {
+      await completeClass.mutateAsync({ id: classId });
+      toast({ title: "Live class ended", description: "Students have been disconnected from this classroom." });
+      const shouldUpload = confirm(
+        localRecording
+          ? "Live class recording is ready. Upload it to this course lesson now?"
+          : "Automatic browser recording was unavailable. Would you like to select and upload a recording manually now?",
+      );
+      if (shouldUpload) onRecordingReady(localRecording);
+      else setLocation(backUrl);
+    } catch (err) {
+      onEndFailed();
+      toast({
+        title: "Could not end class",
+        description: err instanceof Error ? err.message : "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
