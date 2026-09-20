@@ -11,6 +11,7 @@ import {
   SignUpResponse,
 } from "@workspace/api-zod";
 import { readSession, signSession, requireAuth, requireRole, requireSuperAdmin, effectiveRole, reconcileEffectiveRole, isSuperAdminEmail, SESSION_COOKIE, sessionTtlSeconds, type AuthenticatedRequest } from "../middlewares/auth";
+import { claimGuestPurchasesByEmail } from "../lib/claimGuestPurchases";
 
 const router: IRouter = Router();
 function hashPassword(password: string, salt = randomBytes(16).toString("hex")) {
@@ -37,7 +38,8 @@ router.get("/auth/session", async (req, res): Promise<void> => {
     res.json(GetSessionResponse.parse({ authenticated: false, user: null }));
     return;
   }
-  const { role } = await reconcileEffectiveRole(user);
+  const { canonicalUserId, role } = await reconcileEffectiveRole(user);
+  await claimGuestPurchasesByEmail(canonicalUserId, user.email);
   res.json(GetSessionResponse.parse({ authenticated: true, user: { id: user.id, email: user.email, name: user.name, role } }));
 });
 
@@ -80,12 +82,9 @@ router.post("/auth/sign-up", async (req, res): Promise<void> => {
     name: parsed.data.name,
     role: effectiveRole(email, "student"),
     passwordHash: hashPassword(parsed.data.password),
-  }).returning({
-    id: lmsUsersTable.id,
-    email: lmsUsersTable.email,
-    name: lmsUsersTable.name,
-    role: lmsUsersTable.role,
-  });
+  }).returning();
+  const { canonicalUserId, role } = await reconcileEffectiveRole(user);
+  await claimGuestPurchasesByEmail(canonicalUserId, email);
   res.cookie(SESSION_COOKIE, signSession(user.id), {
     httpOnly: true,
     sameSite: "lax",
@@ -93,7 +92,7 @@ router.post("/auth/sign-up", async (req, res): Promise<void> => {
     maxAge: sessionTtlSeconds * 1000,
     path: "/",
   });
-  res.status(201).json(SignUpResponse.parse({ authenticated: true, user: { ...user, role: effectiveRole(email, user.role) } }));
+  res.status(201).json(SignUpResponse.parse({ authenticated: true, user: { id: user.id, email: user.email, name: user.name, role } }));
 });
 
 router.post("/auth/logout", (_req, res): void => {
