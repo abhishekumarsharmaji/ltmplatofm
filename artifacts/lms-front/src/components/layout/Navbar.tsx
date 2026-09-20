@@ -52,6 +52,9 @@ export function Navbar() {
       <Link href="/" onClick={onClick} className="block py-3 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 lg:py-0">
         {t("home")}
       </Link>
+      <Link href="/courses" onClick={onClick} className="block py-3 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 lg:py-0">
+        Courses
+      </Link>
       <Link href="/products" onClick={onClick} className="block py-3 text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 lg:py-0">
         Digital products
       </Link>

@@ -38,6 +38,22 @@ systemctl restart coreskils-api
 nginx -t
 systemctl reload nginx
 
-curl --fail --silent --show-error http://127.0.0.1:4000/api/healthz
-echo
+healthy=0
+for attempt in $(seq 1 30); do
+  if curl --fail --silent --show-error http://127.0.0.1:4000/api/healthz; then
+    echo
+    healthy=1
+    break
+  fi
+  echo "Waiting for CoreSkils API to become ready (${attempt}/30)..."
+  sleep 2
+done
+
+if [[ "$healthy" -ne 1 ]]; then
+  echo "CoreSkils API did not become healthy after restart." >&2
+  systemctl status coreskils-api --no-pager >&2 || true
+  journalctl -u coreskils-api -n 100 --no-pager >&2 || true
+  exit 1
+fi
+
 echo "Deployment completed successfully: ${REMOTE_HEAD:0:8}"
