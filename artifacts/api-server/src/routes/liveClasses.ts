@@ -213,12 +213,12 @@ router.post("/live-classes/:id/join", requireAuth, async (req, res): Promise<voi
   const [item] = await db.select().from(liveClassesTable).where(eq(liveClassesTable.id, classId));
   if (!item || item.status === "cancelled") { res.status(404).json({ error: "Live class not found" }); return; }
   const host = user.canonicalRole === "admin" || (user.canonicalRole === "creator" && item.creatorId === user.canonicalUserId);
+  if (item.status === "completed") { res.status(403).json({ error: "This live class has ended. Its recording remains available in the course lessons." }); return; }
   if (!host) {
     const [enrolled] = await db.select({ id: enrollmentsTable.id }).from(enrollmentsTable).where(and(eq(enrollmentsTable.courseId, item.courseId), eq(enrollmentsTable.userId, user.canonicalUserId!)));
     if (!enrolled) { res.status(403).json({ error: "Enrollment required" }); return; }
     const now = Date.now();
     if (now < item.startsAt.getTime() - 15 * 60_000) { res.status(403).json({ error: "The classroom opens 15 minutes before the scheduled start time" }); return; }
-    if (item.status === "completed") { res.status(403).json({ error: "This live class has ended" }); return; }
   }
   const serverUrl = browserLiveKitUrl(process.env.LIVEKIT_URL);
   if (!process.env.LIVEKIT_API_KEY || !process.env.LIVEKIT_API_SECRET || !serverUrl) { res.status(503).json({ error: "LiveKit is not configured with a valid public WebSocket URL" }); return; }

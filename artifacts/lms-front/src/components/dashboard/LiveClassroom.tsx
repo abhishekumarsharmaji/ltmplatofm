@@ -41,6 +41,7 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
   const joinAttemptedRef = useRef(false);
   const connectedRef = useRef(false);
   const automaticRetriesRef = useRef(0);
+  const intentionalDisconnectRef = useRef(false);
 
   useEffect(() => {
     if (joinAttemptedRef.current) return;
@@ -122,7 +123,7 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
         onError: (err) => console.error("Failed to record leave:", err)
       });
     }
-    if (automaticRetriesRef.current < 2) {
+    if (!intentionalDisconnectRef.current && automaticRetriesRef.current < 2) {
       automaticRetriesRef.current += 1;
       window.setTimeout(retryConnection, 1200 * automaticRetriesRef.current);
     }
@@ -203,6 +204,12 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
               classId={id}
               backUrl={backUrl}
               liveClass={tokenInfo.liveClass}
+              onEnding={() => {
+                intentionalDisconnectRef.current = true;
+              }}
+              onEndFailed={() => {
+                intentionalDisconnectRef.current = false;
+              }}
             />
           )}
         </div>
@@ -321,7 +328,19 @@ function StudentBroadcastView() {
   );
 }
 
-function HostControls({ classId, backUrl, liveClass }: { classId: number; backUrl: string; liveClass: any }) {
+function HostControls({
+  classId,
+  backUrl,
+  liveClass,
+  onEnding,
+  onEndFailed,
+}: {
+  classId: number;
+  backUrl: string;
+  liveClass: any;
+  onEnding: () => void;
+  onEndFailed: () => void;
+}) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const startRecording = useStartLiveClassRecording();
@@ -359,12 +378,16 @@ function HostControls({ classId, backUrl, liveClass }: { classId: number; backUr
 
   const handleEndClass = () => {
     if (!confirm("End this live class now? All connected students will be disconnected.")) return;
+    onEnding();
     completeClass.mutate({ id: classId }, {
       onSuccess: () => {
         toast({ title: "Live class ended", description: "Students have been disconnected from this classroom." });
         setLocation(backUrl);
       },
-      onError: (err) => toast({ title: "Could not end class", description: err.message, variant: "destructive" }),
+      onError: (err) => {
+        onEndFailed();
+        toast({ title: "Could not end class", description: err.message, variant: "destructive" });
+      },
     });
   };
 

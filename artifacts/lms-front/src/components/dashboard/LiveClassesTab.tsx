@@ -42,8 +42,17 @@ import { LessonVideoUpload } from "@/components/dashboard/LessonVideoUpload";
 
 export function LiveClassesTab({ productId, role = 'creator' }: { productId: number, role?: 'creator' | 'admin' }) {
   const { data: classes, isLoading } = useListCreatorLiveClasses(productId);
+  const queryClient = useQueryClient();
   const { data: builder } = useGetCreatorCourseBuilder(productId);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  useEffect(() => {
+    if (!classes?.some((item) => item.recordingStatus === "recording" || item.recordingStatus === "processing")) return;
+    const timer = window.setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: getListCreatorLiveClassesQueryKey(productId) });
+    }, 5_000);
+    return () => window.clearInterval(timer);
+  }, [classes, productId, queryClient]);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -144,6 +153,28 @@ function LiveClassItem({ liveClass, productId, role, modules }: { liveClass: Liv
           <Badge className={`font-bold text-[10px] uppercase tracking-wider border-none shadow-none ${getStatusColor(liveClass.status)}`}>
             {liveClass.status === 'live' ? 'LIVE NOW' : liveClass.status}
           </Badge>
+          {(liveClass.recordingStatus !== "idle" || liveClass.status === "completed") && (
+            <Badge
+              variant="outline"
+              className={
+                liveClass.recordingStatus === "ready"
+                  ? "border-green-200 bg-green-50 text-green-700"
+                  : liveClass.recordingStatus === "failed"
+                    ? "border-red-200 bg-red-50 text-red-700"
+                    : "border-amber-200 bg-amber-50 text-amber-700"
+              }
+            >
+              {liveClass.recordingStatus === "ready"
+                ? "Recording saved in lessons"
+                : liveClass.recordingStatus === "failed"
+                  ? "Automatic recording failed"
+                  : liveClass.recordingStatus === "recording"
+                    ? "Recording now"
+                    : liveClass.recordingStatus === "processing"
+                      ? "Recording processing"
+                      : "No automatic recording"}
+            </Badge>
+          )}
         </div>
         <p className="text-[14px] text-[#4D4D4D] line-clamp-1">{liveClass.description || "No description provided."}</p>
         <div className="flex items-center gap-4 mt-3 text-[13px] text-[#4D4D4D] font-medium">
