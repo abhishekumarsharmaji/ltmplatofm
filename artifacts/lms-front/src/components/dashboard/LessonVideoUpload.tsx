@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
   useRemoveLessonAsset,
@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Upload, Trash2, PlayCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export function LessonVideoUpload({ lesson, productId }: { lesson: any, productId: number }) {
+export function LessonVideoUpload({ lesson, productId, initialFile, onUploadComplete }: { lesson: any, productId: number, initialFile?: File | null, onUploadComplete?: () => void }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -21,10 +21,7 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const uploadFile = async (file: File) => {
     if (!file.type.startsWith("video/")) {
       setError("Please select a valid video file.");
       return;
@@ -132,6 +129,7 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
       
       queryClient.invalidateQueries({ queryKey: getGetCreatorCourseBuilderQueryKey(productId) });
       queryClient.invalidateQueries({ queryKey: getGetCreatorCourseReadinessQueryKey(productId) });
+      onUploadComplete?.();
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Failed to upload video");
@@ -140,6 +138,18 @@ export function LessonVideoUpload({ lesson, productId }: { lesson: any, productI
       setUploading(false);
     }
   };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) await uploadFile(file);
+  };
+
+  const uploadedInitialFileRef = useRef<File | null>(null);
+  useEffect(() => {
+    if (!initialFile || uploadedInitialFileRef.current === initialFile || uploading) return;
+    uploadedInitialFileRef.current = initialFile;
+    void uploadFile(initialFile);
+  }, [initialFile, uploading]);
 
   const asset = lesson.assets?.find((a: any) => a.kind === "video");
   const handleRemove = () => {

@@ -97,7 +97,7 @@ export function DeliveryPage() {
     { title: "1. Delivery method", paragraphs: ["After a successful payment is verified, downloadable products are made available through the authenticated customer library or secure download flow. Access details may also be sent to the registered email address."] },
     { title: "2. Delivery time", paragraphs: ["Digital access is normally provided immediately after server-side payment confirmation. Bank, UPI or gateway delays can leave a transaction pending. In such cases, access is supplied after successful reconciliation."] },
     { title: "3. Delivery requirements", bullets: ["Use the same email/account during purchase and access.", "Maintain a supported browser and working internet connection.", "Do not share secure links, account credentials or downloaded files.", "Check spam or promotions folders for transactional email."] },
-    { title: "4. Delivery problems", paragraphs: [`If confirmed payment does not produce access, contact ${BUSINESS.email} with your account email, product name, payment reference and a screenshot that does not expose sensitive financial credentials. We will verify the transaction and restore access or apply the Refund Policy.`] },
+    { title: "4. Delivery problems", paragraphs: ["If confirmed payment does not produce access, submit a support request through the platform with your account email, product name, payment reference and a screenshot that does not expose sensitive financial credentials. We will verify the transaction and restore access or apply the Refund Policy."] },
     { title: "5. No physical delivery", paragraphs: ["No courier fee, tracking number or physical delivery timeline applies to digital-only items. Any future physical product will display its separate shipping charges and estimated delivery terms before checkout."] },
   ]} />;
 }
@@ -110,16 +110,11 @@ export function ContactPage() {
           <div className="mx-auto max-w-4xl rounded-2xl border border-[#E5E5E5] bg-white p-7 shadow-sm sm:p-12">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#0B8F50]">Customer support</p>
             <h1 className="mt-3 text-4xl font-bold text-black sm:text-5xl" data-testid="heading-contact">Contact CoreSkils</h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-[#4D4D4D]">For account, product, payment, delivery, refund or privacy questions, contact us using the verified details below.</p>
-            <div className="mt-10 grid gap-5 sm:grid-cols-2">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-[#4D4D4D]">For account, product, payment, delivery, refund or privacy questions, submit a support request through your CoreSkils account.</p>
+            <div className="mt-10">
               <div className="rounded-xl border border-[#E5E5E5] p-6">
-                <h2 className="font-bold text-black">Email support</h2>
-                <a href={`mailto:${BUSINESS.email}`} className="mt-3 inline-block font-semibold text-[#0B8F50] underline underline-offset-4" data-testid="link-contact-email">{BUSINESS.email}</a>
-                <p className="mt-3 text-sm leading-6 text-[#737373]">Typical response time: within 2 business days.</p>
-              </div>
-              <div className="rounded-xl border border-[#E5E5E5] p-6">
-                <h2 className="font-bold text-black">Business details</h2>
-                <p className="mt-3 text-sm leading-6 text-[#4D4D4D]">{BUSINESS.legalName}<br />{BUSINESS.address}</p>
+                <h2 className="font-bold text-black">Platform support</h2>
+                <p className="mt-3 text-sm leading-6 text-[#737373]">Sign in to your account and use the available support options. Typical response time is within 2 business days.</p>
               </div>
             </div>
             <div className="mt-8 rounded-xl bg-[#123D32] p-6 text-white">

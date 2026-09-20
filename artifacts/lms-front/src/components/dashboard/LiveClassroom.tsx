@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { 
   LiveKitRoom, 
   VideoConference, 
@@ -42,6 +42,12 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
   const connectedRef = useRef(false);
   const automaticRetriesRef = useRef(0);
   const intentionalDisconnectRef = useRef(false);
+  const stopBrowserRecordingRef = useRef<() => Promise<File | null>>(async () => null);
+  const [recordedFile, setRecordedFile] = useState<File | null>(null);
+  const [recordingUploadOpen, setRecordingUploadOpen] = useState(false);
+  const registerBrowserRecordingStop = useCallback((stop: () => Promise<File | null>) => {
+    stopBrowserRecordingRef.current = stop;
+  }, []);
 
   useEffect(() => {
     if (joinAttemptedRef.current) return;
@@ -163,21 +169,41 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
 
   if (disconnected) {
     return (
-      <div className="flex min-h-[70vh] flex-col items-center justify-center space-y-4 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <Video className="h-8 w-8" />
+      <>
+        {tokenInfo.isHost && (
+          <RecordingUploadDialog
+            liveClass={tokenInfo.liveClass}
+            productId={tokenInfo.liveClass.productId}
+            open={recordingUploadOpen}
+            onOpenChange={setRecordingUploadOpen}
+            recordedFile={recordedFile}
+          />
+        )}
+        <div className="flex min-h-[70vh] flex-col items-center justify-center space-y-4 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            <Video className="h-8 w-8" />
+          </div>
+          <h2 className="text-2xl font-bold">Live class disconnected</h2>
+          <p className="max-w-md text-muted-foreground">The creator may have ended the live class, or your connection was interrupted.</p>
+          {disconnectReason && <p className="text-xs text-muted-foreground">Connection status: {disconnectReason}</p>}
+          <Button type="button" onClick={retryConnection}>Reconnect now</Button>
+          <Link href={backUrl} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Back to live classes</Link>
         </div>
-        <h2 className="text-2xl font-bold">Live class disconnected</h2>
-        <p className="max-w-md text-muted-foreground">The creator may have ended the live class, or your connection was interrupted.</p>
-        {disconnectReason && <p className="text-xs text-muted-foreground">Connection status: {disconnectReason}</p>}
-        <Button type="button" onClick={retryConnection}>Reconnect now</Button>
-        <Link href={backUrl} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">Back to live classes</Link>
-      </div>
+      </>
     );
   }
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] -m-6">
+      {tokenInfo.isHost && (
+        <RecordingUploadDialog
+          liveClass={tokenInfo.liveClass}
+          productId={tokenInfo.liveClass.productId}
+          open={recordingUploadOpen}
+          onOpenChange={setRecordingUploadOpen}
+          recordedFile={recordedFile}
+        />
+      )}
       {/* Custom Header */}
       <div className="h-16 px-6 bg-card border-b border-border flex items-center justify-between shrink-0 z-10 shadow-sm">
         <div className="flex items-center gap-4">
@@ -210,6 +236,11 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
               onEndFailed={() => {
                 intentionalDisconnectRef.current = false;
               }}
+              stopBrowserRecording={() => stopBrowserRecordingRef.current()}
+              onRecordingReady={(file) => {
+                setRecordedFile(file);
+                setRecordingUploadOpen(true);
+              }}
             />
           )}
         </div>
@@ -230,7 +261,11 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
           }}
           style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
         >
-          <BroadcastRoomContent isHost={tokenInfo.isHost} />
+          <BroadcastRoomContent
+            isHost={tokenInfo.isHost}
+            classTitle={tokenInfo.liveClass.title}
+            registerBrowserRecordingStop={registerBrowserRecordingStop}
+          />
           <RoomAudioRenderer />
         </LiveKitRoom>
       </div>
@@ -238,10 +273,19 @@ export function LiveClassroom({ id, backUrl }: { id: number, backUrl: string }) 
   );
 }
 
-function BroadcastRoomContent({ isHost }: { isHost: boolean }) {
+function BroadcastRoomContent({
+  isHost,
+  classTitle,
+  registerBrowserRecordingStop,
+}: {
+  isHost: boolean;
+  classTitle: string;
+  registerBrowserRecordingStop: (stop: () => Promise<File | null>) => void;
+}) {
   if (isHost) {
     return (
       <div className="relative h-full">
+        <BrowserClassRecorder classTitle={classTitle} registerStop={registerBrowserRecordingStop} />
         <VideoConference />
         <ScreenShareControl />
       </div>
@@ -249,6 +293,69 @@ function BroadcastRoomContent({ isHost }: { isHost: boolean }) {
   }
 
   return <StudentBroadcastView />;
+}
+
+function BrowserClassRecorder({
+  classTitle,
+  registerStop,
+}: {
+  classTitle: string;
+  registerStop: (stop: () => Promise<File | null>) => void;
+}) {
+  const { localParticipant } = useLocalParticipant();
+
+  useEffect(() => {
+    let disposed = false;
+    let recorder: MediaRecorder | null = null;
+    let chunks: Blob[] = [];
+
+    const start = async () => {
+      let tracks: MediaStreamTrack[] = [];
+      for (let attempt = 0; attempt < 20 && tracks.length === 0; attempt += 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, 500));
+        if (disposed || typeof MediaRecorder === "undefined") return;
+        tracks = Array.from(localParticipant.trackPublications.values())
+          .map((publication) => publication.track?.mediaStreamTrack)
+          .filter((track): track is MediaStreamTrack => Boolean(track && track.readyState === "live"));
+      }
+      if (tracks.length === 0) return;
+
+      const stream = new MediaStream(tracks);
+      const mimeType = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"]
+        .find((candidate) => MediaRecorder.isTypeSupported(candidate));
+      recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) chunks.push(event.data);
+      };
+      recorder.start(1_000);
+
+      registerStop(() => new Promise<File | null>((resolve) => {
+        if (!recorder || recorder.state === "inactive") {
+          resolve(null);
+          return;
+        }
+        recorder.onstop = () => {
+          const type = recorder?.mimeType || "video/webm";
+          const safeTitle = classTitle.replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "") || "live-class";
+          const file = chunks.length > 0
+            ? new File(chunks, `${safeTitle}-${new Date().toISOString().replace(/[:.]/g, "-")}.webm`, { type })
+            : null;
+          chunks = [];
+          resolve(file);
+        };
+        recorder.stop();
+      }));
+    };
+
+    void start();
+    return () => {
+      disposed = true;
+      registerStop(async () => null);
+      if (recorder?.state === "recording") recorder.stop();
+    };
+  }, [classTitle, localParticipant, registerStop]);
+
+  return null;
 }
 
 function ScreenShareControl() {
@@ -334,12 +441,16 @@ function HostControls({
   liveClass,
   onEnding,
   onEndFailed,
+  stopBrowserRecording,
+  onRecordingReady,
 }: {
   classId: number;
   backUrl: string;
   liveClass: any;
   onEnding: () => void;
   onEndFailed: () => void;
+  stopBrowserRecording: () => Promise<File | null>;
+  onRecordingReady: (file: File | null) => void;
 }) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -376,13 +487,20 @@ function HostControls({
     });
   };
 
-  const handleEndClass = () => {
+  const handleEndClass = async () => {
     if (!confirm("End this live class now? All connected students will be disconnected.")) return;
+    const localRecording = await stopBrowserRecording();
     onEnding();
     completeClass.mutate({ id: classId }, {
       onSuccess: () => {
         toast({ title: "Live class ended", description: "Students have been disconnected from this classroom." });
-        setLocation(backUrl);
+        const shouldUpload = confirm(
+          localRecording
+            ? "Live class recording is ready. Upload it to this course lesson now?"
+            : "Automatic browser recording was unavailable. Would you like to select and upload a recording manually now?",
+        );
+        if (shouldUpload) onRecordingReady(localRecording);
+        else setLocation(backUrl);
       },
       onError: (err) => {
         onEndFailed();

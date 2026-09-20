@@ -285,14 +285,39 @@ function AttendanceDialog({ liveClass }: { liveClass: LiveClass }) {
   );
 }
 
-export function RecordingUploadDialog({ liveClass, productId, compact = false }: { liveClass: LiveClass; productId: number; compact?: boolean }) {
-  const [open, setOpen] = useState(false);
+export function RecordingUploadDialog({
+  liveClass,
+  productId,
+  compact = false,
+  open: controlledOpen,
+  onOpenChange,
+  recordedFile,
+}: {
+  liveClass: LiveClass;
+  productId: number;
+  compact?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  recordedFile?: File | null;
+}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [lessonId, setLessonId] = useState("");
   const { data: builder } = useGetCreatorCourseBuilder(productId);
   const lessons = builder?.modules.flatMap((module) =>
     (module.lessons ?? []).map((lesson) => ({ lesson, moduleTitle: module.title }))
   ) ?? [];
   const selected = lessons.find((item) => item.lesson.id === Number(lessonId));
+
+  useEffect(() => {
+    if (!open || lessonId || lessons.length === 0) return;
+    const preferred =
+      lessons.find(({ lesson }) => lesson.id === liveClass.recordingLessonId) ??
+      lessons.find(({ lesson }) => lesson.moduleId === liveClass.moduleId) ??
+      lessons[0];
+    setLessonId(String(preferred.lesson.id));
+  }, [open, lessonId, lessons, liveClass.moduleId, liveClass.recordingLessonId]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -325,7 +350,12 @@ export function RecordingUploadDialog({ liveClass, productId, compact = false }:
             </Select>
           </div>
           {selected ? (
-            <LessonVideoUpload lesson={selected.lesson} productId={productId} />
+            <LessonVideoUpload
+              lesson={selected.lesson}
+              productId={productId}
+              initialFile={recordedFile}
+              onUploadComplete={() => setOpen(false)}
+            />
           ) : (
             <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
               Select the lesson where students should watch this class recording.
